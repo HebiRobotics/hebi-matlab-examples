@@ -2,6 +2,8 @@
 
 This repository contains examples to go with the http://docs.hebi.us[online documentation] that help to get started with the HEBI Robotics APIs for MATLAB. Note that the scripts use actuators that we used for testing, so you will need to change any naming to match your own actuators.
 
+*API Version: 1.0*
+
 ## Setup
 
 All examples in this repository require the HEBI Robotics API for MATLAB in order to run. Please
