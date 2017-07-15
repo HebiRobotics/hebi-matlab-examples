@@ -1,0 +1,270 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>ex4_kinematics</title><meta name="generator" content="MATLAB 9.2"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2017-07-13"><meta name="DC.source" content="ex4_kinematics.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">Define kinematic structure using HEBI components</a></li><li><a href="#3">Programmatically access body info</a></li><li><a href="#4">Programmatically access joint info</a></li><li><a href="#5">Get Forward kinematics</a></li><li><a href="#6">Get Jacobian</a></li></ul></div><pre class="codeinput"><span class="comment">% This example shows howto use the HebiKinematics API to calculate forward</span>
+<span class="comment">% kinematics and Jacobians.</span>
+<span class="comment">%</span>
+<span class="comment">% Requirements:  MATLAB 2013b or higher</span>
+<span class="comment">%</span>
+<span class="comment">% Author:        Florian Enner</span>
+<span class="comment">% Created:       13 July, 2017</span>
+<span class="comment">% API:           hebi-matlab-1.0</span>
+<span class="comment">%</span>
+<span class="comment">% Copyright 2017 HEBI Robotics</span>
+</pre><h2 id="2">Define kinematic structure using HEBI components</h2><p>The addBody method creates a serial chain of bodies that describe the kinematic relation of a robot. A 'body' can be a rigid link as well as a dynamic element. The first body represents the base and the last body represents the end-effector.</p><p>The following code creates a representation of the rendered 5-DoF arm shown below. For more information on the available parts, please consult the help files and/or the online documentation.</p><p><img vspace="5" hspace="5" src="resources/5dof_fk.png" alt=""> </p><pre class="codeinput"><span class="comment">% Setup</span>
+kin = HebiKinematics();
+kin.addBody(<span class="string">'X5-4'</span>); <span class="comment">% base joint</span>
+kin.addBody(<span class="string">'X5-HeavyBracket'</span>, <span class="string">'mount'</span>, <span class="string">'right-inside'</span>);
+kin.addBody(<span class="string">'X5-9'</span>);
+kin.addBody(<span class="string">'X5-Link'</span>, <span class="string">'ext'</span>, 0.350, <span class="string">'twist'</span>, pi);
+kin.addBody(<span class="string">'X5-9'</span>);
+kin.addBody(<span class="string">'X5-Link'</span>, <span class="string">'ext'</span>, 0.250, <span class="string">'twist'</span>, pi);
+kin.addBody(<span class="string">'X5-1'</span>);
+kin.addBody(<span class="string">'X5-LightBracket'</span>, <span class="string">'mount'</span>, <span class="string">'left'</span>);
+kin.addBody(<span class="string">'X5-1'</span>);
+
+<span class="comment">% Display</span>
+display(kin);
+</pre><pre class="codeoutput">
+kin = 
+
+ &lt;a href="matlab:helpPopup HebiKinematics"&gt;HebiKinematics&lt;/a&gt; with properties:
+
+    numBodies: 9
+       numDoF: 5
+         mass: 2.7 [kg]
+      payload: 0 [kg]
+
+    body  type             isDoF  mass 
+    ----  ---------------  -----  -----
+    1     X5-4             true   0.335
+    2     X5-HeavyBracket  false  0.215
+    3     X5-9             true   0.360
+    4     X5-Link          false  0.400
+    5     X5-9             true   0.360
+    6     X5-Link          false  0.300
+    7     X5-1             true   0.315
+    8     X5-LightBracket  false  0.100
+    9     X5-1             true   0.315
+
+</pre><h2 id="3">Programmatically access body info</h2><pre class="codeinput">bodyInfo = kin.getBodyInfo();
+display(bodyInfo);
+</pre><pre class="codeoutput">
+bodyInfo =
+
+  9&times;4 table
+
+    body          type           isDoF    mass 
+    ____    _________________    _____    _____
+
+    1       'X5-4'               true     0.335
+    2       'X5-HeavyBracket'    false    0.215
+    3       'X5-9'               true      0.36
+    4       'X5-Link'            false      0.4
+    5       'X5-9'               true      0.36
+    6       'X5-Link'            false      0.3
+    7       'X5-1'               true     0.315
+    8       'X5-LightBracket'    false      0.1
+    9       'X5-1'               true     0.315
+
+</pre><h2 id="4">Programmatically access joint info</h2><pre class="codeinput">jointInfo = kin.getJointInfo();
+display(jointInfo);
+</pre><pre class="codeoutput">
+jointInfo =
+
+  5&times;6 table
+
+    body     type     mass     positionLimit     velocityLimit      torqueLimit 
+    ____    ______    _____    _____________    ________________    ____________
+
+    1       'X5-4'    0.335    -Inf     Inf      -3.35      3.35      -7       7
+    3       'X5-9'     0.36    -Inf     Inf     -1.466     1.466     -13      13
+    5       'X5-9'     0.36    -Inf     Inf     -1.466     1.466     -13      13
+    7       'X5-1'    0.315    -Inf     Inf       -9.5       9.5    -2.5     2.5
+    9       'X5-1'    0.315    -Inf     Inf       -9.5       9.5    -2.5     2.5
+
+</pre><h2 id="5">Get Forward kinematics</h2><p>While the HebiKinematics and the HebiGroup APIs were desigend to work well together, the HebiKinematics API is independent and can be used by itself. To keep these examples simple, we use pre-defined position vectors. In a real application, positions can be set to the group feedback.</p><pre class="codeinput"><span class="comment">% Input position vector (could be replaced with "position = fbk.position")</span>
+position = rand(1, kin.getNumDoF);
+display(position);
+
+<span class="comment">% 4x4xN transforms from the base frame to each output</span>
+frames = kin.getForwardKinematics(<span class="string">'output'</span>, position);
+
+<span class="comment">% 4x4 transform from the base frame to the end-effector</span>
+endEffector = kin.getForwardKinematicsEndEffector(position);
+display(endEffector);
+</pre><pre class="codeoutput">
+position =
+
+    0.7513    0.2551    0.5060    0.6991    0.8909
+
+
+endEffector =
+
+   -0.1167   -0.9413   -0.3167    0.4342
+    0.9551   -0.0189   -0.2958    0.3391
+    0.2725   -0.3370    0.9012    0.1790
+         0         0         0    1.0000
+
+</pre><h2 id="6">Get Jacobian</h2><p>The calls to get the Jacobian work the same way as the forward kinematics.</p><pre class="codeinput"><span class="comment">% 6x numDoF x numBodies matrix</span>
+J = kin.getJacobian(<span class="string">'output'</span>, position);
+
+<span class="comment">% 6 x numDoF matrix</span>
+J_endEffector = kin.getJacobianEndEffector(position);
+display(J_endEffector);
+</pre><pre class="codeoutput">
+J_endEffector =
+
+   -0.3391   -0.0680    0.0034   -0.0488         0
+    0.4342   -0.0635    0.0032   -0.0456         0
+         0    0.5488   -0.2101   -0.0321         0
+    0.0000    0.6826   -0.6826    0.6826   -0.3167
+   -0.0000   -0.7308    0.7308   -0.7308   -0.2958
+    1.0000    0.0000    0.0000   -0.0000    0.9012
+
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2017a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+% This example shows howto use the HebiKinematics API to calculate forward
+% kinematics and Jacobians.
+% 
+% Requirements:  MATLAB 2013b or higher
+%
+% Author:        Florian Enner
+% Created:       13 July, 2017
+% API:           hebi-matlab-1.0
+%
+% Copyright 2017 HEBI Robotics
+
+%% Define kinematic structure using HEBI components
+% The addBody method creates a serial chain of bodies that describe the 
+% kinematic relation of a robot. A 'body' can be a rigid link as well as a 
+% dynamic element. The first body represents the base and the last body 
+% represents the end-effector.
+%
+% The following code creates a representation of the rendered 5-DoF arm  
+% shown below. For more information on the available parts, please consult
+% the help files and/or the online documentation.
+%
+% <<resources/5dof_fk.png>>
+%
+
+% Setup
+kin = HebiKinematics();
+kin.addBody('X5-4'); % base joint
+kin.addBody('X5-HeavyBracket', 'mount', 'right-inside');
+kin.addBody('X5-9');
+kin.addBody('X5-Link', 'ext', 0.350, 'twist', pi);
+kin.addBody('X5-9');
+kin.addBody('X5-Link', 'ext', 0.250, 'twist', pi);
+kin.addBody('X5-1');
+kin.addBody('X5-LightBracket', 'mount', 'left');
+kin.addBody('X5-1');
+
+% Display
+display(kin);
+
+%% Programmatically access body info
+bodyInfo = kin.getBodyInfo();
+display(bodyInfo);
+
+%% Programmatically access joint info
+jointInfo = kin.getJointInfo();
+display(jointInfo);
+
+%% Get Forward kinematics
+% While the HebiKinematics and the HebiGroup APIs were desigend to work
+% well together, the HebiKinematics API is independent and can be used
+% by itself. To keep these examples simple, we use pre-defined position
+% vectors. In a real application, positions can be set to the group
+% feedback.
+
+% Input position vector (could be replaced with "position = fbk.position")
+position = rand(1, kin.getNumDoF);
+display(position);
+
+% 4x4xN transforms from the base frame to each output
+frames = kin.getForwardKinematics('output', position);
+
+% 4x4 transform from the base frame to the end-effector
+endEffector = kin.getForwardKinematicsEndEffector(position);
+display(endEffector);
+
+
+%% Get Jacobian
+% The calls to get the Jacobian work the same way as the forward
+% kinematics.
+
+% 6x numDoF x numBodies matrix
+J = kin.getJacobian('output', position);
+
+% 6 x numDoF matrix
+J_endEffector = kin.getJacobianEndEffector(position);
+display(J_endEffector);
+
+##### SOURCE END #####
+--></body></html>

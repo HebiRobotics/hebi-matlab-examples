@@ -1,0 +1,176 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>ex2_feedback</title><meta name="generator" content="MATLAB 9.2"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2017-07-13"><meta name="DC.source" content="ex2_feedback.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">Discovery (can be omitted)</a></li><li><a href="#3">Select devices and form a HebiGroup</a></li><li><a href="#4">Access feedback</a></li><li><a href="#5">Output position feedback once a second</a></li></ul></div><pre class="codeinput"><span class="comment">% This example shows howto use the HebiGroup API to access basic feedback</span>
+<span class="comment">%</span>
+<span class="comment">% (hint: individual sections can be run using ctrl+enter)</span>
+<span class="comment">%</span>
+<span class="comment">% Requirements:  MATLAB 2013b or higher</span>
+<span class="comment">%</span>
+<span class="comment">% Author:        Florian Enner</span>
+<span class="comment">% Created:       13 July, 2017</span>
+<span class="comment">% API:           hebi-matlab-1.0</span>
+<span class="comment">%</span>
+<span class="comment">% Copyright 2017 HEBI Robotics</span>
+</pre><h2 id="2">Discovery (can be omitted)</h2><p>We first need to discover what devices are available on the network</p><pre class="codeinput">disp(HebiLookup);
+</pre><pre class="codeoutput"> &lt;a href="matlab:helpPopup HebiLookup"&gt;HebiLookup&lt;/a&gt; with properties:
+
+                  lookupAddresses: {'192.168.1.255'} [IPv4]
+                  lookupFrequency: 5 [Hz]
+    initialGroupFeedbackFrequency: 100 [Hz]
+      initialGroupCommandLifetime: 0.25 [s]
+
+    Module  Family           Name             Serial Number  
+    ------  ---------------  ---------------  ---------------
+    1       2dof             base             X-00134        
+    2       2dof             knee             X-00148        
+    3       CommsTest        X-00108          X-00108        
+    4       X5-9             X-00165          X-00165        
+    5       X8-3             X-80040          X-80040        
+
+</pre><h2 id="3">Select devices and form a HebiGroup</h2><p>After discovery we can create a group that allows us to communicate with selected modules. Note that the parameter needs to be changed to target devices that are on your network.</p><pre class="codeinput">serials = <span class="string">'X-80040'</span>; <span class="comment">% &lt;- modify to match a device on your network!</span>
+group = HebiLookup.newGroupFromSerialNumbers(serials);
+</pre><h2 id="4">Access feedback</h2><p>Feedback is in SI units and can be accessed as below. If a group contains more than one module, the returned feedback contains vectors instead of scalars.</p><pre class="codeinput">fbk = group.getNextFeedback();
+display(fbk);
+</pre><pre class="codeoutput">
+fbk =
+
+                  time: 1.500e+09 [s]
+           positionCmd: NaN [rad]
+           velocityCmd: NaN [rad/s]
+             torqueCmd: NaN [Nm]
+              position: -0.1401 [rad]
+              velocity: -1.652 [rad/s]
+                torque: 2.209 [Nm]
+                accelX: -2.817 [m/s^2]
+                accelY: -0.1933 [m/s^2]
+                accelZ: 11.78 [m/s^2]
+                 gyroX: 0.102 [rad/s]
+                 gyroY: -0.57 [rad/s]
+                 gyroZ: 0.3161 [rad/s]
+          motorCurrent: -0.0008297 [A]
+        windingCurrent: 0.6211 [A]
+    ambientTemperature: 43.11 [C]
+    windingTemperature: 34.21 [C]
+               voltage: 24.04 [V]
+
+
+</pre><h2 id="5">Output position feedback once a second</h2><pre class="codeinput">group.setFeedbackFrequency(1); <span class="comment">% reduce rate from 100 Hz default</span>
+t0 = tic();
+<span class="keyword">while</span> toc(t0) &lt; 5
+    fbk = group.getNextFeedback();
+    disp([<span class="string">'position: '</span> num2str(fbk.position)]);
+<span class="keyword">end</span>
+</pre><pre class="codeoutput">position: -0.17261
+position: -0.18196
+position: 0.086375
+position: -0.25343
+position: 0.20557
+position: 0.6431
+position: -0.75747
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2017a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+% This example shows howto use the HebiGroup API to access basic feedback
+%
+% (hint: individual sections can be run using ctrl+enter)
+% 
+% Requirements:  MATLAB 2013b or higher
+%
+% Author:        Florian Enner
+% Created:       13 July, 2017
+% API:           hebi-matlab-1.0
+%
+% Copyright 2017 HEBI Robotics
+
+%% Discovery (can be omitted)
+% We first need to discover what devices are available on the network
+disp(HebiLookup);
+
+%% Select devices and form a HebiGroup
+% After discovery we can create a group that allows us to communicate with
+% selected modules. Note that the parameter needs to be changed to target
+% devices that are on your network.
+serials = 'X-80040'; % <- modify to match a device on your network!
+group = HebiLookup.newGroupFromSerialNumbers(serials); 
+
+%% Access feedback
+% Feedback is in SI units and can be accessed as below. If a group contains
+% more than one module, the returned feedback contains vectors instead of
+% scalars.
+fbk = group.getNextFeedback();
+display(fbk);
+
+%% Output position feedback once a second
+group.setFeedbackFrequency(1); % reduce rate from 100 Hz default
+t0 = tic();
+while toc(t0) < 5
+    fbk = group.getNextFeedback();
+    disp(['position: ' num2str(fbk.position)]);
+end
+##### SOURCE END #####
+--></body></html>

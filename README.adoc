@@ -1,0 +1,53 @@
+# HEBI MATLAB API Examples
+
+This repository contains examples to go with the http://docs.hebi.us[online documentation] that help to get started with the HEBI Robotics APIs for MATLAB. Note that the scripts use actuators that we used for testing, so you will need to change any naming to match your own actuators.
+
+## Setup
+
+All examples in this repository require the HEBI Robotics API for MATLAB in order to run. Please
+
+. download the latest API from the http://docs.hebi.us[documentation]
+. unzip the file into a directory of your choice
+. add the resulting _hebi_ folder to the MATLAB https://mathworks.com/help/matlab/ref/path.html[path]
+
+[source,matlab]
+----
+addpath('hebi');
+----
+
+## Basic Examples
+
+[width="100%",options="header",cols="1a,3a"]
+|====================
+| Script | Topics
+
+|ex1_lookup.m (ex1_lookup.html)|
+* starting point of the API
+* discovering devices
+* establishing communications
+
+|ex2_feedback.m (ex2_feedback.html)|
+* accessing basic feedback
+
+|ex3_command.m (ex3_command.html)|
+* sending basic commands
+* open-loop / closed-loop control
+* combined position/velocity control
+
+|ex4_kinematics.m (ex4_kinematics.html)|
+* creating kinematic structures
+* forward kinematics
+* Jacobians
+
+|ex5_inverse_kinematics.m (ex5_inverse_kinematics.html)|
+* inverse kinematics
+
+|ex6_trajectories.m (ex6_trajectories.html)|
+* trajectory generation
+* moving smoothly between points
+
+|====================
+
+## Demos
+
+The demos folder contains the source code for some of our https://www.youtube.com/hebirobotics[YouTube videos] as well as common demos.

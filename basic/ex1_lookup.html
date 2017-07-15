@@ -1,0 +1,238 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>lookup</title><meta name="generator" content="MATLAB 9.2"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2017-07-13"><meta name="DC.source" content="lookup.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">Display all devices that are on the network</a></li><li><a href="#3">Reset lookup</a></li><li><a href="#4">Get meta data of all modules on the network</a></li><li><a href="#5">Create group using serial numbers</a></li><li><a href="#6">Create group using human readable names</a></li><li><a href="#7">Create group using only the family</a></li></ul></div><pre class="codeinput"><span class="comment">% HebiLookup represents the starting point of the API and provides</span>
+<span class="comment">% ways to discover devices on the network and to establish communications</span>
+<span class="comment">% with groups of modules, i.e., form a HebiGroup.</span>
+<span class="comment">%</span>
+<span class="comment">% Created groups represent the basic way to send commands and retrieve</span>
+<span class="comment">% feedback.  They provide convenient ways to deal with modules, and handle</span>
+<span class="comment">% high-level issues such as data synchronization and logging.</span>
+<span class="comment">%</span>
+<span class="comment">% (hint: individual sections can be run using ctrl+enter)</span>
+<span class="comment">%</span>
+<span class="comment">% Requirements:  MATLAB 2013b or higher</span>
+<span class="comment">%</span>
+<span class="comment">% Author:        Florian Enner</span>
+<span class="comment">% Created:       13 July, 2017</span>
+<span class="comment">% API:           hebi-matlab-1.0</span>
+<span class="comment">%</span>
+<span class="comment">% Copyright 2017 HEBI Robotics</span>
+</pre><h2 id="2">Display all devices that are on the network</h2><p>The first call to HebiLookup initializes a background process that can automatically discover modules using UDP broadcast messages. The default settings can be changed programmatically via set methods, or permanently by modifying hebi_config.m</p><pre class="codeinput">disp(HebiLookup);
+</pre><pre class="codeoutput"> &lt;a href="matlab:helpPopup HebiLookup"&gt;HebiLookup&lt;/a&gt; with properties:
+
+                  lookupAddresses: {'192.168.1.255'} [IPv4]
+                  lookupFrequency: 5 [Hz]
+    initialGroupFeedbackFrequency: 100 [Hz]
+      initialGroupCommandLifetime: 0.25 [s]
+
+    Module  Family           Name             Serial Number  
+    ------  ---------------  ---------------  ---------------
+    1       2dof             base             X-00134        
+    2       2dof             knee             X-00148        
+    3       CommsTest        X-00108          X-00108        
+    4       X5-9             X-00165          X-00165        
+    5       X8-3             X-80040          X-80040        
+
+</pre><h2 id="3">Reset lookup</h2><p>Available broadcast addresses are only set once on startup. If new network interfaces get added after the first call (e.g. connected to Wi-Fi), a reinitialization can be forced programmatically.</p><pre class="codeinput">HebiLookup.clearModuleList(); <span class="comment">% clears stale modules</span>
+HebiLookup.initOnce(); <span class="comment">% re-initializes discovery to default values</span>
+</pre><h2 id="4">Get meta data of all modules on the network</h2><p>If meta data needs to be accessed programmatically, you can create a group of all modules and call getInfo().</p><pre class="codeinput">group = HebiLookup.newGroupFromFamily(<span class="string">'*'</span>);
+info = group.getInfo();
+display(info);
+</pre><pre class="codeoutput">
+info =
+
+  5&times;15 table
+
+    pcRxTime      family         name           macAddress            ipAddress           netmask           gateway       serialNumber    mechanicalType    mechanicalRevision    electricalType    electricalRevision    firmwareType    firmwareRevision    firmwareMode 
+    ________    ___________    _________    ___________________    _______________    _______________    _____________    ____________    ______________    __________________    ______________    __________________    ____________    ________________    _____________
+
+    1.5e+09     '2dof'         'base'       'D8:80:39:E8:4F:0A'    '192.168.1.226'    '255.255.255.0'    '192.168.1.1'    'X-00134'       'X5-4'            'B9V'                 'X5_8_D'          '02'                  'X5_8_D'        '9.811.807'         'application'
+    1.5e+09     '2dof'         'knee'       'D8:80:39:E8:D1:E3'    '192.168.1.189'    '255.255.255.0'    '192.168.1.1'    'X-00148'       'X5-1'            'B9V'                 'X5_8_D'          '02'                  'X5_8_D'        '9.811.807'         'application'
+    1.5e+09     'CommsTest'    'X-00108'    'D8:80:39:E8:77:77'    '192.168.1.179'    '255.255.255.0'    '192.168.1.1'    'X-00108'       'X5-4'            'B9V'                 'X5_8_D'          '02'                  'X5_8_D'        '9.811.807'         'application'
+    1.5e+09     'X5-9'         'X-00165'    'D8:80:39:ED:34:69'    '192.168.1.110'    '255.255.255.0'    '192.168.1.1'    'X-00165'       'X5-9'            'C9V'                 'X5_8_D'          '03'                  'X5_8_D'        '9.811.807'         'application'
+    1.5e+09     'X8-3'         'X-80040'    'D8:80:39:5A:7D:CF'    '192.168.1.159'    '255.255.255.0'    '192.168.1.1'    'X-80040'       'X8-3'            'A12V'                'X5_8_D'          '03'                  'X5_8_D'        '9.811.807'         'application'
+
+</pre><h2 id="5">Create group using serial numbers</h2><pre class="codeinput">serials = {<span class="string">'X-00165'</span>, <span class="string">'X-80040'</span>};
+group = HebiLookup.newGroupFromSerialNumbers(serials);
+display(group);
+</pre><pre class="codeoutput">
+group = 
+
+ &lt;a href="matlab:helpPopup HebiGroup"&gt;HebiGroup&lt;/a&gt; with properties:
+
+    feedbackFrequency: 100 [Hz]
+      commandLifetime: 0.25 [s]
+           numModules: 2
+              logPath: []
+
+    Module  Family           Name             Serial Number  
+    ------  ---------------  ---------------  ---------------
+    1       X5-9             X-00165          X-00165        
+    2       X8-3             X-80040          X-80040        
+
+</pre><h2 id="6">Create group using human readable names</h2><pre class="codeinput">family = <span class="string">'2dof'</span>;
+names = {<span class="string">'base'</span>, <span class="string">'knee'</span>};
+group = HebiLookup.newGroupFromNames(family, names);
+display(group);
+</pre><pre class="codeoutput">
+group = 
+
+ &lt;a href="matlab:helpPopup HebiGroup"&gt;HebiGroup&lt;/a&gt; with properties:
+
+    feedbackFrequency: 100 [Hz]
+      commandLifetime: 0.25 [s]
+           numModules: 2
+              logPath: []
+
+    Module  Family           Name             Serial Number  
+    ------  ---------------  ---------------  ---------------
+    1       2dof             base             X-00134        
+    2       2dof             knee             X-00148        
+
+</pre><h2 id="7">Create group using only the family</h2><p>This call provides a way to quickly connect to an entire robot by grouping all modules in a specified family, and by sorting them alphabetically. Note that the family name supports wildcards, i.e., '?' for a single unknown character, and '*' for zero or more characters.</p><pre class="codeinput">group = HebiLookup.newGroupFromFamily(<span class="string">'X?-*'</span>);
+display(group);
+</pre><pre class="codeoutput">
+group = 
+
+ &lt;a href="matlab:helpPopup HebiGroup"&gt;HebiGroup&lt;/a&gt; with properties:
+
+    feedbackFrequency: 100 [Hz]
+      commandLifetime: 0.25 [s]
+           numModules: 2
+              logPath: []
+
+    Module  Family           Name             Serial Number  
+    ------  ---------------  ---------------  ---------------
+    1       X5-9             X-00165          X-00165        
+    2       X8-3             X-80040          X-80040        
+
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2017a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+% HebiLookup represents the starting point of the API and provides
+% ways to discover devices on the network and to establish communications
+% with groups of modules, i.e., form a HebiGroup.
+%
+% Created groups represent the basic way to send commands and retrieve 
+% feedback.  They provide convenient ways to deal with modules, and handle  
+% high-level issues such as data synchronization and logging.
+%
+% (hint: individual sections can be run using ctrl+enter)
+% 
+% Requirements:  MATLAB 2013b or higher
+%
+% Author:        Florian Enner
+% Created:       13 July, 2017
+% API:           hebi-matlab-1.0
+%
+% Copyright 2017 HEBI Robotics
+
+%% Display all devices that are on the network
+% The first call to HebiLookup initializes a background process that can
+% automatically discover modules using UDP broadcast messages. The default
+% settings can be changed programmatically via set methods, or permanently  
+% by modifying hebi_config.m
+disp(HebiLookup);
+
+%% Reset lookup
+% Available broadcast addresses are only set once on startup. If new
+% network interfaces get added after the first call (e.g. connected to
+% Wi-Fi), a reinitialization can be forced programmatically.
+HebiLookup.clearModuleList(); % clears stale modules
+HebiLookup.initOnce(); % re-initializes discovery to default values
+
+%% Get meta data of all modules on the network
+% If meta data needs to be accessed programmatically, you can create a
+% group of all modules and call getInfo().
+group = HebiLookup.newGroupFromFamily('*');
+info = group.getInfo();
+display(info);
+
+%% Create group using serial numbers
+serials = {'X-00165', 'X-80040'};
+group = HebiLookup.newGroupFromSerialNumbers(serials);
+display(group);
+
+%% Create group using human readable names
+family = '2dof';
+names = {'base', 'knee'};
+group = HebiLookup.newGroupFromNames(family, names);
+display(group);
+
+%% Create group using only the family
+% This call provides a way to quickly connect to an entire robot by 
+% grouping all modules in a specified family, and by sorting them
+% alphabetically.
+% Note that the family name supports wildcards, i.e., '?' for a single
+% unknown character, and '*' for zero or more characters.
+group = HebiLookup.newGroupFromFamily('X?-*');
+display(group);
+
+
+##### SOURCE END #####
+--></body></html>
