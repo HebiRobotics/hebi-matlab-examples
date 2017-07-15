@@ -55,3 +55,22 @@ This folder contains examples to get familiar with the core APIs. The accompanyi
 ## Demos
 
 The demos folder contains the source code for some of our https://www.youtube.com/hebirobotics[YouTube videos] as well as common demos.
+
+[width="100%",options="header",cols="1a,3a"]
+|====================
+| Video / Demo | Source Code
+
+|https://youtu.be/oHAddCWBobs[X-Series Industrial Smart Actuator]|
+:x5_teaser: link:demos/youtube/x5_teaser/x5_teaser_
+* {x5_teaser}demo2_stable_output.m[Demo2 - Output Stabilization]
+* {x5_teaser}demo3a_follow_imu.m[Demo3a - Follow IMU]
+* {x5_teaser}demo3b_zero_torque.m[Demo3b - Zero Torque]
+* {x5_teaser}demo3c_ping_pong.m[Demo3c - Torque Ping Pong]
+
+|https://youtu.be/zaPtxre4tFc[Teleop Taxi]|
+:teleop_taxi: link:demos/youtube/teleop_taxi/teleop_taxi_
+* {teleop_taxi}simple.m[Simplified] (without video)
+* {teleop_taxi}full.m[Full] (including video)
+
+|====================
+
