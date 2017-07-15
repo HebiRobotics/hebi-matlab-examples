@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>lookup</title><meta name="generator" content="MATLAB 9.2"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2017-07-13"><meta name="DC.source" content="lookup.m"><style type="text/css">
+      --><title>ex1_lookup</title><meta name="generator" content="MATLAB 9.2"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2017-07-15"><meta name="DC.source" content="ex1_lookup.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -109,14 +109,14 @@ info =
 
   5&times;15 table
 
-    pcRxTime      family         name           macAddress            ipAddress           netmask           gateway       serialNumber    mechanicalType    mechanicalRevision    electricalType    electricalRevision    firmwareType    firmwareRevision    firmwareMode 
-    ________    ___________    _________    ___________________    _______________    _______________    _____________    ____________    ______________    __________________    ______________    __________________    ____________    ________________    _____________
+     pcRxTime       family         name           macAddress            ipAddress           netmask           gateway       serialNumber    mechanicalType    mechanicalRevision    electricalType    electricalRevision    firmwareType    firmwareRevision    firmwareMode 
+    __________    ___________    _________    ___________________    _______________    _______________    _____________    ____________    ______________    __________________    ______________    __________________    ____________    ________________    _____________
 
-    1.5e+09     '2dof'         'base'       'D8:80:39:E8:4F:0A'    '192.168.1.226'    '255.255.255.0'    '192.168.1.1'    'X-00134'       'X5-4'            'B9V'                 'X5_8_D'          '02'                  'X5_8_D'        '9.811.807'         'application'
-    1.5e+09     '2dof'         'knee'       'D8:80:39:E8:D1:E3'    '192.168.1.189'    '255.255.255.0'    '192.168.1.1'    'X-00148'       'X5-1'            'B9V'                 'X5_8_D'          '02'                  'X5_8_D'        '9.811.807'         'application'
-    1.5e+09     'CommsTest'    'X-00108'    'D8:80:39:E8:77:77'    '192.168.1.179'    '255.255.255.0'    '192.168.1.1'    'X-00108'       'X5-4'            'B9V'                 'X5_8_D'          '02'                  'X5_8_D'        '9.811.807'         'application'
-    1.5e+09     'X5-9'         'X-00165'    'D8:80:39:ED:34:69'    '192.168.1.110'    '255.255.255.0'    '192.168.1.1'    'X-00165'       'X5-9'            'C9V'                 'X5_8_D'          '03'                  'X5_8_D'        '9.811.807'         'application'
-    1.5e+09     'X8-3'         'X-80040'    'D8:80:39:5A:7D:CF'    '192.168.1.159'    '255.255.255.0'    '192.168.1.1'    'X-80040'       'X8-3'            'A12V'                'X5_8_D'          '03'                  'X5_8_D'        '9.811.807'         'application'
+    1.5001e+09    '2dof'         'base'       'D8:80:39:E8:4F:0A'    '192.168.1.226'    '255.255.255.0'    '192.168.1.1'    'X-00134'       'X5-4'            'B9V'                 'X5_8_D'          '02'                  'X5_8_D'        '9.811.807'         'application'
+    1.5001e+09    '2dof'         'knee'       'D8:80:39:E8:D1:E3'    '192.168.1.189'    '255.255.255.0'    '192.168.1.1'    'X-00148'       'X5-1'            'B9V'                 'X5_8_D'          '02'                  'X5_8_D'        '9.811.807'         'application'
+    1.5001e+09    'CommsTest'    'X-00108'    'D8:80:39:E8:77:77'    '192.168.1.179'    '255.255.255.0'    '192.168.1.1'    'X-00108'       'X5-4'            'B9V'                 'X5_8_D'          '02'                  'X5_8_D'        '9.811.807'         'application'
+    1.5001e+09    'X5-9'         'X-00165'    'D8:80:39:ED:34:69'    '192.168.1.110'    '255.255.255.0'    '192.168.1.1'    'X-00165'       'X5-9'            'C9V'                 'X5_8_D'          '03'                  'X5_8_D'        '9.811.807'         'application'
+    1.5001e+09    'X8-3'         'X-80040'    'D8:80:39:5A:7D:CF'    '192.168.1.159'    '255.255.255.0'    '192.168.1.1'    'X-80040'       'X8-3'            'A12V'                'X5_8_D'          '03'                  'X5_8_D'        '9.811.807'         'application'
 
 </pre><h2 id="5">Create group using serial numbers</h2><pre class="codeinput">serials = {<span class="string">'X-00165'</span>, <span class="string">'X-80040'</span>};
 group = HebiLookup.newGroupFromSerialNumbers(serials);
