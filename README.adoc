@@ -16,33 +16,37 @@ addpath('hebi');
 ----
 
 ## Basic Examples
+This folder contains examples to get familiar with the core APIs. The accompanying html files show the expected output when being run on a correct setup.
+
+:basic: link:basic
+:basic-cdn: link:https://cdn.rawgit.com/HebiRobotics/hebi-matlab-examples/c937fc87/basic
 
 [width="100%",options="header",cols="1a,3a"]
 |====================
 | Script | Topics
 
-|ex1_lookup.m (ex1_lookup.html)|
+|{basic}/ex1_lookup.m[ex1_lookup.m] ({basic-cdn}/ex1_lookup.html[html])|
 * starting point of the API
 * discovering devices
 * establishing communications
 
-|ex2_feedback.m (ex2_feedback.html)|
+|{basic}/ex1_lookup.m[ex2_feedback.m] ({basic-cdn}/ex2_feedback.html[html])|
 * accessing basic feedback
 
-|ex3_command.m (ex3_command.html)|
+|{basic}/ex3_command.m[ex1_lookup.m] ({basic-cdn}/ex3_command.html[html])|
 * sending basic commands
 * open-loop / closed-loop control
 * combined position/velocity control
 
-|ex4_kinematics.m (ex4_kinematics.html)|
+|{basic}/ex4_kinematics.m[ex1_lookup.m] ({basic-cdn}/ex4_kinematics.html[html])|
 * creating kinematic structures
 * forward kinematics
 * Jacobians
 
-|ex5_inverse_kinematics.m (ex5_inverse_kinematics.html)|
+|{basic}/ex5_inverse_kinematics.m[ex1_lookup.m] ({basic-cdn}/ex5_inverse_kinematics.html[html])|
 * inverse kinematics
 
-|ex6_trajectories.m (ex6_trajectories.html)|
+|{basic}/ex6_trajectories.m[ex1_lookup.m] ({basic-cdn}/ex6_trajectories.html[html])|
 * trajectory generation
 * moving smoothly between points
 
