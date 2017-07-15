@@ -23,30 +23,30 @@ This folder contains examples to get familiar with the core APIs. The accompanyi
 
 [width="100%",options="header",cols="1a,3a"]
 |====================
-| Script | Topics
+| File | Topics
 
-|{basic}/ex1_lookup.m[ex1_lookup.m] ({basic-cdn}/ex1_lookup.html[html])|
+|{basic-cdn}/ex1_lookup.html[ex1_lookup] ({basic}/ex1_lookup.m[script]) |
 * starting point of the API
 * discovering devices
 * establishing communications
 
-|{basic}/ex1_lookup.m[ex2_feedback.m] ({basic-cdn}/ex2_feedback.html[html])|
+|{basic-cdn}/ex2_feedback.html[ex2_feedback] ({basic}/ex2_feedback.m[script]) |
 * accessing basic feedback
 
-|{basic}/ex3_command.m[ex1_lookup.m] ({basic-cdn}/ex3_command.html[html])|
+|{basic-cdn}/ex3_command.html[ex3_command] ({basic}/ex3_command.m[script]) |
 * sending basic commands
 * open-loop / closed-loop control
 * combined position/velocity control
 
-|{basic}/ex4_kinematics.m[ex1_lookup.m] ({basic-cdn}/ex4_kinematics.html[html])|
+|{basic-cdn}/ex4_kinematics.html[ex4_kinematics] ({basic}/ex4_kinematics.m[script]) |
 * creating kinematic structures
 * forward kinematics
 * Jacobians
 
-|{basic}/ex5_inverse_kinematics.m[ex1_lookup.m] ({basic-cdn}/ex5_inverse_kinematics.html[html])|
+|{basic-cdn}/ex5_inverse_kinematics.html[ex5_inverse_kinematics] ({basic}/ex5_inverse_kinematics.m[script]) |
 * inverse kinematics
 
-|{basic}/ex6_trajectories.m[ex1_lookup.m] ({basic-cdn}/ex6_trajectories.html[html])|
+|{basic-cdn}/ex6_trajectories.html[ex6_trajectories] ({basic}/ex6_trajectories.m[script]) |
 * trajectory generation
 * moving smoothly between points
 
