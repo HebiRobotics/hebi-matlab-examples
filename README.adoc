@@ -14,14 +14,14 @@ All examples in this repository require the HEBI Robotics API for MATLAB in orde
 
 [source,matlab]
 ----
-addpath('hebi');
+addpath([pwd '/hebi']);
 ----
 
 ## Basic Examples
 This folder contains examples to get familiar with the core APIs. The accompanying html files show the expected output when being run on a correct setup.
 
 :basic: link:basic
-:basic-cdn: link:https://cdn.rawgit.com/HebiRobotics/hebi-matlab-examples/b7aa5d02/basic
+:basic-cdn: link:https://cdn.rawgit.com/HebiRobotics/hebi-matlab-examples/37ea8658/basic
 
 [width="100%",options="header",cols="1a,3a"]
 |====================
