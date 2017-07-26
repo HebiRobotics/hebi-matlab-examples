@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>ex1_lookup</title><meta name="generator" content="MATLAB 9.2"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2017-07-15"><meta name="DC.source" content="ex1_lookup.m"><style type="text/css">
+      --><title>HebiLookup</title><meta name="generator" content="MATLAB 9.2"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2017-07-26"><meta name="DC.source" content="ex1_lookup.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -66,24 +66,15 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
 
 
-  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">Display all devices that are on the network</a></li><li><a href="#3">Reset lookup</a></li><li><a href="#4">Get meta data of all modules on the network</a></li><li><a href="#5">Create group using serial numbers</a></li><li><a href="#6">Create group using human readable names</a></li><li><a href="#7">Create group using only the family</a></li></ul></div><pre class="codeinput"><span class="comment">% HebiLookup represents the starting point of the API and provides</span>
-<span class="comment">% ways to discover devices on the network and to establish communications</span>
-<span class="comment">% with groups of modules, i.e., form a HebiGroup.</span>
-<span class="comment">%</span>
-<span class="comment">% Created groups represent the basic way to send commands and retrieve</span>
-<span class="comment">% feedback.  They provide convenient ways to deal with modules, and handle</span>
-<span class="comment">% high-level issues such as data synchronization and logging.</span>
-<span class="comment">%</span>
-<span class="comment">% (hint: individual sections can be run using ctrl+enter)</span>
-<span class="comment">%</span>
-<span class="comment">% Requirements:  MATLAB 2013b or higher</span>
-<span class="comment">%</span>
-<span class="comment">% Author:        Florian Enner</span>
-<span class="comment">% Created:       13 July, 2017</span>
-<span class="comment">% API:           hebi-matlab-1.0</span>
-<span class="comment">%</span>
-<span class="comment">% Copyright 2017 HEBI Robotics</span>
-</pre><h2 id="2">Display all devices that are on the network</h2><p>The first call to HebiLookup initializes a background process that can automatically discover modules using UDP broadcast messages. The default settings can be changed programmatically via set methods, or permanently by modifying hebi_config.m</p><pre class="codeinput">disp(HebiLookup);
+  </style></head><body><div class="content"><h1>HebiLookup</h1><!--introduction--><p><b>HebiLookup</b> represents the starting point of the API and provides ways to discover devices on the network and to establish communications with groups of modules.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#2">Device Overview</a></li><li><a href="#3">Select Devices: Human Readable Names</a></li><li><a href="#4">Select Devices: Hardware Serial Numbers</a></li><li><a href="#5">Select Devices: Family Only</a></li><li><a href="#6">Debugging: Reset lookup</a></li><li><a href="#7">Debugging: Access Meta Data of all Devices</a></li></ul></div><p>
+<table border=0>
+  <tr><td>Created</td><td>July 13, 2017</td></tr>
+  <tr><td>Last Update</td><td>July 26, 2017</td></tr>
+  <tr><td>API Version</td><td>hebi-matlab-1.0</td></tr>
+  <tr><td>Requirements</td><td>MATLAB 2013b or higher</td></tr>
+</table>
+</p><p>Copyright 2017 HEBI Robotics</p><h2 id="2">Device Overview</h2><p>The first call to HebiLookup initializes a background process that can automatically discover devices using UDP broadcast messages. The default settings can be changed programmatically via set methods, or permanently by modifying <b>hebi_config.m</b></p><p>Displaying HebiLookup provides an overview of all modules that were found on the network. The Family and Name columns show the user-settable names, and the Serial Number column shows the unique serial number of each device.</p><pre class="codeinput"><span class="comment">% Display all devices found on the network</span>
+disp(HebiLookup);
 </pre><pre class="codeoutput"> &lt;a href="matlab:helpPopup HebiLookup"&gt;HebiLookup&lt;/a&gt; with properties:
 
                   lookupAddresses: {'192.168.1.255'} [IPv4]
@@ -99,44 +90,8 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
     4       X5-9             X-00165          X-00165        
     5       X8-3             X-80040          X-80040        
 
-</pre><h2 id="3">Reset lookup</h2><p>Available broadcast addresses are only set once on startup. If new network interfaces get added after the first call (e.g. connected to Wi-Fi), a reinitialization can be forced programmatically.</p><pre class="codeinput">HebiLookup.clearModuleList(); <span class="comment">% clears stale modules</span>
-HebiLookup.initOnce(); <span class="comment">% re-initializes discovery to default values</span>
-</pre><h2 id="4">Get meta data of all modules on the network</h2><p>If meta data needs to be accessed programmatically, you can create a group of all modules and call getInfo().</p><pre class="codeinput">group = HebiLookup.newGroupFromFamily(<span class="string">'*'</span>);
-info = group.getInfo();
-display(info);
-</pre><pre class="codeoutput">
-info =
-
-  5&times;15 table
-
-     pcRxTime       family         name           macAddress            ipAddress           netmask           gateway       serialNumber    mechanicalType    mechanicalRevision    electricalType    electricalRevision    firmwareType    firmwareRevision    firmwareMode 
-    __________    ___________    _________    ___________________    _______________    _______________    _____________    ____________    ______________    __________________    ______________    __________________    ____________    ________________    _____________
-
-    1.5001e+09    '2dof'         'base'       'D8:80:39:E8:4F:0A'    '192.168.1.226'    '255.255.255.0'    '192.168.1.1'    'X-00134'       'X5-4'            'B9V'                 'X5_8_D'          '02'                  'X5_8_D'        '9.811.807'         'application'
-    1.5001e+09    '2dof'         'knee'       'D8:80:39:E8:D1:E3'    '192.168.1.189'    '255.255.255.0'    '192.168.1.1'    'X-00148'       'X5-1'            'B9V'                 'X5_8_D'          '02'                  'X5_8_D'        '9.811.807'         'application'
-    1.5001e+09    'CommsTest'    'X-00108'    'D8:80:39:E8:77:77'    '192.168.1.179'    '255.255.255.0'    '192.168.1.1'    'X-00108'       'X5-4'            'B9V'                 'X5_8_D'          '02'                  'X5_8_D'        '9.811.807'         'application'
-    1.5001e+09    'X5-9'         'X-00165'    'D8:80:39:ED:34:69'    '192.168.1.110'    '255.255.255.0'    '192.168.1.1'    'X-00165'       'X5-9'            'C9V'                 'X5_8_D'          '03'                  'X5_8_D'        '9.811.807'         'application'
-    1.5001e+09    'X8-3'         'X-80040'    'D8:80:39:5A:7D:CF'    '192.168.1.159'    '255.255.255.0'    '192.168.1.1'    'X-80040'       'X8-3'            'A12V'                'X5_8_D'          '03'                  'X5_8_D'        '9.811.807'         'application'
-
-</pre><h2 id="5">Create group using serial numbers</h2><pre class="codeinput">serials = {<span class="string">'X-00165'</span>, <span class="string">'X-80040'</span>};
-group = HebiLookup.newGroupFromSerialNumbers(serials);
-display(group);
-</pre><pre class="codeoutput">
-group = 
-
- &lt;a href="matlab:helpPopup HebiGroup"&gt;HebiGroup&lt;/a&gt; with properties:
-
-    feedbackFrequency: 100 [Hz]
-      commandLifetime: 0.25 [s]
-           numModules: 2
-              logPath: []
-
-    Module  Family           Name             Serial Number  
-    ------  ---------------  ---------------  ---------------
-    1       X5-9             X-00165          X-00165        
-    2       X8-3             X-80040          X-80040        
-
-</pre><h2 id="6">Create group using human readable names</h2><pre class="codeinput">family = <span class="string">'2dof'</span>;
+</pre><h2 id="3">Select Devices: Human Readable Names</h2><p>The preferred way for creating groups is to select devices based on their human readable <b>family</b> and <b>name</b>. Both parameters are user-settable and can be modified freely via the Scope GUI.</p><p>A common convention is that the family identifies the robot (e.g. ' 2dof ') and that the name identifies the part (e.g. ' knee ').</p><div><ul><li>The device order of the resulting group will match the order of the   specified names</li><li>Selection strings support the following wildcards: ' ? ' for a single   character and ' * ' for any number of characters</li><li>If more than one device meets a selection criteria, all matching   devices will be added in alphabetical order</li></ul></div><pre class="codeinput"><span class="comment">% Select devices by their user-settable family and name</span>
+family = <span class="string">'2dof'</span>;
 names = {<span class="string">'base'</span>, <span class="string">'knee'</span>};
 group = HebiLookup.newGroupFromNames(family, names);
 display(group);
@@ -155,7 +110,9 @@ group =
     1       2dof             base             X-00134        
     2       2dof             knee             X-00148        
 
-</pre><h2 id="7">Create group using only the family</h2><p>This call provides a way to quickly connect to an entire robot by grouping all modules in a specified family, and by sorting them alphabetically. Note that the family name supports wildcards, i.e., '?' for a single unknown character, and '*' for zero or more characters.</p><pre class="codeinput">group = HebiLookup.newGroupFromFamily(<span class="string">'X?-*'</span>);
+</pre><h2 id="4">Select Devices: Hardware Serial Numbers</h2><p>Another common way for selecting devices is to refer to their unique hardware serial number.</p><div><ul><li>The resulting device order will match the order of the selection vector</li><li>Wilcards are not supported</li></ul></div><pre class="codeinput"><span class="comment">% Select devices by their unique hardwre serial numbers</span>
+serials = {<span class="string">'X-00165'</span>, <span class="string">'X-80040'</span>};
+group = HebiLookup.newGroupFromSerialNumbers(serials);
 display(group);
 </pre><pre class="codeoutput">
 group = 
@@ -172,66 +129,155 @@ group =
     1       X5-9             X-00165          X-00165        
     2       X8-3             X-80040          X-80040        
 
+</pre><h2 id="5">Select Devices: Family Only</h2><p>This call creates a group of all devices that match the selected family and sorts them in alphabetical order. This represents a simpler way to connect to an entire system at once, but it does require the names to be set to values that sort correctly.</p><p>For example, sortable names could look as follows</p><div><ul><li>' 1_base '</li><li>' 2_shoulder '</li><li>' 3_wrist '</li></ul></div><p>Wildcards are supported</p><pre class="codeinput"><span class="comment">% Select devices by family in alphabetical order</span>
+group = HebiLookup.newGroupFromFamily(<span class="string">'X?-*'</span>);
+display(group);
+</pre><pre class="codeoutput">
+group = 
+
+ &lt;a href="matlab:helpPopup HebiGroup"&gt;HebiGroup&lt;/a&gt; with properties:
+
+    feedbackFrequency: 100 [Hz]
+      commandLifetime: 0.25 [s]
+           numModules: 2
+              logPath: []
+
+    Module  Family           Name             Serial Number  
+    ------  ---------------  ---------------  ---------------
+    1       X5-9             X-00165          X-00165        
+    2       X8-3             X-80040          X-80040        
+
+</pre><h2 id="6">Debugging: Reset lookup</h2><p>Some cases such as connecting a network cable after the lookup has already started can result in devices not being found. This may be because available broadcast addresses are only set once on startup, resulting in new networks being ignored.</p><p>In such cases, you can force a reinitialization manually using the code below.</p><pre class="codeinput"><span class="comment">% Clear state and reinitialize discovery on the default (all) interfaces</span>
+HebiLookup.clearModuleList();
+HebiLookup.initOnce();
+</pre><h2 id="7">Debugging: Access Meta Data of all Devices</h2><p>Sometimes it may be necessary to programmatically access meta data that is not covered by the lookup. For such cases you can create a group of all modules (wildcard ' * ') and access the group info.</p><pre class="codeinput"><span class="comment">% Create a group of all modules on the network</span>
+group = HebiLookup.newGroupFromFamily(<span class="string">'*'</span>);
+info = group.getInfo();
+display(info);
+</pre><pre class="codeoutput">
+info =
+
+  5&times;15 table
+
+     pcRxTime       family         name           macAddress            ipAddress           netmask           gateway       serialNumber    mechanicalType    mechanicalRevision    electricalType    electricalRevision    firmwareType    firmwareRevision    firmwareMode 
+    __________    ___________    _________    ___________________    _______________    _______________    _____________    ____________    ______________    __________________    ______________    __________________    ____________    ________________    _____________
+
+    1.5011e+09    '2dof'         'base'       'D8:80:39:E8:4F:0A'    '192.168.1.226'    '255.255.255.0'    '192.168.1.1'    'X-00134'       'X5-4'            'B9V'                 'X5_8_D'          '02'                  'X5_8_D'        '9.811.807'         'application'
+    1.5011e+09    '2dof'         'knee'       'D8:80:39:E8:D1:E3'    '192.168.1.189'    '255.255.255.0'    '192.168.1.1'    'X-00148'       'X5-1'            'B9V'                 'X5_8_D'          '02'                  'X5_8_D'        '9.811.807'         'application'
+    1.5011e+09    'CommsTest'    'X-00108'    'D8:80:39:E8:77:77'    '192.168.1.179'    '255.255.255.0'    '192.168.1.1'    'X-00108'       'X5-4'            'B9V'                 'X5_8_D'          '02'                  'X5_8_D'        '9.811.807'         'application'
+    1.5011e+09    'X5-9'         'X-00165'    'D8:80:39:ED:34:69'    '192.168.1.110'    '255.255.255.0'    '192.168.1.1'    'X-00165'       'X5-9'            'C9V'                 'X5_8_D'          '03'                  'X5_8_D'        '9.811.807'         'application'
+    1.5011e+09    'X8-3'         'X-80040'    'D8:80:39:5A:7D:CF'    '192.168.1.159'    '255.255.255.0'    '192.168.1.1'    'X-80040'       'X8-3'            'A12V'                'X5_8_D'          '03'                  'X5_8_D'        '9.811.807'         'application'
+
 </pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2017a</a><br></p></div><!--
 ##### SOURCE BEGIN #####
-% HebiLookup represents the starting point of the API and provides
+%% HebiLookup
+% *HebiLookup* represents the starting point of the API and provides
 % ways to discover devices on the network and to establish communications
-% with groups of modules, i.e., form a HebiGroup.
+% with groups of modules.
 %
-% Created groups represent the basic way to send commands and retrieve 
-% feedback.  They provide convenient ways to deal with modules, and handle  
-% high-level issues such as data synchronization and logging.
+%%
 %
-% (hint: individual sections can be run using ctrl+enter)
-% 
-% Requirements:  MATLAB 2013b or higher
-%
-% Author:        Florian Enner
-% Created:       13 July, 2017
-% API:           hebi-matlab-1.0
+% <html>
+% <table border=0>
+%   <tr><td>Created</td><td>July 13, 2017</td></tr>
+%   <tr><td>Last Update</td><td>July 26, 2017</td></tr>
+%   <tr><td>API Version</td><td>hebi-matlab-1.0</td></tr>
+%   <tr><td>Requirements</td><td>MATLAB 2013b or higher</td></tr>
+% </table>
+% </html>
 %
 % Copyright 2017 HEBI Robotics
 
-%% Display all devices that are on the network
+%% Device Overview
 % The first call to HebiLookup initializes a background process that can
-% automatically discover modules using UDP broadcast messages. The default
+% automatically discover devices using UDP broadcast messages. The default
 % settings can be changed programmatically via set methods, or permanently  
-% by modifying hebi_config.m
+% by modifying *hebi_config.m*
+%
+% Displaying HebiLookup provides an overview of all modules that were found
+% on the network. The Family and Name columns show the user-settable names,
+% and the Serial Number column shows the unique serial number of each 
+% device.
+
+% Display all devices found on the network
 disp(HebiLookup);
 
-%% Reset lookup
-% Available broadcast addresses are only set once on startup. If new
-% network interfaces get added after the first call (e.g. connected to
-% Wi-Fi), a reinitialization can be forced programmatically.
-HebiLookup.clearModuleList(); % clears stale modules
-HebiLookup.initOnce(); % re-initializes discovery to default values
+%% Select Devices: Human Readable Names
+% The preferred way for creating groups is to select devices based on their
+% human readable *family* and *name*. Both parameters are user-settable and
+% can be modified freely via the Scope GUI.
+%
+% A common convention is that the family identifies the robot (e.g.
+% ' 2dof ') and that the name identifies the part (e.g. ' knee ').
+%
+% * The device order of the resulting group will match the order of the
+%   specified names
+% * Selection strings support the following wildcards: ' ? ' for a single
+%   character and ' * ' for any number of characters
+% * If more than one device meets a selection criteria, all matching 
+%   devices will be added in alphabetical order
 
-%% Get meta data of all modules on the network
-% If meta data needs to be accessed programmatically, you can create a
-% group of all modules and call getInfo().
-group = HebiLookup.newGroupFromFamily('*');
-info = group.getInfo();
-display(info);
-
-%% Create group using serial numbers
-serials = {'X-00165', 'X-80040'};
-group = HebiLookup.newGroupFromSerialNumbers(serials);
-display(group);
-
-%% Create group using human readable names
+% Select devices by their user-settable family and name
 family = '2dof';
 names = {'base', 'knee'};
 group = HebiLookup.newGroupFromNames(family, names);
 display(group);
 
-%% Create group using only the family
-% This call provides a way to quickly connect to an entire robot by 
-% grouping all modules in a specified family, and by sorting them
-% alphabetically.
-% Note that the family name supports wildcards, i.e., '?' for a single
-% unknown character, and '*' for zero or more characters.
+%% Select Devices: Hardware Serial Numbers
+% Another common way for selecting devices is to refer to their unique
+% hardware serial number. 
+%
+% * The resulting device order will match the order of the selection vector
+% * Wilcards are not supported
+
+% Select devices by their unique hardwre serial numbers
+serials = {'X-00165', 'X-80040'};
+group = HebiLookup.newGroupFromSerialNumbers(serials);
+display(group);
+
+%% Select Devices: Family Only
+% This call creates a group of all devices that match the selected family 
+% and sorts them in alphabetical order. This represents a simpler way to
+% connect to an entire system at once, but it does require the names to be
+% set to values that sort correctly. 
+%
+% For example, sortable names could look as follows
+%
+% * ' 1_base '
+% * ' 2_shoulder '
+% * ' 3_wrist '
+%
+% Wildcards are supported
+
+% Select devices by family in alphabetical order
 group = HebiLookup.newGroupFromFamily('X?-*');
 display(group);
+
+%% Debugging: Reset lookup
+% Some cases such as connecting a network cable after the lookup has
+% already started can result in devices not being found. This may be
+% because available broadcast addresses are only set once on startup,
+% resulting in new networks being ignored.
+%
+% In such cases, you can force a reinitialization manually using the code
+% below.
+
+% Clear state and reinitialize discovery on the default (all) interfaces
+HebiLookup.clearModuleList();
+HebiLookup.initOnce();
+
+%% Debugging: Access Meta Data of all Devices
+% Sometimes it may be necessary to programmatically access meta data that
+% is not covered by the lookup. For such cases you can create a group of
+% all modules (wildcard ' * ') and access the group info.
+
+% Create a group of all modules on the network
+group = HebiLookup.newGroupFromFamily('*');
+info = group.getInfo();
+display(info);
+
+
+
 
 
 ##### SOURCE END #####
