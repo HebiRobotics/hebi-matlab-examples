@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>ex6_trajectories</title><meta name="generator" content="MATLAB 9.2"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2017-07-15"><meta name="DC.source" content="ex6_trajectories.m"><style type="text/css">
+      --><title>HebiTrajectoryGenerator</title><meta name="generator" content="MATLAB 9.2"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2017-08-22"><meta name="DC.source" content="ex6_trajectories.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -66,17 +66,14 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
 
 
-  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">General</a></li><li><a href="#3">Single Actuator Joint Trajectory</a></li><li><a href="#5">Moving a robot to random waypoints</a></li></ul></div><pre class="codeinput"><span class="comment">% This example shows howto use the HebiTrajectoryGenerator API to create</span>
-<span class="comment">% paths to smoothly move through waypoints.</span>
-<span class="comment">%</span>
-<span class="comment">% Requirements:  MATLAB 2013b or higher</span>
-<span class="comment">%</span>
-<span class="comment">% Author:        Florian Enner</span>
-<span class="comment">% Created:       14 July, 2017</span>
-<span class="comment">% API:           hebi-matlab-1.0</span>
-<span class="comment">%</span>
-<span class="comment">% Copyright 2017 HEBI Robotics</span>
-</pre><h2 id="2">General</h2><p>For series elastic actuators such as the X-series modules it is important to command smooth trajectories to avoid oscillations induced by the spring element. Additionally, it helps significantly to not only command positions, but also velocities and if possible torques.</p><p>Trajectories work on a joint level and are technically independent of the kinematic configuration. The API however requires knowledge of HebiKinematics to access meta-data such as velocity limits. Thus, position and velocity control can be done with only knowledge of the number of joints in a system. A full model of the system is however required for</p><div><ul><li>Torque control, i.e., converting joint accelerations to corresponding   torques and forces</li><li>'Linear'-type trajectories that move the end-effector in world   coordinates</li></ul></div><h2 id="3">Single Actuator Joint Trajectory</h2><p>The following exampe creates a trajectory through position waypoints for a single actuator. The time vector can be automatically determined based on the joint limits. Alternatively the time can be set manually.</p><div><ul><li>'Duration' sets the total desired duration</li><li>'Time' sets the times at which each waypoint should be hit</li></ul></div><p>For more options please see our online documentation or the corresponding help files.</p><pre class="codeinput"><span class="comment">% Setup single module for accessing meta-data</span>
+  </style></head><body><div class="content"><h1>HebiTrajectoryGenerator</h1><!--introduction--><p>This example shows howto use the HebiTrajectoryGenerator API to create paths to smoothly move through waypoints.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#2">General</a></li><li><a href="#3">Single Actuator Joint Trajectory (blocking)</a></li><li><a href="#5">Moving a robot to random waypoints (blocking)</a></li><li><a href="#7">Moving a robot to random waypoints (non-blocking)</a></li></ul></div><p>
+<table border=0>
+  <tr><td>Created</td><td>July 14, 2017</td></tr>
+  <tr><td>Last Update</td><td>Aug 22, 2017</td></tr>
+  <tr><td>API Version</td><td>hebi-matlab-1.0-rc2</td></tr>
+  <tr><td>Requirements</td><td>MATLAB 2013b or higher</td></tr>
+</table>
+</p><p>Copyright 2017 HEBI Robotics</p><h2 id="2">General</h2><p>For series elastic actuators such as the X-series modules it is important to command smooth trajectories to avoid oscillations induced by the spring element. Additionally, it helps significantly to not only command positions, but also velocities and if possible torques.</p><p>Trajectories work on a joint level and are technically independent of the kinematic configuration. The API however requires knowledge of HebiKinematics to access meta-data such as velocity limits. Thus, position and velocity control can be done with only knowledge of the number of joints in a system. However, a full model of the system is required for</p><div><ul><li>Torque control, i.e., converting joint accelerations to corresponding   torques and forces</li><li>'Linear'-type trajectories that move the end-effector in world   coordinates</li></ul></div><h2 id="3">Single Actuator Joint Trajectory (blocking)</h2><p>The following exampe creates a trajectory through position waypoints for a single actuator. The time vector can be automatically determined based on the joint limits. Alternatively the time can be set manually.</p><div><ul><li>'Duration' sets the total desired duration</li><li>'Time' sets a time vector at which each waypoint should be hit</li></ul></div><p>For more options please see our online documentation or the corresponding help files.</p><pre class="codeinput"><span class="comment">% Setup single module for accessing meta-data</span>
 kin = HebiKinematics();
 kin.addBody(<span class="string">'X5-1'</span>);
 trajGen = HebiTrajectoryGenerator(kin);
@@ -104,7 +101,7 @@ waypoints =
 
      0     2    -1    -2     1     0
 
-</pre><img vspace="5" hspace="5" src="ex6_trajectories_01.png" alt=""> <h2 id="5">Moving a robot to random waypoints</h2><p>In addition to providing low-level access to the raw trajectory, we provide convenience wrappers that simplify interactions with the HebiGroup and HebiKinematics APIs.</p><p>'moveJoint()' moves between waypoints and blocks until the trajectory is executed.</p><p><img vspace="5" hspace="5" src="resources/2dof_RR_ik_xy.png" alt=""> </p><pre class="codeinput"><span class="comment">% Setup 2 dof planar RR arm</span>
+</pre><img vspace="5" hspace="5" src="ex6_trajectories_01.png" alt=""> <h2 id="5">Moving a robot to random waypoints (blocking)</h2><p>In addition to providing low-level access to the raw trajectory, we provide convenience wrappers that simplify interactions with the HebiGroup and HebiKinematics APIs. For example, 'moveJoint' moves between waypoints and blocks until the trajectory has fully executed.</p><pre class="codeinput"><span class="comment">% Setup 2 dof planar RR arm</span>
 kin = HebiKinematics();
 kin.addBody(<span class="string">'X5-4'</span>); <span class="comment">% base joint</span>
 kin.addBody(<span class="string">'X5-Link'</span>, <span class="string">'ext'</span>, 0.35, <span class="string">'twist'</span>, pi);
@@ -117,7 +114,7 @@ trajGen.setSpeedFactor(0.5);
 trajGen.setMinDuration(0.5);
 
 <span class="comment">% Connect to modules (replace names with your own)</span>
-group = HebiLookup.newGroupFromNames(<span class="string">'2dof'</span>, {<span class="string">'base'</span>, <span class="string">'knee'</span>});
+group = HebiLookup.newGroupFromNames(<span class="string">'arm'</span>, {<span class="string">'base'</span>, <span class="string">'shoulder'</span>});
 
 <span class="comment">% Determine direction of gravity to compensate for gravitational effects</span>
 fbk = group.getNextFeedback(); <span class="comment">% assume fixed base</span>
@@ -125,7 +122,7 @@ gravityVec = -[fbk.accelX(1) fbk.accelY(1) fbk.accelZ(1)];
 
 <span class="comment">% Move to random waypoints</span>
 current = fbk.position;
-<span class="keyword">for</span> i = 1:20
+<span class="keyword">for</span> i = 1:10
 
     next = (rand(size(current)) - 0.5) * pi/2; <span class="comment">% max +/- pi/2</span>
     trajGen.moveJoint(group,      <span class="keyword">...</span><span class="comment"> % target actuators</span>
@@ -135,7 +132,7 @@ current = fbk.position;
     current = next;
 
 <span class="keyword">end</span>
-</pre><pre class="codeinput"><span class="comment">% Display</span>
+</pre><p><img vspace="5" hspace="5" src="resources/2dof_RR_ik_xy.png" alt=""> </p><pre class="codeinput"><span class="comment">% Display</span>
 display(kin);
 display(trajGen);
 display(group);
@@ -178,19 +175,88 @@ group =
 
     Module  Family           Name             Serial Number  
     ------  ---------------  ---------------  ---------------
-    1       2dof             base             X-00134        
-    2       2dof             knee             X-00148        
+    1       Arm              Base             X-80040        
+    2       Arm              Shoulder         X-00165        
 
+</pre><h2 id="7">Moving a robot to random waypoints (non-blocking)</h2><p>In some cases it is necessary to replan a trajectory and adapt to environmental events while moving between waypoints. For example, a robot may try to catch a moving target and needs to update the goal waypoint. To accomodate these use cases we provide a non-blocking API that lets users be in full control.</p><pre class="codeinput"><span class="comment">% Setup 2 dof planar RR arm</span>
+kin = HebiKinematics();
+kin.addBody(<span class="string">'X5-4'</span>); <span class="comment">% base joint</span>
+kin.addBody(<span class="string">'X5-Link'</span>, <span class="string">'ext'</span>, 0.35, <span class="string">'twist'</span>, pi);
+kin.addBody(<span class="string">'X5-1'</span>);
+kin.addBody(<span class="string">'X5-Link'</span>, <span class="string">'ext'</span>, 0.25, <span class="string">'twist'</span>, pi);
+
+<span class="comment">% Setup trajectory generator</span>
+trajGen = HebiTrajectoryGenerator(kin);
+trajGen.setSpeedFactor(0.5);
+trajGen.setMinDuration(0.5);
+
+<span class="comment">% Connect to modules (replace names with your own)</span>
+group = HebiLookup.newGroupFromNames(<span class="string">'arm'</span>, {<span class="string">'base'</span>, <span class="string">'shoulder'</span>});
+
+<span class="comment">% Determine direction of gravity to compensate for gravitational effects</span>
+fbk = group.getNextFeedback(); <span class="comment">% assume fixed base</span>
+gravityVec = -[fbk.accelX(1) fbk.accelY(1) fbk.accelZ(1)];
+
+<span class="comment">% Exit condition</span>
+effortThreshold = 3; <span class="comment">% torque in [Nm] on rotary joints</span>
+
+<span class="comment">% Move to random waypoints</span>
+cmd = CommandStruct();
+current = fbk.position;
+<span class="keyword">for</span> i = 1:10
+
+    <span class="comment">% Calculate trajectory to next waypoint</span>
+    traj = trajGen.newJointMove([current; next]);
+    current = next;
+
+    <span class="comment">% Execute trajectory</span>
+    t0 = tic();
+    t = toc(t0);
+    <span class="keyword">while</span> t &lt; traj.getDuration()
+        t = toc(t0);
+
+        <span class="comment">% React to something (e.g. position error or torque threshold)</span>
+        fbk = group.getNextFeedback();
+        <span class="keyword">if</span> abs(fbk.effort - fbk.effortCmd) &gt; effortThreshold
+            group.send(CommandStruct()); <span class="comment">% turn off commands</span>
+            error(<span class="string">'Reacting to something...'</span>);
+        <span class="keyword">end</span>
+
+        <span class="comment">% Get target state at current point in time</span>
+        [cmdPos, cmdVel, cmdAccel] = traj.getState(t);
+
+        <span class="comment">% Calculate compensatory efforts (torques/forces)</span>
+        gravCompEfforts = kin.getGravCompEfforts(fbk.position, gravityVec);
+        dynamicsCompEfforts = kin.getDynamicCompEfforts(fbk.position, <span class="keyword">...</span>
+            cmdPos,<span class="keyword">...</span>
+            cmdVel,<span class="keyword">...</span>
+            cmdAccel);
+
+        <span class="comment">% Command position/velocity</span>
+        cmd.position = cmdPos;
+        cmd.velocity = cmdVel;
+        cmd.effort = gravCompEfforts + dynamicsCompEfforts;
+        group.send(cmd);
+
+    <span class="keyword">end</span>
+
+<span class="keyword">end</span>
 </pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2017a</a><br></p></div><!--
 ##### SOURCE BEGIN #####
+%% HebiTrajectoryGenerator
 % This example shows howto use the HebiTrajectoryGenerator API to create
 % paths to smoothly move through waypoints.
-% 
-% Requirements:  MATLAB 2013b or higher
 %
-% Author:        Florian Enner
-% Created:       14 July, 2017
-% API:           hebi-matlab-1.0
+%%
+%
+% <html>
+% <table border=0>
+%   <tr><td>Created</td><td>July 14, 2017</td></tr>
+%   <tr><td>Last Update</td><td>Aug 22, 2017</td></tr>
+%   <tr><td>API Version</td><td>hebi-matlab-1.0-rc2</td></tr>
+%   <tr><td>Requirements</td><td>MATLAB 2013b or higher</td></tr>
+% </table>
+% </html>
 %
 % Copyright 2017 HEBI Robotics
 
@@ -204,7 +270,7 @@ group =
 % the kinematic configuration. The API however requires knowledge of 
 % HebiKinematics to access meta-data such as velocity limits. Thus, 
 % position and velocity control can be done with only knowledge of the
-% number of joints in a system. A full model of the system is however 
+% number of joints in a system. However, a full model of the system is 
 % required for
 %
 % * Torque control, i.e., converting joint accelerations to corresponding 
@@ -212,13 +278,13 @@ group =
 % * 'Linear'-type trajectories that move the end-effector in world
 %   coordinates
 
-%% Single Actuator Joint Trajectory
+%% Single Actuator Joint Trajectory (blocking)
 % The following exampe creates a trajectory through position waypoints  
 % for a single actuator. The time vector can be automatically determined
 % based on the joint limits. Alternatively the time can be set manually.
 %
 % * 'Duration' sets the total desired duration
-% * 'Time' sets the times at which each waypoint should be hit
+% * 'Time' sets a time vector at which each waypoint should be hit
 %
 % For more options please see our online documentation or the corresponding
 % help files.
@@ -250,16 +316,11 @@ legend position velocity acceleration waypoint
 xlabel('time [s]');
 ylabel('value [rad, rad/s, rad/s^2]');
 
-%% Moving a robot to random waypoints
+%% Moving a robot to random waypoints (blocking)
 % In addition to providing low-level access to the raw trajectory, we
 % provide convenience wrappers that simplify interactions with the 
-% HebiGroup and HebiKinematics APIs.
-%
-% 'moveJoint()' moves between waypoints and blocks until the trajectory is
-% executed.
-%
-% <<resources/2dof_RR_ik_xy.png>>
-%
+% HebiGroup and HebiKinematics APIs. For example, 'moveJoint' moves between 
+% waypoints and blocks until the trajectory has fully executed.
 
 % Setup 2 dof planar RR arm
 kin = HebiKinematics();
@@ -274,7 +335,7 @@ trajGen.setSpeedFactor(0.5);
 trajGen.setMinDuration(0.5);
 
 % Connect to modules (replace names with your own)
-group = HebiLookup.newGroupFromNames('2dof', {'base', 'knee'});
+group = HebiLookup.newGroupFromNames('arm', {'base', 'shoulder'});
 
 % Determine direction of gravity to compensate for gravitational effects
 fbk = group.getNextFeedback(); % assume fixed base
@@ -282,7 +343,7 @@ gravityVec = -[fbk.accelX(1) fbk.accelY(1) fbk.accelZ(1)];
 
 % Move to random waypoints
 current = fbk.position;
-for i = 1:20
+for i = 1:10
     
     next = (rand(size(current)) - 0.5) * pi/2; % max +/- pi/2 
     trajGen.moveJoint(group,      ... % target actuators
@@ -294,11 +355,86 @@ for i = 1:20
 end
 
 %%%
+%
+% <<resources/2dof_RR_ik_xy.png>>
+%
 
 % Display
 display(kin);
 display(trajGen);
 display(group);
+
+%% Moving a robot to random waypoints (non-blocking)
+% In some cases it is necessary to replan a trajectory and adapt to
+% environmental events while moving between waypoints. For example, a
+% robot may try to catch a moving target and needs to update the goal
+% waypoint. To accomodate these use cases we provide a non-blocking API
+% that lets users be in full control.
+
+% Setup 2 dof planar RR arm
+kin = HebiKinematics();
+kin.addBody('X5-4'); % base joint
+kin.addBody('X5-Link', 'ext', 0.35, 'twist', pi);
+kin.addBody('X5-1');
+kin.addBody('X5-Link', 'ext', 0.25, 'twist', pi);
+
+% Setup trajectory generator
+trajGen = HebiTrajectoryGenerator(kin);
+trajGen.setSpeedFactor(0.5);
+trajGen.setMinDuration(0.5);
+
+% Connect to modules (replace names with your own)
+group = HebiLookup.newGroupFromNames('arm', {'base', 'shoulder'});
+
+% Determine direction of gravity to compensate for gravitational effects
+fbk = group.getNextFeedback(); % assume fixed base
+gravityVec = -[fbk.accelX(1) fbk.accelY(1) fbk.accelZ(1)];
+
+% Exit condition
+effortThreshold = 3; % torque in [Nm] on rotary joints
+
+% Move to random waypoints
+cmd = CommandStruct();
+current = fbk.position;
+for i = 1:10
+    
+    % Calculate trajectory to next waypoint
+    traj = trajGen.newJointMove([current; next]);
+    current = next;
+    
+    % Execute trajectory
+    t0 = tic();
+    t = toc(t0);
+    while t < traj.getDuration()
+        t = toc(t0);
+        
+        % React to something (e.g. position error or torque threshold)
+        fbk = group.getNextFeedback();
+        if abs(fbk.effort - fbk.effortCmd) > effortThreshold
+            group.send(CommandStruct()); % turn off commands
+            error('Reacting to something...');
+        end
+        
+        % Get target state at current point in time
+        [cmdPos, cmdVel, cmdAccel] = traj.getState(t);
+        
+        % Calculate compensatory efforts (torques/forces)
+        gravCompEfforts = kin.getGravCompEfforts(fbk.position, gravityVec);
+        dynamicsCompEfforts = kin.getDynamicCompEfforts(fbk.position, ...
+            cmdPos,...
+            cmdVel,...
+            cmdAccel);
+        
+        % Command position/velocity
+        cmd.position = cmdPos;
+        cmd.velocity = cmdVel;
+        cmd.effort = gravCompEfforts + dynamicsCompEfforts;
+        group.send(cmd);
+        
+    end
+    
+end
+
 
 
 

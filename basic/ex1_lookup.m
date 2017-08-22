@@ -8,8 +8,8 @@
 % <html>
 % <table border=0>
 %   <tr><td>Created</td><td>July 13, 2017</td></tr>
-%   <tr><td>Last Update</td><td>July 26, 2017</td></tr>
-%   <tr><td>API Version</td><td>hebi-matlab-1.0</td></tr>
+%   <tr><td>Last Update</td><td>Aug 22, 2017</td></tr>
+%   <tr><td>API Version</td><td>hebi-matlab-1.0-rc2</td></tr>
 %   <tr><td>Requirements</td><td>MATLAB 2013b or higher</td></tr>
 % </table>
 % </html>
@@ -36,7 +36,7 @@ disp(HebiLookup);
 % can be modified freely via the Scope GUI.
 %
 % A common convention is that the family identifies the robot (e.g.
-% ' 2dof ') and that the name identifies the part (e.g. ' knee ').
+% ' Arm ') and that the name identifies the part (e.g. ' base ').
 %
 % * The device order of the resulting group will match the order of the
 %   specified names
@@ -46,8 +46,8 @@ disp(HebiLookup);
 %   devices will be added in alphabetical order
 
 % Select devices by their user-settable family and name
-family = '2dof';
-names = {'base', 'knee'};
+family = 'arm';
+names = {'base', 'shoulder', 'elbow'};
 group = HebiLookup.newGroupFromNames(family, names);
 display(group);
 
@@ -58,7 +58,7 @@ display(group);
 % * The resulting device order will match the order of the selection vector
 % * Wilcards are not supported
 
-% Select devices by their unique hardwre serial numbers
+% Select devices by their unique hardware serial numbers
 serials = {'X-00165', 'X-80040'};
 group = HebiLookup.newGroupFromSerialNumbers(serials);
 display(group);
@@ -73,7 +73,7 @@ display(group);
 %
 % * ' 1_base '
 % * ' 2_shoulder '
-% * ' 3_wrist '
+% * ' 3_elbow '
 %
 % Wildcards are supported
 

@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>ex3_command</title><meta name="generator" content="MATLAB 9.2"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2017-07-13"><meta name="DC.source" content="ex3_command.m"><style type="text/css">
+      --><title>HebiGroup - Command</title><meta name="generator" content="MATLAB 9.2"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2017-08-22"><meta name="DC.source" content="ex3_command.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -66,36 +66,34 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
 
 
-  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">Discovery (can be omitted)</a></li><li><a href="#3">Setup</a></li><li><a href="#4">Command zero-torque</a></li><li><a href="#5">Virtual Spring (closed-loop)</a></li><li><a href="#6">Sine Wave (open-loop)</a></li></ul></div><pre class="codeinput"><span class="comment">% This example shows howto use the HebiGroup API to send basic commands</span>
-<span class="comment">% and to create a virtual spring</span>
-<span class="comment">%</span>
-<span class="comment">% (hint: individual sections can be run using ctrl+enter)</span>
-<span class="comment">%</span>
-<span class="comment">% Requirements:  MATLAB 2013b or higher</span>
-<span class="comment">%</span>
-<span class="comment">% Author:        Florian Enner</span>
-<span class="comment">% Created:       13 July, 2017</span>
-<span class="comment">% API:           hebi-matlab-1.0</span>
-<span class="comment">%</span>
-<span class="comment">% Copyright 2017 HEBI Robotics</span>
-</pre><h2 id="2">Discovery (can be omitted)</h2><pre class="codeinput">disp(HebiLookup);
+  </style></head><body><div class="content"><h1>HebiGroup - Command</h1><!--introduction--><p>This example shows howto use the HebiGroup API to send basic commands and to create a closed loop virtual spring</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#2">Discovery (can be omitted)</a></li><li><a href="#3">Select devices and form a HebiGroup</a></li><li><a href="#4">Command zero-effort (open-loop)</a></li><li><a href="#5">Virtual Spring (closed-loop)</a></li><li><a href="#6">Sine Wave (open-loop)</a></li></ul></div><p>
+<table border=0>
+  <tr><td>Created</td><td>July 13, 2017</td></tr>
+  <tr><td>Last Update</td><td>Aug 22, 2017</td></tr>
+  <tr><td>API Version</td><td>hebi-matlab-1.0-rc2</td></tr>
+  <tr><td>Requirements</td><td>MATLAB 2013b or higher</td></tr>
+</table>
+</p><p>Copyright 2017 HEBI Robotics</p><h2 id="2">Discovery (can be omitted)</h2><p>First, we need to discover what devices are available on the network</p><pre class="codeinput"><span class="comment">% Show devices on the network</span>
+disp(HebiLookup);
 </pre><pre class="codeoutput"> &lt;a href="matlab:helpPopup HebiLookup"&gt;HebiLookup&lt;/a&gt; with properties:
 
-                  lookupAddresses: {'192.168.1.255'} [IPv4]
+                  lookupAddresses: {'192.168.88.255'} [IPv4]
                   lookupFrequency: 5 [Hz]
     initialGroupFeedbackFrequency: 100 [Hz]
       initialGroupCommandLifetime: 0.25 [s]
 
     Module  Family           Name             Serial Number  
     ------  ---------------  ---------------  ---------------
-    1       2dof             base             X-00134        
-    2       2dof             knee             X-00148        
-    3       CommsTest        X-00108          X-00108        
-    4       X5-9             X-00165          X-00165        
-    5       X8-3             X-80040          X-80040        
+    1       Arm              Base             X-80040        
+    2       Arm              Elbow            X-00134        
+    3       Arm              Shoulder         X-00165        
+    4       X5-1             X-00148          X-00148        
+    5       X5-4             X-00108          X-00108        
 
-</pre><h2 id="3">Setup</h2><pre class="codeinput">serials = <span class="string">'X-80040'</span>; <span class="comment">% Selection (modify to match your devices!)</span>
-group = HebiLookup.newGroupFromSerialNumbers(serials);
+</pre><h2 id="3">Select devices and form a HebiGroup</h2><p>After discovery we can create a group that allows us to communicate with selected modules. Note that the parameter needs to be changed to target devices that are on your network.</p><pre class="codeinput"><span class="comment">% Select a device</span>
+family = <span class="string">'*'</span>; <span class="comment">% any family</span>
+name = <span class="string">'X-00148'</span>; <span class="comment">% &lt;- modify to match the name of a device on your network!</span>
+group = HebiLookup.newGroupFromNames(family, name);
 disp(group);
 </pre><pre class="codeoutput"> &lt;a href="matlab:helpPopup HebiGroup"&gt;HebiGroup&lt;/a&gt; with properties:
 
@@ -106,21 +104,21 @@ disp(group);
 
     Module  Family           Name             Serial Number  
     ------  ---------------  ---------------  ---------------
-    1       X8-3             X-80040          X-80040        
+    1       X5-1             X-00148          X-00148        
 
-</pre><h2 id="4">Command zero-torque</h2><p>The below example keeps the module in zero-torque mode in order to be actively backdriveable.</p><div><ul><li>The command needs to be contiuously re-sent to prevent the   command lifetime from timing out.</li><li>The pause limits the rate and prevents busy spinning. This is not   necessary for closed-loop control as the feedback rate is already   limiting.</li></ul></div><pre class="codeinput">cmd = CommandStruct();
+</pre><h2 id="4">Command zero-effort (open-loop)</h2><p>The below example keeps the module in zero-effort (on rotary modules zero-torque) mode in order to be actively backdriveable.</p><div><ul><li>The command needs to be contiuously re-sent to prevent the   command lifetime from timing out.</li><li>The pause limits the rate and prevents busy spinning. This is not   necessary for closed-loop control as the loop is already limited by   the feedback rate.</li></ul></div><pre class="codeinput">cmd = CommandStruct();
 t0 = tic();
 <span class="keyword">while</span> toc(t0) &lt; 5
-   cmd.torque = 0;
+   cmd.effort = 0;
    group.send(cmd);
    pause(0.01);
 <span class="keyword">end</span>
-</pre><h2 id="5">Virtual Spring (closed-loop)</h2><p>This example shows a closed-loop controller that implements a virtual spring that controls torque to drive the output towards the origin.</p><pre class="codeinput">stiffness = 1; <span class="comment">% Nm / rad</span>
+</pre><h2 id="5">Virtual Spring (closed-loop)</h2><p>This example shows a closed-loop controller that implements a virtual spring that controls effort (torque) to drive the output towards the origin.</p><pre class="codeinput">stiffness = 1; <span class="comment">% Nm / rad</span>
 cmd = CommandStruct();
 t0 = tic();
 <span class="keyword">while</span> toc(t0) &lt; 5
     fbk = group.getNextFeedback();
-    cmd.torque = -stiffness * fbk.position; <span class="comment">% Hooke's law: F = -k * x</span>
+    cmd.effort = -stiffness * fbk.position; <span class="comment">% Hooke's law: F = -k * x</span>
     group.send(cmd);
 <span class="keyword">end</span>
 </pre><h2 id="6">Sine Wave (open-loop)</h2><p>This example shows an open-loop controller commanding a 1 Hz sine wave using simultaneous position and velocity control.</p><pre class="codeinput">cmd = CommandStruct();
@@ -136,54 +134,67 @@ t = 0;
 <span class="keyword">end</span>
 </pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2017a</a><br></p></div><!--
 ##### SOURCE BEGIN #####
-% This example shows howto use the HebiGroup API to send basic commands
-% and to create a virtual spring
+%% HebiGroup - Command
+% This example shows howto use the HebiGroup API to send basic commands 
+% and to create a closed loop virtual spring
 %
-% (hint: individual sections can be run using ctrl+enter)
-% 
-% Requirements:  MATLAB 2013b or higher
+%%
 %
-% Author:        Florian Enner
-% Created:       13 July, 2017
-% API:           hebi-matlab-1.0
+% <html>
+% <table border=0>
+%   <tr><td>Created</td><td>July 13, 2017</td></tr>
+%   <tr><td>Last Update</td><td>Aug 22, 2017</td></tr>
+%   <tr><td>API Version</td><td>hebi-matlab-1.0-rc2</td></tr>
+%   <tr><td>Requirements</td><td>MATLAB 2013b or higher</td></tr>
+% </table>
+% </html>
 %
 % Copyright 2017 HEBI Robotics
 
 %% Discovery (can be omitted)
+% First, we need to discover what devices are available on the network
+
+% Show devices on the network
 disp(HebiLookup);
 
-%% Setup
-serials = 'X-80040'; % Selection (modify to match your devices!)
-group = HebiLookup.newGroupFromSerialNumbers(serials);
+%% Select devices and form a HebiGroup
+% After discovery we can create a group that allows us to communicate with
+% selected modules. Note that the parameter needs to be changed to target
+% devices that are on your network.
+
+% Select a device 
+family = '*'; % any family
+name = 'X-00148'; % <- modify to match the name of a device on your network!
+group = HebiLookup.newGroupFromNames(family, name); 
 disp(group);
 
-%% Command zero-torque
-% The below example keeps the module in zero-torque mode in order to be
-% actively backdriveable. 
+%% Command zero-effort (open-loop)
+% The below example keeps the module in zero-effort (on rotary modules 
+% zero-torque) mode in order to be actively backdriveable.
 %
 % * The command needs to be contiuously re-sent to prevent the 
 %   command lifetime from timing out.
 % * The pause limits the rate and prevents busy spinning. This is not
-%   necessary for closed-loop control as the feedback rate is already 
-%   limiting.
+%   necessary for closed-loop control as the loop is already limited by
+%   the feedback rate.
 cmd = CommandStruct();
 t0 = tic();
 while toc(t0) < 5
-   cmd.torque = 0;
+   cmd.effort = 0;
    group.send(cmd);
    pause(0.01);
 end
 
 %% Virtual Spring (closed-loop)
 % This example shows a closed-loop controller that implements a 
-% virtual spring that controls torque to drive the output towards the 
-% origin.
+% virtual spring that controls effort (torque) to drive the output 
+% towards the origin.
 stiffness = 1; % Nm / rad
 cmd = CommandStruct();
 t0 = tic();
 while toc(t0) < 5
     fbk = group.getNextFeedback();
-    cmd.torque = -stiffness * fbk.position; % Hooke's law: F = -k * x
+    cmd.effort = -stiffness * fbk.position; % Hooke's law: F = -k * x
     group.send(cmd);
 end
 

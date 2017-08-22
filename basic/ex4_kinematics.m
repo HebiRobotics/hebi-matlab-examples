@@ -1,15 +1,15 @@
 %% HebiKinematics
 % This example shows howto use the HebiKinematics API to calculate forward
-% kinematics, Jacobians, as well as torques to compensate for accelerations
-% due to gravity and the dynamics.
+% kinematics, Jacobians, as well as forces and torques to compensate
+% for accelerations due to gravity and the dynamics.
 %
 %%
 %
 % <html>
 % <table border=0>
 %   <tr><td>Created</td><td>July 13, 2017</td></tr>
-%   <tr><td>Last Update</td><td>July 26, 2017</td></tr>
-%   <tr><td>API Version</td><td>hebi-matlab-1.0</td></tr>
+%   <tr><td>Last Update</td><td>Aug 22, 2017</td></tr>
+%   <tr><td>API Version</td><td>hebi-matlab-1.0-rc2</td></tr>
 %   <tr><td>Requirements</td><td>MATLAB 2013b or higher</td></tr>
 % </table>
 % </html>
@@ -29,7 +29,7 @@
 % <<resources/5dof_fk.png>>
 %
 
-% Setup
+% Setup 5dof arm
 kin = HebiKinematics();
 kin.addBody('X5-4'); % base joint
 kin.addBody('X5-HeavyBracket', 'mount', 'right-inside');
@@ -75,15 +75,16 @@ J_endEffector = kin.getJacobianEndEffector(position);
 display(J_endEffector);
 
 %% Gravity Compensation
-% There are many use cases such as teach-repeat that benefit from an arm
+% There are many use cases, such as teach-repeat, that benefit from an arm
 % being in a compliant 'zero-gravity' mode. The Kinematics API provides
-% convenience methods that help with calculating compensatory torques.
+% convenience methods that help with calculating the required forces and 
+% torques to counter gravity.
 
-% Calculate compensatory torques at position zero w/ gravity pointing in
-% the negative z direction
+% Calculate compensatory torques/forces at position zero w/ gravity 
+% pointing in the negative z direction
 gravityVec = [0 0 -1];
 position = zeros(1, kin.getNumDoF);
-gravCompTorques = kin.getGravCompTorques(position, gravityVec);
+gravCompEfforts = kin.getGravCompEfforts(position, gravityVec);
 
 %%%
 % The following example continuously compensates for gravity on a 2 dof
@@ -101,7 +102,7 @@ kin.addBody('X5-1');
 kin.addBody('X5-Link', 'ext', 0.25, 'twist', pi);
 
 % Setup the group that corresponds to the cnfiguration
-group = HebiLookup.newGroupFromNames('2dof', {'base', 'knee'});
+group = HebiLookup.newGroupFromNames('arm', {'base', 'shoulder'});
 
 % Determine the direction of gravity based on the built-in IMU 
 % (assumes fixed base)
@@ -113,20 +114,25 @@ t0 = tic();
 cmd = CommandStruct();
 while toc(t0) < 5
     fbk = group.getNextFeedback();
-    cmd.torque = kin.getGravCompTorques(fbk.position, gravityVec);
+    cmd.effort = kin.getGravCompEfforts(fbk.position, gravityVec);
     group.send(cmd);
 end
 
 %% Dynamics Compensation
 % Similarly to gravity compensation, HebiKinematics also provides a way to
-% calculate torques to compensate for the dynamics.
+% calculate forces and torques to compensate for the joint accelerations 
+% due to dynamic motions.
 %
-% It does require knowledge of positions, velocities, and accelerations at
-% a given point, so it is primarily useful when being combined with a
+% This does require knowledge of positions, velocities, and accelerations
+% at a given point, so it is primarily useful when being combined with a
 % trajectory, such as provided by the HebiTrajectory API (later example).
+%
+% The dynamics compensation does not include the torques/forces required
+% to compensate for gravity. Thus, getDynamicCompEfforts() is typically
+% used in combination with getGravCompEfforts().
 
 % Create sample sinusoidal motion
-time = 0; 
+time = 0.2; 
 freq = 1 * (2*pi);  % 1 Hz 
 amp = 1; 
 allDoF = ones(1,group.getNumModules);
@@ -137,7 +143,7 @@ cmdVelocity = freq * amp * cos( freq * time ) * allDoF;
 cmdAcceleration = -freq^2 * amp * sin( freq * time ) * allDoF;
 
 % Calculate torques at sampled point within trajectory
-torques = kin.getDynamicCompTorques(...
+efforts = kin.getDynamicCompEfforts(...
     fbk.position, ...
     cmdPosition, ...
     cmdVelocity, ...
@@ -147,5 +153,5 @@ torques = kin.getDynamicCompTorques(...
 display(cmdPosition);
 display(cmdVelocity);
 display(cmdAcceleration);
-display(torques);
+display(efforts);
 

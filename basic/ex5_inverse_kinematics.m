@@ -1,11 +1,17 @@
+%% HebiKinematics - IK
 % This example shows howto use the HebiKinematics API to calculate inverse
 % kinematics.
-% 
-% Requirements:  MATLAB 2013b or higher
 %
-% Author:        Florian Enner
-% Created:       14 July, 2017
-% API:           hebi-matlab-1.0
+%%
+%
+% <html>
+% <table border=0>
+%   <tr><td>Created</td><td>July 14, 2017</td></tr>
+%   <tr><td>Last Update</td><td>Aug 22, 2017</td></tr>
+%   <tr><td>API Version</td><td>hebi-matlab-1.0-rc2</td></tr>
+%   <tr><td>Requirements</td><td>MATLAB 2013b or higher</td></tr>
+% </table>
+% </html>
 %
 % Copyright 2017 HEBI Robotics
 
@@ -18,7 +24,7 @@
 % The resulting positions are calculated using a numerical IK approach that
 % is independent of the configuration. Please be aware of the following:
 %
-% * There are no collision checks
+% * There are currently no collision checks
 % * A result will always be returned, even if the criteria have not been
 %   matched. It is up to the user to check whether the result is
 %   satisfactory.
@@ -34,10 +40,10 @@
 
 %% IK: XYZ Position Target
 % The 'xyz' target finds angles that match the corresponding end effector
-% position. It ignores the end effector orientation. It always expects a
+% position while ignoring the end effector orientation. It always expects a
 % 1x3 vector, but unused axes can be omitted by setting the desired value
-% to nan. This is useful for e.g. planar robots that are constrained in one
-% axis.
+% to nan. This is useful for, e.g., planar robots that are constrained in 
+% one axis.
 
 % Setup 2 dof planar RR arm
 kin = HebiKinematics();

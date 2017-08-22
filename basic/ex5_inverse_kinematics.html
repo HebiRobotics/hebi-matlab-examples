@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>ex5_ik</title><meta name="generator" content="MATLAB 9.2"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2017-07-14"><meta name="DC.source" content="ex5_ik.m"><style type="text/css">
+      --><title>HebiKinematics - IK</title><meta name="generator" content="MATLAB 9.2"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2017-08-22"><meta name="DC.source" content="ex5_inverse_kinematics.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -66,17 +66,14 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
 
 
-  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">General</a></li><li><a href="#3">IK: XYZ Position Target</a></li><li><a href="#5">IK: SO3 Rotation Target</a></li><li><a href="#7">IK: Tip Axis Target</a></li><li><a href="#9">Combining multiple targets</a></li></ul></div><pre class="codeinput"><span class="comment">% This example shows howto use the HebiKinematics API to calculate inverse</span>
-<span class="comment">% kinematics.</span>
-<span class="comment">%</span>
-<span class="comment">% Requirements:  MATLAB 2013b or higher</span>
-<span class="comment">%</span>
-<span class="comment">% Author:        Florian Enner</span>
-<span class="comment">% Created:       14 July, 2017</span>
-<span class="comment">% API:           hebi-matlab-1.0</span>
-<span class="comment">%</span>
-<span class="comment">% Copyright 2017 HEBI Robotics</span>
-</pre><h2 id="2">General</h2><p>The inverse kinematics method computes the joint positions associated to a desired end-effector configuration. The end effector is assumed to be the last body in the kinematic chain. There are a variety of optimization criteria that can be combined depending on the application.</p><p>The resulting positions are calculated using a numerical IK approach that is independent of the configuration. Please be aware of the following:</p><div><ul><li>There are no collision checks</li><li>A result will always be returned, even if the criteria have not been   matched. It is up to the user to check whether the result is   satisfactory.</li><li>The hardware may not have enough degrees of freedom to provide a valid   solution, e.g., a 2 dof arm can't reach a 6 dof target</li></ul></div><p>When working with real hardware it is generally a good idea to seed the optimization with 'reasonable' initial positions such as the previous results or the current position feedback.</p><p>For more information please consult our online documentation and the help files.</p><h2 id="3">IK: XYZ Position Target</h2><p>The 'xyz' target finds angles that match the corresponding end effector position. It ignores the end effector orientation. It always expects a 1x3 vector, but unused axes can be omitted by setting the desired value to nan. This is useful for e.g. planar robots that are constrained in one axis.</p><pre class="codeinput"><span class="comment">% Setup 2 dof planar RR arm</span>
+  </style></head><body><div class="content"><h1>HebiKinematics - IK</h1><!--introduction--><p>This example shows howto use the HebiKinematics API to calculate inverse kinematics.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#2">General</a></li><li><a href="#3">IK: XYZ Position Target</a></li><li><a href="#5">IK: SO3 Rotation Target</a></li><li><a href="#7">IK: Tip Axis Target</a></li><li><a href="#9">Combining multiple targets</a></li></ul></div><p>
+<table border=0>
+  <tr><td>Created</td><td>July 14, 2017</td></tr>
+  <tr><td>Last Update</td><td>Aug 22, 2017</td></tr>
+  <tr><td>API Version</td><td>hebi-matlab-1.0-rc2</td></tr>
+  <tr><td>Requirements</td><td>MATLAB 2013b or higher</td></tr>
+</table>
+</p><p>Copyright 2017 HEBI Robotics</p><h2 id="2">General</h2><p>The inverse kinematics method computes the joint positions associated to a desired end-effector configuration. The end effector is assumed to be the last body in the kinematic chain. There are a variety of optimization criteria that can be combined depending on the application.</p><p>The resulting positions are calculated using a numerical IK approach that is independent of the configuration. Please be aware of the following:</p><div><ul><li>There are currently no collision checks</li><li>A result will always be returned, even if the criteria have not been   matched. It is up to the user to check whether the result is   satisfactory.</li><li>The hardware may not have enough degrees of freedom to provide a valid   solution, e.g., a 2 dof arm can't reach a 6 dof target</li></ul></div><p>When working with real hardware it is generally a good idea to seed the optimization with 'reasonable' initial positions such as the previous results or the current position feedback.</p><p>For more information please consult our online documentation and the help files.</p><h2 id="3">IK: XYZ Position Target</h2><p>The 'xyz' target finds angles that match the corresponding end effector position while ignoring the end effector orientation. It always expects a 1x3 vector, but unused axes can be omitted by setting the desired value to nan. This is useful for, e.g., planar robots that are constrained in one axis.</p><pre class="codeinput"><span class="comment">% Setup 2 dof planar RR arm</span>
 kin = HebiKinematics();
 kin.addBody(<span class="string">'X5-4'</span>); <span class="comment">% base joint</span>
 kin.addBody(<span class="string">'X5-Link'</span>, <span class="string">'ext'</span>, 0.35, <span class="string">'twist'</span>, pi);
@@ -100,7 +97,7 @@ desiredXyz =
 
 ikAngles =
 
-   -0.4037   -1.6567
+   -0.4037   -1.6566
 
 
 actualXyz =
@@ -173,14 +170,14 @@ desiredAxis =
 
 ikAngles =
 
-   -0.0000    0.7768   -0.7768         0
+   -0.0000    0.7854   -0.7854         0
 
 
 endEffector =
 
-    0.0170         0    1.0000    0.2520
-         0   -1.0000         0    0.0620
-    1.0000         0   -0.0170    0.2600
+         0         0    1.0000    0.2510
+         0   -1.0000         0    0.0630
+    1.0000         0         0    0.2630
          0         0         0    1.0000
 
 </pre><h2 id="9">Combining multiple targets</h2><p>Targets can be combined as required for the application.</p><pre class="codeinput"><span class="comment">% Setup 5-DoF Arm</span>
@@ -229,26 +226,32 @@ desiredAxis =
 
 ikAngles =
 
-    0.1757    0.8420    2.2609    2.9900         0
+    0.0093   -0.7384   -2.2484    0.0608         0
 
 
 endEffector =
 
-         0   -0.1750   -0.9850    0.2020
-         0    0.9850   -0.1750   -0.0130
+         0   -0.0090   -1.0000    0.2000
+         0    1.0000   -0.0090   -0.0470
     1.0000         0         0    0.1000
          0         0         0    1.0000
 
 </pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2017a</a><br></p></div><!--
 ##### SOURCE BEGIN #####
+%% HebiKinematics - IK
 % This example shows howto use the HebiKinematics API to calculate inverse
 % kinematics.
-% 
-% Requirements:  MATLAB 2013b or higher
 %
-% Author:        Florian Enner
-% Created:       14 July, 2017
-% API:           hebi-matlab-1.0
+%%
+%
+% <html>
+% <table border=0>
+%   <tr><td>Created</td><td>July 14, 2017</td></tr>
+%   <tr><td>Last Update</td><td>Aug 22, 2017</td></tr>
+%   <tr><td>API Version</td><td>hebi-matlab-1.0-rc2</td></tr>
+%   <tr><td>Requirements</td><td>MATLAB 2013b or higher</td></tr>
+% </table>
+% </html>
 %
 % Copyright 2017 HEBI Robotics
 
@@ -261,7 +264,7 @@ endEffector =
 % The resulting positions are calculated using a numerical IK approach that
 % is independent of the configuration. Please be aware of the following:
 %
-% * There are no collision checks
+% * There are currently no collision checks
 % * A result will always be returned, even if the criteria have not been
 %   matched. It is up to the user to check whether the result is
 %   satisfactory.
@@ -277,10 +280,10 @@ endEffector =
 
 %% IK: XYZ Position Target
 % The 'xyz' target finds angles that match the corresponding end effector
-% position. It ignores the end effector orientation. It always expects a
+% position while ignoring the end effector orientation. It always expects a
 % 1x3 vector, but unused axes can be omitted by setting the desired value
-% to nan. This is useful for e.g. planar robots that are constrained in one
-% axis.
+% to nan. This is useful for, e.g., planar robots that are constrained in 
+% one axis.
 
 % Setup 2 dof planar RR arm
 kin = HebiKinematics();

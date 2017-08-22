@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>HebiKinematics</title><meta name="generator" content="MATLAB 9.2"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2017-07-26"><meta name="DC.source" content="ex4_kinematics.m"><style type="text/css">
+      --><title>HebiKinematics</title><meta name="generator" content="MATLAB 9.2"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2017-08-22"><meta name="DC.source" content="ex4_kinematics.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -66,14 +66,14 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
 
 
-  </style></head><body><div class="content"><h1>HebiKinematics</h1><!--introduction--><p>This example shows howto use the HebiKinematics API to calculate forward kinematics, Jacobians, as well as torques to compensate for accelerations due to gravity and the dynamics.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#2">Define kinematic structure using HEBI components</a></li><li><a href="#3">Calculate Forward Kinematics</a></li><li><a href="#4">Calculate Jacobian</a></li><li><a href="#5">Gravity Compensation</a></li><li><a href="#7">Dynamics Compensation</a></li></ul></div><p>
+  </style></head><body><div class="content"><h1>HebiKinematics</h1><!--introduction--><p>This example shows howto use the HebiKinematics API to calculate forward kinematics, Jacobians, as well as forces and torques to compensate for accelerations due to gravity and the dynamics.</p><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#2">Define kinematic structure using HEBI components</a></li><li><a href="#3">Calculate Forward Kinematics</a></li><li><a href="#4">Calculate Jacobian</a></li><li><a href="#5">Gravity Compensation</a></li><li><a href="#7">Dynamics Compensation</a></li></ul></div><p>
 <table border=0>
   <tr><td>Created</td><td>July 13, 2017</td></tr>
-  <tr><td>Last Update</td><td>July 26, 2017</td></tr>
-  <tr><td>API Version</td><td>hebi-matlab-1.0</td></tr>
+  <tr><td>Last Update</td><td>Aug 22, 2017</td></tr>
+  <tr><td>API Version</td><td>hebi-matlab-1.0-rc2</td></tr>
   <tr><td>Requirements</td><td>MATLAB 2013b or higher</td></tr>
 </table>
-</p><p>Copyright 2017 HEBI Robotics</p><h2 id="2">Define kinematic structure using HEBI components</h2><p>The addBody method creates a serial chain of bodies that describe the kinematic relation of a robot. A body can be a rigid link or a dynamic element. The first body represents the base and the last body represents the end-effector.</p><p>The following code creates a representation of the rendered 5-DoF arm shown below. For more information on available bodies, please consult the help files and/or the online documentation at <a href="http://docs.hebi.us">http://docs.hebi.us</a>.</p><p><img vspace="5" hspace="5" src="resources/5dof_fk.png" alt=""> </p><pre class="codeinput"><span class="comment">% Setup</span>
+</p><p>Copyright 2017 HEBI Robotics</p><h2 id="2">Define kinematic structure using HEBI components</h2><p>The addBody method creates a serial chain of bodies that describe the kinematic relation of a robot. A body can be a rigid link or a dynamic element. The first body represents the base and the last body represents the end-effector.</p><p>The following code creates a representation of the rendered 5-DoF arm shown below. For more information on available bodies, please consult the help files and/or the online documentation at <a href="http://docs.hebi.us">http://docs.hebi.us</a>.</p><p><img vspace="5" hspace="5" src="resources/5dof_fk.png" alt=""> </p><pre class="codeinput"><span class="comment">% Setup 5dof arm</span>
 kin = HebiKinematics();
 kin.addBody(<span class="string">'X5-4'</span>); <span class="comment">% base joint</span>
 kin.addBody(<span class="string">'X5-HeavyBracket'</span>, <span class="string">'mount'</span>, <span class="string">'right-inside'</span>);
@@ -122,14 +122,14 @@ display(endEffector);
 </pre><pre class="codeoutput">
 position =
 
-    0.8407    0.2543    0.8143    0.2435    0.9293
+    0.6557    0.0357    0.8491    0.9340    0.6787
 
 
 endEffector =
 
-   -0.2177   -0.9537    0.2076    0.4187
-    0.9581   -0.1682    0.2319    0.3950
-   -0.1862    0.2493    0.9503    0.1117
+    0.2296   -0.9686   -0.0953    0.4359
+    0.9688    0.2369   -0.0733    0.2741
+    0.0936   -0.0755    0.9927   -0.0096
          0         0         0    1.0000
 
 </pre><h2 id="4">Calculate Jacobian</h2><p>The calls to get the Jacobian work the same way as the forward kinematics.</p><pre class="codeinput"><span class="comment">% 6x numDoF x numBodies matrix</span>
@@ -141,18 +141,18 @@ display(J_endEffector);
 </pre><pre class="codeoutput">
 J_endEffector =
 
-   -0.3950   -0.0171   -0.0416   -0.0469         0
-    0.4187   -0.0191   -0.0465   -0.0524         0
-         0    0.5736   -0.2349    0.0230         0
-    0.0000    0.7451   -0.7451    0.7451    0.2076
-    0.0000   -0.6669    0.6669   -0.6669    0.2319
-    1.0000   -0.0000   -0.0000    0.0000    0.9503
+   -0.2741    0.0758   -0.0857   -0.0583         0
+    0.4359    0.0583   -0.0659   -0.0448         0
+         0    0.5126   -0.1628   -0.0089         0
+    0.0000    0.6097   -0.6097    0.6097   -0.0953
+   -0.0000   -0.7926    0.7926   -0.7926   -0.0733
+    1.0000    0.0000    0.0000    0.0000    0.9927
 
-</pre><h2 id="5">Gravity Compensation</h2><p>There are many use cases such as teach-repeat that benefit from an arm being in a compliant 'zero-gravity' mode. The Kinematics API provides convenience methods that help with calculating compensatory torques.</p><pre class="codeinput"><span class="comment">% Calculate compensatory torques at position zero w/ gravity pointing in</span>
-<span class="comment">% the negative z direction</span>
+</pre><h2 id="5">Gravity Compensation</h2><p>There are many use cases, such as teach-repeat, that benefit from an arm being in a compliant 'zero-gravity' mode. The Kinematics API provides convenience methods that help with calculating the required forces and torques to counter gravity.</p><pre class="codeinput"><span class="comment">% Calculate compensatory torques/forces at position zero w/ gravity</span>
+<span class="comment">% pointing in the negative z direction</span>
 gravityVec = [0 0 -1];
 position = zeros(1, kin.getNumDoF);
-gravCompTorques = kin.getGravCompTorques(position, gravityVec);
+gravCompEfforts = kin.getGravCompEfforts(position, gravityVec);
 </pre><p>The following example continuously compensates for gravity on a 2 dof arm. It works with any serial chain robot configuration provided that the actuators in the group match the kinematic configuration.</p><p><img vspace="5" hspace="5" src="resources/2dof_RR_ik_xy.png" alt=""> </p><pre class="codeinput"><span class="comment">% Setup 2 dof planar RR arm (could be any number of DoF)</span>
 kin = HebiKinematics();
 kin.addBody(<span class="string">'X5-4'</span>); <span class="comment">% base joint</span>
@@ -161,7 +161,7 @@ kin.addBody(<span class="string">'X5-1'</span>);
 kin.addBody(<span class="string">'X5-Link'</span>, <span class="string">'ext'</span>, 0.25, <span class="string">'twist'</span>, pi);
 
 <span class="comment">% Setup the group that corresponds to the cnfiguration</span>
-group = HebiLookup.newGroupFromNames(<span class="string">'2dof'</span>, {<span class="string">'base'</span>, <span class="string">'knee'</span>});
+group = HebiLookup.newGroupFromNames(<span class="string">'arm'</span>, {<span class="string">'base'</span>, <span class="string">'shoulder'</span>});
 
 <span class="comment">% Determine the direction of gravity based on the built-in IMU</span>
 <span class="comment">% (assumes fixed base)</span>
@@ -173,11 +173,11 @@ t0 = tic();
 cmd = CommandStruct();
 <span class="keyword">while</span> toc(t0) &lt; 5
     fbk = group.getNextFeedback();
-    cmd.torque = kin.getGravCompTorques(fbk.position, gravityVec);
+    cmd.effort = kin.getGravCompEfforts(fbk.position, gravityVec);
     group.send(cmd);
 <span class="keyword">end</span>
-</pre><h2 id="7">Dynamics Compensation</h2><p>Similarly to gravity compensation, HebiKinematics also provides a way to calculate torques to compensate for the dynamics.</p><p>It does require knowledge of positions, velocities, and accelerations at a given point, so it is primarily useful when being combined with a trajectory, such as provided by the HebiTrajectory API (later example).</p><pre class="codeinput"><span class="comment">% Create sample sinusoidal motion</span>
-time = 0;
+</pre><h2 id="7">Dynamics Compensation</h2><p>Similarly to gravity compensation, HebiKinematics also provides a way to calculate forces and torques to compensate for the joint accelerations due to dynamic motions.</p><p>This does require knowledge of positions, velocities, and accelerations at a given point, so it is primarily useful when being combined with a trajectory, such as provided by the HebiTrajectory API (later example).</p><p>The dynamics compensation does not include the torques/forces required to compensate for gravity. Thus, getDynamicCompEfforts() is typically used in combination with getGravCompEfforts().</p><pre class="codeinput"><span class="comment">% Create sample sinusoidal motion</span>
+time = 0.2;
 freq = 1 * (2*pi);  <span class="comment">% 1 Hz</span>
 amp = 1;
 allDoF = ones(1,group.getNumModules);
@@ -188,7 +188,7 @@ cmdVelocity = freq * amp * cos( freq * time ) * allDoF;
 cmdAcceleration = -freq^2 * amp * sin( freq * time ) * allDoF;
 
 <span class="comment">% Calculate torques at sampled point within trajectory</span>
-torques = kin.getDynamicCompTorques(<span class="keyword">...</span>
+efforts = kin.getDynamicCompEfforts(<span class="keyword">...</span>
     fbk.position, <span class="keyword">...</span>
     cmdPosition, <span class="keyword">...</span>
     cmdVelocity, <span class="keyword">...</span>
@@ -198,41 +198,41 @@ torques = kin.getDynamicCompTorques(<span class="keyword">...</span>
 display(cmdPosition);
 display(cmdVelocity);
 display(cmdAcceleration);
-display(torques);
+display(efforts);
 </pre><pre class="codeoutput">
 cmdPosition =
 
-     0     0
+    0.9511    0.9511
 
 
 cmdVelocity =
 
-    6.2832    6.2832
+    1.9416    1.9416
 
 
 cmdAcceleration =
 
-     0     0
+  -37.5462  -37.5462
 
 
-torques =
+efforts =
 
-   -0.8761    0.2892
+   -3.7878    0.4938
 
 </pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2017a</a><br></p></div><!--
 ##### SOURCE BEGIN #####
 %% HebiKinematics
 % This example shows howto use the HebiKinematics API to calculate forward
-% kinematics, Jacobians, as well as torques to compensate for accelerations
-% due to gravity and the dynamics.
+% kinematics, Jacobians, as well as forces and torques to compensate
+% for accelerations due to gravity and the dynamics.
 %
 %%
 %
 % <html>
 % <table border=0>
 %   <tr><td>Created</td><td>July 13, 2017</td></tr>
-%   <tr><td>Last Update</td><td>July 26, 2017</td></tr>
-%   <tr><td>API Version</td><td>hebi-matlab-1.0</td></tr>
+%   <tr><td>Last Update</td><td>Aug 22, 2017</td></tr>
+%   <tr><td>API Version</td><td>hebi-matlab-1.0-rc2</td></tr>
 %   <tr><td>Requirements</td><td>MATLAB 2013b or higher</td></tr>
 % </table>
 % </html>
@@ -252,7 +252,7 @@ torques =
 % <<resources/5dof_fk.png>>
 %
 
-% Setup
+% Setup 5dof arm
 kin = HebiKinematics();
 kin.addBody('X5-4'); % base joint
 kin.addBody('X5-HeavyBracket', 'mount', 'right-inside');
@@ -298,15 +298,16 @@ J_endEffector = kin.getJacobianEndEffector(position);
 display(J_endEffector);
 
 %% Gravity Compensation
-% There are many use cases such as teach-repeat that benefit from an arm
+% There are many use cases, such as teach-repeat, that benefit from an arm
 % being in a compliant 'zero-gravity' mode. The Kinematics API provides
-% convenience methods that help with calculating compensatory torques.
+% convenience methods that help with calculating the required forces and 
+% torques to counter gravity.
 
-% Calculate compensatory torques at position zero w/ gravity pointing in
-% the negative z direction
+% Calculate compensatory torques/forces at position zero w/ gravity 
+% pointing in the negative z direction
 gravityVec = [0 0 -1];
 position = zeros(1, kin.getNumDoF);
-gravCompTorques = kin.getGravCompTorques(position, gravityVec);
+gravCompEfforts = kin.getGravCompEfforts(position, gravityVec);
 
 %%%
 % The following example continuously compensates for gravity on a 2 dof
@@ -324,7 +325,7 @@ kin.addBody('X5-1');
 kin.addBody('X5-Link', 'ext', 0.25, 'twist', pi);
 
 % Setup the group that corresponds to the cnfiguration
-group = HebiLookup.newGroupFromNames('2dof', {'base', 'knee'});
+group = HebiLookup.newGroupFromNames('arm', {'base', 'shoulder'});
 
 % Determine the direction of gravity based on the built-in IMU 
 % (assumes fixed base)
@@ -336,20 +337,25 @@ t0 = tic();
 cmd = CommandStruct();
 while toc(t0) < 5
     fbk = group.getNextFeedback();
-    cmd.torque = kin.getGravCompTorques(fbk.position, gravityVec);
+    cmd.effort = kin.getGravCompEfforts(fbk.position, gravityVec);
     group.send(cmd);
 end
 
 %% Dynamics Compensation
 % Similarly to gravity compensation, HebiKinematics also provides a way to
-% calculate torques to compensate for the dynamics.
+% calculate forces and torques to compensate for the joint accelerations 
+% due to dynamic motions.
 %
-% It does require knowledge of positions, velocities, and accelerations at
-% a given point, so it is primarily useful when being combined with a
+% This does require knowledge of positions, velocities, and accelerations
+% at a given point, so it is primarily useful when being combined with a
 % trajectory, such as provided by the HebiTrajectory API (later example).
+%
+% The dynamics compensation does not include the torques/forces required
+% to compensate for gravity. Thus, getDynamicCompEfforts() is typically
+% used in combination with getGravCompEfforts().
 
 % Create sample sinusoidal motion
-time = 0; 
+time = 0.2; 
 freq = 1 * (2*pi);  % 1 Hz 
 amp = 1; 
 allDoF = ones(1,group.getNumModules);
@@ -360,7 +366,7 @@ cmdVelocity = freq * amp * cos( freq * time ) * allDoF;
 cmdAcceleration = -freq^2 * amp * sin( freq * time ) * allDoF;
 
 % Calculate torques at sampled point within trajectory
-torques = kin.getDynamicCompTorques(...
+efforts = kin.getDynamicCompEfforts(...
     fbk.position, ...
     cmdPosition, ...
     cmdVelocity, ...
@@ -370,7 +376,7 @@ torques = kin.getDynamicCompTorques(...
 display(cmdPosition);
 display(cmdVelocity);
 display(cmdAcceleration);
-display(torques);
+display(efforts);
 
 
 ##### SOURCE END #####
