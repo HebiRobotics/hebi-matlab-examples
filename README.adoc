@@ -2,7 +2,7 @@
 
 This repository contains examples to go with the http://docs.hebi.us[online documentation] that help to get started with the HEBI Robotics APIs for MATLAB. Note that the scripts use actuators that we used for testing, so you will need to change any naming to match your own actuators.
 
-*API Version: 1.0*
+*API Version: 1.0* (rev >= 1908)
 
 ## Setup
 
@@ -21,7 +21,7 @@ addpath([pwd '/hebi']);
 This folder contains examples to get familiar with the core APIs. The accompanying html files show the expected output when being run on a correct setup.
 
 :basic: link:basic
-:basic-cdn: link:https://cdn.rawgit.com/HebiRobotics/hebi-matlab-examples/37ea8658/basic
+:basic-cdn: link:https://cdn.rawgit.com/HebiRobotics/hebi-matlab-examples/369965c4/basic
 
 [width="100%",options="header",cols="1a,3a"]
 |====================
