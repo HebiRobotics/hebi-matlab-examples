@@ -1,0 +1,50 @@
+# HEBI Robotics Kits - Arms
+
+This folder contains examples for controlling arm-type configurations such as the 5-DoF and 6-DoF X-Series arm kits.
+
+*API Version: 1.0*
+
+## Setup
+
+### Load Libraries
+
+These examples make use of a variety of HEBI libraries. In order to load the libraries correctly, please run `startup()` after starting up MATLAB.
+
+Currently bundled APIs include
+
+* hebi-matlab-1.0-rev1908 (link:http://docs.hebi.us[source])
+* matlab-input-1.2 (link:https://github.com/HebiRobotics/MatlabInput/releases[source])
+
+### Setup Robot
+
+Open the `setupArm()` function and modify it to match your specific robot configuration. You can find tutorials on defining the kinematic structure on the online link:http://docs.hebi.us[documentation]. 
+
+## Examples
+
+At the top of each file is a `setup` section that may expose options for testing different behaviors.
+
+:code: link:
+
+[width="100%",options="header",cols="1a,3a"]
+|====================
+| File | Topics
+
+|{code}/ex_grav_comp.m[ex_grav_comp]|
+* gravity compensated mode
+* drift mitigation / admittance control
+
+|{code}/ex_teach_repeat.m[ex_teach_repeat]|
+* record waypoints in gravity compensated mode
+* replay waypoints with blocking trajectories
+* logging and visualization
+* keyboard input
+
+|{code}/ex_target_chase.m[ex_target_chase]|
+* asynchronous trajectories
+* continuous replaning
+* continuous target update
+* mouse input
+
+|====================
+
+
