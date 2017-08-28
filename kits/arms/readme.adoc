@@ -23,7 +23,7 @@ Open the `setupArm()` function and modify it to match your specific robot config
 
 At the top of each file is a `setup` section that may expose options for testing different behaviors.
 
-:code: link:
+:code: link:kits/arms/
 
 [width="100%",options="header",cols="1a,3a"]
 |====================
