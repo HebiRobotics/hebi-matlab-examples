@@ -17,7 +17,18 @@ Currently bundled APIs include
 
 ### Setup Robot
 
-Open the `setupArm()` function and modify it to match your specific robot configuration. You can find tutorials on defining the kinematic structure on the online link:http://docs.hebi.us[documentation]. 
+Open the `setupArm()` function and modify it to match your specific robot configuration. You can find tutorials on defining the kinematic structure on the online link:http://docs.hebi.us[documentation].
+
+Depending on the example you may also want to change the control strategy or test different gains. You can do this via the Scope GUI or programmatically using the following code. More information on gain tuning can be found on the main documentation as well.
+
+[source,matlab]
+----
+% Change the control strategy of all modules in a group
+desiredStrategy = 4; % change as needed
+gains = GainStruct();
+gains.controlStrategy = ones(1,group.getNumModules) * desiredStrategy;
+group.send('gains', gains)
+----
 
 ## Examples
 
@@ -25,25 +36,30 @@ At the top of each file is a `setup` section that may expose options for testing
 
 :code: link:./
 
-[width="100%",options="header",cols="1a,3a"]
+[width="100%",options="header",cols="1a,3a,1a"]
 |====================
-| File | Topics
+| File | Topics | Recommended Control Strategy
 
 |{code}/ex_grav_comp.m[ex_grav_comp]|
 * gravity compensated mode
 * drift mitigation / admittance control
+|3 or 4 +
+(identical without position control)
 
 |{code}/ex_teach_repeat.m[ex_teach_repeat]|
 * record waypoints in gravity compensated mode
 * replay waypoints with blocking trajectories
 * logging and visualization
 * keyboard input
+|4
 
-|{code}/ex_target_chase.m[ex_target_chase]|
+|{code}/ex_target_chase.m[ex_target_chase] +
+(link:https://youtu.be/pkCh5ZbxHp8?t=5s[video])|
 * asynchronous trajectories
-* continuous replaning
-* continuous target update
+* continuous replaning to catch moving target
+* inverse kinematics
 * mouse input
+|4 (comp on) or 3 (comp off)
 
 |====================
 
