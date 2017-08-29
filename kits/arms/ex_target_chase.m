@@ -13,7 +13,13 @@
 % Trajectory
 trajGen = HebiTrajectoryGenerator(kin);
 trajGen.setMinDuration(0.1); % Speed up 'small' movements
-trajGen.setSpeedFactor(0.3); % Slow down to a reasonable speed
+trajGen.setSpeedFactor(0.5); % Slow down to a reasonable speed
+
+% Select whether to add efforts (torques) to compensate for gravity and 
+% dynamic effects. This can improve motions significantly and becomes
+% especially important at high speeds. We recommend using control
+% strategy 4 if enabled, and control strategy 3 if disabled.
+enableEffortComp = true;
 
 %% Continuously move to target 
 fbk = group.getNextFeedbackFull();
@@ -39,20 +45,22 @@ while true
     % Get state of current trajectory (assume mouse hasn't changed)
     t = toc(t0);
     [pos,vel,accel] = traj.getState(t);
-   
-    % Send current state to robot
-    dynamicsComp = kin.getDynamicCompEfforts(fbkPosition,pos,vel,accel);
-    gravComp = kin.getGravCompEfforts(fbkPosition, gravityVec);
-    
     cmd.position = pos;
     cmd.velocity = vel;
-    cmd.effort = dynamicsComp + gravComp;
+   
+    if enableEffortComp
+        dynamicsComp = kin.getDynamicCompEfforts(fbkPosition,pos,vel,accel);
+        gravComp = kin.getGravCompEfforts(fbkPosition, gravityVec);
+        cmd.effort = dynamicsComp + gravComp;
+    end
+   
+    % Send current state to robot
     group.send(cmd);
     
     % Update target in case it has changed
     targetXyz = getTargetCoordinates();
     ikPosition = kin.getIK('xyz', targetXyz, ...
-        'TipAxis', [0 0 -1], ... % keep output facing the same direction
+        'TipAxis', [1 0 0], ... % keep output facing the same direction
         'initial', fbkPosition); % seed with current location
     
     % Recalculate trajectory starting at the current state
