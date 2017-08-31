@@ -30,7 +30,7 @@ while keys.ESC == 0
     % Do grav-comp while training waypoints
     fbk = group.getNextFeedback();
     cmd.effort = kin.getGravCompEfforts(fbk.position, gravityVec);
-    group.set(cmd);
+    group.send(cmd);
     
     % Add new waypoint on space bar press
     keys = read(kb);

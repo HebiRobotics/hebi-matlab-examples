@@ -73,6 +73,6 @@ while t < 5
     t = toc(t0);
     cmd.position = sin( w * t );
     cmd.velocity = cos( w * t );
-    group.set(cmd);
+    group.send(cmd);
     pause(0.001);
 end
