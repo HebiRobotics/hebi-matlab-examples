@@ -40,11 +40,13 @@ At the top of each file is a `setup` section that may expose options for testing
 |====================
 | File | Topics | Recommended Control Strategy
 
+|{code}/ex_kinematics_visualization.m[ex_grav_comp]|
+* passive visualization of robot configuration
+|N/A
+
 |{code}/ex_grav_comp.m[ex_grav_comp]|
-* gravity compensated mode
-* drift mitigation / admittance control
-|3 or 4 +
-(identical without position control)
+* gravity compensation for weight-less mode
+|2/3/4 (identical for only torque)
 
 |{code}/ex_teach_repeat.m[ex_teach_repeat]|
 * record waypoints in gravity compensated mode
@@ -55,11 +57,11 @@ At the top of each file is a `setup` section that may expose options for testing
 
 |{code}/ex_target_chase.m[ex_target_chase] +
 (link:https://youtu.be/pkCh5ZbxHp8?t=5s[video])|
-* asynchronous trajectories
+* non-blocking trajectories
 * continuous replaning to catch moving target
 * inverse kinematics
 * mouse input
-|4 (comp on) or 3 (comp off)
+|4 (dynamics comp on) or 3 (dynamics comp off)
 
 |====================
 
