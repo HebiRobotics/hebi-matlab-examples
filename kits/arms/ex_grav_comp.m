@@ -1,10 +1,14 @@
+% -------------------------------------------------------------------------
+% NOTE
+% Controlling only torques (or forces) will always exhibit some amount of 
+% drift due to noise in the sensors and a non-perfect model of the robot. 
+% This can be mitigated with 'admittance control' which can add torques to
+% remain at a position when the robot is not actively beind held.
+% -------------------------------------------------------------------------
+
 %% Setup
 % Robot specific setup. Edit as needed.
 [group, kin, gravityVec] = setupArm();
-
-% Select whether a 'Admittance' controller should be enabled. It mitigates
-% drift when the robot is not being held in place.
-enableAdmittanceControl = false;
 
 % Select the duration in seconds
 duration = 30;
@@ -14,16 +18,13 @@ cmd = CommandStruct();
 t0 = tic();
 while toc(t0) < duration
     
-    % Standard gravity compensation
+    % Gather sensor data
     fbk = group.getNextFeedback();
+    
+    % Calculate required torques to negate gravity at current position
     cmd.effort = kin.getGravCompEfforts(fbk.position, gravityVec);
     
-    % Mitigate drift when robot is not held in place 
-    if enableAdmittanceControl
-        error('TODO: implement');
-    end
-    
-    % send commands to robot
-    group.set(cmd);
+    % Send to robot
+    group.send(cmd);
     
 end
