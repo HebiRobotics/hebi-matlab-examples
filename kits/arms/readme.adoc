@@ -65,4 +65,19 @@ At the top of each file is a `setup` section that may expose options for testing
 
 |====================
 
+## Experimenting with Gains
 
+We recommend that you try running the samples with various gains and control strategies so that you can get a feel for the differences. The easiest way for editing gains is to save the current gains to disk, edit the file, and then load it. This also lets you use diff-tools for comparison.
+
+[source,matlab]
+----
+fileName = './current-gains.xml';
+
+% Save current gains
+gains = group.getGains();
+HebiUtils.saveGains(gains, fileName);
+
+% Load gains from file
+gains = HebiUtils.loadGains(fileName);
+group.send('gains', gains);
+----
