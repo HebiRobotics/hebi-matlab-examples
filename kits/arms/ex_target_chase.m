@@ -12,7 +12,7 @@
 
 % Trajectory
 trajGen = HebiTrajectoryGenerator(kin);
-trajGen.setMinDuration(0.1); % Speed up 'small' movements
+trajGen.setMinDuration(0.2); % Speed up 'small' movements
 trajGen.setSpeedFactor(0.5); % Slow down to a reasonable speed
 
 % Select whether to add efforts (torques) to compensate for gravity and 
@@ -34,16 +34,17 @@ traj = trajGen.newJointMove([fbk.position; ikPosition]);
 
 endVelocities = zeros(1, group.getNumModules);
 endAccels = zeros(1, group.getNumModules);
+lastXyz = [nan nan nan];
 
-t0 = tic();
+t0 = fbk.time;
 while true
    
     % Gather feedback
     fbk = group.getNextFeedback(fbk); % reuse struct
     fbkPosition = fbk.position; % only access once
     
-    % Get state of current trajectory (assume mouse hasn't changed)
-    t = toc(t0);
+    % Get state of current trajectory
+    t = min(fbk.time - t0, traj.getDuration()); % bound to max duration
     [pos,vel,accel] = traj.getState(t);
     cmd.position = pos;
     cmd.velocity = vel;
@@ -53,22 +54,28 @@ while true
         gravComp = kin.getGravCompEfforts(fbkPosition, gravityVec);
         cmd.effort = dynamicsComp + gravComp;
     end
-   
+    
     % Send current state to robot
     group.send(cmd);
     
-    % Update target in case it has changed
+    % Recompute trajectory if target has changed
     targetXyz = getTargetCoordinates();
-    ikPosition = kin.getIK('xyz', targetXyz, ...
-        'TipAxis', [1 0 0], ... % keep output facing the same direction
-        'initial', fbkPosition); % seed with current location
-    
-    % Recalculate trajectory starting at the current state
-    t0 = tic();
-    traj = trajGen.newJointMove(...
-        [pos; ikPosition], ...
-        'Velocities', [vel; endVelocities],     ...
-        'Accelerations', [accel; endAccels]);
+    if any(lastXyz ~= targetXyz)
+        lastXyz = targetXyz;
+        
+        % Find target joint positions using inverse kinematics
+        ikPosition = kin.getIK('xyz', targetXyz, ...
+            'TipAxis', [1 0 0], ... % keep output facing the same direction
+            'initial', pos); % seed with current location
+        
+        % Start new trajectory at the current state
+        t0 = fbk.time;
+        traj = trajGen.newJointMove(...
+            [pos; ikPosition], ...
+            'Velocities', [vel; endVelocities],     ...
+            'Accelerations', [accel; endAccels]);
+        
+    end
     
 end
 

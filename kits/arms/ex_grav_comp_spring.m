@@ -26,7 +26,7 @@ velocityThreshold = 0.2;
 % Stiffness (like Kp gain) of the virtual spring, i.e., how hard should  
 % it try to keep the position. Could be different for each module (vector)
 % and may need some tuning. A stiffness of zero disables it.
-stiffness = 5;
+stiffness = 10;
 
 %% Gravity compensated mode
 fbk = group.getNextFeedback();

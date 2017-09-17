@@ -11,7 +11,7 @@
 [group, kin, gravityVec] = setupArm();
 
 % Select the duration in seconds
-duration = 30;
+duration = 60;
 
 %% Gravity compensated mode
 cmd = CommandStruct();
