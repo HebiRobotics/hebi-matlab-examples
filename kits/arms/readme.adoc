@@ -40,12 +40,12 @@ At the top of each file is a `setup` section that may expose options for testing
 |====================
 | File | Topics | Recommended Control Strategy
 
-|{code}/ex_kinematics_visualization.m[ex_grav_comp] +
-(link:https://youtu.be/sli8Tq8FAQs[video])|
+|{code}/ex_kinematics_visualization.m[ex_kinematics_visualization]|
 * passive visualization of robot configuration
 |N/A
 
-|{code}/ex_grav_comp.m[ex_grav_comp]|
+|{code}/ex_grav_comp.m[ex_grav_comp] +
+(link:https://youtu.be/sli8Tq8FAQs[video])|
 * gravity compensation for weight-less mode
 |2/3/4 (identical for only torque)
 
