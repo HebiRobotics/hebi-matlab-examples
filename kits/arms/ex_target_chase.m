@@ -12,7 +12,7 @@
 
 % Trajectory
 trajGen = HebiTrajectoryGenerator(kin);
-trajGen.setMinDuration(0.2); % Speed up 'small' movements
+trajGen.setMinDuration(0.2); % Speed up 'small' movements (default is >1s)
 trajGen.setSpeedFactor(0.5); % Slow down to a reasonable speed
 
 % Select whether to add efforts (torques) to compensate for gravity and 
