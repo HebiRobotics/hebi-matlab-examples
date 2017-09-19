@@ -2,8 +2,8 @@
 % NOTE
 % Controlling only torques (or forces) will always exhibit some amount of 
 % drift due to noise in the sensors and a non-perfect model of the robot. 
-% This can be mitigated with 'admittance control' which can add torques to
-% remain at a position when the robot is not actively beind held.
+% This can be mitigated by adding an extra controller that can add torques
+% to remain at a position when the robot is not actively beind held.
 % -------------------------------------------------------------------------
 
 %% Setup
