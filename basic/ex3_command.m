@@ -7,8 +7,8 @@
 % <html>
 % <table border=0>
 %   <tr><td>Created</td><td>July 13, 2017</td></tr>
-%   <tr><td>Last Update</td><td>Aug 22, 2017</td></tr>
-%   <tr><td>API Version</td><td>hebi-matlab-1.0-rc2</td></tr>
+%   <tr><td>Last Update</td><td>Sept 21, 2017</td></tr>
+%   <tr><td>API Version</td><td>hebi-matlab-1.0</td></tr>
 %   <tr><td>Requirements</td><td>MATLAB 2013b or higher</td></tr>
 % </table>
 % </html>
@@ -64,15 +64,42 @@ end
 
 %% Sine Wave (open-loop)
 % This example shows an open-loop controller commanding a 1 Hz 
-% sine wave using simultaneous position and velocity control.
-cmd = CommandStruct();
+% sine wave using position control.
+amplitude = 1;
 w = 2 * pi;
+
+cmd = CommandStruct();
 t0 = tic();
 t = 0;
 while t < 5
     t = toc(t0);
-    cmd.position = sin( w * t );
-    cmd.velocity = cos( w * t );
+    cmd.position = amplitude * sin( w * t );
     group.send(cmd);
     pause(0.001);
 end
+
+%% Step Input (open-loop)
+% This example shows an open-loop controller commanding alternating
+% step inputs of +/- amplitude to position
+amplitude = 1; % [rad]
+duration = 2; % [s]
+
+cmd = CommandStruct();
+direction = 1;
+tNext = duration;
+t0 = tic();
+while toc(t0) < 5
+    
+    % Flip direction
+    if toc(t0) >= tNext
+        tNext = tNext + duration;
+        direction = -direction;
+    end
+    
+    % Command position
+    cmd.position = amplitude * direction;
+    group.send(cmd);
+    pause(0.01);
+    
+end
+
