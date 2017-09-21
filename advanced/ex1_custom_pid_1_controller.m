@@ -71,24 +71,22 @@ kD = 0;
 
 cmd = CommandStruct();
 fbk = group.getNextFeedbackFull();
-t0 = fbk.hwTxTime; % use hardware timestamps (note: is a vector)
-lastT = zeros(size(t0));
+tPrev = fbk.hwTxTime; % use hardware timestamps (note: is a vector)
 iError = zeros(size(t0));
-lastError = zeros(size(t0));
-while all(lastT < 60)
+lastError = cmdPosition() - fbk.position;
+t0 = tic();
+while toc(t0) < 60
     
-    % read feedback and target position
+    % read feedback and calculate dt (based on device specific hw timestamps)
     fbk = group.getNextFeedback(fbk);
-    fbkPos = fbk.position;
-    cmdPos = cmdPosition();
+    t = fbk.hwTxTime;
+    dt =  t - tPrev;
+    tPrev = t;
     
-    % calculate dt based on device specific hardware timestamps
-    t = fbk.hwTxTime - t0;
-    dt = lastT - t;
-    lastT = t;
+    % read target and calculate error for this iteration
+    error = cmdPosition() - fbk.position;
     
     % proportional control
-    error = cmdPos - fbkPos;
     pwm = kP .* error;
 
     % integral control
