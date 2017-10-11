@@ -15,13 +15,13 @@
 [group, kin, gravityVec] = setupArm();
 
 % Select the duration in seconds
-duration = 60;
+duration = 30;
 
 % Velocity threshold below which robot is considered moving. Instead of
 % trying to determine movement based on sensor data, it could also be a
 % physical button on the robot that users would need to press before being
 % able to move the robot.
-velocityThreshold = 0.2;
+velocityThreshold = 0.5;
 
 % Stiffness (like Kp gain) of the virtual spring, i.e., how hard should  
 % it try to keep the position. Could be different for each module (vector)
@@ -38,18 +38,18 @@ t0 = tic();
 while toc(t0) < duration
     
     % Gather sensor data and always do grav comp
-    fbk = group.getNextFeedback(fbk);
-    fbkPosition = fbk.position;
-    cmd.effort = kin.getGravCompEfforts(fbkPosition, gravityVec);
+    fbk = group.getNextFeedback();
+
+    cmd.effort = kin.getGravCompEfforts(fbk.position, gravityVec);
     
     % Find whether robot is actively moving
     isMoving = max(abs(fbk.velocity)) > velocityThreshold;
     if isMoving
         % Update idle position
-        idlePos = fbkPosition;
+        idlePos = fbk.position;
     else
         % Add efforts from virtual spring to maintain position
-        driftError = idlePos - fbkPosition;
+        driftError = idlePos - fbk.position;
         holdingEffort = driftError .* stiffness;
         cmd.effort = cmd.effort + holdingEffort;
     end

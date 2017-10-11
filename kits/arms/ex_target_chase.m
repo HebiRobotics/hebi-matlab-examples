@@ -7,13 +7,13 @@
 % -------------------------------------------------------------------------
 
 %% Setup
-% Robot specific setup. Edit as needed.
+% Robot specific setup. Edit setupArm.m as needed for your configuration.
 [group, kin, gravityVec] = setupArm();
 
 % Trajectory
 trajGen = HebiTrajectoryGenerator(kin);
 trajGen.setMinDuration(0.2); % Speed up 'small' movements (default is >1s)
-trajGen.setSpeedFactor(0.5); % Slow down to a reasonable speed
+trajGen.setSpeedFactor(1.0); % Slow down to a reasonable speed
 
 % Select whether to add efforts (torques) to compensate for gravity and 
 % dynamic effects. This can improve motions significantly and becomes
@@ -25,33 +25,42 @@ enableEffortComp = true;
 fbk = group.getNextFeedbackFull();
 cmd = CommandStruct();
 
+% Start background logging
+group.startLog();
+
 % Move to current coordinates
-targetXyz = getTargetCoordinates();
-ikPosition = kin.getIK('xyz', targetXyz, ...
+xyzTarget = getTargetCoordinates();
+ikPosition = kin.getIK('xyz', xyzTarget, ...
     'initial', zeros(1, group.getNumModules));
 
 traj = trajGen.newJointMove([fbk.position; ikPosition]);
 
 endVelocities = zeros(1, group.getNumModules);
 endAccels = zeros(1, group.getNumModules);
-lastXyz = [nan nan nan];
+
+xyzLast = [nan nan nan];
 
 t0 = fbk.time;
-while true
+
+maxDemoTime = 30; % sec
+demoTimer = tic;
+
+while toc(demoTimer) < maxDemoTime
    
     % Gather feedback
-    fbk = group.getNextFeedback(fbk); % reuse struct
-    fbkPosition = fbk.position; % only access once
+    fbk = group.getNextFeedback();
+
+    t = min(fbk.time - t0, traj.getDuration()); % bound to max duration
     
     % Get state of current trajectory
-    t = min(fbk.time - t0, traj.getDuration()); % bound to max duration
     [pos,vel,accel] = traj.getState(t);
     cmd.position = pos;
     cmd.velocity = vel;
    
     if enableEffortComp
-        dynamicsComp = kin.getDynamicCompEfforts(fbkPosition,pos,vel,accel);
-        gravComp = kin.getGravCompEfforts(fbkPosition, gravityVec);
+        dynamicsComp = kin.getDynamicCompEfforts( ...
+                                    fbk.position, pos, vel, accel );
+        gravComp = kin.getGravCompEfforts( fbk.position, gravityVec );
         cmd.effort = dynamicsComp + gravComp;
     end
     
@@ -59,25 +68,34 @@ while true
     group.send(cmd);
     
     % Recompute trajectory if target has changed
-    targetXyz = getTargetCoordinates();
-    if any(lastXyz ~= targetXyz)
-        lastXyz = targetXyz;
+    xyzTarget = getTargetCoordinates();  
+    if any(xyzLast ~= xyzTarget)
+        xyzLast = xyzTarget;
         
         % Find target joint positions using inverse kinematics
-        ikPosition = kin.getIK('xyz', targetXyz, ...
-            'TipAxis', [1 0 0], ... % keep output facing the same direction
-            'initial', pos); % seed with current location
+        if kin.getNumDoF >= 5
+            ikPosition = kin.getIK( 'xyz', xyzTarget, ...
+                                    'TipAxis', [1 0 0], ... % keep output facing the same direction
+                                    'initial', pos); % seed with current location
+        else
+            ikPosition = kin.getIK( 'xyz', xyzTarget, ...
+                                    'initial', pos); % seed with current location
+        end
         
         % Start new trajectory at the current state
         t0 = fbk.time;
-        traj = trajGen.newJointMove(...
-            [pos; ikPosition], ...
-            'Velocities', [vel; endVelocities],     ...
-            'Accelerations', [accel; endAccels]);
-        
+        traj = trajGen.newJointMove( [pos; ikPosition], ...
+                        'Velocities', [vel; endVelocities], ...
+                        'Accelerations', [accel; endAccels]);  
     end
     
 end
+
+% Stop background logging
+hLog = group.stopLogFull();
+
+% Plot the commands and feedback
+plotLogCommands(hLog, group)
 
 %% Get target coordinates (from mouse, but could also be from e.g. video)
 function [xyz] = getTargetCoordinates()
@@ -99,8 +117,8 @@ relativeLoc = [
 ];
 
 % Set possible workspace range [m]
-world_x = [+0.25 +0.50];
-world_y = [+0.50 -0.25];
+world_x = [+0.25 +0.60];
+world_y = [+0.50 -0.50];
 world_z = 0;
 
 % Map input [pixels] to workspace [m]
