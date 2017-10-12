@@ -13,13 +13,13 @@ group = HebiLookup.newGroupFromNames('Arm', {
 
 % Kinematics
 kin = HebiKinematics();
-kin.addBody('X8-3');
-kin.addBody('X5-HeavyBracket', 'mount', 'right-inside');
+kin.addBody('X5-4');
+kin.addBody('X5-HeavyBracket', 'mount', 'right-outside');
 kin.addBody('X5-9');
-kin.addBody('X5-Link', 'extension', 0.260 + 0.025, 'twist', pi);
-kin.addBody('X5-4');
-kin.addBody('X5-Link', 'extension', 0.253 + 0.025, 'twist', pi);
-kin.addBody('X5-4');
+kin.addBody('X5-Link', 'extension', .325, 'twist', pi);
+kin.addBody('X5-9');
+kin.addBody('X5-Link', 'extension', .325, 'twist', pi);
+kin.addBody('X5-1');
 kin.addBody('X5-LightBracket', 'mount', 'right');
 kin.addBody('X5-1');
 kin.addBody('X5-LightBracket', 'mount', 'right');
