@@ -4,9 +4,10 @@
 
 % Trajectory
 trajGen = HebiTrajectoryGenerator(kin);
-trajGen.setMinDuration(0.5); % Speed up 'small' movements
-trajGen.setSpeedFactor(0.5); % Slow down movements to a safer speed
-
+trajGen.setMinDuration(0.5); % Min move time for 'small' movements
+                             % (default is 1.0)
+trajGen.setSpeedFactor(1.0); % Slow down movements to a safer speed.
+                             % (default is 1.0)
 % Keyboard input
 kb = HebiKeyboard();
 
@@ -52,14 +53,14 @@ if enableLogging
    logFile = group.startLog(); 
 end
 
+% Move from current position to first waypoint
+startPosition = group.getNextFeedback().position;
+trajGen.moveJoint( group, [startPosition; waypoints(1,:)], ...
+                    'EnableDynamicsComp', true, ...
+                    'GravityVec', gravityVec );
+
 % Move along waypoints
 if stopBetweenWaypoints
-    
-    % Move from current position to first waypoint
-    startPosition = group.getNextFeedback().position;
-    trajGen.moveJoint(group, [startPosition; waypoints(1,:)], ...
-        'EnableDynamicsComp', true, ...
-        'GravityVec', gravityVec);
     
     % Split waypoints into individual movements
     numMoves = size(waypoints,1);
@@ -72,20 +73,18 @@ if stopBetweenWaypoints
         % Do minimum-jerk trajectory between positions. Note that this
         % call handles trajectory commands internally and blocks until
         % the move is finished.
-        trajGen.moveJoint(group, [startPosition; endPosition], ...
-            'EnableDynamicsComp', true, ...
-            'GravityVec', gravityVec);
+        trajGen.moveJoint( group, [startPosition; endPosition], ...
+                            'EnableDynamicsComp', true, ...
+                            'GravityVec', gravityVec );
         
     end
     
 else
     
     % Move through all waypoints as a single movement
-    startPosition = group.getNextFeedback().position;
-    trajGen.moveJoint(group, [startPosition; waypoints], ...
-        'EnableDynamicsComp', true, ...
-        'GravityVec', gravityVec);
-    
+    trajGen.moveJoint( group, waypoints, ...
+                        'EnableDynamicsComp', true, ...
+                        'GravityVec', gravityVec );
 end
 
 % Stop background logging and visualize
