@@ -11,18 +11,18 @@
 [group, kin, gravityVec] = setupArm();
 
 % Select the duration in seconds
-duration = 60;
+demoDuration = 30;
 
 %% Gravity compensated mode
 cmd = CommandStruct();
-t0 = tic();
-while toc(t0) < duration
+demoTimer = tic();
+while toc(demoTimer) < demoDuration
     
     % Gather sensor data
     fbk = group.getNextFeedback();
     
     % Calculate required torques to negate gravity at current position
-    cmd.effort = kin.getGravCompEfforts(fbk.position, gravityVec);
+    cmd.effort = kin.getGravCompEfforts( fbk.position, gravityVec );
     
     % Send to robot
     group.send(cmd);
