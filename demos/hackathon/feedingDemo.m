@@ -1,4 +1,9 @@
 %% Setup
+%
+% This demo lets a user train waypoints for an arm to play back.  The
+% default configuration is a 5-DOF suitable for feeding someone with a
+% fork.
+
 % Robot specific setup. Edit as needed.
 [group, kin, gravityVec] = setupFeedingArm();
 
@@ -7,7 +12,7 @@ defaultWaypoints = waypoints;
 
 % Trajectory
 trajGen = HebiTrajectoryGenerator(kin);
-trajGen.setMinDuration(1.0); % Min move time for 'small' movements
+trajGen.setMinDuration(1.5); % Min move time for 'small' movements
                              % (default is 1.0)
 trajGen.setSpeedFactor(0.75); % Slow down movements to a safer speed.
                              % (default is 1.0)
@@ -53,6 +58,7 @@ end
 if isempty(waypoints)
     waypoints = defaultWaypoints;
 end
+numWaypoints = size(waypoints,1);
 
 % Start background logging 
 if enableLogging
@@ -83,6 +89,54 @@ while keys.ESC == 0
     cmd.effort = fbk.effortCmd;
     
     group.send(cmd);
+    
+    % Nudge waypoints based on keyboard input.
+    if keys.DOWN || keys.UP || keys.RIGHT || keys.LEFT || keys.SHIFT
+        
+        % Figure what direction(s) to nudge
+        % The axes may need to be changed depending on the orientation
+        % of the arm relative to the operator and the settings of the
+        % baseFrame in the kinematics object.
+        nudgeXYZ = [0; 0; 0];
+        if keys.DOWN && keys.SHIFT
+            nudgeXYZ = nudgeXYZ + [0; 0; -.001];
+        elseif keys.DOWN
+            nudgeXYZ = nudgeXYZ + [-.001; 0; 0];
+        end
+        if keys.UP && keys.SHIFT
+            nudgeXYZ = nudgeXYZ + [0; 0; .001];
+        elseif keys.UP
+            nudgeXYZ = nudgeXYZ + [.001; 0; 0];
+        end
+        if keys.RIGHT
+            nudgeXYZ = nudgeXYZ + [0; -.001; 0];
+        end
+        if keys.LEFT
+            nudgeXYZ = nudgeXYZ + [0; .001; 0];
+        end
+        
+        % Iterate thru and nudge each waypoint
+        for i=1:numWaypoints
+            
+            endEffFrame = kin.getFK('endeffector',waypoints(i,:));
+            targetXYZ = endEffFrame(1:3,4);
+            targetTipAxis = endEffFrame(1:3,3);
+            
+            adjustedXYZ = targetXYZ + nudgeXYZ;
+            
+            newPositions = kin.getIK( 'xyz', adjustedXYZ, ...
+                                      'tipaxis', targetTipAxis, ...
+                                      'initial', waypoints(i,:) );
+                                  
+            waypoints(i,:) = newPositions;                      
+        end
+        
+        % Command the new positions
+        cmd.position = waypoints(1,:);
+        cmd.effort = kin.getGravCompEfforts( cmd.position, gravityVec );
+        group.send(cmd);
+        pause(.03);  % Slow things down a little in case a key is held
+    end
     
     % Move along waypoints
     if keys.SPACE == 1 && prevKeys.SPACE == 0 % diff state
