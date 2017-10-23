@@ -64,6 +64,14 @@ At the top of each file is a `setup` section that may expose options for testing
 * mouse input
 |4 (dynamics comp on) or 3 (dynamics comp off)
 
+|{code}/ex_target_chase_joystick.m[ex_target_chase_joystick] +
+(link:https://youtu.be/Ll20_6IsjnQ[video])|
+* non-blocking trajectories
+* continuous replaning to catch moving target
+* inverse kinematics
+* joystick input
+|4 (dynamics comp on) or 3 (dynamics comp off)
+
 |====================
 
 ## Experimenting with Gains
