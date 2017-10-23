@@ -115,8 +115,8 @@ The demos folder contains the source code for some of our https://www.youtube.co
 * {teleop_taxi}simple.m[Simplified] (without video)
 * {teleop_taxi}full.m[Full] (including video)
 
-|link:demos/hackathon[Hackathon]|
-* Feeding arm demo for Hackathon in Japan, Oct 2017
+|Hackathon (Japan Oct, 2017)|
+* link:demos/hackathon[Feeding arm demo]
 
 |====================
 
