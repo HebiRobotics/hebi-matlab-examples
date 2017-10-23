@@ -1,4 +1,8 @@
 % -------------------------------------------------------------------------
+% This demo is the same as ex_target_chase.m, with the difference being
+% that the target is based on joystick input rather than the mouse
+% location, and that it includes a variable tip axis.
+%
 % !!!! WARNING !!!!
 % Before running this code we recommend changing the allowed workspace
 % in the 'getTargetCoordinates' function below and setting safety limits
@@ -21,6 +25,9 @@ trajGen.setSpeedFactor(1); % Speed multiplier (1 = full speed, 0.5 = half)
 % strategy 4 if enabled, and control strategy 3 if disabled.
 enableEffortComp = true;
 
+% Connect to joystick
+joy = HebiJoystick(1);
+
 %% Continuously move to target 
 fbk = group.getNextFeedbackFull();
 cmd = CommandStruct();
@@ -29,8 +36,10 @@ cmd = CommandStruct();
 group.startLog();
 
 % Move to current coordinates
-xyzTarget = getTargetCoordinates();
-ikPosition = kin.getIK('xyz', xyzTarget, ...
+[xyzTarget, tipTarget] = getTargetCoordinates(joy);
+ikPosition = kin.getIK(...
+    'xyz', xyzTarget, ...
+    'TipAxis', tipTarget, ...
     'initial', zeros(1, group.getNumModules));
 
 traj = trajGen.newJointMove([fbk.position; ikPosition]);
@@ -39,6 +48,7 @@ endVelocities = zeros(1, group.getNumModules);
 endAccels = zeros(1, group.getNumModules);
 
 xyzLast = [nan nan nan];
+tipLast = [nan nan nan]';
 
 t0 = fbk.time;
 
@@ -68,14 +78,15 @@ while toc(demoTimer) < maxDemoTime
     group.send(cmd);
     
     % Recompute trajectory if target has changed
-    xyzTarget = getTargetCoordinates();  
-    if any(xyzLast ~= xyzTarget)
+    [xyzTarget, tipTarget] = getTargetCoordinates(joy);
+    if any(xyzLast ~= xyzTarget) || any(tipLast ~= tipTarget)
         xyzLast = xyzTarget;
+        tipLast = tipTarget;
         
         % Find target joint positions using inverse kinematics
         if kin.getNumDoF >= 5
             ikPosition = kin.getIK( 'xyz', xyzTarget, ...
-                                    'TipAxis', [1 0 0], ... % keep output facing the same direction
+                                    'TipAxis', tipTarget, ...
                                     'initial', pos); % seed with current location
         else
             ikPosition = kin.getIK( 'xyz', xyzTarget, ...
@@ -97,34 +108,36 @@ hLog = group.stopLogFull();
 % Plot the commands and feedback
 plotLogCommands(hLog, group)
 
-%% Get target coordinates (from mouse, but could also be from e.g. video)
-function [xyz] = getTargetCoordinates()
-
-% Select whole screen as valid area 
-screenSize = get(0,'screensize');
-screen_x = [0 screenSize(3)]; % (1) left - right, e.g., [0 1920]
-screen_y = [0 screenSize(4)]; % (2) bottom - top, e.g., [0 1200]
-
-% Read mouse input and bind within valid area [pixels]
-loc = get(0, 'PointerLocation');
-mouseX = min(max(loc(1), screen_x(1)), screen_x(2));
-mouseY = min(max(loc(2), screen_y(1)), screen_y(2));
-
-% Find relative coordinates in width and height
-relativeLoc = [
-    (mouseX - screen_x(1)) / diff(screen_x);
-    (mouseY - screen_y(1)) / diff(screen_y);
-];
+%% Get target coordinates and tip axis (from joystick)
+function [xyz, tipTarget] = getTargetCoordinates(joy)
 
 % Set possible workspace range [m]
 world_x = [+0.25 +0.60];
-world_y = [+0.50 -0.50];
-world_z = 0;
+world_y = [-0.25 +0.25];
+world_z = [-0.10 +0.10];
+angle_y = [-pi/2 +pi/2];
 
-% Map input [pixels] to workspace [m]
+% Find relative coordinates in x and y [0,1]. (Note: axes are [-1,+1]
+[axes, ~, ~] = read(joy);
+relativeLoc = (-axes + 1) / 2;
+
+% Map input [0,1] to workspace [m] (linear k * x + d)
 x = relativeLoc(2) * diff(world_x) + world_x(1);
 y = relativeLoc(1) * diff(world_y) + world_y(1);
-z = world_z;
+z = relativeLoc(3) * diff(world_z) + world_z(1);
 xyz = [x,y,z];
+
+% Map input [0,1] to y rotation [rad]
+yAngle = relativeLoc(5) * diff(angle_y) + angle_y(1);
+tipTarget = [0 0 1]';
+
+% Rotate vector using rotation matrix 
+s = sin(yAngle); 
+c = cos(yAngle);
+Ry = [
+  c 0 s
+  0 1 0
+  -s 0 c];
+tipTarget = Ry * tipTarget;
 
 end
