@@ -160,6 +160,11 @@ classdef (Sealed) HebiLookup
             %   become cluttered with 'stale' modules.
             javaMethod('clearModuleList', HebiLookup.className,  varargin{:});
             this = HebiLookup.wrapper;
+            
+            % Add a pause so that the lookup has some
+            % time to find modules
+            config = hebi_config('HebiLookup');
+            pause(config.initialNetworkLookupPause);
         end
         
         function this = clearGroups(varargin)
