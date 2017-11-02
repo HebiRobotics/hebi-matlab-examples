@@ -1,6 +1,6 @@
 %% Setup
 %
-% This demo lets a user train waypoints for an arm to play back.  The
+% This demo lets a user train waypoints for an   arm to play back.  The
 % default configuration is a 5-DOF suitable for feeding someone with a
 % fork.
 
