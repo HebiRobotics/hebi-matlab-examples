@@ -12,9 +12,11 @@ close all;
 moduleNames = { '_port', '_starboard', ...
                 'base1', 'shoulder1', 'elbow1', ...
                 'base2', 'shoulder2', 'elbow2' };
+            
 robotGroup = HebiLookup.newGroupFromNames('Igor',moduleNames);
 robotGroup.setFeedbackFrequency(500);
 pause(2.0);
+
 fbk = robotGroup.getNextFeedbackFull();
 timeLast = fbk.time;
 
@@ -33,11 +35,6 @@ R_port = R_z(pi)*R_x(pi/2);
 R_starboard = R_x(pi/2);
 direction = [-1 1];
 
-% % WHEELS IN
-% R_starboard = R_z(pi)*R_x(pi/2);
-% R_port = R_x(pi/2);
-% direction = [1 -1];
-
 wheelRadius = .200 / 2;  % m
 wheelBase = .600;  % m
 
@@ -50,7 +47,8 @@ armVelComp = false;
 
 % Setup kinematics and create trajectory generator
 chassisKin = HebiKinematics();
-chassisKin.addBody('X5-4');
+chassisKin.addBody('X5-4');  % Use X5-4 as a dummy module just so we can
+                             % get the trajectory generator to work.
 
 % Setup Arms
 R_hip = R_x(pi/2);
@@ -59,8 +57,8 @@ T_hip = eye(4);
 T_hip(1:3,1:3) = R_hip;
 T_hip(1:3,4) = xyz_hip;
 
-armBaseXYZ(:,1) = [0; .12; .43];
-armBaseXYZ(:,2) = [0; -.12; .43];
+armBaseXYZ(:,1) = [0; .12; .43]; % m
+armBaseXYZ(:,2) = [0; -.12; .43]; % m
 
 for arm = 1:numArms
     armKin{arm} = HebiKinematics();
