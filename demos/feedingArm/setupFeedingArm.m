@@ -22,16 +22,16 @@ output_EndEff(1:3,4) = xyz_endEff;
 output_EndEff(1:3,1:3) = rot_endEff;
 
 comEndEff = xyz_endEff / 2;
-massEndEff = .2; % kg   .2 default
+massEndEff = 0; % kg   .2 default
 
 % Arm Kinematics
 kin = HebiKinematics();
 kin.addBody('X5-4');
 kin.addBody('X5-HeavyBracket', 'mount', 'left-outside');
 kin.addBody('X5-9');
-kin.addBody('X5-Link', 'extension', .325, 'twist', pi, 'mass', .280);
+kin.addBody('X5-Link', 'extension', .325, 'twist', pi, 'mass', .200);
 kin.addBody('X5-9');
-kin.addBody('X5-Link', 'extension', .325, 'twist', pi, 'mass', .280);
+kin.addBody('X5-Link', 'extension', .325, 'twist', pi, 'mass', .200);
 kin.addBody('X5-1');
 kin.addBody('X5-LightBracket', 'mount', 'left');
 kin.addBody('X5-1');

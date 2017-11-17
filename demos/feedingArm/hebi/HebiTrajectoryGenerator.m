@@ -96,16 +96,13 @@ classdef (Sealed) HebiTrajectoryGenerator
             %   'UnconstrainedQp' creates advanced minimum jerk 
             %   trajectories that support user specified velocity and 
             %   acceleration constraints at any point (free constraints 
-            %   are represented by nans). The current implementation is 
-            %   however relatively expensive to compute and is only 
-            %   recommended for low numbers of waypoints.
+            %   are represented by nans).
             %
-            %   'MinJerkPhase' requires fully specified position waypoints
-            %   and assumes start and end conditions of zero for velocities 
-            %   and accelerations. It does not support user specified
-            %   constraints. However, it is computationally very efficient
-            %   and can be used for many waypoints.
-            %
+            %   'MinJerkPhase' is an older trajectory algorithm that
+            %   requires fully specified position waypoints and does not
+            %   support user specified constraints. We consider this
+            %   algorithm deprecated and recommend not using it anymore.
+            % 
             %   See also HebiTrajectoryGenerator, newJointMove
             setAlgorithm(this.obj, varargin{:});
         end
