@@ -6,7 +6,7 @@ currentDir = fileparts(mfilename('fullpath'));
 addpath(fullfile(currentDir , 'hebi'));
 
 % add utility directory
-addpath(fullfile(currentDir, 'utils'));
+addpath(fullfile(currentDir, 'tools'));
 
 % explicitely pre-load libraries
 hebi_load(); % main HEBI library
