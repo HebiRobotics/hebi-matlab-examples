@@ -1,3 +1,23 @@
+%% Advanced - Control Input
+% This example executes different input profiles, e.g., 
+% step input or sinusoidal input, on a single actuator.
+% This is sometimes useful to demonstrate control theory
+% concepts.
+%
+%%
+%
+% <html>
+% <table border=0>
+%   <tr><td>Created</td><td>Feb 2, 2017</td></tr>
+%   <tr><td>Last Update</td><td>Feb 2, 2017</td></tr>
+%   <tr><td>API Version</td><td>hebi-matlab-1.2</td></tr>
+%   <tr><td>Requirements</td><td>MATLAB 2013b or higher</td></tr>
+% </table>
+% </html>
+%
+
+% Copyright 2018 HEBI Robotics
+
 %% Setup
 group = HebiLookup.newGroupFromNames('Family','Name');
 group.setFeedbackFrequency(100);
