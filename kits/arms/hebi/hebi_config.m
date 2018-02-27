@@ -1,13 +1,13 @@
 function [config] = hebi_config(simpleName)
 %HEBI_CONFIG exposes default parameters that can be edited if needed
 
-%   Copyright 2014-2016 HEBI Robotics, LLC.
+%   Copyright 2014-2018 HEBI Robotics, Inc.
 switch simpleName
     
     case 'hebi_load'
         % Path to the binary library file. By default, it is assumed that
         % the library is placed in the same folder as this file.
-        config.libraryVersion = 'hebi-matlab-1.0-rev1908';
+        config.libraryVersion = 'hebi-matlab-1.3-rev2169';
         config.libraryPath = fileparts(mfilename('fullpath'));
         
     case 'HebiLookup'

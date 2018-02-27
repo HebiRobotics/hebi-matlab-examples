@@ -28,7 +28,7 @@ classdef (Sealed) HebiPoseFilter
     %         disp(pose);
     %      end
     
-    %   Copyright 2014-2016 HEBI Robotics, LLC.
+    %   Copyright 2014-2018 HEBI Robotics, Inc.
     
     % Public API
     methods(Access = public)
