@@ -1,0 +1,23 @@
+# HEBI Robotics Kits - Edward
+
+This folder contains source code for running the Edward kit link:http://docs.hebi.us/resources/kits/assyInstructions/X-Series_Edward.pdf[Edward] kit.
+
+## Contents
+
+* *startup.m* loads the required libraries
+* *edwardDemo.m* contains the main demo including the startup procedure and stop/restart functionality 
+* *edwardDemoRunner.m* is a single script that executes startup and edwardDemo
+* *edwardStart.sh* is a shell script that starts MATLAB and executes edwardDemoRunner.m
+
+## Notes
+
+* The gains file (edwardGains.xml) file gets loaded automatically and assumes that you are using the default configuration of modules.
+
+## Instructions
+
+TODO:
+
+* general overview
+* joystick mappings
+* code overview
+* link to assembly docs, pictures, etc.
