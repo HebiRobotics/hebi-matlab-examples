@@ -19,8 +19,8 @@ classdef (Sealed) HebiLookup
     %
     %   HebiLookup Methods (group creation):
     %   newGroupFromNames                 - groups by user defined names
-    %   newGroupFromSerialNumbers         - groups by hardware serial numbers
     %   newGroupFromFamily                - groups by family and sorts by name
+    %   newGroupFromSerialNumbers         - groups by hardware serial numbers
     %   newGroupFromMacs                  - groups by hardware mac addresses
     %   newConnectedGroupFromName         - groups by connectivity
     %   newConnectedGroupFromSerialNumber - groups by connectivity
@@ -35,18 +35,18 @@ classdef (Sealed) HebiLookup
     %      % Show devices on the network
     %      display(HebiLookup);
     %
-    %   Example
+    %   Examples
     %      % Create group using names
     %      family = 'Arm';
     %      names = {'Base'; 'Shoulder'; 'Elbow'};
     %      group = HebiLookup.newGroupFromNames(family, names);
     %
-    %      % Create group using serial numbers
-    %      serials = {'SA023'; 'SA032'; 'SA025'};
-    %      group = HebiLookup.newGroupFromSerialNumbers(serials);
-    %
-    %      % Create alphabetically ordered group of all modules
+    %      % Create an alphabetically ordered group of all modules
     %      group = HebiLookup.newGroupFromFamily('*');
+    %
+    %      % Create group using serial numbers
+    %      serials = {'X-00009'; 'X-00042'; 'X-00001'};
+    %      group = HebiLookup.newGroupFromSerialNumbers(serials);\
     %
     %      % Create group using mac addresses
     %      macs = {'08:00:7F:9B:67:09'; '08:00:7F:50:BF:45'};
@@ -59,7 +59,7 @@ classdef (Sealed) HebiLookup
     %
     %   See also HebiGroup
     
-    %   Copyright 2014-2016 HEBI Robotics, LLC.
+    %   Copyright 2014-2017 HEBI Robotics, Inc.
     
     % Static API
     methods(Static)
@@ -160,6 +160,11 @@ classdef (Sealed) HebiLookup
             %   become cluttered with 'stale' modules.
             javaMethod('clearModuleList', HebiLookup.className,  varargin{:});
             this = HebiLookup.wrapper;
+            
+            % Add a pause so that the lookup has some
+            % time to find modules
+            config = hebi_config('HebiLookup');
+            pause(config.initialNetworkLookupPause);
         end
         
         function this = clearGroups(varargin)
