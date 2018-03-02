@@ -8,8 +8,8 @@ classdef (Sealed) HebiTrajectory
     %   HebiTrajectory Methods:
     %      getDuration     - returns the total duration [s]
     %      getState        - returns position/velocity/acceleration 
-    %                        at any given time.
-    %      getWaypointTime - returns the timestamp for each waypoint
+    %                        at any given time
+    %      getWaypointTime - returns the input time for each waypoint
     %
     %   Example
     %      % Create trajectory
@@ -41,7 +41,7 @@ classdef (Sealed) HebiTrajectory
     %
     %           % compensate for accelerations
     %           accelCompEffort = kin.getDynamicCompEfforts(...
-    %               fbk.position, ... % Used for calculating jacobian
+    %               fbk.position, ... % used for jacobian
     %               pos, vel, accel);
     %
     %           % send to hardware
@@ -56,13 +56,13 @@ classdef (Sealed) HebiTrajectory
     %   HebiTrajectoryGenerator.newJointMove,
     %   HebiTrajectoryGenerator.executeTrajectory
 
-    %   Copyright 2014-2018 HEBI Robotics, Inc.
+    %   Copyright 2014-2017 HEBI Robotics, LLC.
         
     %% API Methods
     methods(Access = public)
         
         function duration = getDuration(this)
-            % getDuration returns the total duration of the trajectory [s]
+            % getDuration returns the total duration [s]
             %
             %   This is equivalent to 
             %     

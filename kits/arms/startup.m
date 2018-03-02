@@ -10,7 +10,6 @@ addpath(fullfile(currentDir, 'tools'));
 
 % explicitely pre-load libraries
 hebi_load(); % main HEBI library
-HebiJoystick.loadLibs(); % Keyboard input
 HebiKeyboard.loadLibs(); % Keyboard input
 
 end

@@ -8,80 +8,38 @@ classdef (Sealed) HebiTrajectoryGenerator
     % efforts (torques). 
     %
     %   HebiTrajectoryGenerator Methods (non-blocking):
-    %
-    %      newJointMove   - Creates a trajectory through joint waypoints
-    %                       that does not make use of kinematics.
-    %
-    %      newLinearMove  - Creates a trajectory through xyz waypoints
-    %                       that uses knowledge of kinematics to travel in
-    %                       straight lines in workspace.
-    %
-    %      setMinDuration - Sets the minimum duration that gets used when
-    %                       relying on the trajectory generator's internal
-    %                       timing heuristic.
-    %      getMinDuration - Returns the currently set minimum trajectory
-    %                       duration.
-    %
-    %      setSpeedFactor - Sets a scalar that adjusts the speed of all
-    %                       trajectories. A value of 1.0 will run at full
-    %                       speed, and smaller values proportionally
-    %                       slow down the timing of the trajectory. This
-    %                       applies to both the internal timing heuristic
-    %                       as well as user supplied time vectors.
-    %      getSpeedFactor - Returns currently set speed factor.
-    %
-    %      setAlgorithm   - Allows use of legacy trajectory algorithms.
-    %      getAlgorithm   - Returns the active trajectory algorithm.
+    %      setAlgorithm      - sets the trajectory algorithm
+    %      setMinDuration    - sets the minimum duration
+    %      setSpeedFactor    - sets the speed factor
+    %      newJointMove      - creates a trajectory through joint waypoints
+    %      newLinearMove     - creates a trajectory through xyz waypoints
     %
     %   HebiTrajectoryGenerator Methods (blocking):
+    %      moveJoint         - creates and executes joint trajectory
+    %      moveLinear        - creates and executes xyz trajectory
+    %      executeTrajectory - executes a given trajectory
     %
-    %      moveJoint         - Creates and executes a joint space trajectory 
-    %                          using newJointMove() and commands a group to 
-    %                          execute the trajectory until it is complete.
-    %                          This is a convenience function that will only
-    %                          move between 2 waypoints, starting and
-    %                          stopping at zero velocity and acceleration.
+    % Note that trajectories can technically be calculated without
+    % knowledge of the kinematic configuration. This API requires the
+    % HebiKinematics object mainly in order to access joint meta-data such 
+    % as velocity limits. A full model of the system is only required for
+    % converting accelerations to efforts (torques) as well as 'linear'
+    % movements that move the end-effector in world coordinates. 
     %
-    %      moveLinear        - Creates and executes a workspace trajectory
-    %                          using newLinearMove() and commands a group to 
-    %                          execute the trajectory until it is complete.
-    %                          This is a convenience function that will only
-    %                          move between 2 waypoints, starting and
-    %                          stopping at zero velocity and acceleration.
+    % Thus, even if your robot can not be expressed as a serial chain 
+    % (e.g. delta arm), you may still use this API to calculate  
+    % trajectories by only specifying the system's joints.
     %
-    %      executeTrajectory - Executes a trajectory that is generated with
-    %                          either newJointMove or newLinearMove.  This
-    %                          method provides more control on how the
-    %                          trajectory is setup, allowing multiple
-    %                          intermediate waypoints and additional
-    %                          constraints such as user-defined waypoint
-    %                          timing and non-zero waypoint velocities and
-    %                          accelerations.                   
-    %
-    % Note that the following parts of the API require additional knowledge 
-    % about the hardware:
-    %
-    %   - The internal heuristic to automatically determine an appropriate
-    %     time vector requires knowledge of joint velocity limits
-    %
-    %   - Linear movements (newLinearMove/moveLinear) require a fully 
-    %     specified kinematic model (HebiKinematics object) for IK
-    %
-    %   - executeTrajectory requires a fully specified kinematic model
-    %     (HebiKinematics object) if gravity or acceleration compensation 
-    %     are enabled.
-    %
-    % Execution of a trajectory using the simplified 'blocking' API
-    % additionally requires a HebiGroup in order to communicate with the
-    % actuator hardware.
+    % Execution of a trajectory additionally requires a HebiGroup in order
+    % to communicate with hardware.
     %
     %   Example
-    %      % Initialize with a kinematic model (3-DoF arm)
+    %      % Setup kinematics and create trajectory generator
     %      kin = HebiKinematics();
     %      kin.addBody('X5-4');
-    %      kin.addBody('X5-Link', 'ext', 0.325, 'twist', 0);
+    %      kin.addBody('X5-Link', 'ext', 0.2875, 'twist', 0, 'mass', 0.318);
     %      kin.addBody('X5-1');
-    %      kin.addBody('X5-Link', 'ext', 0.325, 'twist', 0);
+    %      kin.addBody('X5-Link', 'ext', 0.3678, 'twist', 0, 'mass', 0.276);
     %      kin.addBody('X5-1');
     %      trajGen = HebiTrajectoryGenerator(kin);
     %
@@ -95,34 +53,14 @@ classdef (Sealed) HebiTrajectoryGenerator
     %      end
     %
     %   Example
-    %      % Initialize without a kinematic model (e.g. delta arm, where
-    %      % the parallel kinematics cannot use HEBIKINEMATICS )
-    %      velocityLimit = [ -9.5 9.5
-    %                        -9.5 9.5
-    %                        -9.5 9.5 ];
-    %      trajGen = HebiTrajectoryGenerator(velocityLimit);
-    %
-    %      % Alternatively you can setup a 'dummy' HebiKinematics object to  
-    %      % get the velocity limits programmatically.
-    %      kin = HebiKinematics();
-    %      kin.addBody('X5-1');
-    %      kin.addBody('X5-1');
-    %      kin.addBody('X5-1');
-    %      velocityLimits = kin.getJointInfo().velocityLimit;
-    %      trajGen = HebiTrajectoryGenerator(velocityLimits);
-    %
-    %   Example
-    %      % Generate a trajectory for XY velocities of a mobile base where
-    %      % speeds are limited to 1 m/s (or whatever units you are using).
-    %      velocityLimits = [ -1 1;
-    %                         -1 1 ];
-    %      trajGen = HebiTrajectoryGenerator(velocityLimits);
-    %      positions = [ 0 0;
-    %                   -2 1 ];
-    %      trajectory = trajGen.newJointMove(positions);
+    %      % Generate a non-blocking trajectory
+    %      trajGen = HebiTrajectoryGenerator(kin);
+    %      trajectory = trajGen.newJointMove([start; finish]);
     %
     %      % Visualize points along the trajectory
-    %      HebiUtils.plotTrajectory(trajectory);
+    %      t = 0:0.001:trajectory.getDuration();
+    %      [pos, vel, accel] = trajectory.getState(t);
+    %      plot(t, pos);
     %
     %      % Execute trajectory open-loop in position and velocity
     %      cmd = CommandStruct();
@@ -135,19 +73,15 @@ classdef (Sealed) HebiTrajectoryGenerator
     %          pause(0.001);
     %      end
     %
-    %   See also HebiTrajectory, HebiKinematics, HebiLookup, HebiGroup, 
-    %   newJointMove, executeTrajectory.
+    %   See also HebiKinematics, HebiLookup, HebiGroup, newJointMove
     
-    %   Copyright 2014-2018 HEBI Robotics, Inc.
+    %   Copyright 2014-2017 HEBI Robotics, LLC.
     
     %% API Methods
     methods(Access = public)
         
          function out = getAlgorithm(this, varargin)
-            % getAlgorithm gets the trajectory algorithm that is currently
-            % being used to generate trajectories. 
-            %
-            % See also setAlgorithm
+            % getAlgorithm gets the trajectory algorithm
             out = getAlgorithm(this.obj, varargin{:});
         end
         
@@ -162,56 +96,44 @@ classdef (Sealed) HebiTrajectoryGenerator
             %   'UnconstrainedQp' creates advanced minimum jerk 
             %   trajectories that support user specified velocity and 
             %   acceleration constraints at any point (free constraints 
-            %   are represented by nans).
+            %   are represented by nans). The current implementation is 
+            %   however relatively expensive to compute and is only 
+            %   recommended for low numbers of waypoints.
             %
-            %   'MinJerkPhase' is an older trajectory algorithm that
-            %   requires fully specified position waypoints and does not
-            %   support user specified constraints. We consider this
-            %   algorithm deprecated and recommend not using it anymore.
-            % 
-            %   See also HebiTrajectoryGenerator, newJointMove,
-            %   getAlgorithm
+            %   'MinJerkPhase' requires fully specified position waypoints
+            %   and assumes start and end conditions of zero for velocities 
+            %   and accelerations. It does not support user specified
+            %   constraints. However, it is computationally very efficient
+            %   and can be used for many waypoints.
+            %
+            %   See also HebiTrajectoryGenerator, newJointMove
             setAlgorithm(this.obj, varargin{:});
         end
         
         function out = getMinDuration(this, varargin)
-            % getMinDuration returns the minimum auto-determined duration.
-            %
-            % See also setMinDuration
+            % getMinDuration returns the minimum auto-determined duration
             out = getMinDuration(this.obj, varargin{:});
         end
         
         function this = setMinDuration(this, varargin)
-            % setMinDuration sets the minimum duration that gets used when 
-            % relying on the trajectory generator's internal timing heuristic. 
-            %
-            % This prevents large accelerations when generating a trajectory
-            % between positions that are close together. Minimum duration
-            % is over-ridden when either a 'Duration' length or 'Time'
-            % vector is specified when making a new trajectory.
-            %
-            % See also newJointMove, getMinDuration
+            % setMinDuration sets the minimum auto-determined duration
             setMinDuration(this.obj, varargin{:});
         end
         
         function out = getSpeedFactor(this, varargin)
-            % getSpeedFactor gets the speed factor that adjusts the speed
-            % of all trajectories. 
-            %
-            % See also setSpeedFactor
+            % getSpeedFactor gets the speed factor
             out = getSpeedFactor(this.obj, varargin{:});
         end
         
         function this = setSpeedFactor(this, varargin)
-            % setSpeedFactor sets the speed factor that adjusts the speed
-            % of all trajectories.
+            % setSpeedFactor sets the speed factor
             %
             %   The speed factor reduces the speed of all trajectories
             %   to the specified multiplier. For example, a speed factor
             %   of 0.5 would turn a 5 second trajectory into a 10 second
             %   trajectory.
             %
-            %   This factor gets applied to all trajectories, including
+            %   This factor gets applied to all trajectories, even
             %   ones that have user specified time.
             %
             %   Example:
@@ -219,7 +141,7 @@ classdef (Sealed) HebiTrajectoryGenerator
             %       trajGen = HebiTrajectoryGenerator(kin);
             %       trajGen.setSpeedFactor(0.5);
             %
-            %   Values above 1.0 are supported, but may result in
+            %   Values above 1 are supported, but may result in
             %   trajectories that exceed the joint limits.
             %
             %   See also getSpeedFactor, newJointMove
@@ -231,7 +153,7 @@ classdef (Sealed) HebiTrajectoryGenerator
             %
             % Arguments:
             %
-            %   Positions     - [numWaypoints x numJoints] matrix
+            %   Positions        - N x numJoints matrix
             %
             % Parameters:
             %
@@ -270,17 +192,7 @@ classdef (Sealed) HebiTrajectoryGenerator
             %   zero start and end conditions.
             %
             %   Example:
-            %       % Setup trajectory generator for a single joint
-            %       kin = HebiKinematics();
-            %       kin.addBody('X5-1');
-            %       velocityLimit = kin.getJointInfo().velocityLimit;
-            %       trajGen = HebiTrajectoryGenerator(velocityLimit);
-            %
-            %   Example:
-            %       % Create trajectory with automated time scaling, with
-            %       % specified settings to slow down from defaults.
-            %       trajGen.setMinDuration(1.0);  
-            %       trajGen.setSpeedFactor(0.5);  
+            %       % Create trajectory with automated time scaling
             %       positions = rand(10, kin.getNumDoF());
             %       trajectory = trajGen.newJointMove(positions);
             %
@@ -295,7 +207,9 @@ classdef (Sealed) HebiTrajectoryGenerator
             %       % Visualize the trajectory
             %       positions = rand(10, kin.getNumDoF());
             %       trajectory = trajGen.newJointMove(positions);
-            %       HebiUtils.plotTrajectory(trajectory);
+            %       t = 0:0.001:trajectory.getDuration();
+            %       [pos,vel,accel] = trajectory.getState(t);
+            %       plot(t, pos);
             %
             %   Example:
             %       % Create trajectory
@@ -334,22 +248,33 @@ classdef (Sealed) HebiTrajectoryGenerator
             %       % Setup trajectory generator for a single joint
             %       kin = HebiKinematics();
             %       kin.addBody('X5-1');
-            %       velocityLimit = kin.getJointInfo().velocityLimit;
-            %       trajGen = HebiTrajectoryGenerator(velocityLimit);
+            %       trajGen = HebiTrajectoryGenerator(kin);
+            %       trajGen.setSpeedFactor(1);
+            %       trajGen.setAlgorithm('UnconstrainedQp');
             %
             %       % Create single joint trajectory with constraints
             %       positions     = [ 0  1   3   3   1   0 ]';
             %       velocities    = [ 0 nan  0   0  nan  0 ]';
             %       accelerations = [ 0 nan nan nan nan  0 ]';
-            %       waypointTimes = [ 0  1   2   3   4   5 ]';
+            %       time          = [ 0  1   2   3   4   5 ]';
             %
             %       trajectory = trajGen.newJointMove( positions, ...
             %           'Velocities', velocities, ...
             %           'Accelerations', accelerations, ...
-            %           'Time', waypointTimes );
+            %           'Time', time );
             %
-            %       % Visualize the position/velocity/accelerations.
-            %       HebiUtils.plotTrajectory(trajectory);
+            %       % Visualize result
+            %       t = 0:0.01:trajectory.getDuration();
+            %       [p,v,a] = trajectory.getState(t);
+            %       subplot(3,1,1);
+            %       plot(t,p);
+            %       title('position')
+            %       subplot(3,1,2);
+            %       plot(t,v);
+            %       title('velocity')
+            %       subplot(3,1,3);
+            %       plot(t,a);
+            %       title('acceleration')
             %       
             %   See also HebiTrajectoryGenerator, moveJoint, newJointMove,
             %   executeTrajectory
@@ -363,13 +288,6 @@ classdef (Sealed) HebiTrajectoryGenerator
             %   difference being that the resulting trajectory represents
             %   an approximate straight line in cartesian workspace
             %   coordinates.
-            %
-            %   NOTE:
-            %   Because the underlying IK relies on a local optimizer, the
-            %   generated trajectory and waypoints for large motions, 
-            %   particularly large changes in orientation, may be poor. It 
-            %   is important to check the output of newLinearMove() before
-            %   sending it actual hardware.
             %
             %   At the moment this method supports only exactly two
             %   waypoints per call. This method also currently only
@@ -388,18 +306,12 @@ classdef (Sealed) HebiTrajectoryGenerator
                 error('Missing support for more than two waypoints.');
             end
             
-            if isempty(this.kin)
-                error(['To use newLinearMove() HebiTrajectoryGenerator needs ' ...
-                      'to be initialized with a HebiKinematics object (for IK).']);          
+            if ~exist('vrrotmat2vec','file')
+                error('Requires Simulink 3D Animation toolbox. Dependency will be removed soon.');
             end
             
-            numDoF = this.kin.getNumDoF();
-            
-            % Make sure we have at least 2 joints.  3-DoF IK should work on
-            % a 2-DoF arm.
-            if numDoF < 2
-                disp('Please specify kinematics with 2 or more DoF.');
-                return;
+            if ~strcmp('MinJerkPhase', this.getAlgorithm)
+               error('newLinearMove currently only supports MinJerkPhase algorithm'); 
             end
             
             % Interpolate between XYZ endpoint positions
@@ -416,90 +328,42 @@ classdef (Sealed) HebiTrajectoryGenerator
             upSampledXYZ = interp1(regPhase, xyzPositions', upSampledPhase, 'linear' );
             upSampledAngles = interp1(regPhase, positions, upSampledPhase, 'linear' );
             
-            if numDoF >= 6
-                diffDCM = Tn(1:3,1:3) * T0(1:3,1:3)';
-                [rotAxis,rotAngle] = HebiUtils.rotMat2axAng(diffDCM);
-            elseif numDoF >= 4
-                rotAxis = cross(T0(1:3,3),Tn(1:3,3));
-                
-                if norm(rotAxis) > 1E-6
-                    rotAxis = rotAxis / norm(rotAxis);
-                    rotAngle = acos( dot(T0(1:3,3),Tn(1:3,3)) );
-                    % Keep angle between +/- pi
-                    if abs(rotAngle) > pi 
-                        rotAngle = sign(rotAngle)*(abs(rotAngle) - 2*pi);
-                    end
-                else
-                    rotAxis = [0 0 1];
-                    rotAngle = 0;
-                end
+            % Disable so3 IK on 'large' rotations
+            diffDCM = T0(1:3,1:3) * Tn(1:3,1:3)';
+            axisAngle = vrrotmat2vec(diffDCM);
+            looseIK = abs(axisAngle(4)) > pi/4;
+            if looseIK
+                display('Large Orientation Change. Doing "Loose" IK.');
             end
-                  
+            
             % Get the joint angles for each waypoint
             IKAngles = nan(upSamplePoints, this.kin.getNumDoF());
             for i=1:upSamplePoints
                 
                 initAngles = upSampledAngles(i,:);
-
-                if numDoF <= 3
-                    % 3DoF IK
+                
+                if looseIK
                     IKAngles(i,:) = getInverseKinematics( this.kin, ...
                         'xyz', upSampledXYZ(i,:)', ...
-                        'initial', initAngles );
-                elseif numDoF <= 5
-                    % 5DoF IK
-                    interpAngle = upSampledPhase(i)*rotAngle;
-                    interpRotMat = axAng2rotMat(rotAxis,interpAngle);
-                    cmdTipAxis = interpRotMat * T0(1:3,3);
-                   
-                    IKAngles(i,:) = getInverseKinematics( this.kin, ...
-                        'xyz', upSampledXYZ(i,:)', ...
-                        'tipAxis', cmdTipAxis, ...
                         'initial', initAngles );
                 else
-                    % 6DoF IK
-                    interpAngle = upSampledPhase(i)*rotAngle;
-                    interpRotMat = axAng2rotMat(rotAxis,interpAngle);
-                    cmdDCM = interpRotMat*T0(1:3,1:3);
-                    
+                    cmdDCM = this.kin.getForwardKinematicsEndEffector(initAngles);
                     IKAngles(i,:) = getInverseKinematics( this.kin, ...
                         'xyz', upSampledXYZ(i,:)', ...
-                        'SO3', cmdDCM, ...
-                        'initial', initAngles );  
+                        'so3', cmdDCM, ...
+                        'initial', initAngles );
                 end
                 
             end
             
-            % Change Algorithm to MinJerkPhase if needed.  We still use the
-            % old algorithm because it produces more smooth overall motion.
-            % An update to the auto-timing heuristic is needed before
-            % updating to UnconstrainedQP.  
-            originalAlgorithm = this.getAlgorithm;
-            if ~strcmp(originalAlgorithm,'MinJerkPhase')
-                c = onCleanup(@()this.setAlgorithm(originalAlgorithm));
-                this.setAlgorithm('MinJerkPhase');
-            end
-            
             % Construct joint move trajectory over interpolated angles
             trajectory = this.newJointMove(IKAngles, varargin{:});
-
         end
         
         function [] = moveJoint(this, group, positions, varargin)
-            % MOVEJOINT creates a joint-space trajectorythat moves 
-            % between the given waypoints, and executes the trajectory on a
-            % group of actuators.  The trajectoty will start and stop at 
-            % the first and last waypoints and will move thru any 
-            % intermediate waypoints without stopping.
+            % moveJoint creates and executes a joint trajectory
             %
-            %   This method is a 'blocking' call, which means that the
-            %   function will run until the execution of the trajectory is
-            %   completed.  If you need to access and react to feedback
-            %   while a trajectory is being executed, use NEWJOINTMOVE to
-            %   make the trajectory and then us TRAJECTORY.GETSTATE to 
-            %   directly access commmands in a loop.
-            %
-            %   MOVEJOINT is a convenience wrapper that is equivalent
+            %   This method is a convenience wrapper that is equivalent
             %   to manually calling the following:
             %
             %      traj = trajGen.newJointMove(positions);
@@ -507,13 +371,11 @@ classdef (Sealed) HebiTrajectoryGenerator
             %
             %   Arguments:
             %
-            %       group     - HebiGroup containing the actuators 
-            %       positions - [numWaypoints x numModules matrix] of 
-            %                   positions.
+            %       group     - target actuators (HebiGroup)
+            %       positions - N x numModules matrix of positions
             %
             %   Please check the documentation for newJointMove and
-            %   executeTrajectory (direct links below) for information 
-            %   on available parameters for these functions.
+            %   executeTrajectory for information on available parameters.
             %
             %   Example
             %      % Move between waypoints with stops in between
@@ -531,48 +393,31 @@ classdef (Sealed) HebiTrajectoryGenerator
             %      positions = rand(numWaypoints, kin.getNumDoF);
             %      trajGen.moveJoint(group, positions);
             %
-            %   See also HebiTrajectoryGenerator, HebiTrajectory, 
-            %   newJointMove, executeTrajectory.
+            %   See also HebiTrajectoryGenerator, newJointMove,
+            %   executeTrajectory
             traj = this.newJointMove(positions);
             this.executeTrajectory(group, traj, varargin{:});
         end
         
         function [] = moveLinear(this, group, positions, varargin)
-            % moveLinear moves between waypoints in straight lines in
-            % workspace, based on kinematics that were defined when setting
-            % up the trajectory with HebiTrajectoryGenerator(kin).
+            % moveLinear moves between waypoints in straight lines
             %
-            %   This method works the same as moveJoint() with the only
+            %   This method works the same as moveJoint with the only
             %   difference being that the resulting trajectory represents
             %   an approximate straight line in cartesian workspace
             %   coordinates.
             %
-            %   NOTE:
-            %   Because the underlying IK relies on a local optimizer, the
-            %   generated trajectory and waypoints for large motions, 
-            %   particularly large changes in orientation, may be poor.
-            %   Therefore it is recommended that you use this function for 
-            %   moves that are in similar parts of the workspace and have 
-            %   relatively small change in orientation of the end-effector.
-            %
-            %   This method is a 'blocking' call, which means that the
-            %   function will run until the execution of the trajectory is
-            %   completed.  If you need to access and react to feedback
-            %   while a trajectory is being executed, use NEWJOINTMOVE to
-            %   make the trajectory and then us TRAJECTORY.GETSTATE to 
-            %   directly access commmands in a loop.
-            %
-            %   MOVELINEAR is a convenience wrapper that is equivalent
+            %   This method is a convenience wrapper that is equivalent
             %   to manually calling the following:
             %
             %      traj = trajGen.newLinearMove(positions);
             %      trajGen.executeTrajectory(group, traj);
             %
-            %   Please refer to the documentation of newLinearMove and
+            %   Please refer to the documentation of newJointMove and
             %   executeTrajectory for more information.
             %
-            %   See also moveJoint, HebiTrajectoryGenerator, HebiTrajectory, 
-            %   newLinearMove, newJointMove, executeTrajectory.
+            %   See also HebiTrajectoryGenerator, moveJoint, newJointMove,
+            %   executeTrajectory
             traj = this.newLinearMove(positions);
             this.executeTrajectory(group, traj, varargin{:});
         end
@@ -582,9 +427,8 @@ classdef (Sealed) HebiTrajectoryGenerator
             %
             %   Arguments:
             %
-            %       group     - HebiGroup containing the actuators 
-            %       positions - [numWaypoints x numModules matrix] of 
-            %                   positions.
+            %       group      - target actuators (HebiGroup)
+            %       trajectory - executable trajectory (HebiTrajectory)
             %
             %   Parameters:
             %
@@ -616,18 +460,9 @@ classdef (Sealed) HebiTrajectoryGenerator
             %       callback = @(time, fbk, cmd) cmd;
             %
             %   Example
-            %       % Create trajectory generator with defined kinematic
-            %       % model for  acceleration compensation
-            %       kin = HebiKinematics();
-            %       kin.addBody('X5-4');
-            %       kin.addBody('X5-Link', 'ext', 0.325, 'twist', 0);
-            %       kin.addBody('X5-1');
-            %       kin.addBody('X5-Link', 'ext', 0.325, 'twist', 0);
-            %       kin.addBody('X5-1');
-            %       trajGen = HebiTrajectoryGenerator(kin);
-            %
-            %       % Create trajectory w/ automatically determined time
-            %       positions = [0 0 0; 1 1 1];
+            %       % Create trajectory
+            %       trajGen = TrajectoryGenerator(kin);
+            %       positions = [0 0; 1 1]
             %       trajectory = trajGen.newJointMove(positions);
             %
             %       % Simple execution
@@ -656,13 +491,6 @@ classdef (Sealed) HebiTrajectoryGenerator
             parser.parse(varargin{:});
             p = parser.Results;
             
-            % Sanity check
-            useEfforts = p.EnableDynamicsComp || ~isempty(p.GravityVec);
-            if useEfforts && isempty(this.kin)
-                error(['To compensate for gravity or accelerations HebiTrajectoryGenerator ' ...
-                    'needs to be initialized with a HebiKinematics object.']);
-            end
-            
             % Simplify names
             group = p.Group;
             traj = p.Trajectory;
@@ -683,6 +511,7 @@ classdef (Sealed) HebiTrajectoryGenerator
                 
                 % Convert accelerations to efforts
                 effort = zeros(size(pos));
+                useEfforts = false;
                 if p.EnableDynamicsComp
                     accelCompEffort = this.kin.getDynamicCompEfforts(...
                         jacobianPosition, ...
@@ -690,6 +519,7 @@ classdef (Sealed) HebiTrajectoryGenerator
                         vel, ...
                         accel);
                     effort = effort + accelCompEffort;
+                    useEfforts = true;
                 end
                 
                 % Account for gravity if applicable
@@ -698,6 +528,7 @@ classdef (Sealed) HebiTrajectoryGenerator
                         jacobianPosition, ...
                         p.GravityVec);
                     effort = effort + gravCompEffort;
+                    useEfforts = true;
                 end
                 
                 % Offset for springs etc., if applicable
@@ -707,7 +538,7 @@ classdef (Sealed) HebiTrajectoryGenerator
                 
                 % Disable effort control if not needed
                 if ~useEfforts
-                    effort(:) = nan;
+                    effort = nan(size(pos));
                 end
                 
                 % Command to module
@@ -726,29 +557,18 @@ classdef (Sealed) HebiTrajectoryGenerator
             end
         end
         
-        function this = HebiTrajectoryGenerator(arg1)
+        function this = HebiTrajectoryGenerator(kin)
             % Provides methods to generate trajectories
-            
-            % Backing Java object
-            this.obj = javaObject(HebiTrajectoryGenerator.className);
-            
-            % Optional velocity limits / kinematics
-            if nargin > 0 && ~isempty(arg1)
-                
-                if isa(arg1, 'HebiKinematics')
-                    this.kin = arg1;
-                    arg1 = this.kin.obj;
-                end
-                
-                setVelocityLimits(this.obj, arg1);
-                
+            if ~isa(kin, 'HebiKinematics')
+                error('Expected HebiKinematics');
             end
+            this.kin = kin;
             
-            % Initialize defaultable properties
+            this.obj = javaObject(HebiTrajectoryGenerator.className);
+            setKinematics(this.obj, kin.obj);
             setAlgorithm(this.obj, this.config.defaultAlgorithm);
             setMinDuration(this.obj, this.config.defaultMinDuration);
             setSpeedFactor(this.obj, this.config.defaultSpeedFactor);
-            
         end
         
     end

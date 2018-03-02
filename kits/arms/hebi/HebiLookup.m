@@ -12,17 +12,15 @@ classdef (Sealed) HebiLookup
     %
     %   HebiLookup Methods (configuration):
     %   setLookupAddresses                - sets the lookup target address [ipv4]
-    %   getLookupAddresses                - gets the lookup target address [ipv4]
     %   setLookupFrequency                - sets the lookup request rate [Hz]
-    %   getLookupFrequency                - gets the lookup request rate [Hz]    
     %   setInitialGroupFeedbackFrequency  - sets the group feedback rate [Hz]
     %   setInitialGroupCommandLifetime    - sets the command lifetime [s]
     %   clearModuleList                   - clears device list (including stale)
     %
     %   HebiLookup Methods (group creation):
     %   newGroupFromNames                 - groups by user defined names
-    %   newGroupFromFamily                - groups by family and sorts by name
     %   newGroupFromSerialNumbers         - groups by hardware serial numbers
+    %   newGroupFromFamily                - groups by family and sorts by name
     %   newGroupFromMacs                  - groups by hardware mac addresses
     %   newConnectedGroupFromName         - groups by connectivity
     %   newConnectedGroupFromSerialNumber - groups by connectivity
@@ -37,18 +35,18 @@ classdef (Sealed) HebiLookup
     %      % Show devices on the network
     %      display(HebiLookup);
     %
-    %   Examples
+    %   Example
     %      % Create group using names
     %      family = 'Arm';
     %      names = {'Base'; 'Shoulder'; 'Elbow'};
     %      group = HebiLookup.newGroupFromNames(family, names);
     %
-    %      % Create an alphabetically ordered group of all modules
-    %      group = HebiLookup.newGroupFromFamily('*');
-    %
     %      % Create group using serial numbers
-    %      serials = {'X-00009'; 'X-00042'; 'X-00001'};
-    %      group = HebiLookup.newGroupFromSerialNumbers(serials);\
+    %      serials = {'SA023'; 'SA032'; 'SA025'};
+    %      group = HebiLookup.newGroupFromSerialNumbers(serials);
+    %
+    %      % Create alphabetically ordered group of all modules
+    %      group = HebiLookup.newGroupFromFamily('*');
     %
     %      % Create group using mac addresses
     %      macs = {'08:00:7F:9B:67:09'; '08:00:7F:50:BF:45'};
@@ -61,7 +59,7 @@ classdef (Sealed) HebiLookup
     %
     %   See also HebiGroup
     
-    %   Copyright 2014-2018 HEBI Robotics, Inc.
+    %   Copyright 2014-2016 HEBI Robotics, LLC.
     
     % Static API
     methods(Static)
@@ -162,11 +160,6 @@ classdef (Sealed) HebiLookup
             %   become cluttered with 'stale' modules.
             javaMethod('clearModuleList', HebiLookup.className,  varargin{:});
             this = HebiLookup.wrapper;
-            
-            % Add a pause so that the lookup has some
-            % time to find modules
-            config = hebi_config('HebiLookup');
-            pause(config.initialNetworkLookupPause);
         end
         
         function this = clearGroups(varargin)

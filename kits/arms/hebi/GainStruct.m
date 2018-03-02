@@ -5,18 +5,15 @@ function struct = GainStruct()
     %   gains on a group of modules. Please consult the online
     %   documentation to find out more about the individual gain settings.
     %
-    %   NaNs for any values in gains or control parmaters are ignored. In
-    %   these cases any existing setting on the module for that parameter
-    %   will remain unmodified.
+    %   Non-finite values and NaNs are ignored.
     %
-    %   Example:
-    %       % Set the control strategy of a 2 module group to strategy 4
-    %       gains = GainStruct()
-    %       gains.controlStrategy = [4 4];
+    %   Example
+    %       gains = GainStruct();
+    %       gains.controlStrategy = 4;
     %       group.send('gains', gains);
     %
     %   See also HebiLookup, HebiGroup
     
-    %   Copyright 2014-2018 HEBI Robotics, Inc.
+    %   Copyright 2014-2016 HEBI Robotics, LLC.
     struct = javaObject(hebi_load('GainStruct'));
 end

@@ -1,6 +1,6 @@
 %% Setup
 % Robot specific setup. Edit as needed.
-[group, kin, gravityVec] = setupArm_beverages();
+[group, kin, gravityVec] = setupArm();
 
 % Trajectory
 trajGen = HebiTrajectoryGenerator(kin);
@@ -59,57 +59,32 @@ trajGen.moveJoint( group, [startPosition; waypoints(1,:)], ...
                     'EnableDynamicsComp', true, ...
                     'GravityVec', gravityVec );
 
-while true
+% Move along waypoints
+if stopBetweenWaypoints
     
-    % Add new waypoint on space bar press
-    keys = read(kb);
-    
-    if keys.SPACE == 1
-        break;
-    end
-    
-    % Move along waypoints
-    if stopBetweenWaypoints
-
-        % Split waypoints into individual movements
-        numMoves = size(waypoints,1);
-        for i = 2:numMoves
-
-            % Pick start and end positions
-            startPosition = waypoints(i-1,:);
-            endPosition = waypoints(i,:);
-
-            % Do minimum-jerk trajectory between positions. Note that this
-            % call handles trajectory commands internally and blocks until
-            % the move is finished.
-            trajGen.moveJoint( group, [startPosition; endPosition], ...
-                                'EnableDynamicsComp', true, ...
-                                'GravityVec', gravityVec );
-            
-            if keys.SPACE == 1
-                break;
-            end                
-        end
-
-    else
+    % Split waypoints into individual movements
+    numMoves = size(waypoints,1);
+    for i = 2:numMoves
         
-        if keys.SPACE == 1
-            break;
-        end
-
-        % Move through all waypoints as a single movement
-        trajGen.moveJoint( group, waypoints, ...
+        % Pick start and end positions
+        startPosition = waypoints(i-1,:);
+        endPosition = waypoints(i,:);
+        
+        % Do minimum-jerk trajectory between positions. Note that this
+        % call handles trajectory commands internally and blocks until
+        % the move is finished.
+        trajGen.moveJoint( group, [startPosition; endPosition], ...
                             'EnableDynamicsComp', true, ...
                             'GravityVec', gravityVec );
+        
     end
     
-    if keys.SPACE == 1
-        break;
-    end
+else
     
-    trajGen.moveJoint( group, [waypoints(end,:);  waypoints(1,:)], ...
-                                'EnableDynamicsComp', true, ...
-                                'GravityVec', gravityVec );
+    % Move through all waypoints as a single movement
+    trajGen.moveJoint( group, waypoints, ...
+                        'EnableDynamicsComp', true, ...
+                        'GravityVec', gravityVec );
 end
 
 % Stop background logging and visualize

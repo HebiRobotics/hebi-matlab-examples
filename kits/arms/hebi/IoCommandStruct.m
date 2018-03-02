@@ -14,6 +14,6 @@ function struct = IoCommandStruct()
     %
     %   See also HebiLookup, HebiGroup
     
-    %   Copyright 2014-2018 HEBI Robotics, LLC.
+    %   Copyright 2014-2016 HEBI Robotics, LLC.
     struct = javaObject(hebi_load('IoCommandStruct'));
 end
