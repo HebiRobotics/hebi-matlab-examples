@@ -1,6 +1,8 @@
 # HEBI Robotics Kits - Edward
 
-This folder contains source code for running the Edward kit link:http://docs.hebi.us/resources/kits/assyInstructions/X-Series_Edward.pdf[Edward] kit.
+This folder contains source code for running the Edward kit (link:http://docs.hebi.us/resources/kits/assyInstructions/X-Series_Edward.pdf[Assembly Instructions]):
+
+image::http://docs.hebi.us//resources/kits/images/Edward_img.PNG[width=50%]
 
 ## Contents
 
