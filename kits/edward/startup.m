@@ -6,7 +6,6 @@ addpath(fullfile(localDir));
 addpath(fullfile(localDir, 'hebi'));
 
 addpath(fullfile(localDir, 'tools'));
-addpath(fullfile(localDir, 'tools', 'gains'));
 addpath(fullfile(localDir, 'tools', 'input'));
 addpath(fullfile(localDir, 'tools', 'kinematics'));
 
