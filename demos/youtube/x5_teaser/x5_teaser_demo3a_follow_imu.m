@@ -4,6 +4,9 @@
 %                https://youtu.be/oHAddCWBobs?t=46s
 %                
 % Requirements:  MATLAB 2013b or higher
+%                An Android phone running the HEBI Node App from the
+%                Google Play Store:
+%                https://play.google.com/store/apps/details?id=us.hebi.android.node&hl=en
 %
 % Author:        Florian Enner
 % Date:          23 March, 2016
@@ -14,7 +17,8 @@
 
 %% Setup
 group = HebiLookup.newGroupFromNames('Demo3', 'X5-4_003');
-phone = HebiLookup.newGroupFromNames('*','HEBI_Nexus5');
+phone = HebiLookup.newGroupFromNames('*','HEBI_Nexus5'); % See link above 
+                                                         % to download app
 
 %% Get Gyro Bias (don't move phone!)
 phone.startLog();
