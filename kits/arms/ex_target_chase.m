@@ -8,7 +8,7 @@
 
 %% Setup
 % Robot specific setup. Edit setupArm.m as needed for your configuration.
-[ group, kin, effortOffset, gravityVec ] = setupArm('5dof');
+[ group, kin, effortOffset, gravityVec ] = setupArm('4dof');
 
 % Trajectory
 trajGen = HebiTrajectoryGenerator(kin);
