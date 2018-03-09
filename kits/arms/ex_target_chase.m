@@ -8,7 +8,7 @@
 
 %% Setup
 % Robot specific setup. Edit setupArm.m as needed for your configuration.
-[group, kin, gravityVec] = setupArm();
+[ group, kin, effortOffset, gravityVec ] = setupArm('5dof');
 
 % Trajectory
 trajGen = HebiTrajectoryGenerator(kin);
@@ -61,7 +61,7 @@ while toc(demoTimer) < maxDemoTime
         dynamicsComp = kin.getDynamicCompEfforts( ...
                                     fbk.position, pos, vel, accel );
         gravComp = kin.getGravCompEfforts( fbk.position, gravityVec );
-        cmd.effort = dynamicsComp + gravComp;
+        cmd.effort = dynamicsComp + gravComp + effortOffset;
     end
     
     % Send current state to robot
