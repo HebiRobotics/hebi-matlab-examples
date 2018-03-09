@@ -17,4 +17,7 @@ HebiKeyboard.loadLibs();
 addpath(fullfile(localDir, 'kinematics'));
 addpath(fullfile(localDir, 'util'));
 
+% Scripts that may or may not be used anymore. Needs review.
+addpath(fullfile(localDir, 'unknown'));
+
 end
