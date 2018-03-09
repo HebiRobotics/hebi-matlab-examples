@@ -69,6 +69,8 @@ group.send('gains', gains)
 
 At the top of each file is a `setup` section that may expose options for testing different behaviors.
 
+Examples that are dependent on the number of degrees of freedom follow a naming convention with the kit name suffixed. Examples that are applicable to all kits do not have a suffix. They default to using the `4dof` kit, so please modify accordingly.
+
 :code: link:./
 
 [width="100%",options="header",cols="1a,3a,1a"]
