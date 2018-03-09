@@ -61,6 +61,6 @@ function struct = CommandStruct()
     %   See also HebiLookup, HebiGroup, GainStruct, HebiGroup.send,
     %   HebiGroup.setCommandLifetime.
     
-    %   Copyright 2014-2017 HEBI Robotics, Inc.
+    %   Copyright 2014-2018 HEBI Robotics, Inc.
     struct = javaObject(hebi_load('CommandStruct'));
 end

@@ -56,7 +56,7 @@ classdef (Sealed) HebiTrajectory
     %   HebiTrajectoryGenerator.newJointMove,
     %   HebiTrajectoryGenerator.executeTrajectory
 
-    %   Copyright 2014-2017 HEBI Robotics, Inc.
+    %   Copyright 2014-2018 HEBI Robotics, Inc.
         
     %% API Methods
     methods(Access = public)

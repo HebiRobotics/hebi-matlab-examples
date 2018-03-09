@@ -19,6 +19,8 @@ classdef (Sealed) HebiTrajectoryGenerator
     %      setMinDuration - Sets the minimum duration that gets used when
     %                       relying on the trajectory generator's internal
     %                       timing heuristic.
+    %      getMinDuration - Returns the currently set minimum trajectory
+    %                       duration.
     %
     %      setSpeedFactor - Sets a scalar that adjusts the speed of all
     %                       trajectories. A value of 1.0 will run at full
@@ -26,8 +28,10 @@ classdef (Sealed) HebiTrajectoryGenerator
     %                       slow down the timing of the trajectory. This
     %                       applies to both the internal timing heuristic
     %                       as well as user supplied time vectors.
+    %      getSpeedFactor - Returns currently set speed factor.
     %
     %      setAlgorithm   - Allows use of legacy trajectory algorithms.
+    %      getAlgorithm   - Returns the active trajectory algorithm.
     %
     %   HebiTrajectoryGenerator Methods (blocking):
     %
@@ -134,7 +138,7 @@ classdef (Sealed) HebiTrajectoryGenerator
     %   See also HebiTrajectory, HebiKinematics, HebiLookup, HebiGroup, 
     %   newJointMove, executeTrajectory.
     
-    %   Copyright 2014-2017 HEBI Robotics, Inc.
+    %   Copyright 2014-2018 HEBI Robotics, Inc.
     
     %% API Methods
     methods(Access = public)

@@ -9,7 +9,12 @@ classdef (Sealed) HebiUtils
     %
     %   loadGains          - loads group gains from disk (XML)
     %
-    %   newGroupFromLog    - replays data from a .hebilog file
+    %   newGroupFromLog    - generates a group from a .hebilog file that
+    %                        you can use play back data using getNextFeedback.
+    %
+    %   loadGroupLog       - loads a binary .hebilog file into memory
+    %
+    %   loadGroupLogUI     - shows a UI dialog to load one or more logs.
     %
     %   convertGroupLog    - converts a binary .hebilog file into a readable
     %                        format, either in memory or files like CSV or MAT.
@@ -23,8 +28,11 @@ classdef (Sealed) HebiUtils
     %   plotTrajectory     - visualizes the positions, velocities, and
     %                        accelerations of a trajectory produced by
     %                        HebiTrajectoryGenerator.
-    
-    %   Copyright 2014-2017 HEBI Robotics, Inc.
+    %
+    %   quat2rotMat        - converts orientations represented by a unit
+    %                        quaternion to a rotation matrix.
+
+    %   Copyright 2014-2018 HEBI Robotics, Inc.
     
     % Static API
     methods(Static)
@@ -43,25 +51,71 @@ classdef (Sealed) HebiUtils
             out = javaMethod('now', HebiUtils.className,  varargin{:});
         end
         
+        function varargout = loadGroupLog(varargin)
+            % loadGroupLog loads a binary .hebilog file into memory
+            %
+            %   This method converts binary log files into a log struct that 
+            %   contains all the feedback from a group over time that the group
+            %   was being logged.  Format of the log struct mirrors that of the
+            %   feedback struct, except that there are multiple rows of
+            %   data, each corresponding to a successive point in time.
+            %
+            %   'InputFile' Argument (required)
+            %      Absolute or relative path to the binary log file.
+            %
+            %   'View' Parameter (optional)
+            %      'Simple' converts only simple feedback. This is appropriate
+            %               for most users and results in much smaller log
+            %               files. (default)
+            %      'Full'   converts all available feedback. This is appropriate
+            %               for advanced users that need additional timestamps
+            %               or data from less common sensors.
+            %
+            %   Additionally, this method returns info and gains if the
+            %   corresponding data is contained within the log. For
+            %   logs recorded before version 1.1, very short
+            %   logs, and logs that were taken while the lookup was
+            %   disabled, info and gains may return empty.
+            %
+            %    Example:
+            %       % 1) Create a binary .hebilog file
+            %       group = HebiLookup.newGroupFromFamily('*');
+            %       logFile = group.startLog();
+            %       pause(5);
+            %       group.stopLog('format','raw'); % Does not convert log to
+            %                                      % memory.
+            %
+            %       % 2) Load the log from the binary file
+            %       hebiLog = HebiUtils.loadGroupLog(logFile);
+            %       plot(hebiLog.time, hebiLog.position);
+            %
+            %       % 3) Also read info and gains
+            %       [hebiLog, info, gains] = HebiUtils.loadGroupLog(logFile)
+            %
+            %   See also HebiGroup.startLog, HebiGroup.stopLog,
+            %   loadGroupLogsUI, convertGroupLog
+            [varargout{1:nargout}] = HebiUtils.convertGroupLog(varargin{:}, 'LogFormat', 'memory');
+        end
+        
         function varargout = convertGroupLog(varargin)
-            % convertGroupLog converts a binary log file into various formats
+            % CONVERTGROUPLOG converts a binary log file into various formats
             %
             %   This method is a more general version of HebiGroup.stopLog
-            %   that can convert existing binary log files into readable
+            %   that can convert existing binary log files into other readable
             %   formats. This is useful to recover data after a system
             %   crash, or to create alternative views of the data.
             %
-            %   'InputFile' Argument
+            %   'InputFile' Argument (required)
             %      Absolute or relative path to the binary log file.
             %
-            %   'LogFormat' ('format') Parameter
+            %   'LogFormat' ('format') Parameter (optional)
             %      'Memory' converts to an in-memory struct. Large logs can
             %               result in out-of-memory errors. (default)
             %      'Csv'    converts data to a CSV file
             %      'Mat'    converts data to a MAT file
             %      'Raw'    returns the input path
             %
-            %   'View' Parameter
+            %   'View' Parameter  (optional)
             %      'Simple' converts only simple feedback. This is appropriate
             %               for most users and results in much smaller log
             %               files. (default)
@@ -92,7 +146,7 @@ classdef (Sealed) HebiUtils
             %       [hebiLog, info, gains] = HebiUtils.convertGroupLog(logFile)
             %
             %   See also HebiGroup.startLog, HebiGroup.stopLog,
-            %   convertGroupLogsUI
+            %   convertGroupLogsUI, loadGroupLog.
             varargout = {javaMethod('convertGroupLog', HebiUtils.className,  varargin{:})};
             if nargout > 1
                 inputFile = varargin{1};
@@ -101,7 +155,7 @@ classdef (Sealed) HebiUtils
         end
         
         function group = newGroupFromLog(varargin)
-            % newGroupFromLog replays data from a log file
+            % NEWGROUPFROMLOG replays data from a log file
             %
             %   This method creates a group that retrieves data from a log
             %   file rather than from the network. This can be very useful
@@ -133,7 +187,7 @@ classdef (Sealed) HebiUtils
         end
         
         function out = saveGains(varargin)
-            % saveGains saves gains to disk (xml)
+            % SAVEGAINS saves gains for group to disk (xml)
             %
             %   This method saves gains from a GainStruct in a human
             %   readable format on disk. Note that this includes only the
@@ -157,7 +211,7 @@ classdef (Sealed) HebiUtils
         end
         
         function out = loadGains(varargin)
-            % loadGains loads gains from disk (xml)
+            % LOADGAINS loads gains for group from disk (xml)
             %
             %   This method loads gains from a human readable file into a
             %   GainStruct. Note that this includes only the control
@@ -173,6 +227,43 @@ classdef (Sealed) HebiUtils
             %
             %   See also HebiUtils, saveGains, GainStruct.
             out = javaMethod('loadGains', HebiUtils.className,  varargin{:});
+        end
+        
+        function [ varargout ] = loadGroupLogsUI( varargin )
+            %LOADGROUPLOGSUI shows a dialog to choose one or more .hebilog files 
+            %to load into memory.
+            %
+            %   This method lets users choose one or more raw .hebilog
+            %   files via a file selector dialog and loads them into memory. 
+            %   The output is a cell array of the conversion result for each 
+            %   selected file.
+            %
+            %   The optional parameters are the same as LOADGROUPLOG.
+            %
+            %   'View' Parameter (optional)
+            %      'Simple' converts only simple feedback. This is appropriate
+            %               for most users and results in much smaller log
+            %               files. (default)
+            %      'Full'   converts all available feedback. This is appropriate
+            %               for advanced users that need additional timestamps
+            %               or data from less common sensors.
+            %
+            %    Example:
+            %       % Load selected files and plot position feedback
+            %       hebiLogs = HebiUtils.loadGroupLogsUI();
+            %       HebiUtils.plotLogs(hebiLogs, 'position');
+            %
+            %    Example:
+            %       % Load selected files as 'full' structs
+            %       hebiLogs = HebiUtils.loadGroupLogsUI('View', 'full');
+            %
+            %    Example:
+            %       % Add info/gains if available
+            %       [hebiLogs, infos, gains] = HebiUtils.loadGroupLogsUI();
+            %
+            % See also HebiGroup.stopLog, convertGroupLog, loadGroupLog.
+                        
+            [varargout{1:nargout}] = HebiUtils.convertGroupLogsUI(varargin{:}, 'LogFormat', 'memory');
         end
         
         function [ varargout ] = convertGroupLogsUI( varargin )
@@ -224,7 +315,7 @@ classdef (Sealed) HebiUtils
             %       % Add info/gains if available
             %       [hebiLogs, infos, gains] = HebiUtils.convertGroupLogsUI();
             %
-            % See also HebiGroup.stopLog, convertGroupLog.
+            % See also HebiGroup.stopLog, convertGroupLog, loadGroupLogsUI.
             
             % Show selector dialog
             [fileName,pathName] = uigetfile( '*.hebilog', ...
@@ -275,7 +366,6 @@ classdef (Sealed) HebiUtils
             
             % Output as 3 args, e.g., [hebiLogs, infos, gains] = ...
             varargout = {hebiLogs, infos, gains};
-            
         end
         
         function [ ] = plotLogs( hebiLogs, feedbackField, varargin )
@@ -391,6 +481,7 @@ classdef (Sealed) HebiUtils
                 title( [feedbackField ' - Log ' ...
                     num2str(i) ' of ' num2str(numLogs)] );
                 xlim([0 hebiLogs{i}.time(end)]);
+                grid on;
                 
                 % If pos/vel/effort, plot commands and error as well
                 if isCommandPlot
@@ -410,6 +501,7 @@ classdef (Sealed) HebiUtils
                     ylabel(['error (' HebiUtils.feedbackUnits(feedbackField) ')']);
                     title( [feedbackField ' error'] );
                     xlim([0 hebiLogs{i}.time(end)]);
+                    grid on;
                 end
                 
                 % Add legend at the end so that it doesn't generate  
@@ -517,6 +609,34 @@ classdef (Sealed) HebiUtils
             xlabel('time (sec)');
             grid on;
             
+        end
+        
+        function [ R ] = quat2rotMat( q )
+            %QUAT2DCM Conversion of a quaternion to an orthogonal rotation matrix.
+            %Assumes that the scalar element, q_w, is the first element of the 
+            %quaternion vector, q = [q_w q_x q_y q_z].
+            %
+            %   R = quat2rotMat( q )
+            %
+            %   If q needs to be a [4x1] row vector. R is a [3x3] SO3 rotation 
+            %   matrix. You can batch process N quaternions by passing in a [Nx4] 
+            %   matrix where each row is a quaternion. In this case thefunction 
+            %   will return N rotation matrices of size [3x3xN].
+            
+            num_q = size(q,1);
+            R = zeros(3,3,num_q);
+
+            for i=1:num_q
+
+                a = q(i,2);
+                b = q(i,3);
+                c = q(i,4);
+                d = -q(i,1);
+
+                R(:,:,i) = [ a^2 - b^2 - c^2 + d^2,   2*(a*b + c*d),       2*(a*c - b*d);
+                             2*(a*b - c*d),   -a^2 + b^2 - c^2 + d^2,    2*(b*c + a*d);
+                             2*(a*c + b*d),         2*(b*c - a*d),  -a^2 - b^2 + c^2 + d^2];
+            end    
         end
     end
     
@@ -634,6 +754,7 @@ classdef (Sealed) HebiUtils
                     feedbackUnits = '';
             end
         end
+     
         
         function [ R ] = axAng2rotMat( axis, angle )
             %AXANG2ROTMAT Convert an orientation represented in axis-angle form into an
@@ -655,8 +776,7 @@ classdef (Sealed) HebiUtils
             
             R = [  x*x*C + c   x*y*C - z*s   x*z*C + y*s;
                 y*x*C + z*s   y*y*C + c    y*z*C - x*s;
-                z*x*C - y*s  z*y*C + x*s    z*z*C + c ];
-            
+                z*x*C - y*s  z*y*C + x*s    z*z*C + c ];      
         end
         
         function [ axis, angle ] = rotMat2axAng( R )
@@ -685,8 +805,7 @@ classdef (Sealed) HebiUtils
             % Keep angle between +/- pi
             if abs(angle) > pi
                 angle = sign(angle)*(abs(angle) - 2*pi);
-            end
-            
+            end            
         end
         
     end

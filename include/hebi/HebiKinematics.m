@@ -13,12 +13,7 @@ classdef (Sealed) HebiKinematics
     %
     %   HebiKinematics Methods (setup):
     %      addBody               -  adds a body to the end of the chain
-    %      getNumBodies          -  number of bodies
-    %      getNumDoF             -  number of degrees of freedom
-    %      getBodyMasses         -  a vector of all body masses [kg]
-    %      getBodyInfo           -  a table of body related info
-    %      getJointInfo          -  a table of joint related info
-    %      setBaseFrame          -  relationship from world to first body
+    %      setBaseFrame          -  set transform from world to first body
     %
     %   HebiKinematics Methods (kinematics):
     %      getForwardKinematics  -  calculates the configuration of bodies
@@ -27,6 +22,14 @@ classdef (Sealed) HebiKinematics
     %      getGravCompEfforts    -  compensates for gravitational accelerations
     %      getDynamicCompEfforts -  compensates for accelerations due to motions
     %      setPayload            -  sets a payload for effort compensation
+    %
+    %   HebiKinematics Methods (information):
+    %      getNumBodies          -  number of bodies
+    %      getNumDoF             -  number of degrees of freedom
+    %      getBodyMasses         -  a vector of all body masses [kg]
+    %      getBodyInfo           -  a table of body related info
+    %      getJointInfo          -  a table of joint related info
+    %      getBaseFrame          -  get transform from world to first body
     %
     %   Example
     %      % Setup a simple 3 dof arm made of X5 modules
@@ -44,7 +47,7 @@ classdef (Sealed) HebiKinematics
     %
     %   See also HebiGroup
     
-    %   Copyright 2014-2017 HEBI Robotics, Inc.
+    %   Copyright 2014-2018 HEBI Robotics, Inc.
     
     % Public API
     methods(Access = public)

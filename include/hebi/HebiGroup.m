@@ -8,15 +8,22 @@ classdef (Sealed) HebiGroup < handle
     %   HebiGroup Methods (configuration):
     %   getNumModules        - returns the number of grouped modules
     %   setFeedbackFrequency - sets the feedback request rate
+    %   getFeedbackFrequency - gets the feedback request rate
     %   setCommandLifetime   - sets the command lifetime
+    %   getCommandLifetime   - gets the command lifetime
     %
     %   HebiGroup Methods (common):
-    %   getGains             - returns the current gains
+    %   send                 - sends synchronized commands, as well as a
+    %                          number of other settings and parameters
+    %   getNextFeedback      - returns the next new 'simple' feedback
+    %   getNextFeedbackFull  - returns the next new 'full' feedback  
+    %   getNextFeedbackIO    - returns the next new I/O board feedback 
     %   getInfo              - returns meta information such as names
-    %   getNextFeedback      - returns the next new synchronized feedback
-    %   send                 - sends synchronized commands
+    %   getGains             - returns the current gains
     %   startLog             - starts background logging to disk
     %   stopLog              - stops logging and returns a readable format
+    %   stopLogFull          - same as above, returning full feedback
+    %   stopLogIO            - same as above, returning I/O feedback
     %
     %   Example
     %      % 200 Hz loop commanding of the current position
@@ -42,7 +49,7 @@ classdef (Sealed) HebiGroup < handle
     %
     %   See also HebiLookup, send, getInfo, startLog, getNextFeedback.
     
-    %   Copyright 2014-2017 HEBI Robotics, Inc.
+    %   Copyright 2014-2018 HEBI Robotics, Inc.
     
     % Public API
     methods(Access = public)
@@ -63,13 +70,16 @@ classdef (Sealed) HebiGroup < handle
         function out = getFeedbackFrequency(this, varargin)
             %getFeedbackFrequency returns the feedback polling frequency [Hz]
             %
-            %   getFeedbackFrequency() returns the polling rate that has been set by
-            %   the user. Note that the scheduler will try it's best effort to reach
-            %   the set frequency, but the 'real' arriving rate may be lower as it is
-            %   limited by the underlying operating system as well as potential
-            %   hardware constraints.
+            %   getFeedbackFrequency() returns the request rate in Hz for
+            %   feedback a group. 
             %
-            %   A rate of 0.0 indicates that no feedback is being requested.
+            %   The default feedback frequency for a new group is 100 Hz. A 
+            %   rate of 0.0 indicates that no feedback is being requested.
+            %
+            %   Note that the scheduler will try it's best effort to reach
+            %   the set frequency, but the actual arriving rate may be 
+            %   lower as it is limited by the underlying operating system 
+            %   as well as potential hardware constraints.
             %
             %   Example
             %      % Estimate the 'real' incoming feedback frequency
@@ -88,12 +98,16 @@ classdef (Sealed) HebiGroup < handle
         function this = setFeedbackFrequency(this, varargin)
             %setFeedbackFrequency sets the feedback polling frequency [Hz]
             %
-            %   setFeedbackFrequency(frequency) sets the target frequency at which
-            %   feedback requests get sent out. Note that the resulting 'real' arriving
-            %   rate may be lower due to limits in the underlying operating system and
-            %   hardware constraints.
+            %   setFeedbackFrequency(frequency) sets the target frequency 
+            %   in Hz at which feedback requests get sent out. 
             %
-            %   A rate of 0.0 stops sending outgoing feedback requests.
+            %   The default feedback frequency for a new group is 100 Hz. A 
+            %   rate of 0.0 stops sending outgoing feedback requests.
+            %
+            %   Note that the scheduler will try it's best effort to reach
+            %   the set frequency, but the actual arriving rate may be 
+            %   lower as it is limited by the underlying operating system 
+            %   as well as potential hardware constraints.
             %
             %   Example
             %      % Estimate the 'real' incoming feedback frequency
@@ -129,6 +143,8 @@ classdef (Sealed) HebiGroup < handle
             %   conflicting targets from, e.g., the GUI, or any other groups
             %   running in Matlab or from any other APIs.
             %
+            %   The default command lifetime for a new group is 0.25 sec.
+            %
             %   See also HebiGroup, setCommandLifetime
             out = getCommandLifetime(this.obj, varargin{:});
         end
@@ -154,6 +170,8 @@ classdef (Sealed) HebiGroup < handle
             %   matrix []. When disabled, the hardware will continue to
             %   execute the last sent command. Note that this can result in
             %   unexpected behavior when sending efforts and velocities.
+            %
+            %   The default command lifetime for a new group is 0.25 sec.
             %
             %   Example
             %      % Stop motions if hardware does not receive commands at
@@ -240,12 +258,13 @@ classdef (Sealed) HebiGroup < handle
             %   single string or an {1xN cell} array of strings. Valid families are
             %   limited to alphanumerical characters, spaces, and underscores.
             %
-            %   'Persist' persists all settings and gains that are currently set, so
-            %   that they are loaded after reboot. It expects a boolean value (false
-            %   has no effect).
+            %   'Persist' saves all the settings and gains that are currently set on 
+            %   on a module, so that they are loaded after reboot.  It expects a 
+            %   boolean value. True will save settings, false has no effect.
             %
             %   'Reset' reboots a module. It expects a boolean value and can only be
-            %   used in supported modes (e.g. application mode).
+            %   used in supported modes (e.g. application mode). True will reboot a
+            %   module, false has no effect.
             %
             %   'PositionLimit' ('PosLim') sets safety limits for position.
             %   Safety limits act as a virtual hard stop and are independent of gains.

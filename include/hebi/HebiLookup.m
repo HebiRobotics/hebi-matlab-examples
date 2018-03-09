@@ -12,7 +12,9 @@ classdef (Sealed) HebiLookup
     %
     %   HebiLookup Methods (configuration):
     %   setLookupAddresses                - sets the lookup target address [ipv4]
+    %   getLookupAddresses                - gets the lookup target address [ipv4]
     %   setLookupFrequency                - sets the lookup request rate [Hz]
+    %   getLookupFrequency                - gets the lookup request rate [Hz]    
     %   setInitialGroupFeedbackFrequency  - sets the group feedback rate [Hz]
     %   setInitialGroupCommandLifetime    - sets the command lifetime [s]
     %   clearModuleList                   - clears device list (including stale)
@@ -59,7 +61,7 @@ classdef (Sealed) HebiLookup
     %
     %   See also HebiGroup
     
-    %   Copyright 2014-2017 HEBI Robotics, Inc.
+    %   Copyright 2014-2018 HEBI Robotics, Inc.
     
     % Static API
     methods(Static)

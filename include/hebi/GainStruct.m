@@ -17,6 +17,6 @@ function struct = GainStruct()
     %
     %   See also HebiLookup, HebiGroup
     
-    %   Copyright 2014-2017 HEBI Robotics, Inc.
+    %   Copyright 2014-2018 HEBI Robotics, Inc.
     struct = javaObject(hebi_load('GainStruct'));
 end
