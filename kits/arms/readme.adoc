@@ -16,7 +16,7 @@ In order to work with a robot arm, you need to establish communications, and cre
 ----
 % Load arm kit w/ default configuration
 kit = '6dof';
-[ group, kin, effortOffsets, gravityVec ] = setupArm(kit)
+[ group, kin, effortOffset, gravityVec ] = setupArm(kit)
 ----
 
 The `kit` variable needs to match your system. Currently the following kits are supported:

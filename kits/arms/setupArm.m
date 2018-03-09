@@ -1,7 +1,7 @@
-function [ group, kin, effortOffsets, gravityVec ] = setupArm(kit, family)
+function [ group, kin, effortOffset, gravityVec ] = setupArm(kit, family)
 % SETUPARM creates models for various pre-configured arm kits
 %
-%   [ group, kin, effortOffsets, gravityVec ] = setupArm(kitName, family)
+%   [ group, kin, effortOffset, gravityVec ] = setupArm(kitName, family)
 %
 % The 'Kit' argument currently supports the following names:
 %
@@ -46,7 +46,7 @@ switch kit
         kin.addBody('X5-1');
         
         % Account for external efforts due to the gas spring
-        effortOffsets = [0 -9.8 0 0 0 0];
+        effortOffset = [0 -9.8 0 0 0 0];
         
     case '5dof' % A-2084-05
         %%
@@ -71,7 +71,7 @@ switch kit
         kin.addBody('X5-1');
         
         % Account for external efforts due to the gas spring
-        effortOffsets = [0 -9.8 0 0 0];
+        effortOffset = [0 -9.8 0 0 0];
         
     case '4dof' % A-2085-04
         %%
@@ -119,8 +119,8 @@ end
 
 %% Common Setup
 % Use default effort offsets
-if ~exist('effortOffset', 'var') || isempty(effortOffsets)
-    effortOffsets = zeros(1, kin.getNumDoF);
+if ~exist('effortOffset', 'var') || isempty(effortOffset)
+    effortOffset = zeros(1, kin.getNumDoF);
 end
 
 % Determine initial gravity vector based on the internal pose filter of
