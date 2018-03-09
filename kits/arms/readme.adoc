@@ -102,6 +102,7 @@ Examples that are dependent on the number of degrees of freedom follow a naming 
 |4 (dynamics comp on) or 3 (dynamics comp off)
 
 |{code}/ex_target_chase_joystick.m[ex_target_chase_joystick] +
+{code}/ex_target_chase_joystick_6dof.m[ex_target_chase_joystick_6dof] +
 (link:https://youtu.be/ITrrnRo-UAI[video])|
 * non-blocking trajectories
 * continuous replaning to catch moving target
