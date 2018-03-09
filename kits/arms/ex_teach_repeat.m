@@ -1,6 +1,6 @@
 %% Setup
 % Robot specific setup. Edit as needed.
-[group, kin, gravityVec] = setupArm();
+[ group, kin, effortOffset, gravityVec ] = setupArm('4dof');
 
 % Trajectory
 trajGen = HebiTrajectoryGenerator(kin);
@@ -30,7 +30,8 @@ while keys.ESC == 0
     
     % Do grav-comp while training waypoints
     fbk = group.getNextFeedback();
-    cmd.effort = kin.getGravCompEfforts(fbk.position, gravityVec);
+    cmd.effort = kin.getGravCompEfforts(fbk.position, gravityVec) ...
+        + effortOffset;
     group.send(cmd);
     
     % Add new waypoint on space bar press
@@ -56,8 +57,9 @@ end
 % Move from current position to first waypoint
 startPosition = group.getNextFeedback().position;
 trajGen.moveJoint( group, [startPosition; waypoints(1,:)], ...
-                    'EnableDynamicsComp', true, ...
-                    'GravityVec', gravityVec );
+    'EnableDynamicsComp', true, ...
+    'GravityVec', gravityVec, ...
+    'EffortOffset', effortOffset);
 
 % Move along waypoints
 if stopBetweenWaypoints
@@ -74,8 +76,9 @@ if stopBetweenWaypoints
         % call handles trajectory commands internally and blocks until
         % the move is finished.
         trajGen.moveJoint( group, [startPosition; endPosition], ...
-                            'EnableDynamicsComp', true, ...
-                            'GravityVec', gravityVec );
+            'EnableDynamicsComp', true, ...
+            'GravityVec', gravityVec, ...
+            'EffortOffset', effortOffset );
         
     end
     
@@ -83,8 +86,9 @@ else
     
     % Move through all waypoints as a single movement
     trajGen.moveJoint( group, waypoints, ...
-                        'EnableDynamicsComp', true, ...
-                        'GravityVec', gravityVec );
+        'EnableDynamicsComp', true, ...
+        'GravityVec', gravityVec, ...
+        'EffortOffset', effortOffset );
 end
 
 % Stop background logging and visualize

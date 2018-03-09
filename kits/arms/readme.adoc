@@ -2,24 +2,59 @@
 
 This folder contains examples for controlling arm-type configurations such as the 5-DoF and 6-DoF X-Series arm kits.
 
-*API Version: 1.0*
-
 ## Setup
 
 ### Load Libraries
 
 These examples make use of a variety of HEBI libraries. In order to load the libraries correctly, please run `startup()` after starting up MATLAB.
 
-Currently bundled APIs include
-
-* hebi-matlab-1.0-rev1908 (link:http://docs.hebi.us[source])
-* matlab-input-1.2 (link:https://github.com/HebiRobotics/MatlabInput/releases[source])
-
 ### Setup Robot
 
-Open the `setupArm()` function and modify it to match your specific robot configuration. You can find tutorials on defining the kinematic structure on the online link:http://docs.hebi.us[documentation].
+In order to work with a robot arm, you need to establish communications, and create a matching kinematic model. If you are using a pre-configured link:http://docs.hebi.us/hardware.html#Kits[kit] with the default actuator types as well as default naming conventions, you can simply call `setupArm.m` as shown below.
 
-Depending on the example you may also want to change the control strategy or test different gains. You can do this via the Scope GUI or programmatically using the following code. More information on gain tuning can be found on the main documentation as well.
+[source,matlab]
+----
+% Load arm kit w/ default configuration
+kit = '6dof';
+[ group, kin, effortOffset, gravityVec ] = setupArm(kit)
+----
+
+The `kit` variable needs to match your system. Currently the following kits are supported:
+
+:assembly: link:http://docs.hebi.us/resources/kits/assyInstructions
+:kitimg: image:http://docs.hebi.us/resources/kits/images
+
+[width="100%",options="header",cols="1a,1a,2a,1a"]
+|====================
+| Kit Name | Part Number | Description and Info | Image
+
+|`'6dof'`|A-2084-06|
+6 - DoF Arm Kit +
+{assembly}/6-DoF_Arm.pdf[Assembly Instructions]|
+{kitimg}/6-DoF_Arm.PNG[]
+
+|`'5dof'`|A-2084-05|
+5 - DoF Arm Kit +
+{assembly}/5-DoF_Arm.pdf[Assembly Instructions]|
+{kitimg}/5-DoF_Arm.PNG[]
+
+|`'4dof'`|A-2085-04|
+4 - DoF Arm Kit +
+{assembly}/4-DoF_Arm.pdf[Assembly Instructions]|
+{kitimg}/4-DoF_Arm.PNG[]
+
+|`'4dof-scara'`|A-2084-01|
+4 - DoF SCARA Style Arm Kit +
+{assembly}/4-DoF_SCARA-ish_Arm.pdf[Assembly Instructions]|
+{kitimg}/4-DoF_SCARA.JPG[]
+
+|====================
+
+If you are using different actuator types or non-default configurations, you will need to modify the model to match your system. You can find tutorials on defining custom kinematic structures on the online link:http://docs.hebi.us/tools.html#kinematics[kinematics documentation]. The `setupArm.m` function should provide a good starting point.
+
+### Set Gains
+
+Pre-assembled kits should already come with good gains. However, depending on the example you may want to change the control strategy or simply test different gains.  You can do this via the Scope GUI or programmatically using the following code. More information on gain tuning can be found on the online link:http://docs.hebi.us/core_concepts.html#motor_control[motion control documentation].
 
 [source,matlab]
 ----
@@ -33,6 +68,8 @@ group.send('gains', gains)
 ## Examples
 
 At the top of each file is a `setup` section that may expose options for testing different behaviors.
+
+Examples that are dependent on the number of degrees of freedom follow a naming convention with the kit name suffixed. Examples that are applicable to all kits do not have a suffix. They default to using the `4dof` kit, so please modify accordingly.
 
 :code: link:./
 
@@ -65,6 +102,7 @@ At the top of each file is a `setup` section that may expose options for testing
 |4 (dynamics comp on) or 3 (dynamics comp off)
 
 |{code}/ex_target_chase_joystick.m[ex_target_chase_joystick] +
+{code}/ex_target_chase_joystick_6dof.m[ex_target_chase_joystick_6dof] +
 (link:https://youtu.be/ITrrnRo-UAI[video])|
 * non-blocking trajectories
 * continuous replaning to catch moving target
