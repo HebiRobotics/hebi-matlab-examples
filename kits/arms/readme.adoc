@@ -23,6 +23,7 @@ The `kit` variable needs to match your system. Currently the following kits are 
 
 :assembly: link:http://docs.hebi.us/resources/kits/assyInstructions
 :kitimg: image:http://docs.hebi.us/resources/kits/images
+:imgsize: width=300px
 
 [width="100%",options="header",cols="1a,1a,2a,1a"]
 |====================
@@ -31,22 +32,22 @@ The `kit` variable needs to match your system. Currently the following kits are 
 |`'6dof'`|A-2084-06|
 6 - DoF Arm Kit +
 {assembly}/6-DoF_Arm.pdf[Assembly Instructions]|
-{kitimg}/6-DoF_Arm.PNG[]
+{kitimg}/6-DoF_Arm.PNG[{imgsize}]
 
 |`'5dof'`|A-2084-05|
 5 - DoF Arm Kit +
 {assembly}/5-DoF_Arm.pdf[Assembly Instructions]|
-{kitimg}/5-DoF_Arm.PNG[]
+{kitimg}/5-DoF_Arm.PNG[{imgsize}]
 
 |`'4dof'`|A-2085-04|
 4 - DoF Arm Kit +
 {assembly}/4-DoF_Arm.pdf[Assembly Instructions]|
-{kitimg}/4-DoF_Arm.PNG[]
+{kitimg}/4-DoF_Arm.PNG[{imgsize}]
 
 |`'4dof-scara'`|A-2084-01|
 4 - DoF SCARA Style Arm Kit +
 {assembly}/4-DoF_SCARA-ish_Arm.pdf[Assembly Instructions]|
-{kitimg}/4-DoF_SCARA.JPG[]
+{kitimg}/4-DoF_SCARA.JPG[{imgsize}]
 
 |====================
 
