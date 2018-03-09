@@ -13,6 +13,9 @@ addpath(fullfile(localDir, 'input'));
 HebiJoystick.loadLibs();
 HebiKeyboard.loadLibs();
 
+% MATLAB File Exchange
+addpath(fullfile(localDir, 'exchange', 'SpinCalc'));
+
 % Utilities
 addpath(fullfile(localDir, 'kinematics'));
 addpath(fullfile(localDir, 'util'));
