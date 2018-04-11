@@ -136,6 +136,7 @@ while toc(t0) < runtime
        direction = direction * -1;
        traj = trajGen.newJointMove(direction .* [amplitude -amplitude]);
        t0 = tic();
+       t = 0;
     end
     
     t = min(t,traj.getDuration);
