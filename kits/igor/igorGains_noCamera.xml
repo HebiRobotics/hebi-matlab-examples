@@ -3,12 +3,12 @@
    <control_strategy>3 3 4 4 4 4 4 4 4 3 4 4 4 3</control_strategy>
    <position>
       <kp>0 0 10 50 10 50 15 20 10 1 15 20 10 1</kp>
-      <ki>0 0 10 10 10 10 0 0 0 0 0 0 0 0 /ki>
+      <ki>0 0 10 10 10 10 0 0 0 0 0 0 0 0</ki>
       <kd>0 0 0 0 0 0 0 0 0 0 0 0 0 0</kd>
       <feed_forward>0 0 0 0 0 0 0 0 0 0 0 0 0 0</feed_forward>
       <dead_zone>0 0 0 0 0 0 0 0 0 0 0 0 0 0</dead_zone>
       <i_clamp>0 0 5 2 5 2 0 0 0 0.2 0 0 0 0.2</i_clamp>
-      <punch>0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</punch>
+      <punch>0 0 0 0 0 0 0 0 0 0 0 0 0 0</punch>
       <min_target>-inf -inf -inf -inf -inf -inf -inf -inf -inf -inf -inf -inf -inf -inf</min_target>
       <max_target>inf inf inf inf inf inf inf inf inf inf inf inf inf inf</max_target>
       <target_lowpass>1 1 1 1 1 1 1 1 1 1 1 1 1 1</target_lowpass>
@@ -39,7 +39,7 @@
       <kd>0 0 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001 0.001</kd>
       <feed_forward>1 1 1 1 1 1 1 1 1 1 1 1 1 1</feed_forward>
       <dead_zone>0 0 0 0 0 0 0 0 0 0 0 0 0 0</dead_zone>
-      <i_clamp>0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</i_clamp>
+      <i_clamp>0 0 0 0 0 0 0 0 0 0 0 0 0 0</i_clamp>
       <punch>0 0 -0 0.01 -0 0.01 -0 -0 -0 -0 -0 -0 -0 -0</punch>
       <min_target>-10 -10 -20 -20 -20 -20 -20 -20 -10 -10 -20 -20 -10 -10</min_target>
       <max_target>10 10 20 20 20 20 20 20 10 10 20 20 10 10</max_target>

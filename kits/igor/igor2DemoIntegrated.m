@@ -97,7 +97,7 @@ if(cam_module == 1)
         gains = HebiUtils.loadGains([localDir '/igorGains.xml']);
     end
 else
-    gains = HebiUtils.loadGains([localDir '/igorGainsNoCamera.xml']); 
+    gains = HebiUtils.loadGains([localDir '/igorGains_noCamera.xml']); 
 end
 
 while true

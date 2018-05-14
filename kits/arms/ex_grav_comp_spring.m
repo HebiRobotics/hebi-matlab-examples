@@ -17,7 +17,7 @@
 
 %% Setup
 % Robot specific setup. Edit as needed.
-[group, kin, gravityVec] = setupArm();
+[ group, kin, effortOffset, gravityVec ] = setupArm('4dof');
 
 % Select the duration in seconds
 demoDuration = 30;
@@ -45,8 +45,9 @@ while toc(demoTimer) < demoDuration
     
     % Gather sensor data and always do grav comp
     fbk = group.getNextFeedback();
-
-    cmd.effort = kin.getGravCompEfforts (fbk.position, gravityVec );
+    
+    cmd.effort = kin.getGravCompEfforts (fbk.position, gravityVec ) ...
+        + effortOffset;
     
     % Find whether robot is actively moving
     isMoving = max(abs(fbk.velocity)) > velocityThreshold;

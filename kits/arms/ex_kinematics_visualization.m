@@ -1,6 +1,6 @@
 %% Setup
 % Robot specific setup. Edit as needed.
-[group, kin, gravityVec] = setupArm();
+[group, kin, ~, ~] = setupArm('4dof');
 
 % Select whether coordinate frames for static links should be drawn as well
 showLinks = false;
@@ -26,7 +26,7 @@ while true
     
     % Calculate kinematics
     fbk = group.getNextFeedback();
-    frames = kin.getForwardKinematics('output', fbk.position);
+    frames = kin.getForwardKinematics('OutputFrame', fbk.position);
     
     % Draw coordinate frames
     frames = frames(:,:,selected);

@@ -1,5 +1,5 @@
 function [] = startup()
-% startup sets up libraries and should be run once on startup.
+% startup adds paths required to run demos
 
 localDir = fileparts(mfilename('fullpath'));
 includeScript = fullfile(localDir, '..', '..', 'include', 'include.m');

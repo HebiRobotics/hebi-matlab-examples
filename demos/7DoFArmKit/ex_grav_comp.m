@@ -8,10 +8,19 @@
 
 %% Setup
 % Robot specific setup. Edit as needed.
-[ group, kin, effortOffset, gravityVec ] = setupArm('4dof');
+[group, kin, gravityVec] = setupArm();
+
+gains = HebiUtils.loadGains('teachRepeatGains.XML');
+group.send('gains',gains);
 
 % Select the duration in seconds
 demoDuration = 30;
+
+% Setup Visualization
+framesDisplay = FrameDisplay();
+
+% Start Logging
+% group.startLog;
 
 %% Gravity compensated mode
 cmd = CommandStruct();
@@ -22,10 +31,19 @@ while toc(demoTimer) < demoDuration
     fbk = group.getNextFeedback();
     
     % Calculate required torques to negate gravity at current position
-    cmd.effort = kin.getGravCompEfforts( fbk.position, gravityVec ) ...
-        + effortOffset;
+    cmd.effort = kin.getGravCompEfforts( fbk.position, gravityVec );
+    
+    % Get Feedback to create a Visualization
+    positions = fbk.position; 
+    frames = kin.getFK('output', positions);
+    framesDisplay.setFrames(frames)
+    drawnow;
+    axis equal
     
     % Send to robot
     group.send(cmd);
     
 end
+
+% Stop Logging
+log = group.stopLogFull();
