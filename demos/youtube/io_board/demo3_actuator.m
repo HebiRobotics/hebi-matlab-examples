@@ -9,11 +9,13 @@ actuator = HebiLookup.newGroupFromNames('*', 'X5-1_00004');
 tmpFbk = ioBoard.getNextFeedbackIO();
 cmd = CommandStruct();
 
+positionCmdScale = 2*pi;  % Scales voltage to radians
+
 while true
     
     % Map analog sensor feedback to position command
     fbk = ioBoard.getNextFeedback(tmpFbk);
-    cmd.position = fbk.(potentiometer) * 2*pi;
+    cmd.position = fbk.(potentiometer) * positionCmdScale;
     actuator.set(cmd);
 
 end
