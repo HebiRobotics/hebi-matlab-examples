@@ -12,6 +12,9 @@ ioBoard = HebiLookup.newGroupFromNames('*', 'IO_basic');
 %% Live LED Commands
 cmd = IOCommandStruct();
 
+loadCellVoltageThreshold = 0.2;
+potentiometerVoltageThreshold = 0.5;
+
 while true
 
     % Read feedback
@@ -19,8 +22,8 @@ while true
 
     % Update values
     cmd.(led_r) = fbk.(inputButton);
-    cmd.(led_g) = fbk.(loadCell) > 0.2;
-    cmd.(led_b) = fbk.(potentiometer) > 0.5;
+    cmd.(led_g) = fbk.(loadCell) > loadCellVoltageThreshold;
+    cmd.(led_b) = fbk.(potentiometer) > potentiometerVoltageThreshold;
 
     % Send commands
     ioBoard.set(cmd);
