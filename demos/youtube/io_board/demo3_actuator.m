@@ -1,5 +1,5 @@
 %% I/O Board Pin Mapping
-potentiometer = 'b1';  % analog input (0-5 volts)
+potentiometer = 'a1';  % analog input (0-5 volts)
 
 %% Setup Groups
 ioBoard = HebiLookup.newGroupFromNames('*', 'IO_basic');
