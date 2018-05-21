@@ -1,5 +1,5 @@
 %% I/O Box Pin Mapping
-potentiometer = '11'; % analog input  (0-5 volts)
+potentiometer = 'a1'; % analog input  (0-5 volts)
 led_r = 'b6';         % digital input (0 or 1)
 
 %% Setup Groups
