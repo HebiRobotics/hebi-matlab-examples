@@ -16,9 +16,9 @@ ylabel('value [0-1]');
 legend button potentiometer loadCell;
 
 %% I/O Board Pin Mapping
-potentiometer = 'b1'; % analog input (0-5 volts)
-loadCell      = 'b8'; % analog input (0-5 volts)
-inputButton   = 'e1'; % digital input (0 or 1)
+potentiometer = 'a1'; % analog input (0-5 volts)
+loadCell      = 'a8'; % analog input (0-5 volts)
+inputButton   = 'b1'; % digital input (0 or 1)
 
 %% Setup Groups
 ioBoard = HebiLookup.newGroupFromNames('*', 'IO_basic');
