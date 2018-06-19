@@ -4,7 +4,7 @@
 % Run as a function
 function igor2StartupIntegrated()
 
-    hasCamera = true;
+    hasCamera = false;
     igor2DemoIntegrated( hasCamera );
     
 end
