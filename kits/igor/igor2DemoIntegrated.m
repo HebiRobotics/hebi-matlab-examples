@@ -82,22 +82,16 @@ pause(1);
 fbk = robotGroup.getNextFeedbackFull();
 timeLast = fbk.time;
 
-%gains = HebiUtils.loadGains('igorGains_dancing');
+% Load the gains for all the modules
+gains = HebiUtils.loadGains([localDir '/igorGains.xml']);
 
-% HebiUtils has a lot of useful functions for loading and saving gains and
-% log files.
-%
-% help HebiUtils for more info
-if(cam_module == 1)
-    if max( abs(fbk.effort([7 11])) ) > 10
-        gains = HebiUtils.loadGains([localDir '/igorGains_safeShoulders.xml']);
-        disp('Warning: Likely bad torque sensing on the shoulder!');
-        disp('Loading safer gains.');
-    else 
-        gains = HebiUtils.loadGains([localDir '/igorGains.xml']);
+% If there's no camera, remove the camera module from the gains before
+% sending them (the camera is the last one in the group).
+if cam_module == false
+    gainsFields = fields(gains);
+    for i=2:length(gainsFields)
+        gains.(gainsFields{i})(end) = [];
     end
-else
-    gains = HebiUtils.loadGains([localDir '/igorGains_noCamera.xml']); 
 end
 
 while true
@@ -109,7 +103,7 @@ while true
     end
 end
 
-robotGroup.setFeedbackFrequency(100);
+robotGroup.setFeedbackFrequency(500);
 pause(1);
 
 fbk = robotGroup.getNextFeedbackFull();
