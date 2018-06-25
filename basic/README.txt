@@ -1,6 +1,6 @@
 # HEBI MATLAB API - Basic Examples
 
-This folder contains examples that help you get started with the HEBI Robotics APIs for MATLAB. The examples provided here [assume a single module and] work progressively through concepts that are documented in more detail at:
+This folder contains examples that help you get started with the HEBI Robotics APIs for MATLAB. The examples provided here work progressively through concepts that are documented in more detail at:
 http://docs.hebi.us/tools.html#matlab-api
 
 

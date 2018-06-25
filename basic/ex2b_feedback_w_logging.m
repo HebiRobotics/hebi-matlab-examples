@@ -14,7 +14,9 @@ exampleDuration = 20; % sec
 
 tic;
 
-group.startLog();  % Starts logging in teh background
+group.startLog();  % Starts logging in the background
+
+disp('  Use Scope to command the module and make it move...');
 
 while toc < exampleDuration
     
@@ -25,8 +27,9 @@ while toc < exampleDuration
    
 end
 
-log = group.stopLog();  % Stops logging and returns a struct with all the
-                        % feedback recorded since calling '.startLog()'
+disp('  All done!');
+
+log = group.stopLog();  % Stops background logging
 
 % Plot the logged position feedback
 figure(1);

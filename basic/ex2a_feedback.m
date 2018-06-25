@@ -14,11 +14,12 @@ exampleDuration = 10; % sec
 
 tic;
 
+disp('  Plotting gyro data from the module(s) IMU.');
+disp('  Move the module around to make the feedback interesting...');  
+
 while toc < exampleDuration
     
    fbk = group.getNextFeedback();
-   
-   % While this loop runs, pick the module up and move it around
    
    plot(fbk.gyroX,'.');
    hold on;
@@ -29,4 +30,4 @@ while toc < exampleDuration
    
 end
 
-
+disp('  All Done!');
