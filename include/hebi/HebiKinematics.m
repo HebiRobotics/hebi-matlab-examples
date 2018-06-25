@@ -97,7 +97,7 @@ classdef (Sealed) HebiKinematics
             %       'Twist2'           1x1     [rad]
             %       'Mass'             1x1     [kg]
             %       'CoM'              3x1     [m]
-            %       'Axis'             1x1     [x|y|z|rx|ry|rz]
+            %       'Axis'             1x1     [tx|ty|tz|rx|ry|rz]
             %       'OutputTransform'  4x4                ('output','out')
             %       'Mounting'         1x1     [left|...] ('mount')
             %
@@ -546,9 +546,14 @@ classdef (Sealed) HebiKinematics
     
     methods(Access = public, Hidden = true)
         
-        function this = HebiKinematics()
+        function this = HebiKinematics(varargin)
             % constructor
             this.obj = javaObject(HebiKinematics.className);
+
+            if nargin > 0
+                addHrdf(this.obj, varargin{1});
+            end
+
         end
         
         function disp(this)
