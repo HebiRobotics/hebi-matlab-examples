@@ -1,5 +1,4 @@
-% Initialize the lookup of modules and display information for any modules
-% on the network.
+% Make a group consisting of a single module.
 %
 % Assumes that you have run 'startup.m' in this folder.
 %
