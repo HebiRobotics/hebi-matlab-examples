@@ -1,10 +1,13 @@
 %% Setup
 % Robot specific setup. Edit as needed.
-[ group, kin, effortOffset, gravityVec ] = setupArm('4dof');
+[ group, kin, params ] = setupArm('6dof_w_gripper');
+
+effortOffset = params.effortOffset;
+gravityVec = params.gravityVec;
 
 % Trajectory
 trajGen = HebiTrajectoryGenerator(kin);
-trajGen.setMinDuration(0.5); % Min move time for 'small' movements
+trajGen.setMinDuration(1.0); % Min move time for 'small' movements
                              % (default is 1.0)
 trajGen.setSpeedFactor(1.0); % Slow down movements to a safer speed.
                              % (default is 1.0)
@@ -62,30 +65,51 @@ trajGen.moveJoint( group, [startPosition; waypoints(1,:)], ...
     'EffortOffset', effortOffset);
 
 % Move along waypoints
-if stopBetweenWaypoints
-    
-    % Split waypoints into individual movements
-    numMoves = size(waypoints,1);
-    for i = 2:numMoves
+while true
+    if stopBetweenWaypoints
+
+        % Split waypoints into individual movements
+        numMoves = size(waypoints,1);
+        for i = 2:numMoves
+
+            % Pick start and end positions
+            startPosition = waypoints(i-1,:);
+            endPosition = waypoints(i,:);
+
+            % Do minimum-jerk trajectory between positions. Note that this
+            % call handles trajectory commands internally and blocks until
+            % the move is finished.
+            trajGen.moveJoint( group, [startPosition; endPosition], ...
+                'EnableDynamicsComp', true, ...
+                'GravityVec', gravityVec, ...
+                'EffortOffset', effortOffset );
+
+        end
         
-        % Pick start and end positions
-        startPosition = waypoints(i-1,:);
-        endPosition = waypoints(i,:);
-        
-        % Do minimum-jerk trajectory between positions. Note that this
-        % call handles trajectory commands internally and blocks until
-        % the move is finished.
-        trajGen.moveJoint( group, [startPosition; endPosition], ...
+        keys = read(kb);    
+        if keys.ESC == 1
+            break;
+        end
+
+    else
+
+        % Move through all waypoints as a single movement
+        trajGen.moveJoint( group, waypoints, ...
             'EnableDynamicsComp', true, ...
             'GravityVec', gravityVec, ...
             'EffortOffset', effortOffset );
         
+        keys = read(kb);    
+        if keys.ESC == 1
+            break;
+        end
     end
     
-else
-    
-    % Move through all waypoints as a single movement
-    trajGen.moveJoint( group, waypoints, ...
+    % Go home
+    startPosition = waypoints(end,:);
+    endPosition = waypoints(1,:);
+
+    trajGen.moveJoint( group, [startPosition; endPosition], ...
         'EnableDynamicsComp', true, ...
         'GravityVec', gravityVec, ...
         'EffortOffset', effortOffset );
