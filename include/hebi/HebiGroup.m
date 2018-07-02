@@ -168,8 +168,8 @@ classdef (Sealed) HebiGroup < handle
             %   conflicting targets from, e.g., the GUI, or any other groups
             %   running in Matlab or from any other APIs.
             %
-            %   This feature can be disabled by setting zero or the empty
-            %   matrix []. When disabled, the hardware will continue to
+            %   This feature can be disabled by setting 'inf' or the empty
+            %   matrix '[]'. When disabled, the hardware will continue to
             %   execute the last sent command. Note that this can result in
             %   unexpected behavior when sending efforts and velocities.
             %

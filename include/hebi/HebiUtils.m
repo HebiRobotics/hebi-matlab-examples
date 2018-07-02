@@ -14,7 +14,7 @@ classdef (Sealed) HebiUtils
     %
     %   loadGroupLog       - loads a binary .hebilog file into memory
     %
-    %   loadGroupLogUI     - shows a UI dialog to load one or more logs.
+    %   loadGroupLogsUI    - shows a UI dialog to load one or more logs.
     %
     %   convertGroupLog    - converts a binary .hebilog file into a readable
     %                        format, either in memory or files like CSV or MAT.
@@ -317,16 +317,31 @@ classdef (Sealed) HebiUtils
             %
             % See also HebiGroup.stopLog, convertGroupLog, loadGroupLogsUI.
             
+            % Remember last file location
+            persistent lastDir; 
+            
+            % Use current location if not set yet
+            if isempty(lastDir)
+                openFilePath = pwd;
+            else
+                openFilePath = lastDir;
+            end
+
             % Show selector dialog
             [fileName,pathName] = uigetfile( '*.hebilog', ...
-                '.hebilog Files (*.hebilog)', ...
+                '.hebilog Files (*.hebilog)', openFilePath,...
                 'MultiSelect', 'on' );
             
+            % Update current location if something was actually selected.
+            if pathName ~= 0
+                lastDir = pathName;
+            end
+
             % Convert to cell array
             if ~iscell(fileName) && ~ischar(fileName)
                 % No selection
                 disp('No files chosen.');
-                hebiLogs = {};
+                varargout = {{}};
                 return;
             elseif ~iscell( fileName )
                 % Single-select

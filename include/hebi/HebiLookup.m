@@ -74,12 +74,16 @@ classdef (Sealed) HebiLookup
             %   time any method gets called, so it's not strictly required 
             %   for this method to be called manually.
             %
-            %   However, it also serves as a way to reset the lookup
+            %   However, this also serves as a way to reset the lookup
             %   configuration to its default parameters, which is useful in
             %   case the network setup has changed (e.g. plugged in an
             %   Ethernet cable to a new  network).
             %
             %   The default behavior can be modified in the <a href="matlab:open('hebi_config')">config script</a>
+            %
+            %   See also HebiLookup, setLookupAddresses,
+            %   setLookupFrequency, setInitialGroupFeedbackFrequency,
+            %   setInitialGroupCommandLifetime, clearModuleList
             HebiLookup.initOnce();
             this = HebiLookup.wrapper;
         end
@@ -361,6 +365,9 @@ classdef (Sealed) HebiLookup
                 config.defaultInitialGroupFeedbackFrequency);
             javaMethod('setInitialGroupCommandLifetime', fullName,  ...
                 config.defaultInitialGroupCommandLifetime);
+            
+            % Make sure all stale modules are cleared
+            javaMethod('clearModuleList', fullName);
             
             % Add a pause on first call so that the lookup has some
             % time to find modules

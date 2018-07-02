@@ -45,6 +45,10 @@ classdef (Sealed) HebiKinematics
     %      positions = rand(kin.getNumDoF, 1);
     %      frames = kin.getForwardKinematics('output', positions);
     %
+    %   Example
+    %      % Load model from file (experimental support for hrdf v1.1)
+    %      kin = HebiKinematics('robot.hrdf');
+    %
     %   See also HebiGroup
     
     %   Copyright 2014-2018 HEBI Robotics, Inc.
