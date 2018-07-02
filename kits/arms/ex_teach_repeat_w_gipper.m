@@ -1,6 +1,6 @@
 %% Setup
 % Robot specific setup. Edit as needed.
-[ group, kin, params ] = setupArm('6dof');
+[ group, kin, params ] = setupArm('6dof_w_gripper');
 
 effortOffset = params.effortOffset;
 gravityVec = params.gravityVec;

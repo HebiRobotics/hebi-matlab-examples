@@ -95,7 +95,9 @@ end
 hLog = group.stopLogFull();
 
 % Plot the commands and feedback
-plotLogCommands(hLog, group)
+HebiUtils.plotLogs(hebilog, 'position');
+HebiUtils.plotLogs(hebilog, 'velocity');
+HebiUtils.plotLogs(hebilog, 'effort');
 
 %% Get target coordinates (from mouse, but could also be from e.g. video)
 function [xyz] = getTargetCoordinates()
