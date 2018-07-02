@@ -11,6 +11,7 @@ classdef (Sealed) HebiLookup
     %   default behavior in the <a href="matlab:open('hebi_config')">config script</a>.
     %
     %   HebiLookup Methods (configuration):
+    %   initialize                        - starts or resets the lookup process
     %   setLookupAddresses                - sets the lookup target address [ipv4]
     %   getLookupAddresses                - gets the lookup target address [ipv4]
     %   setLookupFrequency                - sets the lookup request rate [Hz]
@@ -65,6 +66,27 @@ classdef (Sealed) HebiLookup
     
     % Static API
     methods(Static)
+        
+        function this = initialize(varargin)
+            %initialize starts or resets the lookup process
+            %
+            %   The lookup process gets initialized automatically the first
+            %   time any method gets called, so it's not strictly required 
+            %   for this method to be called manually.
+            %
+            %   However, this also serves as a way to reset the lookup
+            %   configuration to its default parameters, which is useful in
+            %   case the network setup has changed (e.g. plugged in an
+            %   Ethernet cable to a new  network).
+            %
+            %   The default behavior can be modified in the <a href="matlab:open('hebi_config')">config script</a>
+            %
+            %   See also HebiLookup, setLookupAddresses,
+            %   setLookupFrequency, setInitialGroupFeedbackFrequency,
+            %   setInitialGroupCommandLifetime, clearModuleList
+            HebiLookup.initOnce();
+            this = HebiLookup.wrapper;
+        end
         
         function this = setLookupAddresses(varargin)
             %setLookupAddresses sets the lookup target address [ipv4]
@@ -343,6 +365,9 @@ classdef (Sealed) HebiLookup
                 config.defaultInitialGroupFeedbackFrequency);
             javaMethod('setInitialGroupCommandLifetime', fullName,  ...
                 config.defaultInitialGroupCommandLifetime);
+            
+            % Make sure all stale modules are cleared
+            javaMethod('clearModuleList', fullName);
             
             % Add a pause on first call so that the lookup has some
             % time to find modules
