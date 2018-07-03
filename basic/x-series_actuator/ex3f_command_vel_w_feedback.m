@@ -16,7 +16,7 @@ group = HebiLookup.newGroupFromNames( familyName, moduleNames );
 
 cmd = CommandStruct();
 
-exampleDuration = 20; % sec
+exampleDuration = 15; % sec
 exampleTimer = tic;
 
 group.startLog();  % Starts logging in the background
@@ -38,4 +38,5 @@ disp('  All done!');
 log = group.stopLog();  % Stops background logging
 
 % Plot using some handy helper functions
-HebiUtils.plotLogs( log, 'velocity' );
+HebiUtils.plotLogs( log, 'velocity', 101 );
+HebiUtils.plotLogs( log, 'gyroZ', 102 );

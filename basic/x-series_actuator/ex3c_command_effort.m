@@ -15,16 +15,21 @@ group = HebiLookup.newGroupFromNames( familyName, moduleNames );
 
 cmd = CommandStruct();
 
-exampleDuration = 20; % sec
+exampleDuration = 10; % sec
 exampleTimer = tic;
 
 group.startLog();  % Starts logging in the background
+
+% Parameters for sin/cos function
+freqHz = 0.5; % Hz
+freq = freqHz * 2*pi;
+amp = 1; % Nm
 
 while toc(exampleTimer) < exampleDuration
     
    fbk = group.getNextFeedback();
    
-   cmd.effort = sin( 2*pi * toc );  % 1 Hz sine-wave sweep
+   cmd.effort = amp * sin( freq * toc(exampleTimer) ); 
    
    group.send(cmd);
    

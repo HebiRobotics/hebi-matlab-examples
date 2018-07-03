@@ -16,22 +16,28 @@ group = HebiLookup.newGroupFromNames( familyName, moduleNames );
 
 cmd = CommandStruct();
 
-exampleDuration = 20; % sec
+exampleDuration = 10; % sec
 exampleTimer = tic;
 
 group.startLog();  % Starts logging in the background
 
 % Parameters for sin/cos function
-freqHz = 1; % Hz
+freqHz = 1.0; % Hz
 freq = freqHz * 2*pi;
-amplitude = deg2rad(45); % rad
+amp = deg2rad( 45 ); % radians
 
 while toc(exampleTimer) < exampleDuration
     
    fbk = group.getNextFeedback();
    
-   cmd.position = amplitude * cos( freq*toc );
-   cmd.velocity = amplitude * freq * sin( freq*toc );
+   % Position Command
+   cmdPosition = amp * sin( freq*toc(exampleTimer) );
+   
+   % Velocity Command (time-derivate of position)
+   cmdVelocity = freq * amp * cos( freq*toc(exampleTimer) );
+   
+   cmd.position = cmdPosition;
+   cmd.velocity = cmdVelocity;
    
    group.send(cmd);
    
@@ -40,5 +46,5 @@ end
 log = group.stopLog();  % Stops background logging
 
 % Plot using some handy helper functions
-HebiUtils.plotLogs( log, 'position' );
-HebiUtils.plotLogs( log, 'velocity' );
+HebiUtils.plotLogs( log, 'position', 'figNum', 101 );
+HebiUtils.plotLogs( log, 'velocity', 'figNum', 102 );

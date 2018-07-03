@@ -13,7 +13,3 @@ familyName = 'My Family';
 moduleNames = {'Module1','Module2','Module3'};
 
 group = HebiLookup.newGroupFromNames( familyName, moduleNames )
-
-
-
-
