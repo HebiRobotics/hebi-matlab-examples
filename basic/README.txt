@@ -1,6 +1,11 @@
 # HEBI MATLAB API - Basic Examples
 
-This folder contains examples that help you get started with the HEBI Robotics APIs for MATLAB. The examples provided here work progressively through concepts that are documented in more detail at:
+This folder contains examples that help you get started with the HEBI Robotics APIs for MATLAB.  There are separate examples for each of our different products:
+  - X-Series Actuator
+  - I/O Board
+  - Mobile I/O
+
+The examples provided here work progressively through concepts that are documented in more detail at:
 http://docs.hebi.us/tools.html#matlab-api
 
 
