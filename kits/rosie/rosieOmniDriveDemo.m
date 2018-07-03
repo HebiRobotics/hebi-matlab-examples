@@ -11,7 +11,7 @@
 
 % Copyright 2017-2018 HEBI Robotics
 
-function drClawOmniDriveDemo()
+function rosieOmniDriveDemo()
 %% Setup
 
 % Optional step to limit the lookup to a set of interfaces or modules
@@ -22,13 +22,13 @@ enableLogging = false;
 enableEffortComp = true;
 
 % Setup Group for the entire Robot
-robotFamily = 'Dr. Claw';
+robotFamily = 'Rosie';
 robotModuleNames = {
-    '_wheel1', ...   % right front omni wheel
-    '_wheel2', ...   % left front omni wheel
-    '_wheel3', ...   % back middle omni wheel
-    'base', 'shoulder', 'elbow', 'wrist1', 'wrist2', 'wrist3', ... % arm modules
-    'spool' };
+    '_Wheel1', ...   % right front omni wheel
+    '_Wheel2', ...   % left front omni wheel
+    '_Wheel3', ...   % back middle omni wheel
+    'Base', 'Shoulder', 'Elbow', 'Wrist1', 'Wrist2', 'Wrist3', ... % arm modules
+    'Spool' };
 
 wheelDOFs = 1:3;
 armDOFs = 4:9;
@@ -40,7 +40,7 @@ robotGroup.setFeedbackFrequency(100);
 
 % Setup Group for phone controller
 phoneFamily = 'HEBI';
-phoneName = 'The Future Is Here!';
+phoneName = 'Mobile IO - Matt iPad';
 
 while true        
     try
@@ -171,6 +171,7 @@ while true
     xyz_arKit_init = [ fbkPhone.position ...
                        fbkPhone.velocity ...
                        fbkPhone.effort ];
+    xyzPhoneNew = xyz_arKit_init;
 
     endVelocities = zeros(1, numArmDOFs);
     endAccels = zeros(1, numArmDOFs);
@@ -256,11 +257,15 @@ while true
             xyz_arKit_init = xyzPhoneNew;
         end
             
-        % Joystick Input for Omnibase Control
-        % I THINK THERE'S A BUG IN CONVENTION FOR X-Y, NEED TO CHECK.
-        xVel = maxLinSpeed * fbkPhoneIO.a7;
-        yVel = maxLinSpeed * fbkPhoneIO.a8;
-        rotVel = maxRotSpeed * fbkPhoneIO.a1;
+%         % Joystick Input for Omnibase Control
+%         % I THINK THERE'S A BUG IN CONVENTION FOR X-Y, NEED TO CHECK.
+%         xVel = maxLinSpeed * fbkPhoneIO.a7;
+%         yVel = maxLinSpeed * fbkPhoneIO.a8;
+%         rotVel = maxRotSpeed * fbkPhoneIO.a1;
+        
+        xVel = maxLinSpeed * fbkPhoneIO.a8; % Right Pad Up/Down
+        yVel = -maxLinSpeed * fbkPhoneIO.a7; % Right Pad Left/Right 
+        rotVel = maxRotSpeed * fbkPhoneIO.a1; % Left Pad Up/Down
 
         % Pose Information for arm Control
         % CURRENTLY HACKED ON POS/VEL/EFFORT FEEDBACK UNTIL API UPDATE.

@@ -24,9 +24,9 @@ enableEffortComp = true;
 % Setup Group for the entire Robot
 robotFamily = 'Rosie';
 robotModuleNames = {
-    '_leftWheel', '_rightWheel', ...
-    'base', 'shoulder', 'elbow', 'wrist1', 'wrist2', 'wrist3', ... % arm modules
-    'spool' };
+    '_LeftWheel', '_RightWheel', ...
+    'Base', 'Shoulder', 'Elbow', 'Wrist1', 'Wrist2', 'Wrist3', ... % arm modules
+    'Spool' };
 
 wheelDOFs = 1:2;
 armDOFs = 3:8;
@@ -55,9 +55,9 @@ end
 
 
 %%  
-%%%%%%%%%%%%%%%%%%%
-% Omni Base Setup %
-%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%
+% Diff Drive Base Setup %
+%%%%%%%%%%%%%%%%%%%%%%%%%
 
 [chassisParams, chassisTrajGen] = setupDiffDriveBase();
 

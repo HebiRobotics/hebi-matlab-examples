@@ -34,6 +34,8 @@ function [ params, armKin, trajGen ] = setupArmWithGripper( )
     
     % Default seed positions for doing inverse kinematics
     params.ikSeedPos = [0 1 2.5 1.5 -1.5 1];
+    
+    % Arm Gains
 
     % Trajectory generator
     trajGen = HebiTrajectoryGenerator(armKin);
