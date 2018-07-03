@@ -7,8 +7,11 @@
 
 HebiLookup.initialize();
 
-% Do we assume that they just keep using the group they created earlier?
-% Or do we want to make a new group each time?
+% Use Scope to change select a module and change the name and family to
+% match the names below.  Following examples will use the same names.
+familyName = 'My Family';
+moduleNames = 'Test Module';  
+group = HebiLookup.newGroupFromNames( familyName, moduleNames );
 
 exampleDuration = 20; % sec
 

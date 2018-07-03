@@ -8,7 +8,7 @@
 
 HebiLookup.initialize();
 
-disp(HebiLookup);
+disp(HebiLookup);  
 
 disp(' NOTE:');
 disp('  The table above should show the information for all the modules');
