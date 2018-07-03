@@ -7,7 +7,7 @@ function rosieDemoRunner()
     localDir = fileparts(mfilename('fullpath'));
     run(fullfile(localDir, 'startup.m'));
     
-    mobileBaseType = 'diff-drive';
+    mobileBaseType = 'omni';
     
     switch lower(mobileBaseType)
         case 'diff-drive'
@@ -21,8 +21,7 @@ function rosieDemoRunner()
             disp('Did not recognize mobile base type');
             return;
     end
-            
-            
+                   
     % Start the demo
     while true
         try
