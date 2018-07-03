@@ -36,6 +36,8 @@ function [ params, armKin, trajGen ] = setupArmWithGripper( )
     params.ikSeedPos = [0 1 2.5 1.5 -1.5 1];
     
     % Arm Gains
+    params.armGains = HebiUtils.loadGains('6-DoF-Arm-Gains-Rosie');
+    params.gripperGains = [];
 
     % Trajectory generator
     trajGen = HebiTrajectoryGenerator(armKin);

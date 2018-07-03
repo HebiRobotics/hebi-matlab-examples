@@ -40,7 +40,7 @@ robotGroup.setFeedbackFrequency(100);
 
 % Setup Group for phone controller
 phoneFamily = 'HEBI';
-phoneName = 'Mobile IO - Matt iPad';
+phoneName = 'The Future is Here!';
 
 while true        
     try

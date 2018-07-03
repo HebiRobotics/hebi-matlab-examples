@@ -38,7 +38,7 @@ robotGroup.setFeedbackFrequency(100);
 
 % Setup Group for phone controller
 phoneFamily = 'HEBI';
-phoneName = 'The Future Is Here!';
+phoneName = 'The Future is Here!';
 
 while true        
     try
@@ -47,7 +47,7 @@ while true
                         phoneFamily, phoneName );        
         disp('Phone Found.  Starting up');
         break;
-    catch
+    catch me
         pause(1.0);
     end
 
@@ -93,6 +93,13 @@ gravityVec = [0 0 -1];
 numArmDOFs = armKin.getNumDoF();
 
 gripperForceScale = abs(armParams.gripperCloseEffort); 
+
+% Make a group to set just the gains for the arm
+armGroup = HebiLookup.newGroupFromNames( robotFamily, ...
+                                         robotModuleNames(armDOFs) );
+armGroup.send('gains',armParams.armGains);
+pause(0.1);
+clear armGroup;
 
 %% Startup
 while true

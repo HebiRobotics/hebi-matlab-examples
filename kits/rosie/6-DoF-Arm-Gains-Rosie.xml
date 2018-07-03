@@ -2,8 +2,8 @@
 <group_gains>
    <control_strategy>4 4 4 4 4 4</control_strategy>
    <position>
-      <kp>100 75 50 10 5 5</kp>
-      <ki>100 150 75 20 10 10</ki>
+      <kp>50 50 25 5 2 2</kp>
+      <ki>50 76 25 10 5 5</ki>
       <kd>0 0 0 0 0 0</kd>
       <feed_forward>0 0 0 0 0 0</feed_forward>
       <dead_zone>0 0 0 0 0 0</dead_zone>
