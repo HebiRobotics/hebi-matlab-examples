@@ -57,9 +57,9 @@ end
 
 
 %%  
-%%%%%%%%%%%%%%%%%%%%%%%
-% Omni Base Kinematics %
-%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%
+% Omni Base Setup %
+%%%%%%%%%%%%%%%%%%%
 
 [chassisParams, chassisTrajGen] = setupOmniBase();
 
@@ -78,13 +78,15 @@ chassisToWheelVelocities = chassisParams.wheelVelocityMatrix;
 chassisEffortsToWheelEfforts = chassisParams.wheelEffortMatrix;
 
 %%
-%%%%%%%%%%%%%%%%%%
-% Arm Kinematics %
-%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%
+% Arm Setup %
+%%%%%%%%%%%%%
 
 [ armParams, armKin, armTrajGen ] = setupArmWithGripper();
 ikSeedPos = armParams.ikSeedPos;
 armEffortOffset = armParams.effortOffset;
+
+gripperForceScale = abs(armParams.gripperCloseEffort); 
 
 gravityVec = [0 0 -1];
 numArmDOFs = armKin.getNumDoF();
@@ -325,7 +327,7 @@ while true
         %%%%%%%%%%%%%%%%%%%
         % Gripper Control %
         %%%%%%%%%%%%%%%%%%%
-        cmd.effort(gripperDOF) = 5 * fbkPhoneIO.a6;
+        cmd.effort(gripperDOF) = gripperForceScale * fbkPhoneIO.a6;
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % Evaluate Trajectory State %
