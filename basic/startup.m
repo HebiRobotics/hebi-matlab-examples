@@ -11,6 +11,6 @@ includeScript = fullfile(localDir, '..', 'include', 'include.m');
 run(includeScript);
 
 % Add this folder and all its subfolders
-addpath(fullfile(localDir, genpath('..') ));
+addpath(fullfile(localDir, genpath('./') ));
 
 end
