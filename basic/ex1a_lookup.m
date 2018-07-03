@@ -15,3 +15,4 @@ disp('  The table above should show the information for all the modules');
 disp('  on the local network.  If this table is empty make sure that the');
 disp('  modules are connected, powered on, and that the status LEDs are'); 
 disp('  displaying a green soft-fade.');
+disp('  ');

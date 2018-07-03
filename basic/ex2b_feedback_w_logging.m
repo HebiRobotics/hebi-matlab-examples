@@ -14,14 +14,13 @@ moduleNames = 'Test Module';
 group = HebiLookup.newGroupFromNames( familyName, moduleNames );
 
 exampleDuration = 20; % sec
-
-tic;
+exampleTimer = tic;
 
 group.startLog();  % Starts logging in the background
 
 disp('  Use Scope to command the module and make it move...');
 
-while toc < exampleDuration
+while toc(exampleTimer) < exampleDuration
     
    fbk = group.getNextFeedback();
    

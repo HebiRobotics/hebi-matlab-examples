@@ -12,5 +12,5 @@ HebiLookup.initialize(); % Only needed once per session, but it doesn't
 familyName = 'My Family';
 moduleNames = 'My First Module';
 
-group = HebiLookup.newGroupFromNames( familyName, moduleNames );
+group = HebiLookup.newGroupFromNames( familyName, moduleNames )
 

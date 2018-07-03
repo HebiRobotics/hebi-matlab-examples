@@ -14,17 +14,16 @@ familyName = 'My Family';
 moduleNames = 'Test Module';  
 group = HebiLookup.newGroupFromNames( familyName, moduleNames );
 
-exampleDuration = 20; % sec
-
 cmd = CommandStruct();
 
-tic;
+exampleDuration = 20; % sec
+exampleTimer = tic;
 
 group.startLog();  % Starts logging in the background
 
 disp('  Move the module to make the output move...');  
 
-while toc < exampleDuration
+while toc(exampleTimer) < exampleDuration
     
    fbk = group.getNextFeedback();
    

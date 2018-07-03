@@ -14,11 +14,10 @@ familyName = 'My Family';
 moduleNames = 'Test Module';  
 group = HebiLookup.newGroupFromNames( familyName, moduleNames );
 
-exampleDuration = 20; % sec
-
 cmd = CommandStruct();
 
-tic;
+exampleDuration = 20; % sec
+exampleTimer = tic;
 
 group.startLog();  % Starts logging in the background
 
@@ -27,7 +26,7 @@ freqHz = 1; % Hz
 freq = freqHz * 2*pi;
 amplitude = deg2rad(45); % rad
 
-while toc < exampleDuration
+while toc(exampleTimer) < exampleDuration
     
    fbk = group.getNextFeedback();
    

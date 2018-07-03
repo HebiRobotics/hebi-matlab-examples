@@ -15,12 +15,12 @@ group = HebiLookup.newGroupFromNames( familyName, moduleNames );
 
 exampleDuration = 10; % sec
 
-tic;
+exampleTimer = tic;
 
 disp('  Plotting gyro data from the module(s) IMU.');
 disp('  Move the module around to make the feedback interesting...');  
 
-while toc < exampleDuration
+while toc(exampleTimer) < exampleDuration
     
    fbk = group.getNextFeedback();
    
