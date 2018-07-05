@@ -3,17 +3,20 @@
 % Assumes that you have a group created with 1 module in it.
 %
 % HEBI Robotics
-% Jun 2018
+% June 2018
+
+clear *;
+close all;
 
 HebiLookup.initialize();
 
-% Use Scope to change select a module and change the name and family to
-% match the names below.  Following examples will use the same names.
 familyName = 'My Family';
 moduleNames = 'Test Module';  
 group = HebiLookup.newGroupFromNames( familyName, moduleNames );
 
-cmd = CommandStruct();
+cmd = CommandStruct(); % The commmand struct will have fields for position,
+                       % velocity, and effort.  Fields that are empty [] 
+                       % or NaN will be ignored when sending.
 
 exampleDuration = 10; % sec
 exampleTimer = tic;

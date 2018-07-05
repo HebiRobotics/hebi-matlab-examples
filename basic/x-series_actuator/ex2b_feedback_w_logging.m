@@ -3,8 +3,9 @@
 % Assumes that you have a group created with at least 1 module in it.
 %
 % HEBI Robotics
-% Jun 2018
+% June 2018
 
+clear *;
 close all;
 
 HebiLookup.initialize();
@@ -18,7 +19,7 @@ group = HebiLookup.newGroupFromNames( familyName, moduleNames );
 exampleDuration = 10; % sec
 exampleTimer = tic;
 
-group.startLog();  % Starts logging in the background
+group.startLog( 'dir', 'logs' );  % Starts logging in the background
 
 disp('  Use Scope to command the module and make it move...');
 

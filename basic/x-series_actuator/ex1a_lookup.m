@@ -4,7 +4,10 @@
 % Assumes that you have run 'startup.m' in this folder.
 %
 % HEBI Robotics
-% Jun 2018
+% June 2018
+
+clear *;
+close all;
 
 HebiLookup.initialize();
 

@@ -3,7 +3,10 @@
 % Assumes that you have a group created with at least 1 module in it.
 %
 % HEBI Robotics
-% Jun 2018
+% June 2018
+
+clear *;
+close all;
 
 HebiLookup.initialize();
 
