@@ -1,4 +1,4 @@
-% Get feedback from a module, log in the background, and plot offline.
+% Get feedback from a module and plot it live.
 %
 % Assumes that you have a group created with at least 1 module in it.
 %
@@ -13,7 +13,7 @@ HebiLookup.initialize();
 % Use Scope to change select a module and change the name and family to
 % match the names below.  Following examples will use the same names.
 familyName = 'My Family';
-moduleNames = 'Test I/O Board';  
+moduleNames = 'Test Mobile'; 
 group = HebiLookup.newGroupFromNames( familyName, moduleNames );
 
 exampleDuration = 10; % sec
@@ -21,9 +21,11 @@ exampleTimer = tic;
 
 group.startLog( 'dir', 'logs' );  % Starts logging in the background
 
-disp('  Use Scope to command the module and make it move...');
+disp('  Plotting gyro data from the mobile device IMU.');
+disp('  Move it around to make the feedback interesting...');  
 
-fbk = group.getNextFeedback();
+% Flag so that we only set the title, etc of plot one time
+isFirstDraw = true;
 
 figure(1);
 clf;
@@ -32,38 +34,35 @@ while toc(exampleTimer) < exampleDuration
     
    fbk = group.getNextFeedback();
    
-   bar( fbk.velocity );
+   bar( [fbk.gyroX fbk.gyroY fbk.gyroZ] );
    
-   yAxisMaxLim = 5; 
-   yAxisMinLim = -5;
+   yAxisMaxLim = 15; 
+   yAxisMinLim = -15;
    ylim([yAxisMinLim yAxisMaxLim]);
    
-   title( 'Module Output Velocity' );
+   title( 'Module Gyro Feedback' );
+   xlabel( 'Axis' );
    ylabel( 'Angular Velocity (rad/sec)');
    grid on;
-   
+
    drawnow;
-   
+
 end
 
-disp('  All done!');
+disp('  All Done!');
 
 log = group.stopLog();  % Stops background logging
 
 % Plot the logged position feedback
 figure(101);
-plot(log.time,log.position);
+plot( log.time, log.gyroX );
+hold on;
+plot( log.time, log.gyroY );
+plot( log.time, log.gyroZ );
+hold off;
 title('Position');
 xlabel('time (sec)');
-ylabel('position (rad)');
+ylabel('angular velocity (rad/sec)');
+legend gyroX gyroY gyroZ;
 grid on;
-
-% Plot the logged velocity feedback
-figure(102);
-plot(log.time,log.velocity);
-title('Velocity');
-xlabel('time (sec)');
-ylabel('velocity (rad/sec)');
-grid on;
-
 

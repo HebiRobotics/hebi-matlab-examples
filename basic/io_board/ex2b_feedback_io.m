@@ -1,4 +1,4 @@
-% Get feedback from a module and plot it live.
+% Get feedback from a module, log in the background, and plot offline.
 %
 % Assumes that you have a group created with at least 1 module in it.
 %
@@ -13,7 +13,7 @@ HebiLookup.initialize();
 % Use Scope to change select a module and change the name and family to
 % match the names below.  Following examples will use the same names.
 familyName = 'My Family';
-moduleNames = 'Test Mobile'; 
+moduleNames = 'Test I/O Board';  
 group = HebiLookup.newGroupFromNames( familyName, moduleNames );
 
 exampleDuration = 10; % sec
@@ -21,48 +21,49 @@ exampleTimer = tic;
 
 group.startLog( 'dir', 'logs' );  % Starts logging in the background
 
-disp('  Plotting gyro data from the mobile device IMU.');
-disp('  Move it around to make the feedback interesting...');  
+disp('  We need to come up with something fun for the I/O Board...');
 
-% Flag so that we only set the title, etc of plot one time
-isFirstDraw = true;
+fbk = group.getNextFeedbackIO();
 
 figure(1);
 clf;
 
 while toc(exampleTimer) < exampleDuration
     
-   fbk = group.getNextFeedback();
+   fbk = group.getNextFeedbackIO();
    
-   bar( [fbk.gyroX fbk.gyroY fbk.gyroZ] );
+   bar( fbk.a1 );
    
-   yAxisMaxLim = 15; 
-   yAxisMinLim = -15;
+   yAxisMaxLim = 5; 
+   yAxisMinLim = -5;
    ylim([yAxisMinLim yAxisMaxLim]);
    
-   title( 'Module Gyro Feedback' );
-   xlabel( 'Axis' );
+   title( 'Module Output Velocity' );
    ylabel( 'Angular Velocity (rad/sec)');
    grid on;
-
+   
    drawnow;
-
+   
 end
 
-disp('  All Done!');
+disp('  All done!');
 
 log = group.stopLog();  % Stops background logging
 
-% Plot the logged gyro feedback
+% Plot the logged position feedback
 figure(101);
-plot( log.time, log.gyroX );
-hold on;
-plot( log.time, log.gyroY );
-plot( log.time, log.gyroZ );
-hold off;
-title('3-Axis Gyro');
+plot(log.time,log.a1);
+title('Position');
 xlabel('time (sec)');
-ylabel('angular velocity (rad/sec)');
-legend gyroX gyroY gyroZ;
+ylabel('position (rad)');
 grid on;
+
+% Plot the logged velocity feedback
+figure(102);
+plot(log.time,log.d1);
+title('Velocity');
+xlabel('time (sec)');
+ylabel('velocity (rad/sec)');
+grid on;
+
 
