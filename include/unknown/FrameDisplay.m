@@ -3,8 +3,14 @@ classdef FrameDisplay < handle
     %kinematic chain. The axes are color-coded RGB for XYZ.
     %
     %  FrameDisplay = FrameDisplay() opens a new figure for drawing
-    %  coordinate frames for transforms. The fiture gets closed
+    %  coordinate frames for transforms. The figure gets closed
     %  automatically when this variable is deleted.
+    %
+    %  Once set up, you display a coordinate frame with .setFrames(frames),
+    %  where frames is a 4x4xN set of N homogeneous transforms.  See the
+    %  example below.
+    %
+    %  Optional Initialization Arguments:
     %
     %  'axisLength' optionally specifies the length of each axis in [m]
     %
@@ -12,6 +18,7 @@ classdef FrameDisplay < handle
     %  initializes the figure handles in the constructor. Otherwise the
     %  figure handles will be initialized at the first call to setFrames.
     %
+    %  Frame Axis Color Coding:
     %  x - red
     %  y - green
     %  z - blue
@@ -83,10 +90,8 @@ classdef FrameDisplay < handle
             line( range,[0 0], [0 0],'Color', 'k', 'LineWidth', 2);
             line( [0 0],range, [0 0],'Color', 'k', 'LineWidth', 2);
             line( [0 0],[0 0], range,'Color', 'k', 'LineWidth', 2);
-            grid minor;
-            box on;
-            axis square;
-            axis auto;
+            grid on;
+            axis equal;
             set(gca, 'PlotBoxAspectRatio', [1 1 1]);
             hold off;
             view(3); 
