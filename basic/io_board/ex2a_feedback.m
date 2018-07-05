@@ -3,7 +3,7 @@
 % Assumes that you have a group created with at least 1 module in it.
 %
 % HEBI Robotics
-% June 2018
+% July 2018
 
 clear *;
 close all;

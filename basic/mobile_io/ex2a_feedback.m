@@ -3,7 +3,7 @@
 % Assumes that you have a group created with at least 1 module in it.
 %
 % HEBI Robotics
-% June 2018
+% July 2018
 
 clear *;
 close all;
@@ -53,14 +53,14 @@ disp('  All Done!');
 
 log = group.stopLog();  % Stops background logging
 
-% Plot the logged position feedback
+% Plot the logged gyro feedback
 figure(101);
 plot( log.time, log.gyroX );
 hold on;
 plot( log.time, log.gyroY );
 plot( log.time, log.gyroZ );
 hold off;
-title('Position');
+title('3-Axis Gyro');
 xlabel('time (sec)');
 ylabel('angular velocity (rad/sec)');
 legend gyroX gyroY gyroZ;

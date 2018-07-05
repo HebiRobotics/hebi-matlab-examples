@@ -1,9 +1,10 @@
-% Get feedback from a module, log in the background, and plot offline.
+% Get orientation feedback from a mobile device, visualize online, log in 
+% the background, and plot logged data offline.
 %
 % Assumes that you have a group created with at least 1 module in it.
 %
 % HEBI Robotics
-% June 2018
+% July 2018
 
 clear *;
 close all;
@@ -56,7 +57,12 @@ disp('  All done!');
 
 log = group.stopLog();  % Stops background logging
 
-% Plot the logged accelerometer feedback
+% Plot the filtered acceleration feedback.  
+%
+% Note that this acceleration is different from the raw accelerometer data 
+% that is returned in the regular feedback.  The mobile device is running 
+% an onboard state estimator that attempts to separate out linear and 
+% gravitional accelerations.
 figure(101);
 plot( log.time, log.accelX );
 hold on;

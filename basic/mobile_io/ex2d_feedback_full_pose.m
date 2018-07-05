@@ -1,9 +1,10 @@
-% Get feedback from a module, log in the background, and plot offline.
+% Get full pose feedback from a mobile device, visualize online, log in 
+% the background, and plot logged data offline.
 %
 % Assumes that you have a group created with at least 1 module in it.
 %
 % HEBI Robotics
-% June 2018
+% July 2018
 
 clear *;
 close all;
@@ -21,7 +22,7 @@ exampleTimer = tic;
 
 group.startLog( 'dir', 'logs' );  % Starts logging in the background
 
-disp('  Visualizing orientation estimate from the mobile device.');
+disp('  Visualizing 6-DoF pose estimate from the mobile device.');
 disp('  Move it around to make the feedback interesting...');  
 
 fbk = group.getNextFeedbackMobile();
@@ -44,12 +45,9 @@ while toc(exampleTimer) < exampleDuration
                        fbk.arOrientationY ...
                        fbk.arOrientationZ ];
    mobileRotMat = HebiUtils.quat2rotMat( mobileQuaterion );
-   mobileXYZ = [ arPositionX;
-                 arPositionY;
-                 arPositionZ ];
-    
-   frames(1:3,1:3) = mobileRotMat;
-   frames(1:3,4) = mobileXYZ;
+   mobileXYZ = [ fbk.arPositionX;
+                 fbk.arPositionY;
+                 fbk.arPositionZ ];
   
    mobilePose.setFrames(frames) 
    drawnow;
