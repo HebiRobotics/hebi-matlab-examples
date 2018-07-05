@@ -2,4 +2,4 @@
 *.asv
 
 *.hebilog
-!/basic/logs/exampleLog.hebilog
+!basic/x-series_actuator/logs/exampleLog.hebilog
