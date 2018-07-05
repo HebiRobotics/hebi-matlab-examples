@@ -14,7 +14,6 @@ familyName = 'My Family';
 moduleNames = 'Test Module';  
 group = HebiLookup.newGroupFromNames( familyName, moduleNames );
 
-% Get the gains that are currently active on the module
+% Get the gains that are currently active on the module and save them
 gains = group.getGains();
-
-HebiUtils.saveGains(gains,'/gains/myGains.XML');
+HebiUtils.saveGains( gains, '/gains/myActuatorGains.xml' );

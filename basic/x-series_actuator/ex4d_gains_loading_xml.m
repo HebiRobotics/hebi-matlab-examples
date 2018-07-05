@@ -15,6 +15,10 @@ moduleNames = 'Test Module';
 group = HebiLookup.newGroupFromNames( familyName, moduleNames );
 
 % Get the gains that are currently active on the module
-gains = group.getGains();
+newGains = HebiUtils.loadGains( '/gains/exampleGains.xml' );
 
-HebiUtils.saveGains(gains,'/gains/myGains.XML');
+% Print them to the screen
+disp(newGains);
+
+% Send the new gains to your module
+group.send( 'gains', newGains );
