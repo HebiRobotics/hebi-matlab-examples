@@ -30,7 +30,9 @@ amp = deg2rad( 45 ); % radians
 
 while toc(exampleTimer) < exampleDuration
     
-   fbk = group.getNextFeedback();
+   fbk = group.getNextFeedback();  % Even though we don't use the feedback,
+                                   % getting feedback conveniently limits
+                                   % the loop rate to the feedback freq.
    
    cmd.position = amp * sin( freq * toc(exampleTimer) ); 
    
