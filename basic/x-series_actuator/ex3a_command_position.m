@@ -18,7 +18,7 @@ cmd = CommandStruct();
 exampleDuration = 10; % sec
 exampleTimer = tic;
 
-group.startLog();  % Starts logging in the background
+group.startLog( 'dir', 'logs' );  % Starts logging in a sub-directory
 
 % Parameters for sin/cos function
 freqHz = 1.0; % Hz

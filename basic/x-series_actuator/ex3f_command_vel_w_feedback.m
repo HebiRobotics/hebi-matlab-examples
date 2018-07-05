@@ -19,7 +19,7 @@ cmd = CommandStruct();
 exampleDuration = 15; % sec
 exampleTimer = tic;
 
-group.startLog();  % Starts logging in the background
+group.startLog( 'dir', 'logs' ); 
 
 disp('  Move the module to make the output move...');  
 
