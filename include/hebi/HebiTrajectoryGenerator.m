@@ -3,9 +3,8 @@ classdef (Sealed) HebiTrajectoryGenerator
     %
     % For series elastic actuators such as the X-series modules it is
     % important to command smooth trajectories to avoid oscillations
-    % induced by the spring element. Additionally, it helps significantly
-    % to not only command positions, but also velocities and if possible
-    % efforts (torques). 
+    % induced by their mechanical compliance. Additionally, it helps to not 
+    % only command positions, but also velocities and efforts (torques). 
     %
     %   HebiTrajectoryGenerator Methods (non-blocking):
     %
@@ -35,20 +34,6 @@ classdef (Sealed) HebiTrajectoryGenerator
     %
     %   HebiTrajectoryGenerator Methods (blocking):
     %
-    %      moveJoint         - Creates and executes a joint space trajectory 
-    %                          using newJointMove() and commands a group to 
-    %                          execute the trajectory until it is complete.
-    %                          This is a convenience function that will only
-    %                          move between 2 waypoints, starting and
-    %                          stopping at zero velocity and acceleration.
-    %
-    %      moveLinear        - Creates and executes a workspace trajectory
-    %                          using newLinearMove() and commands a group to 
-    %                          execute the trajectory until it is complete.
-    %                          This is a convenience function that will only
-    %                          move between 2 waypoints, starting and
-    %                          stopping at zero velocity and acceleration.
-    %
     %      executeTrajectory - Executes a trajectory that is generated with
     %                          either newJointMove or newLinearMove.  This
     %                          method provides more control on how the
@@ -64,7 +49,7 @@ classdef (Sealed) HebiTrajectoryGenerator
     %   - The internal heuristic to automatically determine an appropriate
     %     time vector requires knowledge of joint velocity limits
     %
-    %   - Linear movements (newLinearMove/moveLinear) require a fully 
+    %   - Linear movements (newLinearMove) require a fully 
     %     specified kinematic model (HebiKinematics object) for IK
     %
     %   - executeTrajectory requires a fully specified kinematic model
@@ -75,43 +60,58 @@ classdef (Sealed) HebiTrajectoryGenerator
     % additionally requires a HebiGroup in order to communicate with the
     % actuator hardware.
     %
-    %   Example
-    %      % Initialize with a kinematic model (3-DoF arm)
+    %   Example (blocking API)
     %      kin = HebiKinematics();
-    %      kin.addBody('X5-4');
-    %      kin.addBody('X5-Link', 'ext', 0.325, 'twist', 0);
-    %      kin.addBody('X5-1');
-    %      kin.addBody('X5-Link', 'ext', 0.325, 'twist', 0);
-    %      kin.addBody('X5-1');
-    %      trajGen = HebiTrajectoryGenerator(kin);
+    %      trajGen = HebiTrajectoryGenerator();
     %
     %      % Move between a set of waypoints using blocking calls
-    %      numWaypoints = 20;
-    %      positions = rand(numWaypoints, kin.getNumDoF);
+    %      % (Assumes a group has already been created)
+    %      numWaypoints = 5;
+    %      timeToMove = 3; % seconds
+    %
+    %      positions = rand(numWaypoints, group.getNumModules);
+    %      time = [0 timeToMove];
+    %
     %      for i = 2:numWaypoints
     %           start = positions(i-1, :);
     %           finish = positions(i, :);
-    %           trajGen.moveJoint(group, [start; finish]);
+    %           trajectory = trajGen.newJointMove([start; finish]);
+    %           trajGen.executeTrajectory(group, trajectory);
     %      end
     %
-    %   Example
-    %      % Initialize without a kinematic model (e.g. delta arm, where
-    %      % the parallel kinematics cannot use HEBIKINEMATICS )
-    %      velocityLimit = [ -9.5 9.5
-    %                        -9.5 9.5
-    %                        -9.5 9.5 ];
-    %      trajGen = HebiTrajectoryGenerator(velocityLimit);
-    %
-    %      % Alternatively you can setup a 'dummy' HebiKinematics object to  
-    %      % get the velocity limits programmatically.
+    %   Example (non-blocking API)
     %      kin = HebiKinematics();
-    %      kin.addBody('X5-1');
-    %      kin.addBody('X5-1');
-    %      kin.addBody('X5-1');
-    %      velocityLimits = kin.getJointInfo().velocityLimit;
-    %      trajGen = HebiTrajectoryGenerator(velocityLimits);
+    %      trajGen = HebiTrajectoryGenerator();
     %
-    %   Example
+    %      % Move between a set of waypoints using blocking calls
+    %      % (Assumes a group has already been created)
+    %      numWaypoints = 5;
+    %      timeToMove = 3; % seconds
+    %
+    %      positions = rand(numWaypoints, group.getNumModules);
+    %      time = [0 timeToMove];
+    %
+    %      % Execute trajectory open-loop in position and velocity
+    %      cmd = CommandStruct();
+    %
+    %      for i = 2:numWaypoints
+    %         start = positions(i-1, :);
+    %         finish = positions(i, :);
+    %         trajectory = trajGen.newJointMove([start; finish]);
+    %
+    %         fbk = group.getNextFeedback();
+    %         t0 = fbk.time;
+    %         t = 0;
+    % 
+    %         while t < trajectory.getDuration()
+    %            fbk = group.getNextFeedback();
+    %            t = fbk.time - t0;
+    %            [cmd.position, cmd.velocity, ~] = trajectory.getState(t);
+    %            group.send(cmd);
+    %         end
+    %      end
+    %
+    %   Example (automatic waypoint timing) 
     %      % Generate a trajectory for XY velocities of a mobile base where
     %      % speeds are limited to 1 m/s (or whatever units you are using).
     %      velocityLimits = [ -1 1;
@@ -130,9 +130,9 @@ classdef (Sealed) HebiTrajectoryGenerator
     %      t = toc(t0);
     %      while t < trajectory.getDuration()
     %          t = toc(t0);
+    %          fbk = group.getNextFeedback();  % limits loop rate
     %          [cmd.position, cmd.velocity, ~] = trajectory.getState(t);
     %          group.send(cmd);
-    %          pause(0.001);
     %      end
     %
     %   See also HebiTrajectory, HebiKinematics, HebiLookup, HebiGroup, 
@@ -351,7 +351,7 @@ classdef (Sealed) HebiTrajectoryGenerator
             %       % Visualize the position/velocity/accelerations.
             %       HebiUtils.plotTrajectory(trajectory);
             %       
-            %   See also HebiTrajectoryGenerator, moveJoint, newJointMove,
+            %   See also HebiTrajectoryGenerator, newJointMove,
             %   executeTrajectory
             trajectory = HebiTrajectory(newJointMove(this.obj, varargin{:}));
         end
@@ -492,6 +492,9 @@ classdef (Sealed) HebiTrajectoryGenerator
             % the first and last waypoints and will move thru any 
             % intermediate waypoints without stopping.
             %
+            %   THIS FUNCTION IS DEPRECATED AND WILL BE REMOVED IN A FUTURE
+            %   VERSION OF THE API.
+            %
             %   This method is a 'blocking' call, which means that the
             %   function will run until the execution of the trajectory is
             %   completed.  If you need to access and react to feedback
@@ -541,6 +544,9 @@ classdef (Sealed) HebiTrajectoryGenerator
             % moveLinear moves between waypoints in straight lines in
             % workspace, based on kinematics that were defined when setting
             % up the trajectory with HebiTrajectoryGenerator(kin).
+            %
+            %   THIS FUNCTION IS DEPRECATED AND WILL BE REMOVED IN A FUTURE
+            %   VERSION OF THE API.
             %
             %   This method works the same as moveJoint() with the only
             %   difference being that the resulting trajectory represents
@@ -641,8 +647,7 @@ classdef (Sealed) HebiTrajectoryGenerator
             %           'EffortOffset', zeros(1, kin.getNumDoF), ...
             %           'Callback', @(time, fbk, cmd) cmd);
             %
-            %   See also HebiTrajectoryGenerator, newJointMove, moveJoint,
-            %   newLinearMove
+            %   See also HebiTrajectoryGenerator, newJointMove, newLinearMove
             
             % Setup parser
             parser = inputParser();
