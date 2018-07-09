@@ -1,26 +1,33 @@
 classdef (Sealed) HebiKinematics
     % HebiKinematics provides basic kinematic methods for HEBI modules
     %
-    %   This Kinematics API helps with calculating forwards kinematics and
+    %   HebiKinematics loads HRDF files that descrive the configuration of
+    %   a robot and helps with calculating things like forward kinematics,
     %   inverse kinematics, Jacobians, as well as forces and torques to
     %   compensate for accelerations due to gravity or dynamic motions.
+    % 
+    %   More information and background on kinematics:
+    %   http://docs.hebi.us/core_concepts.html#kinematics
     %
-    %   Note that his API currently only supports serial chains. If you
+    %   More information on the HEBI Robot Description Format (HRDF):
+    %   http://docs.hebi.us/tools.html#robot-description-format
+    %
+    %   This API currently only supports serial chains. If you are going to
     %   work with a robot that has multiple limbs, such as a hexapod, we
     %   recommend creating a cell array that contains a separate kinematic
-    %   object for each limb. The base frames can be set to the location of
-    %   the limb with respect to the chassis.
+    %   object for each limb. The base frames can be set to the pose of the
+    %   first body of the limb with respect to the chassis.
     %
-    %   HebiKinematics Methods (setup):
-    %      addBody               -  adds a body to the end of the chain
-    %      setBaseFrame          -  set transform from world to first body
+    %   HebiKinematics Initialization:
+    %      kin = HebiKinematics('robot.hrdf');   
     %
     %   HebiKinematics Methods (kinematics):
     %      getForwardKinematics  -  calculates the configuration of bodies
     %      getJacobian           -  relates joint to body velocities
     %      getInverseKinematics  -  positions for a desired configuration
     %      getGravCompEfforts    -  compensates for gravitational accelerations
-    %      getDynamicCompEfforts -  compensates for accelerations due to motions
+    %      getDynamicCompEfforts -  compensates for accelerations due to motions 
+    %      setBaseFrame          -  set transform from world to first body
     %      setPayload            -  sets a payload for effort compensation
     %
     %   HebiKinematics Methods (information):
@@ -31,23 +38,20 @@ classdef (Sealed) HebiKinematics
     %      getJointInfo          -  a table of joint related info
     %      getBaseFrame          -  get transform from world to first body
     %
-    %   Example
-    %      % Setup a simple 3 dof arm made of X5 modules
-    %      kin = HebiKinematics();
-    %      kin.addBody('X5-9');
-    %      kin.addBody('X5-LightBracket', 'mounting', 'right');
-    %      kin.addBody('X5-4');
-    %      kin.addBody('X5-Link', 'extension', 0.350, 'twist', pi/2);
-    %      kin.addBody('X5-1');
-    %
-    %   Example
-    %      % Calculate forward kinematics with random inputs
-    %      positions = rand(kin.getNumDoF, 1);
-    %      frames = kin.getForwardKinematics('output', positions);
-    %
+    %   HebiKinematics Methods (programmatic setup):
+    %      addBody               -  adds a body to the end of the chain.
+    %                               This is no longer the preferred method
+    %                               of defining a robot configuration. It
+    %                               is better to make and load a HRDF file.
+    %                              
     %   Example
     %      % Load model from file (experimental support for hrdf v1.1)
     %      kin = HebiKinematics('robot.hrdf');
+    %
+    %   Example
+    %      % Calculate forward kinematics for some random joint positions
+    %      positions = rand(kin.getNumDoF, 1);
+    %      frames = kin.getForwardKinematics('output', positions);
     %
     %   See also HebiGroup
     
@@ -63,7 +67,7 @@ classdef (Sealed) HebiKinematics
             %   the kinematic relation of a robot. A 'body' can be a rigid
             %   link as well as a dynamic element. More detailed
             %   documentation on body types and parameters can be found at:
-            %   http://docs.hebi.us/core_concepts.html#kinematics
+            %   http://docs.hebi.us/hardware.html#Kinematic_Info
             %
             %   The 'Type' argument specifies the type of module or body
             %   that should be added. Currently implemented types include:
