@@ -106,9 +106,9 @@ end
 hLog = group.stopLogFull();
 
 % Plot the commands and feedback
-HebiUtils.plotLogs(hebilog, 'position', 'figNum', 101);
-HebiUtils.plotLogs(hebilog, 'velocity', 'figNum', 102);
-HebiUtils.plotLogs(hebilog, 'effort', 'figNum', 103);
+HebiUtils.plotLogs(hLog, 'position', 'figNum', 101);
+HebiUtils.plotLogs(hLog, 'velocity', 'figNum', 102);
+HebiUtils.plotLogs(hLog, 'effort', 'figNum', 103);
 
 %% Get target coordinates and tip axis (from joystick)
 function [xyz, tipTarget] = getTargetCoordinates(joy)
