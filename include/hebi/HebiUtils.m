@@ -6,21 +6,18 @@ classdef (Sealed) HebiUtils
     %   now                - returns the current timestamp [s]
     %
     %   saveGains          - saves group gains to disk (XML)
-    %
     %   loadGains          - loads group gains from disk (XML)
     %
     %   newGroupFromLog    - generates a group from a .hebilog file that
     %                        you can use play back data using getNextFeedback.
     %
     %   loadGroupLog       - loads a binary .hebilog file into memory
-    %
     %   loadGroupLogsUI    - shows a UI dialog to load one or more logs.
     %
     %   convertGroupLog    - converts a binary .hebilog file into a readable
     %                        format, either in memory or files like CSV or MAT.
-    %
-    %   convertGroupLogsUI - shows a UI dialog to chose one or more
-    %                        .hebilog files to convert.
+    %   convertGroupLogsUI - shows a UI dialog to chose one or more log
+    %                        files to convert.
     %
     %   plotLogs           - visualizes feedback data from one or more log
     %                        files in a formatted and labeled plot.
