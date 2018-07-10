@@ -389,9 +389,9 @@ classdef (Sealed) HebiUtils
             %
             %       'InputLogs' is a single hebiLog object or a cell array 
             %       of log objects. Logs can come from logging modules 
-            %       online with HEBIGROUP.STOPLOG, loaded from a saved file  
-            %       using HEBIUTILS.CONVERTGROUPLOG. Or selected manually 
-            %       from a UI dialog using HEBIUTILS.CONVERTGROUPLOGSUI.
+            %       online with HebiGroup.stopLog, loaded from a saved file  
+            %       using HebiUtils.loadGroupLog. Or selected manually 
+            %       from a UI dialog using HebiUtils.loadGroupLogsUI.
             % 
             %       'FeedbackField' is a string corresponding to a feedback
             %       field in the log object. If the field is 'position',
@@ -424,7 +424,7 @@ classdef (Sealed) HebiUtils
             %           'Modules', 1:2, ...
             %           'FigNum', 100);
             %
-            % See also CONVERTGROUPLOGS, CONVERTGROUPLOGSUI.
+            % See also LOADGROUPLOG, LOADGROUPLOGSUI.
             
             if nargin < 1 || isempty(hebiLogs)
                 disp('Please specify a log file and feedback field to plot.');
