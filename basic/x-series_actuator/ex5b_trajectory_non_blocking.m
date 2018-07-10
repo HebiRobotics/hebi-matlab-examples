@@ -54,7 +54,7 @@ while t < trajectory.getDuration()
     cmd.position = pos;
     cmd.velocity = vel;
     group.send(cmd);
-
+    
 end
 
 % Reverse the waypoints and to go back to the first position

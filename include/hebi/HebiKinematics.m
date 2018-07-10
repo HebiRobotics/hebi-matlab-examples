@@ -19,7 +19,9 @@ classdef (Sealed) HebiKinematics
     %   first body of the limb with respect to the chassis.
     %
     %   HebiKinematics Initialization:
-    %      kin = HebiKinematics('robot.hrdf');   
+    %      kin = HebiKinematics('robot.hrdf') - where 'robot.hrdf' is the
+    %                                           path to the file that
+    %                                           describes the robot.
     %
     %   HebiKinematics Methods (kinematics):
     %      getForwardKinematics  -  calculates the configuration of bodies
