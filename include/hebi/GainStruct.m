@@ -28,7 +28,7 @@ function struct = GainStruct()
     %       gains.controlStrategy = [4 4];
     %       group.send('gains', gains);
     %
-    %   See also HebiGroup, HebiUtils
+    %   See also HebiGroup, HebiUtils.loadGains, HebiUtils.saveGains
     
     %   Copyright 2014-2018 HEBI Robotics, Inc.
     struct = javaObject(hebi_load('GainStruct'));
