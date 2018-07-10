@@ -389,9 +389,9 @@ classdef (Sealed) HebiUtils
             %
             %       'InputLogs' is a single hebiLog object or a cell array 
             %       of log objects. Logs can come from logging modules 
-            %       online with HebiGroup.stopLog, loaded from a saved file  
-            %       using HebiUtils.loadGroupLog. Or selected manually 
-            %       from a UI dialog using HebiUtils.loadGroupLogsUI.
+            %       online with HebiGroup.stopLog(), loaded from a saved file  
+            %       using HebiUtils.loadGroupLog(). Or selected manually 
+            %       from a UI dialog using HebiUtils.loadGroupLogsUI().
             % 
             %       'FeedbackField' is a string corresponding to a feedback
             %       field in the log object. If the field is 'position',
