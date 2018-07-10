@@ -1,7 +1,11 @@
 % Change the D-gain of the position controller on a module while commanding
 % a step change in position.
 %
-% Assumes that you have a group created with 1 module in it.
+% For more information type:
+%    help GainStruct
+%    help HebiGroup
+%
+% This script assumes that you have a group created with 1 module in it.
 %
 % HEBI Robotics
 % July 2018

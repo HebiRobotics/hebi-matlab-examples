@@ -1,7 +1,11 @@
 % Make a group consisting of multiple modules.  A 'module' can be an
 % actuator, and I/O board, or a mobile device running the Mobile I/O app.
 %
-% Assumes that you have run 'startup.m' in this folder.
+% For more information type:
+%    help HebiGroup
+%    help HebiLookup    
+%
+% This script assumes that you have run 'startup.m' in this folder.
 %
 % HEBI Robotics
 % June 2018

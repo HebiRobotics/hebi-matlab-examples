@@ -1,6 +1,11 @@
 % Save and load gains using the cross-API gains XML format.
 %
-% Assumes that you have a group created with 1 module in it.
+% For more information type:
+%    help GainStruct
+%    help HebiUtils
+%    help HebiGroup
+%
+% This script assumes that you have a group created with 1 module in it.
 %
 % HEBI Robotics
 % July 2018

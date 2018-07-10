@@ -1,6 +1,10 @@
 % Send position commands, log in the background, and plot offline.
 %
-% Assumes that you have a group created with 1 module in it.
+% For more information type:
+%    help CommandStruct
+%    help HebiGroup
+%
+% This script assumes that you have a group created with 1 module in it.
 %
 % HEBI Robotics
 % June 2018

@@ -1,6 +1,10 @@
 % Load a saved log file with feedback from an actuator and plot some of 
 % the data.
 %
+% For more information type:
+%    help HebiUtils
+%    help HebiGroup
+%
 % HEBI Robotics
 % July 2018
 

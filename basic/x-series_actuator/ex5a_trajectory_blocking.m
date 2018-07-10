@@ -1,7 +1,11 @@
 % Generate a trajectory and execute it using the blocking API.  This code
 % does the exact same commands as the next non-blocking API example.
 %
-% Assumes that you have a group created with 1 module in it.
+% For more information type:
+%    help HebiTrajectoryGenerator
+%    help HebiTrajectory
+%
+% This script assumes that you have a group created with 1 module in it.
 %
 % HEBI Robotics
 % June 2018

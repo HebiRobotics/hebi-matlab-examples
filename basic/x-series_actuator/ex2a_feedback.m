@@ -1,6 +1,9 @@
 % Get feedback from a module and plot it live.
 %
-% Assumes that you have a group created with at least 1 module in it.
+% For more information type:
+%    help HebiGroup
+%
+% This script assumes you have a group created with at least 1 module.
 %
 % HEBI Robotics
 % June 2018
