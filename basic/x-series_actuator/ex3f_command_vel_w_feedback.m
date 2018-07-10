@@ -30,11 +30,11 @@ disp('  Move the module to make the output move...');
 
 while toc(exampleTimer) < exampleDuration
     
-   fbk = group.getNextFeedback();
-   
-   cmd.velocity = -fbk.gyroZ;  % Command a velocity that counters the  
+    fbk = group.getNextFeedback();
+
+    cmd.velocity = -fbk.gyroZ;  % Command a velocity that counters the  
                                % measured angular velocity around z-axis.
-   group.send(cmd);
+    group.send(cmd);
    
 end
 

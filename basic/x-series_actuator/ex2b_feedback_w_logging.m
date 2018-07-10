@@ -32,21 +32,21 @@ figure(1);
 clf;
 
 while toc(exampleTimer) < exampleDuration
-    
-   fbk = group.getNextFeedback();
-   
-   bar( fbk.velocity );
-   
-   yAxisMaxLim = 5; 
-   yAxisMinLim = -5;
-   ylim([yAxisMinLim yAxisMaxLim]);
-   
-   title( 'Module Output Velocity' );
-   ylabel( 'Angular Velocity (rad/sec)');
-   grid on;
-   
-   drawnow;
-   
+
+    fbk = group.getNextFeedback();
+
+    bar( fbk.velocity );
+
+    yAxisMaxLim = 5; 
+    yAxisMinLim = -5;
+    ylim([yAxisMinLim yAxisMaxLim]);
+
+    title( 'Module Output Velocity' );
+    ylabel( 'Angular Velocity (rad/sec)');
+    grid on;
+
+    drawnow;
+
 end
 
 disp('  All done!');

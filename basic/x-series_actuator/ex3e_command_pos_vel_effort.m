@@ -36,22 +36,22 @@ inertia = 1E-8; % kg * m^2
 
 while toc(exampleTimer) < exampleDuration
     
-   fbk = group.getNextFeedback();
-   
-   % Position Command
-   cmdPosition = amp * sin( freq*toc(exampleTimer) );
-   
-   % Velocity Command (time-derivate of position)
-   cmdVelocity = freq * amp * cos( freq*toc(exampleTimer) );
-   
-   % Acceleration Command (time-derivative of velocity)
-   cmdAcceleration = -freq^2 * amp * sin( freq*toc(exampleTimer) );
-   
-   cmd.position = cmdPosition;
-   cmd.velocity = cmdVelocity;
-   cmd.effort = inertia * cmdAcceleration;
-   
-   group.send(cmd);
+    fbk = group.getNextFeedback();
+
+    % Position Command
+    cmdPosition = amp * sin( freq*toc(exampleTimer) );
+
+    % Velocity Command (time-derivate of position)
+    cmdVelocity = freq * amp * cos( freq*toc(exampleTimer) );
+
+    % Acceleration Command (time-derivative of velocity)
+    cmdAcceleration = -freq^2 * amp * sin( freq*toc(exampleTimer) );
+
+    cmd.position = cmdPosition;
+    cmd.velocity = cmdVelocity;
+    cmd.effort = inertia * cmdAcceleration;
+
+    group.send(cmd);
    
 end
 

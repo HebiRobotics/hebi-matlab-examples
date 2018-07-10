@@ -33,18 +33,18 @@ amp = deg2rad( 45 ); % radians
 
 while toc(exampleTimer) < exampleDuration
     
-   fbk = group.getNextFeedback();
-   
-   % Position Command
-   cmdPosition = amp * sin( freq*toc(exampleTimer) );
-   
-   % Velocity Command (time-derivate of position)
-   cmdVelocity = freq * amp * cos( freq*toc(exampleTimer) );
-   
-   cmd.position = cmdPosition;
-   cmd.velocity = cmdVelocity;
-   
-   group.send(cmd);
+    fbk = group.getNextFeedback();
+
+    % Position Command
+    cmdPosition = amp * sin( freq*toc(exampleTimer) );
+
+    % Velocity Command (time-derivate of position)
+    cmdVelocity = freq * amp * cos( freq*toc(exampleTimer) );
+
+    cmd.position = cmdPosition;
+    cmd.velocity = cmdVelocity;
+
+    group.send(cmd);
    
 end
 

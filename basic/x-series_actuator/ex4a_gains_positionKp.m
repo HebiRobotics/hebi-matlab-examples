@@ -46,15 +46,15 @@ for i = 1:length(newPositionKpGains)
     exampleTimer = tic;
     while toc(exampleTimer) < exampleDuration
 
-       fbk = group.getNextFeedback();
+        fbk = group.getNextFeedback();
 
-       if rem( toc(exampleTimer), 2*stepPeriod ) > stepPeriod
+        if rem( toc(exampleTimer), 2*stepPeriod ) > stepPeriod
            cmd.position = stepPosition;
-       else
+        else
            cmd.position = 0;
-       end
+        end
 
-       group.send(cmd);
+        group.send(cmd);
 
     end
 end

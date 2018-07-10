@@ -32,21 +32,21 @@ figure(1);
 clf;
 
 while toc(exampleTimer) < exampleDuration
-    
-   fbk = group.getNextFeedback();
-   
-   bar( [fbk.gyroX fbk.gyroY fbk.gyroZ] );
-   
-   yAxisMaxLim = 15; 
-   yAxisMinLim = -15;
-   ylim([yAxisMinLim yAxisMaxLim]);
-   
-   title( 'Module Gyro Feedback' );
-   xlabel( 'Axis' );
-   ylabel( 'Angular Velocity (rad/sec)');
-   grid on;
 
-   drawnow;
+    fbk = group.getNextFeedback();
+
+    bar( [fbk.gyroX fbk.gyroY fbk.gyroZ] );
+
+    yAxisMaxLim = 15; 
+    yAxisMinLim = -15;
+    ylim([yAxisMinLim yAxisMaxLim]);
+
+    title( 'Module Gyro Feedback' );
+    xlabel( 'Axis' );
+    ylabel( 'Angular Velocity (rad/sec)');
+    grid on;
+
+    drawnow;
 
 end
 
