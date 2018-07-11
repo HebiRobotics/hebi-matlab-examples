@@ -19,7 +19,7 @@ familyName = 'My Family';
 moduleNames = 'Test Module';  
 group = HebiLookup.newGroupFromNames( familyName, moduleNames );
 
-% Get the gains that are currently active on the module
+% Load the gains from a saved file
 newGains = HebiUtils.loadGains( '/gains/exampleGains.xml' );
 
 % Print them to the screen
