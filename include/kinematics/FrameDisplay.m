@@ -54,7 +54,7 @@ classdef FrameDisplay < handle
         y
         z
         numFrames
-        axisLength = 0.1;
+        axisLength = 0.05;
     end
     
     methods(Access = public)
@@ -99,9 +99,9 @@ classdef FrameDisplay < handle
             % labels
             legend x y z
             title('Frames');
-            xlabel('x');
-            ylabel('y');
-            zlabel('z');
+            xlabel('x (m)');
+            ylabel('y (m)');
+            zlabel('z (m)');
         end
         
         function setFrames(this, frames)
