@@ -50,23 +50,28 @@ classdef FrameDisplay < handle
     
     properties (Access = private)
         figHandle
+        axHandle
         x
         y
         z
         numFrames
-        axisLength = 0.05;
+        axisLength = 0.05;  % m 
+        xyzLimits = nan(3,2); % m (stacked [xLim; yLim; zLim])
     end
     
     methods(Access = public)
         
-        function this = FrameDisplay(axisLength, numFrames)
+        function this = FrameDisplay(axisLength, numFrames, xyzLimits)
             % Constructor gets called once. It creates a new figure and
             % formats it nicely.
             if nargin > 0
                 this.axisLength = axisLength; 
             end
-            if nargin > 1
+            if nargin > 1 && ~isempty(numFrames)
                 this.init(numFrames);
+            end
+            if nargin > 2
+                this.xyzLimits = xyzLimits;
             end
         end
         
@@ -86,13 +91,16 @@ classdef FrameDisplay < handle
                 this.z(i) = line( [0 0], [0 0], range,'Color', 'b', 'LineWidth', 3);
             end
             
-            % Draw small coordinate frame in the center
+            % Draw black coordinate frame at the origin
             line( range,[0 0], [0 0],'Color', 'k', 'LineWidth', 2);
             line( [0 0],range, [0 0],'Color', 'k', 'LineWidth', 2);
             line( [0 0],[0 0], range,'Color', 'k', 'LineWidth', 2);
             grid on;
             axis equal;
-            set(gca, 'PlotBoxAspectRatio', [1 1 1]);
+            
+            this.axHandle = gca;
+            
+            set(this.axHandle, 'PlotBoxAspectRatio', [1 1 1]);
             hold off;
             view(3); 
             
@@ -122,6 +130,10 @@ classdef FrameDisplay < handle
                 end
             end
             
+            xlim(this.axHandle,'auto');
+            ylim(this.axHandle,'auto');
+            zlim(this.axHandle,'auto');
+            
             axes_base = [eye(3) * this.axisLength; ones(1,3)];
             orig_base = [zeros(3); ones(1,3)];
             for i = 1:this.numFrames
@@ -146,6 +158,17 @@ classdef FrameDisplay < handle
                     'ZData', [orig_T(3,3) axes_T(3,3)] );
             end
             
+            % Update axis limits if they grew larger, never shrink them
+            xyzLimitsNew(1,:) = get(this.axHandle,'XLim');
+            xyzLimitsNew(2,:) = get(this.axHandle,'YLim');
+            xyzLimitsNew(3,:) = get(this.axHandle,'ZLim');
+            
+            this.xyzLimits(:,1) = min( this.xyzLimits(:,1), xyzLimitsNew(:,1) );
+            this.xyzLimits(:,2) = max( this.xyzLimits(:,2), xyzLimitsNew(:,2) );  
+            
+            xlim(this.axHandle,this.xyzLimits(1,:));
+            ylim(this.axHandle,this.xyzLimits(2,:));
+            zlim(this.axHandle,this.xyzLimits(3,:));
         end
         
     end
