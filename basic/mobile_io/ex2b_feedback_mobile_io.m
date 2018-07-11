@@ -33,28 +33,28 @@ isFirstDraw = true;
 
 while toc(exampleTimer) < exampleDuration
     
-   fbk = group.getNextFeedbackIO();
-   
-   % Digital Feedback
-   bar( [fbk.b1 fbk.b2 fbk.b3 fbk.b4 fbk.b5 fbk.b6 fbk.b7 fbk.b8], 'r' );
-   hold on;
-   
-   % Analog Feedback
-   bar( [fbk.a1 fbk.a2 fbk.a3 fbk.a4 fbk.a5 fbk.a6 fbk.a7 fbk.a8], 'b' );
-   hold off; 
-   
-   yAxisMaxLim = 1; 
-   yAxisMinLim = -1;
-   ylim([yAxisMinLim yAxisMaxLim]);
-   
+    fbk = group.getNextFeedbackIO();
 
-   title('Digital Inputs (red) and Analog Inputs (blue)');
-   ylabel('[-1 to 1]');
-   grid on;
-   isFirstDraw = false;
+    % Digital Feedback
+    bar( [fbk.b1 fbk.b2 fbk.b3 fbk.b4 fbk.b5 fbk.b6 fbk.b7 fbk.b8], 'r' );
+    hold on;
 
-   
-   drawnow;
+    % Analog Feedback
+    bar( [fbk.a1 fbk.a2 fbk.a3 fbk.a4 fbk.a5 fbk.a6 fbk.a7 fbk.a8], 'b' );
+    hold off; 
+
+    yAxisMaxLim = 1; 
+    yAxisMinLim = -1;
+    ylim([yAxisMinLim yAxisMaxLim]);
+
+
+    title('Digital Inputs (red) and Analog Inputs (blue)');
+    ylabel('[-1 to 1]');
+    grid on;
+    isFirstDraw = false;
+
+
+    drawnow;
    
 end
 
