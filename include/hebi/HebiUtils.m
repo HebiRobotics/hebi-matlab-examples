@@ -492,7 +492,7 @@ classdef (Sealed) HebiUtils
                 plot(ax, hebiLogs{i}.time, hebiLogs{i}.(feedbackField)(:,plotMask) );
                 
                 xlabel('time (sec)');
-                ylabel([feedbackField ' (' HebiUtils.feedbackUnits(feedbackField) ')']);
+                ylabel([feedbackField ' (' HebiUtils.getFeedbackUnits(feedbackField) ')']);
                 title( [feedbackField ' - Log ' ...
                     num2str(i) ' of ' num2str(numLogs)] );
                 xlim([0 hebiLogs{i}.time(end)]);
@@ -513,7 +513,7 @@ classdef (Sealed) HebiUtils
                         hebiLogs{i}.([feedbackField 'Cmd'])(:,plotMask) );
                     
                     xlabel('time (sec)');
-                    ylabel(['error (' HebiUtils.feedbackUnits(feedbackField) ')']);
+                    ylabel(['error (' HebiUtils.getFeedbackUnits(feedbackField) ')']);
                     title( [feedbackField ' error'] );
                     xlim([0 hebiLogs{i}.time(end)]);
                     grid on;
@@ -728,9 +728,11 @@ classdef (Sealed) HebiUtils
             
         end
         
-        function [ feedbackUnits ] = feedbackUnits( feedbackField )
+        function [ feedbackUnits ] = getFeedbackUnits( feedbackField )
             %FEEDBACKUNITS Return units of a given feedback type in a log file
             switch feedbackField
+                
+                % Actuator Feedback
                 case {'position','positionCmd','motorPosition','deflection'}
                     feedbackUnits = 'rad';
                     
@@ -764,6 +766,25 @@ classdef (Sealed) HebiUtils
                     
                 case {'ledR','ledRG','ledB'}
                     feedbackUnits = '0-1';
+                
+                % Mobile Feedback
+                case {'gpsTimestamp'}
+                    feedbackUnits = 'sec';
+                    
+                case {'magnetometerX','magnetometerY','magnetometerZ'}
+                    feedbackUnits = 'T';
+                    
+                case {'gpsLatitude','gpsLongitude','gpsHeading'}
+                    feedbackUnits = 'deg';    
+               
+                case {'altitude','gpsAltitude','gpsHorizontalAccuracy','gpsVerticalAccuracy'}
+                    feedbackUnits = 'm';
+                    
+                case {'arPositionX','arPositionY','arPositionZ'}
+                    feedbackUnits = 'm';    
+                    
+                case {'batteryLevel'}
+                    feedbackUnits = '%';
                     
                 otherwise
                     feedbackUnits = '';
