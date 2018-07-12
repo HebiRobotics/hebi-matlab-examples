@@ -17,7 +17,7 @@ familyName = 'My Family';
 moduleNames = 'Test Mobile';  
 group = HebiLookup.newGroupFromNames( familyName, moduleNames );
 
-exampleDuration = 10; % sec
+exampleDuration = 60; % sec
 exampleTimer = tic;
 
 group.startLog( 'dir', 'logs' );  % Starts logging in the background
@@ -36,42 +36,48 @@ clf;
 
 while toc(exampleTimer) < exampleDuration
     
-   fbk = group.getNextFeedbackMobile();
+    fbk = group.getNextFeedbackMobile();
+
+    % Get the orientation feedback and convert to rotation matrix so that it
+    % can be visualized.
+    mobileQuaterion = [ fbk.arOrientationW ...
+                        fbk.arOrientationX ...
+                        fbk.arOrientationY ...
+                        fbk.arOrientationZ ];
+    mobileRotMat = HebiUtils.quat2rotMat( mobileQuaterion );
+
+    mobileXYZ = [ fbk.arPositionX;
+                  fbk.arPositionY;
+                  fbk.arPositionZ ];
    
-   % Get the orientation feedback and convert to rotation matrix so that it
-   % can be visualized.
-   mobileQuaterion = [ fbk.arOrientationW ...
-                       fbk.arOrientationX ...
-                       fbk.arOrientationY ...
-                       fbk.arOrientationZ ];
-   mobileRotMat = HebiUtils.quat2rotMat( mobileQuaterion );
-   mobileXYZ = [ fbk.arPositionX;
-                 fbk.arPositionY;
-                 fbk.arPositionZ ];
-  
-   mobilePose.setFrames(frames) 
-   drawnow;
-   
+    arTransform = eye(4);
+    arTransform(1:3,1:3) = mobileRotMat;
+    arTransform(1:3,4) = mobileXYZ;
+          
+    mobilePose.setFrames( arTransform );
+    title(['AR Quality: ' num2str(fbk.arQuality)]);
+    drawnow;
+
 end
 
 disp('  All done!');
 
 log = group.stopLog();  % Stops background logging
 
-% Plot the logged position feedback
-figure(101);
-plot(log.time,log.a1);
-title('Position');
-xlabel('time (sec)');
-ylabel('position (rad)');
-grid on;
-
-% Plot the logged velocity feedback
-figure(102);
-plot(log.time,log.d1);
-title('Velocity');
-xlabel('time (sec)');
-ylabel('velocity (rad/sec)');
-grid on;
+% % Plot the logged position feedback
+% figure(101);
+% plot(log.time,log.a1);
+% title('Position');
+% xlabel('time (sec)');
+% ylabel('position (rad)');
+% grid on;
+% 
+% % Plot the logged velocity feedback
+% figure(102);
+% plot(log.time,log.d1);
+% title('Velocity');
+% xlabel('time (sec)');
+% ylabel('velocity (rad/sec)');
+% grid on;
 
 

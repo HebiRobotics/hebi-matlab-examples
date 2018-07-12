@@ -17,7 +17,7 @@ familyName = 'My Family';
 moduleNames = 'Test Mobile';  
 group = HebiLookup.newGroupFromNames( familyName, moduleNames );
 
-exampleDuration = 10; % sec
+exampleDuration = 60; % sec
 exampleTimer = tic;
 
 group.startLog( 'dir', 'logs' );  % Starts logging in the background
@@ -36,20 +36,20 @@ clf;
 
 while toc(exampleTimer) < exampleDuration
     
-   fbk = group.getNextFeedbackMobile();
-   
-   % Get the orientation feedback and convert to rotation matrix so that it
-   % can be visualized.
-   mobileQuaterion = [ fbk.orientationW ...
+    fbk = group.getNextFeedbackMobile();
+
+    % Get the orientation feedback and convert to rotation matrix so that it
+    % can be visualized.
+    mobileQuaterion = [ fbk.orientationW ...
                        fbk.orientationX ...
                        fbk.orientationY ...
                        fbk.orientationZ ];
-   mobileRotMat = HebiUtils.quat2rotMat( mobileQuaterion );
-    
-   frames(1:3,1:3) = mobileRotMat;
-  
-   mobilePose.setFrames(frames) 
-   drawnow;
+    mobileRotMat = HebiUtils.quat2rotMat( mobileQuaterion );
+
+    frames(1:3,1:3) = mobileRotMat;
+
+    mobilePose.setFrames(frames) 
+    drawnow;
    
 end
 
