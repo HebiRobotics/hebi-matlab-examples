@@ -7,8 +7,16 @@ different products:
   - I/O Board
   - Mobile I/O
 
-The examples provided here work progressively through concepts that are 
-documented in more detail at:
+The examples provided here work progressively through the following concepts:
+* Lookup / Groups
+* Feedback
+* Commands
+* Gains
+* Trajectories
+* Kinematics
+* Example - Robot Arm
+
+These API features and concepts are documented in more detail at:
 * http://docs.hebi.us/tools.html#matlab-api
 * http://docs.hebi.us/core_concepts.html
 
