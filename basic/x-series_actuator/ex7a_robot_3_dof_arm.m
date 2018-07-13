@@ -26,6 +26,8 @@ group = HebiLookup.newGroupFromNames( familyName, moduleNames );
 group.send('gains',gains);
 cmd = CommandStruct();
 
+group.startLog('dir','logs');
+
 % Four Corners of a Box
 xyzTargets = [ 0.20  0.40  0.40  0.20;    % x (m)
                0.30  0.30 -0.30 -0.30;    % y (m)
@@ -103,4 +105,10 @@ for i=1:length(xyzTargets)
     end
     
 end
+
+log = group.stopLog();
+
+HebiUtils.plotLogs( log, 'position', 'figNum', 101 );
+HebiUtils.plotLogs( log, 'velocity', 'figNum', 102 );
+HebiUtils.plotLogs( log, 'effort', 'figNum', 103 );
 
