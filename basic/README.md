@@ -9,8 +9,8 @@ different products:
 
 The examples provided here work progressively through concepts that are 
 documented in more detail at:
-http://docs.hebi.us/tools.html#matlab-api
-http://docs.hebi.us/core_concepts.html
+* http://docs.hebi.us/tools.html#matlab-api
+* http://docs.hebi.us/core_concepts.html
 
 
 # Setup
