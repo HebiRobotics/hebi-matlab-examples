@@ -98,7 +98,7 @@ hold off;
 title('Digital Inputs');
 xlabel('time (sec)');
 ylabel('[0 or 1]');
-ylim([-.1 1.1]);
+ylim([-0.1 1.1]);
 legend( strsplit(num2str(1:8)) );
 grid on;
 
