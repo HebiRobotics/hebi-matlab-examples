@@ -1,53 +1,69 @@
 classdef (Sealed) HebiKinematics
     % HebiKinematics provides basic kinematic methods for HEBI modules
     %
-    %   This Kinematics API helps with calculating forwards kinematics and
+    %   HebiKinematics loads HRDF files that describe the configuration of
+    %   a robot and helps with calculating things like forward kinematics,
     %   inverse kinematics, Jacobians, as well as forces and torques to
     %   compensate for accelerations due to gravity or dynamic motions.
+    % 
+    %   More information and background on kinematics:
+    %   http://docs.hebi.us/core_concepts.html#kinematics
     %
-    %   Note that his API currently only supports serial chains. If you
+    %   More information on the HEBI Robot Description Format (HRDF):
+    %   http://docs.hebi.us/tools.html#robot-description-format
+    %
+    %   This API currently only supports serial chains. If you are going to
     %   work with a robot that has multiple limbs, such as a hexapod, we
     %   recommend creating a cell array that contains a separate kinematic
-    %   object for each limb. The base frames can be set to the location of
-    %   the limb with respect to the chassis.
+    %   object for each limb. The base frames can be set to the pose of the
+    %   first body of the limb with respect to the chassis.
     %
     %   HebiKinematics Methods (setup):
-    %      addBody               -  adds a body to the end of the chain
-    %      setBaseFrame          -  set transform from world to first body
+    %      kin = HebiKinematics('robot.hrdf') - where 'robot.hrdf' is the
+    %                                           path to the file that
+    %                                           describes the robot.
     %
     %   HebiKinematics Methods (kinematics):
-    %      getForwardKinematics  -  calculates the configuration of bodies
-    %      getJacobian           -  relates joint to body velocities
-    %      getInverseKinematics  -  positions for a desired configuration
-    %      getGravCompEfforts    -  compensates for gravitational accelerations
-    %      getDynamicCompEfforts -  compensates for accelerations due to motions
-    %      setPayload            -  sets a payload for effort compensation
+    %      getForwardKinematics  - calculates the pose of bodies in the 
+    %                              kinematic chain, given a set of joint 
+    %                              positions
+    %      getInverseKinematics  - calculates the required joint positions to  
+    %                              generate a desired end-effector pose
+    %      getJacobian           - calculates the matrix that relates joint
+    %                              velocities to body velocities
+    %      getGravCompEfforts    - calculates the efforts that compensate
+    %                              for gravitational accelerations, given
+    %                              joint positions and gravity vector.
+    %      getDynamicCompEfforts - calculates the efforts that compensate 
+    %                              for dynamics of a desired motion, given
+    %                              joint position/velocities/accelerations
+    %      setBaseFrame          - set transform from world to first body
+    %                              in the kinematic chain
+    %      setPayload            - sets an additional mass at the end-effector
+    %                              for effort compensation
     %
     %   HebiKinematics Methods (information):
-    %      getNumBodies          -  number of bodies
-    %      getNumDoF             -  number of degrees of freedom
-    %      getBodyMasses         -  a vector of all body masses [kg]
-    %      getBodyInfo           -  a table of body related info
-    %      getJointInfo          -  a table of joint related info
-    %      getBaseFrame          -  get transform from world to first body
+    %      getNumBodies          - number of bodies
+    %      getNumDoF             - number of degrees of freedom
+    %      getBodyMasses         - a vector of all body masses [kg]
+    %      getBodyInfo           - a table of body related info
+    %      getJointInfo          - a table of joint related info
+    %      getBaseFrame          - get transform from world to first body
     %
-    %   Example
-    %      % Setup a simple 3 dof arm made of X5 modules
-    %      kin = HebiKinematics();
-    %      kin.addBody('X5-9');
-    %      kin.addBody('X5-LightBracket', 'mounting', 'right');
-    %      kin.addBody('X5-4');
-    %      kin.addBody('X5-Link', 'extension', 0.350, 'twist', pi/2);
-    %      kin.addBody('X5-1');
-    %
-    %   Example
-    %      % Calculate forward kinematics with random inputs
-    %      positions = rand(kin.getNumDoF, 1);
-    %      frames = kin.getForwardKinematics('output', positions);
-    %
+    %   HebiKinematics Methods (programmatic setup):
+    %      addBody               - adds a body to the end of the chain.
+    %                              THIS IS NO LONGER THE PREFERRED METHOD
+    %                              OF DEFINING A ROBOT CONFIGURATION. It
+    %                              is better to make and load an HRDF file.
+    %                              
     %   Example
     %      % Load model from file (experimental support for hrdf v1.1)
     %      kin = HebiKinematics('robot.hrdf');
+    %
+    %   Example
+    %      % Calculate forward kinematics for some random joint positions
+    %      positions = rand(kin.getNumDoF, 1);
+    %      frames = kin.getForwardKinematics('output', positions);
     %
     %   See also HebiGroup
     
@@ -59,11 +75,16 @@ classdef (Sealed) HebiKinematics
         function this = addBody(this, varargin)
             % addBody adds a body to the end of the chain
             %
+            %   THIS METHOD IS NO LONGER THE PREFERRED WAY OF SETTING UP A
+            %   NEW KINEMATICS OBJECT. PLEASE LOAD FROM AN .HRDF FILE.  FOR
+            %   MORE INFORMATION, PLEASE SEE:
+            %   http://docs.hebi.us/tools.html#robot-description-format
+            %
             %   This method creates a serial chain of bodies that describe
             %   the kinematic relation of a robot. A 'body' can be a rigid
             %   link as well as a dynamic element. More detailed
             %   documentation on body types and parameters can be found at:
-            %   http://docs.hebi.us/core_concepts.html#kinematics
+            %   http://docs.hebi.us/hardware.html#Kinematic_Info
             %
             %   The 'Type' argument specifies the type of module or body
             %   that should be added. Currently implemented types include:
@@ -79,13 +100,6 @@ classdef (Sealed) HebiKinematics
             %       'X5-LightBracket'       (Mounting)
             %       'X5-HeavyBracket'       (Mounting)
             %
-            %     S-Series Types
-            %       'S5-3'
-            %       'S5-Gripper'
-            %       'S5-Link'               (Extension, Twist)
-            %       'S5-ElbowLink'          (Extension, Twist, 
-            %                                Extension2, Twist2)
-            %
             %     Custom Types
             %       'GenericJoint'          (Axis)
             %       'GenericLink'           (CoM, OutputTransform, Mass )
@@ -95,10 +109,8 @@ classdef (Sealed) HebiKinematics
             %   Potential kinematic parameters include:
             %
             %       Parameter          Size    Units      Synonyms
-            %       'Extension'        1x1     [m]        ('ext','ext1')
-            %       'Extension2'       1x1     [m]        ('ext2')
-            %       'Twist'            1x1     [rad]      ('twist1')
-            %       'Twist2'           1x1     [rad]
+            %       'Extension'        1x1     [m]        ('ext')
+            %       'Twist'            1x1     [rad]   
             %       'Mass'             1x1     [kg]
             %       'CoM'              3x1     [m]
             %       'Axis'             1x1     [tx|ty|tz|rx|ry|rz]
@@ -130,7 +142,7 @@ classdef (Sealed) HebiKinematics
             %      kin.addBody('X5-LightBracket', 'mount', 'right');
             %      kin.addBody('X5-1');
             %
-            %   More information can be found at:
+            %   More general info on kinematics can be found at:
             %   http://docs.hebi.us/core_concepts.html#kinematics
             %
             %   See also HebiKinematics
@@ -279,7 +291,7 @@ classdef (Sealed) HebiKinematics
         function out = getForwardKinematics(this, varargin)
             % getForwardKinematics (getFK) calculates the poses of all the
             % bodies in the configured kinematic chain, setup by using 
-            % HebiKinematics() and addBody()
+            % HebiKinematics() and an HRDF file.
             %
             %   This method computes the poses of the chain of bodies in 
             %   the world frame, using specified values for the joint 
@@ -348,10 +360,12 @@ classdef (Sealed) HebiKinematics
             %   assumed to be the last body in the kinematic chain. 
             %
             %   getInverseKinematics uses a gradient-descent based local 
-            %   optimizer to find a valid configuration.  This means that
-            %   the quality of the solution depends on a good starting
-            %   point for the optimization. See 'initialPositions' detail
-            %   below, as this parameter should be used if at all possible.
+            %   optimizer to find a valid configuration.  
+            %
+            %   'InitialPositions' ('Initial') provides the seed for the
+            %   numerical optimization. IT IS HIGHLY RECOMMENDED THAT YOU 
+            %   SPECIFY SEED POSITIONS, AND A FUTURE VERSION OF THE API
+            %   WILL MAKE THIS A REQUIRED PARAMETER.       
             %
             %   There are a variety of optimization criteria that can be 
             %   combined depending on the application. Available parameters 
@@ -379,12 +393,7 @@ classdef (Sealed) HebiKinematics
             %   iterations of the numerical optimization before returning.
             %   This can prevent IK from taking a long time to run, at the
             %   expense of solutions that are potentially less accurate.
-            %   The default value is 150 iterations.
-            %
-            %   'InitialPositions' ('Initial') provides the seed for the
-            %   numerical optimization. By default the optimization seeds
-            %   with all zeros. It is highly recommended that you specify
-            %   seed positions whenever you are using GETINVERSEKINEMATICS. 
+            %   The default value is 150 iterations. 
             %
             %   Examples:
             %      % Inverse kinematics for a 3-DoF arm, specifying initial 
@@ -424,13 +433,16 @@ classdef (Sealed) HebiKinematics
         end
         
         function out = getJacobian(this, varargin)
-            % getJacobian calculates the matrix that relates input DoF 
-            % velocities to body velocities
+            % getJacobian calculates the matrix that relates input joint 
+            % velocities to body velocities.
             %
             %   This method calculates the partial derivatives of the 
-            %   kinematics equation, which relates the joint rates to the 
-            %   linear and angular velocity of each body in the kinematic 
-            %   configuration.
+            %   kinematics equation, which relates the joint velocities to
+            %   the linear and angular velocities of each body in the 
+            %   kinematic chain.
+            %
+            %   More background on Jacobians and kinematics can be found at:
+            %   http://docs.hebi.us/core_concepts.html#kinematics
             %
             %   The Jacobian is returned as a [6 x numDoF x numBodies] set 
             %   of matrices.  Rows 1:3 of the Jacobian correspond to linear 
@@ -484,11 +496,12 @@ classdef (Sealed) HebiKinematics
             % 
             %   'GravityVector' argument expects an [3 x 1] vector of the
             %   direction of gravity in the base frame.  Note that this
-            %   direction vector is not required to be unit length, and 
-            %   gravitational acceleration is assumed to be 9.81 m/s^2.
+            %   direction vector is not required to be unit length, and the
+            %   magnitude of gravitational acceleration is always assumed 
+            %   to be 9.81 m/s^2.
             %
             %   Example
-            %      % Compensate gravity at current position
+            %      % Compensate gravity at current feedback positions
             %      fbk = group.getNextFeedback();
             %      gravity = [0 0 -1];
             %      efforts = kin.getGravCompEfforts(fbk.position, gravity);
@@ -516,8 +529,8 @@ classdef (Sealed) HebiKinematics
             %
             %   'TargetPositions', 'TargetVelocities', and 
             %   'TargetAccelerations' typically come from some sort of 
-            %   trajectory generation function, such as a minimum-jerk 
-            %   trajectory, or a sinusoidal trajectory (example below).
+            %   trajectory generation function, like HebiTrajectoryGenerator 
+            %   (link in "see also"), or a sine trajectory (example below).
             %
             %   Example
             %      % Compensate for dynamics of sinusoidal motion

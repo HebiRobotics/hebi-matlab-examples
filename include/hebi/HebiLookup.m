@@ -25,14 +25,10 @@ classdef (Sealed) HebiLookup
     %   newGroupFromFamily                - groups by family and sorts by name
     %   newGroupFromSerialNumbers         - groups by hardware serial numbers
     %   newGroupFromMacs                  - groups by hardware mac addresses
-    %   newConnectedGroupFromName         - groups by connectivity
-    %   newConnectedGroupFromSerialNumber - groups by connectivity
-    %   newConnectedGroupFromMac          - groups by connectivity
     %
     %   Generally there are two ways to address modules, either by their
-    %   user-configurable name, or by their hardware defined mac address or
-    %   serial number. Some modules (e.g. 'Fieldable' types) have knowledge 
-    %   of their neighbors, which enables grouping based on their connectivity.
+    %   user-configurable names, or by their hardware identifiers such
+    %   as mac address or serial number.
     %
     %   Example
     %      % Show devices on the network
@@ -54,11 +50,6 @@ classdef (Sealed) HebiLookup
     %      % Create group using mac addresses
     %      macs = {'08:00:7F:9B:67:09'; '08:00:7F:50:BF:45'};
     %      group = HebiLookup.newGroupFromMacs(macs);
-    %
-    %      % Create a group of connected modules sorted by connectivity
-    %      group = HebiLookup.newConnectedGroupFromName('Arm', 'Base');
-    %      group = HebiLookup.newConnectedGroupFromSerialNumber('SA023');
-    %      group = HebiLookup.newConnectedGroupFromMac('08:00:7F:9B:67:09');
     %
     %   See also HebiGroup
     
@@ -289,6 +280,40 @@ classdef (Sealed) HebiLookup
             %   See also HebiLookup, HebiGroup
             group = HebiGroup(javaMethod('newGroupFromMacs', HebiLookup.className,  varargin{:}));
         end
+
+    end
+    
+    % Static objects for delegation
+    properties(Constant, Access = private, Hidden = true)
+        className = HebiLookup.initOnce();
+        wrapper = HebiLookup();
+    end
+    
+    % Internal methods and deprecated API calls
+    methods(Access = public, Static, Hidden = true)
+        
+        function fullName = initOnce()
+            % Load library and config
+            fullName = hebi_load('HebiLookup');
+            config = hebi_config('HebiLookup');
+            
+            % Set up lookup parameters
+            javaMethod('setLookupAddresses', fullName,  ...
+                config.defaultLookupAddresses);
+            javaMethod('setLookupFrequency', fullName,  ...
+                config.defaultLookupFrequency);
+            javaMethod('setInitialGroupFeedbackFrequency', fullName,  ...
+                config.defaultInitialGroupFeedbackFrequency);
+            javaMethod('setInitialGroupCommandLifetime', fullName,  ...
+                config.defaultInitialGroupCommandLifetime);
+            
+            % Make sure all stale modules are cleared
+            javaMethod('clearModuleList', fullName);
+            
+            % Add a pause on first call so that the lookup has some
+            % time to find modules
+            pause(config.initialNetworkLookupPause);
+        end
         
         function group = newConnectedGroupFromName(varargin)
             % newConnectedGroupFromName groups by connectivity
@@ -342,37 +367,6 @@ classdef (Sealed) HebiLookup
             group = HebiGroup(javaMethod('newConnectedGroupFromMac', HebiLookup.className,  varargin{:}));
         end
         
-    end
-    
-    % Static objects for delegation
-    properties(Constant, Access = private, Hidden = true)
-        className = HebiLookup.initOnce();
-        wrapper = HebiLookup();
-    end
-    
-    methods(Access = public, Static, Hidden = true)
-        function fullName = initOnce()
-            % Load library and config
-            fullName = hebi_load('HebiLookup');
-            config = hebi_config('HebiLookup');
-            
-            % Set up lookup parameters
-            javaMethod('setLookupAddresses', fullName,  ...
-                config.defaultLookupAddresses);
-            javaMethod('setLookupFrequency', fullName,  ...
-                config.defaultLookupFrequency);
-            javaMethod('setInitialGroupFeedbackFrequency', fullName,  ...
-                config.defaultInitialGroupFeedbackFrequency);
-            javaMethod('setInitialGroupCommandLifetime', fullName,  ...
-                config.defaultInitialGroupCommandLifetime);
-            
-            % Make sure all stale modules are cleared
-            javaMethod('clearModuleList', fullName);
-            
-            % Add a pause on first call so that the lookup has some
-            % time to find modules
-            pause(config.initialNetworkLookupPause);
-        end
     end
     
     % Non-API Methods for MATLAB compliance

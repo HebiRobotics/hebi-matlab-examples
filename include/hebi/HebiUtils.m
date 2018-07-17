@@ -6,21 +6,18 @@ classdef (Sealed) HebiUtils
     %   now                - returns the current timestamp [s]
     %
     %   saveGains          - saves group gains to disk (XML)
-    %
     %   loadGains          - loads group gains from disk (XML)
     %
     %   newGroupFromLog    - generates a group from a .hebilog file that
     %                        you can use play back data using getNextFeedback.
     %
     %   loadGroupLog       - loads a binary .hebilog file into memory
-    %
     %   loadGroupLogsUI    - shows a UI dialog to load one or more logs.
     %
     %   convertGroupLog    - converts a binary .hebilog file into a readable
     %                        format, either in memory or files like CSV or MAT.
-    %
-    %   convertGroupLogsUI - shows a UI dialog to chose one or more
-    %                        .hebilog files to convert.
+    %   convertGroupLogsUI - shows a UI dialog to chose one or more log
+    %                        files to convert.
     %
     %   plotLogs           - visualizes feedback data from one or more log
     %                        files in a formatted and labeled plot.
@@ -392,9 +389,9 @@ classdef (Sealed) HebiUtils
             %
             %       'InputLogs' is a single hebiLog object or a cell array 
             %       of log objects. Logs can come from logging modules 
-            %       online with HEBIGROUP.STOPLOG, loaded from a saved file  
-            %       using HEBIUTILS.CONVERTGROUPLOG. Or selected manually 
-            %       from a UI dialog using HEBIUTILS.CONVERTGROUPLOGSUI.
+            %       online with HebiGroup.stopLog(), loaded from a saved file  
+            %       using HebiUtils.loadGroupLog(). Or selected manually 
+            %       from a UI dialog using HebiUtils.loadGroupLogsUI().
             % 
             %       'FeedbackField' is a string corresponding to a feedback
             %       field in the log object. If the field is 'position',
@@ -427,7 +424,7 @@ classdef (Sealed) HebiUtils
             %           'Modules', 1:2, ...
             %           'FigNum', 100);
             %
-            % See also CONVERTGROUPLOGS, CONVERTGROUPLOGSUI.
+            % See also LOADGROUPLOG, LOADGROUPLOGSUI.
             
             if nargin < 1 || isempty(hebiLogs)
                 disp('Please specify a log file and feedback field to plot.');
@@ -461,10 +458,13 @@ classdef (Sealed) HebiUtils
             for i=1:length(hebiLogs)
                 
                 % Assign the mask for plotting only some modules from a
-                % group.
+                % group.  If its empty figure out the size based on the
+                % number of entries in the second field (the first is the
+                % master 'time' vector that always has one).
                 plotMask = p.Modules;
                 if isempty(plotMask)
-                    plotMask = 1:size(hebiLogs{i}.position,2);
+                    logFields = fields(hebiLogs{i});                 
+                    plotMask = 1:size(hebiLogs{i}.(logFields{2}),2);
                 end
                 
                 % Assign figure number, or count up from the user-defined
@@ -492,7 +492,7 @@ classdef (Sealed) HebiUtils
                 plot(ax, hebiLogs{i}.time, hebiLogs{i}.(feedbackField)(:,plotMask) );
                 
                 xlabel('time (sec)');
-                ylabel([feedbackField ' (' HebiUtils.feedbackUnits(feedbackField) ')']);
+                ylabel([feedbackField ' (' HebiUtils.getFeedbackUnits(feedbackField) ')']);
                 title( [feedbackField ' - Log ' ...
                     num2str(i) ' of ' num2str(numLogs)] );
                 xlim([0 hebiLogs{i}.time(end)]);
@@ -513,7 +513,7 @@ classdef (Sealed) HebiUtils
                         hebiLogs{i}.([feedbackField 'Cmd'])(:,plotMask) );
                     
                     xlabel('time (sec)');
-                    ylabel(['error (' HebiUtils.feedbackUnits(feedbackField) ')']);
+                    ylabel(['error (' HebiUtils.getFeedbackUnits(feedbackField) ')']);
                     title( [feedbackField ' error'] );
                     xlim([0 hebiLogs{i}.time(end)]);
                     grid on;
@@ -708,7 +708,11 @@ classdef (Sealed) HebiUtils
             % from a binary .hebilog file
             %
             %   Example:
-            %       fileNames = HebiUtils.loadGroupLogsUI('format','raw');
+            %       [info, gains] = HebiUtils.readGroupLogInfo(path);
+            %
+            %   Example:
+            %       % Get info for all logs selected via a GUI
+            %       fileNames = HebiUtils.convertGroupLogsUI('format','raw');
             %       [infos, gains] = cellfun(@HebiUtils.readGroupLogInfo, ...
             %           fileNames, 'UniformOutput', false);
             
@@ -728,9 +732,11 @@ classdef (Sealed) HebiUtils
             
         end
         
-        function [ feedbackUnits ] = feedbackUnits( feedbackField )
+        function [ feedbackUnits ] = getFeedbackUnits( feedbackField )
             %FEEDBACKUNITS Return units of a given feedback type in a log file
             switch feedbackField
+                
+                % Actuator Feedback
                 case {'position','positionCmd','motorPosition','deflection'}
                     feedbackUnits = 'rad';
                     
@@ -764,6 +770,25 @@ classdef (Sealed) HebiUtils
                     
                 case {'ledR','ledRG','ledB'}
                     feedbackUnits = '0-1';
+                
+                % Mobile Feedback
+                case {'gpsTimestamp'}
+                    feedbackUnits = 'sec';
+                    
+                case {'magnetometerX','magnetometerY','magnetometerZ'}
+                    feedbackUnits = 'T';
+                    
+                case {'gpsLatitude','gpsLongitude','gpsHeading'}
+                    feedbackUnits = 'deg';    
+               
+                case {'altitude','gpsAltitude','gpsHorizontalAccuracy','gpsVerticalAccuracy'}
+                    feedbackUnits = 'm';
+                    
+                case {'arPositionX','arPositionY','arPositionZ'}
+                    feedbackUnits = 'm';    
+                    
+                case {'batteryLevel'}
+                    feedbackUnits = '%';
                     
                 otherwise
                     feedbackUnits = '';
