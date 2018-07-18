@@ -7,10 +7,10 @@ function [] = startup()
 localDir = fileparts(mfilename('fullpath'));
 
 % Run the include script from the top level of the examples
-includeScript = fullfile(localDir, '..', 'include', 'include.m');
+includeScript = fullfile(localDir, '..', '..', 'include', 'include.m');
 run(includeScript);
 
 % Add this folder and all its subfolders
-addpath(fullfile(localDir, genpath('./') ));
+addpath(genpath(localDir));
 
 end
