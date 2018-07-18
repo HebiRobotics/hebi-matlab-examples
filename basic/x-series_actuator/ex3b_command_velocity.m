@@ -9,6 +9,7 @@
 % HEBI Robotics
 % June 2018
 
+%%
 clear *;
 close all;
 
@@ -18,19 +19,20 @@ familyName = 'My Family';
 moduleNames = 'Test Module';  
 group = HebiLookup.newGroupFromNames( familyName, moduleNames );
 
-cmd = CommandStruct(); % The commmand struct will have fields for position,
-                       % velocity, and effort.  Fields that are empty [] 
-                       % or NaN will be ignored when sending.
-
-exampleDuration = 10; % sec
+% The commmand struct will have fields for position, velocity, and effort.  
+% Fields that are empty [] or NaN will be ignored when sending.
+cmd = CommandStruct(); 
+                       
+exampleDuration = 10; % [sec]
 exampleTimer = tic;
 
-group.startLog( 'dir', 'logs' ); % Starts logging in the background
+% Starts logging in the background
+group.startLog( 'dir', 'logs' ); 
 
 % Parameters for sin/cos function
-freqHz = 0.5; % Hz
-freq = freqHz * 2*pi;
-amp = 1.0; % rad / sec
+freqHz = 0.5;           % [Hz]
+freq = freqHz * 2*pi;   % [rad / sec]
+amp = 1.0;              % [rad / sec]
 
 while toc(exampleTimer) < exampleDuration
     

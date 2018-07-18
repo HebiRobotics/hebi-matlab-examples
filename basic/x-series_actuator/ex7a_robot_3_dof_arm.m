@@ -6,13 +6,14 @@
 % HEBI Robotics
 % July 2018
 
+%%
 clear *;
 close all;
 
 HebiLookup.initialize();
 
-kin = HebiKinematics('/hrdf/3-DoF_arm_example.hrdf');
-gains = HebiUtils.loadGains('/gains/3-DoF_arm_gains.xml');
+kin = HebiKinematics('hrdf/3-DoF_arm_example.hrdf');
+gains = HebiUtils.loadGains('gains/3-DoF_arm_gains.xml');
 trajGen = HebiTrajectoryGenerator();
 
 % Assume gravity points down in the frame of the first module.  This will
@@ -29,9 +30,9 @@ cmd = CommandStruct();
 group.startLog('dir','logs');
 
 % Four Corners of a Box
-xyzTargets = [ 0.20  0.40  0.40  0.20;    % x (m)
-               0.30  0.30 -0.30 -0.30;    % y (m)
-               0.10  0.10  0.10  0.10 ];  % z (m)
+xyzTargets = [ 0.20  0.40  0.40  0.20;    % x [m]
+               0.30  0.30 -0.30 -0.30;    % y [m]
+               0.10  0.10  0.10  0.10 ];  % z [m]
 
 initPosition = [ 0 -pi/4 -pi/2 ];
 
@@ -48,9 +49,9 @@ posTargets(end+1,:) = posTargets(1,:);
 fbk = group.getNextFeedback();
 
 waypoints = [ fbk.position;
-              posTargets(1,:) ];
-timeToMove = 5;
-time = [ 0 timeToMove ];
+              posTargets(1,:) ];    % [rad]
+timeToMove = 5;              % [sec]
+time = [ 0 timeToMove ];     % [sec]
 
 trajectory = trajGen.newJointMove( waypoints, 'time', time );
 t0 = fbk.time;

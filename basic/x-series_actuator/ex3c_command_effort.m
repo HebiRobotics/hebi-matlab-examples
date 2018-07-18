@@ -9,6 +9,7 @@
 % HEBI Robotics
 % June 2018
 
+%%
 clear *;
 close all;
 
@@ -18,33 +19,36 @@ familyName = 'My Family';
 moduleNames = 'Test Module';  
 group = HebiLookup.newGroupFromNames( familyName, moduleNames );
 
-cmd = CommandStruct(); % The commmand struct will have fields for position,
-                       % velocity, and effort.  Fields that are empty [] 
-                       % or NaN will be ignored when sending.
+% The commmand struct will have fields for position, velocity, and effort.  
+% Fields that are empty [] or NaN will be ignored when sending.
+cmd = CommandStruct(); 
+                       
 
-exampleDuration = 10; % sec
+exampleDuration = 10; % [sec]
 exampleTimer = tic;
 
-group.startLog( 'dir', 'logs' ); % Starts logging in the background
+% Starts logging in the background
+group.startLog( 'dir', 'logs' ); 
 
 % Parameters for sin/cos function
-freqHz = 0.5; % Hz
-freq = freqHz * 2*pi;
-amp = 1; % Nm
+freqHz = 0.5;           % [Hz]
+freq = freqHz * 2*pi;   % [rad / sec]
+amp = 1;                % [Nm]
 
 while toc(exampleTimer) < exampleDuration
     
-    fbk = group.getNextFeedback();  % Even though we don't use the feedback,
-                                   % getting feedback conveniently limits
-                                   % the loop rate to the feedback freq.
-
+    % Even though we don't use the feedback, getting feedback conveniently 
+    % limits the loop rate to the feedback frequency                 
+    fbk = group.getNextFeedback();  
+                                  
     cmd.effort = amp * sin( freq * toc(exampleTimer) ); 
 
     group.send(cmd);
    
 end
 
-log = group.stopLog();  % Stops background logging
+% Stops background logging
+log = group.stopLog();
 
 % Plot using some handy helper functions
 HebiUtils.plotLogs( log, 'effort' );

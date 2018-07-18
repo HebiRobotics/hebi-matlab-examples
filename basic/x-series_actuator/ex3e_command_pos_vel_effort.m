@@ -10,6 +10,7 @@
 % HEBI Robotics
 % June 2018
 
+%%
 clear *;
 close all;
 
@@ -21,18 +22,18 @@ group = HebiLookup.newGroupFromNames( familyName, moduleNames );
 
 cmd = CommandStruct();
 
-exampleDuration = 10; % sec
+exampleDuration = 10; % [sec]
 exampleTimer = tic;
 
 group.startLog( 'dir', 'logs' ); 
 
 % Parameters for sin/cos function
-freqHz = 1.0; % Hz
-freq = freqHz * 2*pi;
-amp = deg2rad( 45 ); % radians
+freqHz = 1.0;           % [Hz]
+freq = freqHz * 2*pi;   % [rad / sec]
+amp = deg2rad( 45 );    % [rad]
 
 % Inertia parameters for converting acceleration to torque
-inertia = 1E-8; % kg * m^2
+inertia = 1E-8; % [kg * m^2]
 
 while toc(exampleTimer) < exampleDuration
     

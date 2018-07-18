@@ -10,6 +10,7 @@
 % HEBI Robotics
 % June 2018
 
+%%
 clear *;
 close all;
 
@@ -21,15 +22,15 @@ group = HebiLookup.newGroupFromNames( familyName, moduleNames );
 
 cmd = CommandStruct();
 
-exampleDuration = 10; % sec
+exampleDuration = 10; % [sec]
 exampleTimer = tic;
 
 group.startLog( 'dir', 'logs' );
 
 % Parameters for sin/cos function
-freqHz = 1.0; % Hz
-freq = freqHz * 2*pi;
-amp = deg2rad( 45 ); % radians
+freqHz = 1.0;           % [Hz]
+freq = freqHz * 2*pi;   % [rad / sec]
+amp = deg2rad( 45 );    % [rad]
 
 while toc(exampleTimer) < exampleDuration
     

@@ -9,6 +9,7 @@
 % HEBI Robotics
 % June 2018
 
+%%
 clear *;
 close all;
 
@@ -22,15 +23,15 @@ cmd = CommandStruct(); % The commmand struct will have fields for position,
                        % velocity, and effort.  Fields that are empty [] 
                        % or NaN will be ignored when sending.
 
-exampleDuration = 10; % sec
+exampleDuration = 10; % [sec]
 exampleTimer = tic;
 
 group.startLog( 'dir', 'logs' );  % Starts logging in a sub-directory
 
 % Parameters for sin/cos function
-freqHz = 1.0; % Hz
-freq = freqHz * 2*pi;
-amp = deg2rad( 45 ); % radians
+freqHz = 1.0;           % [Hz]
+freq = freqHz * 2*pi;   % [rad / sec]
+amp = deg2rad( 45 );    % [rad]
 
 while toc(exampleTimer) < exampleDuration
     

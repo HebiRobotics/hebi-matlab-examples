@@ -6,19 +6,22 @@
 % HEBI Robotics
 % July 2018
 
+%%
 clear *;
 close all;
 
 % Load the kinematics from HRDF file
-kin = HebiKinematics('/hrdf/3-DoF_arm_example.hrdf');
+hrdfFileFolder = 'hrdf/';
+hrdfFileName = '3-DoF_arm_example.hrdf';     % the '.hrdf' is optional
+kin = HebiKinematics([hrdfFileFolder hrdfFileName]);
 
 % Initialize a helper utility to view the various coordinate frames
 frameDisp = FrameDisplay();
 
 % Forward kinematics is where you use a set of joint angles to calculate
 % the poses of various parts along the arm, usually the tip (end-effector).
-startPositions = [0 0 0];  % rad 
-endPositions = [-pi/4 pi/4 pi/2]; % rad
+startPositions = [0 0 0];           % [rad] 
+endPositions = [-pi/4 pi/4 pi/2];   % [rad]
 
 % This will return the 4x4 homogeneous transform that describes the pose
 % the end-effector in the world frame (in this case, the base module).  For
@@ -28,10 +31,12 @@ endEffectorFrame = kin.getForwardKinematicsEndEffector( ...
                                             startPositions );
                                    
 % Pull out the XYZ position from the transform and show on workspace
-endEffectorXYZ = endEffectorFrame(1:3,4)
+endEffectorXYZ = endEffectorFrame(1:3,4)  % [m]
 
-% Calculate
-stepSize = 0.01;
+% Calculate forward kinematics gradualy from the start position to the end
+% postion and display.  THIS INTERPOLATION WILL BE IN JOINT SPACE AND WILL
+% NOT MAKE A STRAIGHT LINE IN WORKSPACE.
+stepSize = 0.01;  % [rad]
 
 for step = 0:stepSize:1
     

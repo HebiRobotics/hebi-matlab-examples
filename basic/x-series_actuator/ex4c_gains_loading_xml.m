@@ -10,6 +10,7 @@
 % HEBI Robotics
 % July 2018
 
+%%
 clear *;
 close all;
 
@@ -20,7 +21,9 @@ moduleNames = 'Test Module';
 group = HebiLookup.newGroupFromNames( familyName, moduleNames );
 
 % Load the gains from a saved file
-newGains = HebiUtils.loadGains( '/gains/exampleGains.xml' );
+gainsFileFolder = 'gains/';
+gainsFileName = 'exampleGains.xml';     % the '.gains' is optional
+newGains = HebiUtils.loadGains( [gainsFileFolder gainsFileName] );
 
 % Print them to the screen
 disp(newGains);

@@ -10,6 +10,7 @@
 % HEBI Robotics
 % June 2018
 
+%%
 clear *;
 close all;
 
@@ -21,7 +22,7 @@ group = HebiLookup.newGroupFromNames( familyName, moduleNames );
 
 cmd = CommandStruct();
 
-exampleDuration = 15; % sec
+exampleDuration = 15; % [sec]
 exampleTimer = tic;
 
 group.startLog( 'dir', 'logs' ); 
@@ -32,15 +33,18 @@ while toc(exampleTimer) < exampleDuration
     
     fbk = group.getNextFeedback();
 
-    cmd.velocity = -fbk.gyroZ;  % Command a velocity that counters the  
-                               % measured angular velocity around z-axis.
+    % Command a velocity that counters the measured angular velocity 
+    % around the z-axis (same axis as the output).
+    cmd.velocity = -fbk.gyroZ; 
+    
     group.send(cmd);
    
 end
 
 disp('  All done!');
 
-log = group.stopLog();  % Stops background logging
+% Stops background logging
+log = group.stopLog();  
 
 % Plot using some handy helper functions
 HebiUtils.plotLogs( log, 'velocity', 'figNum', 101 );

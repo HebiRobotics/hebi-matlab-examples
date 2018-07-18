@@ -10,6 +10,7 @@
 % HEBI Robotics
 % July 2018
 
+%%
 clear *;
 close all;
 
@@ -25,16 +26,16 @@ gains = GainStruct(); % Like the commmand struct, the gains struct will
                       % that are empty [] or NaN will be ignored when
                       % sending.
 
-exampleDuration = 4; % sec
+exampleDuration = 4;    % [sec]
 
 group.startLog( 'dir', 'logs' ); 
 
 % Parameters for step function
-stepPeriod = 1.0; % sec
-stepPosition = pi/8; % Rad
+stepPeriod = 1.0;       % [sec]
+stepPosition = pi/8;    % [rad]
 
-newPositionKpGains = [ 0.2 0.5 10 ]; % Make the position controller 
-                                     % gradually stiffer. 
+% Make the position controller gradually stiffer. 
+newPositionKpGains = [ 0.2 0.5 10 ]; 
 
 for i = 1:length(newPositionKpGains)
     

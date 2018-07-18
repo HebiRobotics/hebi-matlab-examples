@@ -8,6 +8,7 @@
 % HEBI Robotics
 % June 2018
 
+%%
 clear *;
 close all;
 
@@ -19,7 +20,7 @@ familyName = 'My Family';
 moduleNames = 'Test Module';  
 group = HebiLookup.newGroupFromNames( familyName, moduleNames );
 
-exampleDuration = 10; % sec
+exampleDuration = 10; % [sec]
 exampleTimer = tic;
 
 group.startLog( 'dir', 'logs' );  % Starts logging in the background

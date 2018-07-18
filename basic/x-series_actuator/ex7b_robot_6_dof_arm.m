@@ -6,13 +6,14 @@
 % HEBI Robotics
 % July 2018
 
+%%
 clear *;
 close all;
 
 HebiLookup.initialize();
 
-kin = HebiKinematics('/hrdf/6-DoF_arm_example.hrdf');
-gains = HebiUtils.loadGains('/gains/6-DoF_arm_gains.xml');
+kin = HebiKinematics('hrdf/6-DoF_arm_example.hrdf');
+gains = HebiUtils.loadGains('gains/6-DoF_arm_gains.xml');
 trajGen = HebiTrajectoryGenerator();
 
 % Assume gravity points down in the frame of the first module.  This will
@@ -29,14 +30,14 @@ cmd = CommandStruct();
 group.startLog('dir','logs');
 
 % Four Corners of a Box
-xyzTargets = [ 0.20  0.50  0.50  0.20;    % x (m)
-               0.20  0.20 -0.20 -0.20;    % y (m)
-               0.20  0.20  0.20  0.20 ];  % z (m)
+xyzTargets = [ 0.20  0.50  0.50  0.20;    % x [m]
+               0.20  0.20 -0.20 -0.20;    % y [m]
+               0.20  0.20  0.20  0.20 ];  % z [m]
 
 % Rotation matrix that makes the end-effector point straight forward
-rotMatTarget = R_y(pi/2);
+rotMatTarget = R_y(pi/2);   % [3x3 SO3 Matrix]
               
-initPosition = [ 0 pi/4 pi/2 pi/4 -pi pi/2 ];
+initPosition = [ 0 pi/4 pi/2 pi/4 -pi pi/2 ];  % [rad]
 
 % Do IK to get joint position waypoints for each XYZ target, as well as the 
 % desired orientation of the end effector.  Copy the first waypoint at the 
