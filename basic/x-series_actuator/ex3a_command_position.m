@@ -19,9 +19,9 @@ familyName = 'My Family';
 moduleNames = 'Test Module';  
 group = HebiLookup.newGroupFromNames( familyName, moduleNames );
 
-cmd = CommandStruct(); % The commmand struct will have fields for position,
-                       % velocity, and effort.  Fields that are empty [] 
-                       % or NaN will be ignored when sending.
+% The commmand struct will have fields for position, velocity, and effort.  
+% Fields that are empty [] or NaN will be ignored when sending.
+cmd = CommandStruct(); 
 
 exampleDuration = 10; % [sec]
 exampleTimer = tic;
@@ -35,14 +35,12 @@ amp = deg2rad( 45 );    % [rad]
 
 while toc(exampleTimer) < exampleDuration
     
-    fbk = group.getNextFeedback();  % Even though we don't use the feedback,
-                                   % getting feedback conveniently limits
-                                   % the loop rate to the feedback freq.
+    % Even though we don't use the feedback, getting feedback conveniently 
+    % limits the loop rate to the feedback freq
+    fbk = group.getNextFeedback();  
 
-    cmd.position = amp * sin( freq * toc(exampleTimer) ); 
-
-    group.send(cmd);
-   
+    cmd.position = amp * sin( freq * toc(exampleTimer) );   
+    group.send(cmd); 
 end
 
 log = group.stopLog();  % Stops background logging

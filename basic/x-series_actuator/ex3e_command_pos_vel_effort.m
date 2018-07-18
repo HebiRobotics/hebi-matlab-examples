@@ -37,6 +37,8 @@ inertia = 1E-8; % [kg * m^2]
 
 while toc(exampleTimer) < exampleDuration
     
+    % Even though we don't use the feedback, getting feedback conveniently 
+    % limits the loop rate to the feedback frequency 
     fbk = group.getNextFeedback();
 
     % Position Command

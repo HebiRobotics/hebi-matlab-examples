@@ -36,12 +36,12 @@ amp = 1.0;              % [rad / sec]
 
 while toc(exampleTimer) < exampleDuration
     
-    fbk = group.getNextFeedback();  % Even though we don't use the feedback,
-                                   % getting feedback conveniently limits
-                                   % the loop rate to the feedback freq.
+    % Even though we don't use the feedback, getting feedback conveniently 
+    % limits the loop rate to the feedback freq
+    fbk = group.getNextFeedback();  
 
     cmd.velocity = amp * sin( freq * toc(exampleTimer) ); 
-
+    
     group.send(cmd);
    
 end

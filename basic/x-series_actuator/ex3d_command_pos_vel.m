@@ -33,7 +33,9 @@ freq = freqHz * 2*pi;   % [rad / sec]
 amp = deg2rad( 45 );    % [rad]
 
 while toc(exampleTimer) < exampleDuration
-    
+
+    % Even though we don't use the feedback, getting feedback conveniently 
+    % limits the loop rate to the feedback frequency 
     fbk = group.getNextFeedback();
 
     % Position Command
