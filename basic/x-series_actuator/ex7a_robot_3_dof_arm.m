@@ -17,7 +17,9 @@ gains = HebiUtils.loadGains('gains/3-DoF_arm_gains.xml');
 trajGen = HebiTrajectoryGenerator();
 
 % Assume gravity points down in the frame of the first module.  This will
-% get used for gravity compensation when controlling the arm.
+% get used for gravity compensation when controlling the arm.  You can use
+% the IMUs in the module to measure the actual orientation of the arm. See
+% the advanced examples on how to do this.
 gravityVec = [0 0 -1];
 
 familyName = 'My Arm';
