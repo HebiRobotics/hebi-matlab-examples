@@ -5,65 +5,56 @@
 % HEBI Robotics
 % June 2018
 
+%% Setup
 clear *;
 close all;
-
 HebiLookup.initialize();
 
 % Use Scope to change select a module and change the name and family to
 % match the names below.  Following examples will use the same names.
-familyName = 'My Family';
-moduleNames = 'Test I/O Board';  
+familyName = 'Test Family';
+moduleNames = 'Test IO Board'; 
 group = HebiLookup.newGroupFromNames( familyName, moduleNames );
 
-exampleDuration = 10; % sec
-exampleTimer = tic;
-
-group.startLog( 'dir', 'logs' );  % Starts logging in the background
-
+%% Visualize analog input a1
 disp('  We need to come up with something fun for the I/O Board...');
 
-fbk = group.getNextFeedbackIO();
+% Start logging in the background
+group.startLog( 'dir', 'logs' );
 
 figure(1);
 clf;
 
-while toc(exampleTimer) < exampleDuration
+duration = 10; % [sec]
+timer = tic();
+while toc(timer) < duration
     
+   % Read feedback
    fbk = group.getNextFeedbackIO();
-   
+
+   % Display
    bar( fbk.a1 );
    
+   % Format plot
    yAxisMaxLim = 5; 
    yAxisMinLim = -5;
    ylim([yAxisMinLim yAxisMaxLim]);
-   
    title( 'Module Output Velocity' );
    ylabel( 'Angular Velocity (rad/sec)');
    grid on;
-   
    drawnow;
    
 end
 
 disp('  All done!');
 
-log = group.stopLog();  % Stops background logging
+% Stop background logging
+log = group.stopLogIO();
 
-% Plot the logged position feedback
+%% Plot the logged feedback
 figure(101);
 plot(log.time,log.a1);
-title('Position');
+title('Pin a1');
 xlabel('time (sec)');
-ylabel('position (rad)');
+ylabel('value');
 grid on;
-
-% Plot the logged velocity feedback
-figure(102);
-plot(log.time,log.d1);
-title('Velocity');
-xlabel('time (sec)');
-ylabel('velocity (rad/sec)');
-grid on;
-
-

@@ -1,4 +1,4 @@
-% Get analog feedback from the touch screen of a mobile device, log in the 
+% Get analog feedback from the touch screen of a mobile device, log in the
 % background, visualize live, and plot offline.
 %
 % Assumes that you have a group created with at least 1 module in it.
@@ -6,63 +6,58 @@
 % HEBI Robotics
 % July 2018
 
+%% Setup
 clear *;
 close all;
-
 HebiLookup.initialize();
 
 % Use Scope to change select a module and change the name and family to
 % match the names below.  Following examples will use the same names.
-familyName = 'My Family';
-moduleNames = 'Test Mobile';  
+familyName = 'HEBI';
+moduleNames = 'Virtual IO';
 group = HebiLookup.newGroupFromNames( familyName, moduleNames );
 
-exampleDuration = 15; % sec
-exampleTimer = tic;
-
-group.startLog( 'dir', 'logs' );  % Starts logging in the background
-
+%% Visualize Slider Input
 disp('  Drag the sliders and press some buttons on the app screen...');
 
-fbk = group.getNextFeedbackIO();
+% Start logging in the background
+group.startLog( 'dir', 'logs' ); 
 
 figure(1);
 clf;
 
-isFirstDraw = true;
-
-while toc(exampleTimer) < exampleDuration
+duration = 15; % [sec]
+timer = tic();
+while toc(timer) < duration
     
-fbk = group.getNextFeedbackIO();
-
-% Digital Feedback
-bar( [fbk.b1 fbk.b2 fbk.b3 fbk.b4 fbk.b5 fbk.b6 fbk.b7 fbk.b8], 'r' );
-hold on;
-
-% Analog Feedback
-bar( [fbk.a1 fbk.a2 fbk.a3 fbk.a4 fbk.a5 fbk.a6 fbk.a7 fbk.a8], 'b' );
-hold off; 
-
-yAxisMaxLim = 1; 
-yAxisMinLim = -1;
-ylim([yAxisMinLim yAxisMaxLim]);
-
-
-title('Digital Inputs (red) and Analog Inputs (blue)');
-ylabel('[-1 to 1]');
-grid on;
-isFirstDraw = false;
-
-
-drawnow;
-   
+    % Read feedback
+    fbk = group.getNextFeedbackIO();
+    
+    % Digital feedback
+    bar( [fbk.b1 fbk.b2 fbk.b3 fbk.b4 fbk.b5 fbk.b6 fbk.b7 fbk.b8], 'r' );
+    hold on;
+    
+    % Analog feedback
+    bar( [fbk.a1 fbk.a2 fbk.a3 fbk.a4 fbk.a5 fbk.a6 fbk.a7 fbk.a8], 'b' );
+    hold off;
+    
+    % Format plot
+    yAxisMaxLim = 1;
+    yAxisMinLim = -1;
+    ylim([yAxisMinLim yAxisMaxLim]);
+    title('Digital Inputs (red) and Analog Inputs (blue)');
+    ylabel('[-1 to 1]');
+    grid on;
+    drawnow;
+    
 end
 
 disp('  All done!');
 
-log = group.stopLogIO();  % Stops background logging
+% Stop background logging
+log = group.stopLogIO();  
 
-% Plot the logged feedback
+%% Plot the logged feedback
 figure(101);
 subplot(2,1,1);
 plot(log.time,log.a1);
@@ -101,5 +96,4 @@ ylabel('[0 or 1]');
 ylim([-0.1 1.1]);
 legend( strsplit(num2str(1:8)) );
 grid on;
-
 

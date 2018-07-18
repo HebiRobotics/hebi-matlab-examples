@@ -6,26 +6,20 @@
 % HEBI Robotics
 % July 2018
 
+%% Setup
 clear *;
 close all;
-
 HebiLookup.initialize();
 
 % Use Scope to change select a module and change the name and family to
 % match the names below.  Following examples will use the same names.
-familyName = 'My Family';
-moduleNames = 'Test Mobile';  
+familyName = 'HEBI';
+moduleNames = 'Virtual IO';
 group = HebiLookup.newGroupFromNames( familyName, moduleNames );
 
-exampleDuration = 60; % sec
-exampleTimer = tic;
-
-group.startLog( 'dir', 'logs' );  % Starts logging in the background
-
+%% Visualize Full Pose
 disp('  Visualizing 6-DoF pose estimate from the mobile device.');
 disp('  Move it around to make the feedback interesting...');  
-
-fbk = group.getNextFeedbackMobile();
 
 % Setup helper function to visualize the orientation
 mobilePose = FrameDisplay();
@@ -34,7 +28,9 @@ frames = eye(4);
 figure(1);
 clf;
 
-while toc(exampleTimer) < exampleDuration
+duration = 60; % [sec]
+timer = tic();
+while toc(timer) < duration
     
     fbk = group.getNextFeedbackMobile();
 
@@ -61,23 +57,3 @@ while toc(exampleTimer) < exampleDuration
 end
 
 disp('  All done!');
-
-log = group.stopLog();  % Stops background logging
-
-% % Plot the logged position feedback
-% figure(101);
-% plot(log.time,log.a1);
-% title('Position');
-% xlabel('time (sec)');
-% ylabel('position (rad)');
-% grid on;
-% 
-% % Plot the logged velocity feedback
-% figure(102);
-% plot(log.time,log.d1);
-% title('Velocity');
-% xlabel('time (sec)');
-% ylabel('velocity (rad/sec)');
-% grid on;
-
-

@@ -5,55 +5,55 @@
 % HEBI Robotics
 % July 2018
 
+%% Setup
 clear *;
 close all;
-
 HebiLookup.initialize();
 
 % Use Scope to change select a module and change the name and family to
 % match the names below.  Following examples will use the same names.
-familyName = 'My Family';
-moduleNames = 'Test Mobile'; 
+familyName = 'Test Family';
+moduleNames = 'Test IO Board'; 
 group = HebiLookup.newGroupFromNames( familyName, moduleNames );
 
-exampleDuration = 10; % sec
-exampleTimer = tic;
-
-group.startLog( 'dir', 'logs' );  % Starts logging in the background
-
+%% Visualize Gyro Feedback
 disp('  Plotting gyro data from the mobile device IMU.');
 disp('  Move it around to make the feedback interesting...');  
 
-% Flag so that we only set the title, etc of plot one time
-isFirstDraw = true;
+% Starts logging in the background
+group.startLog( 'dir', 'logs' );  
 
 figure(1);
 clf;
 
-while toc(exampleTimer) < exampleDuration
+duration = 10; % [sec]
+timer = tic();
+while toc(timer) < duration
     
+   % read a struct of sensor data
    fbk = group.getNextFeedback();
    
+   % visualize gyroscope data
    bar( [fbk.gyroX fbk.gyroY fbk.gyroZ] );
    
+   % format plot
    yAxisMaxLim = 15; 
    yAxisMinLim = -15;
    ylim([yAxisMinLim yAxisMaxLim]);
-   
    title( 'Module Gyro Feedback' );
    xlabel( 'Axis' );
    ylabel( 'Angular Velocity (rad/sec)');
    grid on;
-
    drawnow;
 
 end
 
 disp('  All Done!');
 
-log = group.stopLog();  % Stops background logging
+% Stops background logging
+log = group.stopLog(); 
 
-% Plot the logged gyro feedback
+%% Plot the logged gyro feedback
 figure(101);
 plot( log.time, log.gyroX );
 hold on;
@@ -65,4 +65,3 @@ xlabel('time (sec)');
 ylabel('angular velocity (rad/sec)');
 legend gyroX gyroY gyroZ;
 grid on;
-

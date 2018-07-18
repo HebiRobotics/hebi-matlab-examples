@@ -1,12 +1,16 @@
 % Initialize the lookup of modules and display information for any modules
-% on the network.   A 'module' can be an actuator, and I/O board, or a 
+% on the network. A 'module' can be an actuator, and I/O board, or a 
 % mobile device running the Mobile I/O app.
 %
-% Assumes that you have run 'startup.m' in this folder.
+% For more information type:
+%    help HebiLookup
+%
+% This script assumes that you have run 'startup.m' in this folder.
 %
 % HEBI Robotics
 % June 2018
 
+%%
 clear *;
 close all;
 
