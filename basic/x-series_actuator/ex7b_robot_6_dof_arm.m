@@ -52,26 +52,38 @@ posTargets(end+1,:) = posTargets(1,:);
 % Get the initial feedback joint positions, and go from there to the first
 % waypoint, using the trajectory API.  
 fbk = group.getNextFeedback();
-
 waypoints = [ fbk.position;
-              posTargets(1,:) ];
-timeToMove = 5;
-time = [ 0 timeToMove ];
+              posTargets(1,:) ];    % [rad]
+timeToMove = 5;             % [sec]
+time = [ 0 timeToMove ];    % [sec]
 
+% Calculate initial trajectory to starting posiiton
 trajectory = trajGen.newJointMove( waypoints, 'time', time );
+
+% Initialize timer
 t0 = fbk.time;
 t = 0;
+
+% Execute the motion to go to the first target
 while t < trajectory.getDuration
     
+    % Get feedback and update the timer
     fbk = group.getNextFeedback();
     t = fbk.time - t0;
     
+    % Get new commands from the trajectory
     [pos,vel,acc] = trajectory.getState(t);
     
+    % Calculate commanded efforts to assist with tracking the trajectory.
+    % gravCompEfforts() uses knowledge of the arm's kinematics and mass to
+    % compensate for the weight of the arm.  dynamicCompEfforts() uses the
+    % kinematics and mass to compensate for the commanded accelerations of
+    % the arm.
     gravCompEfforts = kin.getGravCompEfforts( fbk.position, gravityVec );
     dynamicCompEfforts = kin.getDynamicCompEfforts( fbk.position, ...
                                                     pos, vel, acc );
     
+    % Fill in the CommandStruct and send commands to the arm
     cmd.position = pos;
     cmd.velocity = vel;
     cmd.effort = gravCompEfforts + dynamicCompEfforts;
@@ -80,29 +92,45 @@ while t < trajectory.getDuration
 end
 
 
-% Go to all the different points.  
-timeToMove = 3;
-time = [ 0 timeToMove ];
+% Go to the other points a little bit more quickly.  
+timeToMove = 3;             % [sec]
+time = [ 0 timeToMove ];    % [sec]
     
+% Go to all the different points.  Calculate new point-to-point
+% trajectories one at a time.
 for i=1:length(xyzTargets)
     
+    % Shift to the next target position
     waypoints = [ posTargets(i,:) ;
                   posTargets(i+1,:) ];
 
+    % Get the trajectory to the next target         
     trajectory = trajGen.newJointMove( waypoints, 'time', time );
+    
+    % Get feedback and update the timer
     t0 = fbk.time;
     t = 0;
+    
+    % Execute the motion to go to the next target
     while t < trajectory.getDuration
 
+        % Get feedback and update the timer
         fbk = group.getNextFeedback();
         t = fbk.time - t0;
-
+        
+        % Get new commands from the trajectory
         [pos,vel,acc] = trajectory.getState(t);
 
+        % Calculate commanded efforts to assist with tracking the trajectory.
+        % gravCompEfforts() uses knowledge of the arm's kinematics and mass to
+        % compensate for the weight of the arm.  dynamicCompEfforts() uses the
+        % kinematics and mass to compensate for the commanded accelerations of
+        % the arm.
         gravCompEfforts = kin.getGravCompEfforts( fbk.position, gravityVec );
         dynamicCompEfforts = kin.getDynamicCompEfforts( fbk.position, ...
                                                         pos, vel, acc );
 
+        % Fill in the CommandStruct and send commands to the arm                                            
         cmd.position = pos;
         cmd.velocity = vel;
         cmd.effort = gravCompEfforts + dynamicCompEfforts;
