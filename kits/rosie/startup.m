@@ -9,7 +9,7 @@ addpath(fullfile(localDir, 'tools'));
 addpath(fullfile(localDir, 'tools', 'input'));
 addpath(fullfile(localDir, 'tools', 'kinematics'));
 
+hebi_load();
 HebiJoystick.loadLibs();
 HebiKeyboard.loadLibs();
-
 end

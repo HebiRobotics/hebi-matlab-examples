@@ -1,25 +1,24 @@
-classdef FrameDisplay < handle
-    %FrameDisplay draws the coordinate frames of each module in a
+classdef FramesDisplay < handle
+    %FramesDisplay draws the coordinate frames of each module in a
     %kinematic chain. The axes are color-coded RGB for XYZ.
     %
-    %  FrameDisplay = FrameDisplay() opens a new figure for drawing
+    %  FramesDisplay = FramesDisplay() opens a new figure for drawing
     %  coordinate frames for transforms. The figure gets closed
     %  automatically when this variable is deleted.
     %
-    %  Once set up, you display a coordinate frame with .setFrames(frames),
-    %  where frames is a 4x4xN set of N homogeneous transforms.  See the
-    %  example below.
+    %  The frames get updated using FrameDisplay.setFrames(), where the
+    %  input is a new set of 4x4xN homogeneous transforms.  In order to get
+    %  the figure to re-render you will need to execute a DRAWNOW command
+    %  or some other call the forces a re-draw of graphics objects, like a
+    %  PAUSE.
     %
-    %  Optional Initialization Arguments:
-    %
-    %  'axisLength' optionally specifies the length of each axis in [m]
+    %  'axisLength' optionally specifies the length of each axis in [m].
     %
     %  'numFrames' optionally specifies the number of coordinate frames and
     %  initializes the figure handles in the constructor. Otherwise the
     %  figure handles will be initialized at the first call to setFrames.
     %
-    %
-    %  Frame Axis Color Coding:
+    %  Axis colors:
     %  x - red
     %  y - green
     %  z - blue
@@ -32,7 +31,7 @@ classdef FrameDisplay < handle
     %     kin.addBody('X5-1');
     % 
     %     % Create display
-    %     framesDisplay = FrameDisplay();
+    %     framesDisplay = FramesDisplay();
     % 
     %     % Move all joints individually in a circle and
     %     % continuously update display
@@ -46,38 +45,33 @@ classdef FrameDisplay < handle
     %             frames = kin.getFK('output', positions);
     %             framesDisplay.setFrames(frames); % update visualization
     %             pause(delay);
+    %             % drawnow; % If you don't have pause somewhere in the
+    %                        % loop you will need to do this to force the 
+    %                        % figure to re-render.
     %         end
     %     end
     
-    properties (Access = private)
+    properties (Access = public)
         figHandle
         axHandle
         x
         y
         z
         numFrames
-        axisLength = 0.05;  % m 
-        xyzLimits = nan(3,2); % m (stacked [xLim; yLim; zLim])
+        axisLength = 0.1;
     end
     
     methods(Access = public)
         
-
-        function this = FrameDisplay(axisLength, numFrames, xyzLimits)
-
+        function this = FrameDisplay(axisLength, numFrames)
             % Constructor gets called once. It creates a new figure and
             % formats it nicely.
             if nargin > 0
                 this.axisLength = axisLength; 
             end
-
-            if nargin > 1 && ~isempty(numFrames)
+            if nargin > 1
                 this.init(numFrames);
             end
-            if nargin > 2
-                this.xyzLimits = xyzLimits;
-            end
-
         end
         
         function init(this, numFrames)
@@ -85,28 +79,27 @@ classdef FrameDisplay < handle
             this.numFrames = numFrames;
             
             this.figHandle = figure();
+            this.axHandle = axes();
             hold on;
             
             % Initialize all axes to identity. Iterate backwards so that
             % we don't need to pre-initialize arrays
             range = [0 this.axisLength];
             for i = numFrames:-1:1
-                this.x(i) = line( range, [0 0], [0 0],'Color', 'r', 'LineWidth', 3);
-                this.y(i) = line( [0 0], range, [0 0],'Color', 'g', 'LineWidth', 3);
-                this.z(i) = line( [0 0], [0 0], range,'Color', 'b', 'LineWidth', 3);
+                this.x(i) = line(this.axHandle, range, [0 0], [0 0],'Color', 'r', 'LineWidth', 3);
+                this.y(i) = line(this.axHandle, [0 0], range, [0 0],'Color', 'g', 'LineWidth', 3);
+                this.z(i) = line(this.axHandle, [0 0], [0 0], range,'Color', 'b', 'LineWidth', 3);
             end
             
-            % Draw black coordinate frame at the origin
+            % Draw small coordinate frame in the center
             line( range,[0 0], [0 0],'Color', 'k', 'LineWidth', 2);
             line( [0 0],range, [0 0],'Color', 'k', 'LineWidth', 2);
             line( [0 0],[0 0], range,'Color', 'k', 'LineWidth', 2);
             grid on;
+            box on;
             axis equal;
-            
-            this.axHandle = gca;
-            
-            set(this.axHandle, 'PlotBoxAspectRatio', [1 1 1]);
-
+            %axis auto;  
+            set(gca, 'PlotBoxAspectRatio', [1 1 1]);
             hold off;
             view(3); 
             
@@ -116,7 +109,6 @@ classdef FrameDisplay < handle
             xlabel('x (m)');
             ylabel('y (m)');
             zlabel('z (m)');
-
         end
         
         function setFrames(this, frames)
@@ -127,19 +119,32 @@ classdef FrameDisplay < handle
             end
             
             % Draw gets called often and continuously updates the frames
-            if this.numFrames == 1 
-                if ~isequal(size(frames), [4 4])
-                  error('expected input: 4x4');  
-                end
+            newFramesSize = size(frames);
+            if length(newFramesSize) > 2
+                newNumFrames = newFramesSize(3);
             else
-                if ~isequal(size(frames), [4 4 this.numFrames])
-                    error(['expected input: 4x4x' num2str(this.numFrames)]);
+                newNumFrames = 1;
+            end
+            
+            if ~isequal(newFramesSize(1:2), [4 4])
+                error('expected input: 4x4xN homogeneous transforms');  
+            end
+            
+            if ~isempty(frames)
+                if newNumFrames < this.numFrames
+                    this.frames(:,:,newNumFrames+1:end) = [];
+                end
+                if newNumFrames > this.numFrames
+                    range = [0 this.axisLength];
+                    for i = this.numFrames+1:newNumFrames
+                        this.x(i) = line(this.axHandle, range, [0 0], [0 0],'Color', 'r', 'LineWidth', 3);
+                        this.y(i) = line(this.axHandle, [0 0], range, [0 0],'Color', 'g', 'LineWidth', 3);
+                        this.z(i) = line(this.axHandle, [0 0], [0 0], range,'Color', 'b', 'LineWidth', 3);
+                    end
                 end
             end
             
-            xlim(this.axHandle,'auto');
-            ylim(this.axHandle,'auto');
-            zlim(this.axHandle,'auto');
+            this.numFrames = newNumFrames;
             
             axes_base = [eye(3) * this.axisLength; ones(1,3)];
             orig_base = [zeros(3); ones(1,3)];
@@ -165,18 +170,6 @@ classdef FrameDisplay < handle
                     'ZData', [orig_T(3,3) axes_T(3,3)] );
             end
             
-            % Update axis limits if they grew larger, never shrink them
-            xyzLimitsNew(1,:) = get(this.axHandle,'XLim');
-            xyzLimitsNew(2,:) = get(this.axHandle,'YLim');
-            xyzLimitsNew(3,:) = get(this.axHandle,'ZLim');
-            
-            this.xyzLimits(:,1) = min( this.xyzLimits(:,1), xyzLimitsNew(:,1) );
-            this.xyzLimits(:,2) = max( this.xyzLimits(:,2), xyzLimitsNew(:,2) );  
-            
-            xlim(this.axHandle,this.xyzLimits(1,:));
-            ylim(this.axHandle,this.xyzLimits(2,:));
-            zlim(this.axHandle,this.xyzLimits(3,:));
-
         end
         
     end
