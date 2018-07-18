@@ -19,10 +19,7 @@ classdef (Sealed) HebiTrajectory
     %      % Visualize trajectory
     %      t = 0:0.01:trajectory.getDuration();
     %      [pos, vel, accel] = trajectory.getState(t);
-    %      figure(); hold on;
-    %      plot(t, pos);
-    %      plot(t, vel);
-    %      plot(t, accel);
+    %      HebiUtils.plotTrajectory(trajectory);
     %
     %      % Manually execute position/velocity/effort trajectory
     %       cmd = CommandStruct();
@@ -77,8 +74,10 @@ classdef (Sealed) HebiTrajectory
             % getWaypointTime returns the input time for each waypoint [s]
             %
             %   This method returns the time for each waypoint that served
-            %   as input to calculate this trajectory. If the time vector
-            %   has been specified manually, the result is equivalent to
+            %   as input to calculate this trajectory. 
+            %
+            %   If the time vector has been specified manually, the result 
+            %   is equivalent to:
             %
             %       offset = time(1);
             %       result = ((time - offset) * speedFactor) + offset
@@ -86,22 +85,8 @@ classdef (Sealed) HebiTrajectory
             %   This is useful for, e.g., plotting the waypoints on top of
             %   a whole trajectory.
             %
-            %   Example
-            %       % Plot waypoints on top of trajectory
-            %       % (create trajectory via trajectory generator)
-            %       time = trajectory.getWaypointTime();
-            %       positionWaypoints = trajectory.getState(time);
-            %       
-            %       % Plot continuous trajectory
-            %       t = time(1):0.01:time(end); % 100 Hz steps
-            %       position = trajectory.getState(t);
-            %       plot(t, position);
-            %
-            %       % Add waypoints as discrete points
-            %       hold on; 
-            %       plot(time, positionWaypoints, 'o');
-            %
-            %   See also getDuration, HebiTrajectoryGenerator.newJointMove
+            %   See also getDuration, HebiTrajectoryGenerator.newJointMove,
+            %   HebiUtils.plotTrajectory
             if isempty(this.time)
                this.time = getWaypointTime(this.obj); 
             end

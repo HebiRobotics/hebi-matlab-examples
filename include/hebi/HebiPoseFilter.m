@@ -1,7 +1,10 @@
 classdef (Sealed) HebiPoseFilter
     %HebiPoseFilter is a simple filter that uses accel and gyro measurements to estimate the pose
     %
-    %   This api is highly experimental and may change at any time.
+    %   THIS API IS DEPRECATED AND WILL BE REMOVED IN A FUTURE RELEASE. The
+    %   primary purpose of this API was to provide an orientation estimate
+    %   of a module based on its IMU. This estimate is now done on each
+    %   module in firmware.
     %
     %   HebiPoseFilter Methods:
     %      setMaxAccelNormDev - max deviation from the norm
