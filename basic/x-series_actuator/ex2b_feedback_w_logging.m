@@ -3,7 +3,7 @@
 % For more information type:
 %    help HebiGroup
 %
-% This script assumes you have a group created with at least 1 module.
+% This script assumes you can create a group with at least 1 module.
 %
 % HEBI Robotics
 % June 2018

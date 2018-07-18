@@ -5,7 +5,7 @@
 %    help HebiUtils
 %    help HebiGroup
 %
-% This script assumes that you have a group created with 1 module in it.
+% This script assumes you can create a group with 1 module.
 %
 % HEBI Robotics
 % July 2018
