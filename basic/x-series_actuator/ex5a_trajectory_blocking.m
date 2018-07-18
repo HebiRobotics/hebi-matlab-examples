@@ -10,34 +10,31 @@
 % HEBI Robotics
 % June 2018
 
-%%
+%% Setup Group
 clear *;
 close all;
-
 HebiLookup.initialize();
 
-familyName = 'My Family';
-moduleNames = 'Test Module';  
+familyName = 'Test Family';
+moduleNames = 'Test Actuator';
 group = HebiLookup.newGroupFromNames( familyName, moduleNames );
 
-cmd = CommandStruct();
-
-exampleDuration = 10;   % [sec]
-exampleTimer = tic;
-
+%% Blocking Trajectory
+trajGen = HebiTrajectoryGenerator();
 group.startLog( 'dir', 'logs' );
 
-trajGen = HebiTrajectoryGenerator();
-
 % Go from 0 to 180-degrees in 3 seconds
-waypoints = [ 0; 
-              pi ];
+waypoints = [
+    0;
+    pi ];
 time = [ 0 3 ];
 
+% This function generates smooth minimum jerk trajectories
 trajectory = trajGen.newJointMove( waypoints, 'time', time );
 
 % Visualize the trajectory
 HebiUtils.plotTrajectory(trajectory);
+drawnow;
 
 % This function executes the trajectory using the 'blocking' API.  This
 % means that your program will go into this function and 'block' the rest
@@ -51,9 +48,7 @@ waypoints = flipud(waypoints);
 trajectory = trajGen.newJointMove( waypoints, 'time', time );
 trajGen.executeTrajectory( group, trajectory );
 
-log = group.stopLog(); 
-
-% Plot using some handy helper functions
+% Stop logging and plot the velocity data using helper functions
+log = group.stopLog();
 HebiUtils.plotLogs( log, 'position', 'figNum', 101 );
 HebiUtils.plotLogs( log, 'velocity', 'figNum', 102 );
-

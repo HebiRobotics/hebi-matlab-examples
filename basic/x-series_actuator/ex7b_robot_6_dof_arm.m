@@ -142,8 +142,8 @@ for i=1:length(xyzTargets)
     
 end
 
+% Stop logging and plot the command vs feedback pos/vel/effort
 log = group.stopLog();
-
 HebiUtils.plotLogs( log, 'position', 'figNum', 101 );
 HebiUtils.plotLogs( log, 'velocity', 'figNum', 102 );
 HebiUtils.plotLogs( log, 'effort', 'figNum', 103 );

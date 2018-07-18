@@ -13,13 +13,12 @@
 %%
 clear *;
 close all;
-
 HebiLookup.initialize();
 
-familyName = 'My Family';
-moduleNames = 'Test Module';  
+familyName = 'Test Family';
+moduleNames = 'Test Actuator'; 
 group = HebiLookup.newGroupFromNames( familyName, moduleNames );
 
-% Get the gains that are currently active on the module and save them
+% Get the gains that are currently active on the actuator and save them
 gains = group.getGains();
-HebiUtils.saveGains( gains, '/gains/myActuatorGains.xml' );
+HebiUtils.saveGains( gains, './gains/myActuatorGains.xml' );

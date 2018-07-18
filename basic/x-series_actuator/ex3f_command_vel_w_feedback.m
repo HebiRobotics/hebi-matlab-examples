@@ -10,26 +10,23 @@
 % HEBI Robotics
 % June 2018
 
-%%
+%% Setup
 clear *;
 close all;
-
 HebiLookup.initialize();
 
-familyName = 'My Family';
-moduleNames = 'Test Module';  
+familyName = 'Test Family';
+moduleNames = 'Test Actuator'; 
 group = HebiLookup.newGroupFromNames( familyName, moduleNames );
 
+%% Closed-Loop Controller (Velocity)
 cmd = CommandStruct();
-
-exampleDuration = 15; % [sec]
-exampleTimer = tic;
-
 group.startLog( 'dir', 'logs' ); 
 
 disp('  Move the module to make the output move...');  
-
-while toc(exampleTimer) < exampleDuration
+duration = 15; % [sec]
+timer = tic();
+while toc(timer) < duration
     
     fbk = group.getNextFeedback();
 
@@ -43,9 +40,7 @@ end
 
 disp('  All done!');
 
-% Stops background logging
-log = group.stopLog();  
-
-% Plot using some handy helper functions
+% Stop background logging and plot data
+log = group.stopLog(); 
 HebiUtils.plotLogs( log, 'velocity', 'figNum', 101 );
 HebiUtils.plotLogs( log, 'gyroZ', 'figNum', 102 );

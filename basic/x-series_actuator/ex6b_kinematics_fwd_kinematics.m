@@ -11,9 +11,7 @@ clear *;
 close all;
 
 % Load the kinematics from HRDF file
-hrdfFileFolder = 'hrdf/';
-hrdfFileName = '3-DoF_arm_example.hrdf';     % the '.hrdf' is optional
-kin = HebiKinematics([hrdfFileFolder hrdfFileName]);
+kin = HebiKinematics('./hrdf/3-DoF_arm_example.hrdf');
 
 % Initialize a helper utility to view the various coordinate frames
 frameDisp = FrameDisplay();
@@ -31,7 +29,7 @@ endEffectorFrame = kin.getForwardKinematicsEndEffector( ...
                                             startPositions );
                                    
 % Pull out the XYZ position from the transform and show on workspace
-endEffectorXYZ = endEffectorFrame(1:3,4)  % [m]
+endEffectorXYZ = endEffectorFrame(1:3,4);  % [m]
 
 % Calculate forward kinematics gradualy from the start position to the end
 % postion and display.  THIS INTERPOLATION WILL BE IN JOINT SPACE AND WILL

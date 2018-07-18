@@ -13,20 +13,15 @@
 %%
 clear *;
 close all;
-
 HebiLookup.initialize();
 
-familyName = 'My Family';
-moduleNames = 'Test Module';  
+familyName = 'Test Family';
+moduleNames = 'Test Actuator';  
 group = HebiLookup.newGroupFromNames( familyName, moduleNames );
 
 % Load the gains from a saved file
-gainsFileFolder = 'gains/';
-gainsFileName = 'exampleGains.xml';     % the '.gains' is optional
-newGains = HebiUtils.loadGains( [gainsFileFolder gainsFileName] );
+newGains = HebiUtils.loadGains( './gains/exampleGains.xml' );
+disp(newGains); % display
 
-% Print them to the screen
-disp(newGains);
-
-% Send the new gains to your module
+% Send the new gains to the actuator
 group.send( 'gains', newGains );

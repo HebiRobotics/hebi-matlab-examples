@@ -22,5 +22,3 @@ log = logs{1};
 HebiUtils.plotLogs( log, 'position', 'figNum', 101 );
 HebiUtils.plotLogs( log, 'velocity', 'figNum', 102 );
 HebiUtils.plotLogs( log, 'effort', 'figNum', 103 );
-
-

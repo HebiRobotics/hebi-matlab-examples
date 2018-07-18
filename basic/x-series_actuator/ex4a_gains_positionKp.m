@@ -10,24 +10,21 @@
 % HEBI Robotics
 % July 2018
 
-%%
+%% Setup
 clear *;
 close all;
-
 HebiLookup.initialize();
 
-familyName = 'My Family';
-moduleNames = 'Test Module';  
+familyName = 'Test Family';
+moduleNames = 'Test Actuator'; 
 group = HebiLookup.newGroupFromNames( familyName, moduleNames );
 
-% Like the commmand struct, the gains struct will have fields for every 
+%% Position Step Input w/ different Kp gains
+% Like the commmand struct, the gains struct has fields for every 
 % possible gain value.  Fields that are empty [] or NaN will be ignored 
 % when sending.
-cmd = CommandStruct();
 gains = GainStruct(); 
-
-exampleDuration = 4;    % [sec]
-
+cmd = CommandStruct();
 group.startLog( 'dir', 'logs' ); 
 
 % Parameters for step function
@@ -36,7 +33,6 @@ stepPosition = pi/8;    % [rad]
 
 % Make the position controller gradually stiffer. 
 newPositionKpGains = [ 0.2 0.5 10 ]; 
-
 for i = 1:length(newPositionKpGains)
     
     % Update gains struct and send to the actuator
@@ -45,14 +41,15 @@ for i = 1:length(newPositionKpGains)
     disp(['  Setting Kp to: ' num2str(newPositionKpGains(i))]);
 
     % Command a step function to show actuator response
-    exampleTimer = tic;
-    while toc(exampleTimer) < exampleDuration
+    duration = 4; % [sec]
+    timer = tic;
+    while toc(timer) < duration
         
         % Get feedback to limit the loop rate
         fbk = group.getNextFeedback();
         
         % Calculate position step function and send command
-        if rem( toc(exampleTimer), 2*stepPeriod ) > stepPeriod
+        if rem( toc(timer), 2*stepPeriod ) > stepPeriod
            cmd.position = stepPosition;
         else
            cmd.position = 0;
@@ -64,11 +61,8 @@ end
 
 % Pause to let the actuator response to settle
 pause(stepPeriod);
-
 disp('  All done!');
 
-% Stops background logging
+% Stop background logging and plot data using helper functions
 log = group.stopLog();  
-
-% Plot using some handy helper functions
 HebiUtils.plotLogs( log, 'position', 'figNum', 101 );

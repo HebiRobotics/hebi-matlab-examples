@@ -11,9 +11,7 @@ clear *;
 close all;
 
 % Load the kinematics from HRDF file
-hrdfFileFolder = 'hrdf/';
-hrdfFileName = '3-DoF_arm_example.hrdf';     % the '.hrdf' is optional
-kin = HebiKinematics([hrdfFileFolder hrdfFileName]);
+kin = HebiKinematics('./hrdf/3-DoF_arm_example.hrdf');
 
 % Initialize a helper utility to view the various coordinate frames
 frameDisp = FrameDisplay();

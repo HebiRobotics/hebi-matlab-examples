@@ -14,11 +14,11 @@
 clear *;
 close all;
 
-HebiLookup.initialize(); % Only needed once per session, but it doesn't
-                         % hurt to do this every time we run a new script,
-                         % just in case something changed on the network.
+% Only needed once per session, but it doesn't hurt to do this every time
+% we run a new script, just in case something changed on the network.
+HebiLookup.initialize();
 
-familyName = 'My Family';
-moduleNames = {'Module1','Module2','Module3'};
+familyName = 'Test Family';
+moduleNames = {'Actuator1','Actuator2','Actuator3'};
 
 group = HebiLookup.newGroupFromNames( familyName, moduleNames )

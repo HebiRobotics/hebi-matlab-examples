@@ -9,11 +9,10 @@
 %%
 clear *;
 close all;
-
 HebiLookup.initialize();
 
-kin = HebiKinematics('hrdf/3-DoF_arm_example.hrdf');
-gains = HebiUtils.loadGains('gains/3-DoF_arm_gains.xml');
+kin = HebiKinematics('./hrdf/3-DoF_arm_example.hrdf');
+gains = HebiUtils.loadGains('./gains/3-DoF_arm_gains.xml');
 trajGen = HebiTrajectoryGenerator();
 
 % Assume gravity points down in the frame of the first module.  This will
@@ -138,8 +137,6 @@ end
 
 % Stop logging and plot the command vs feedback pos/vel/effort
 log = group.stopLog();
-
 HebiUtils.plotLogs( log, 'position', 'figNum', 101 );
 HebiUtils.plotLogs( log, 'velocity', 'figNum', 102 );
 HebiUtils.plotLogs( log, 'effort', 'figNum', 103 );
-

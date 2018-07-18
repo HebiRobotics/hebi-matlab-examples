@@ -12,7 +12,7 @@
 clear *;
 close all;
 
-logFileFolder = 'logs/';
+logFileFolder = './logs/';
 logFileName = 'exampleLog.hebilog';     % the '.hebilog' is optional
 
 log = HebiUtils.loadGroupLog( [logFileFolder logFileName] );

@@ -14,12 +14,14 @@
 clear *;
 close all;
 
-HebiLookup.initialize(); % Only needed once per session, but it doesn't
-                         % hurt to do this every time we run a new script,
-                         % just in case something changed on the network.
+% Only needed once per session, but it doesn't hurt to do this every time
+% we run a new script, just in case something changed on the network.
+HebiLookup.initialize();
 
-familyName = 'My Family';
-moduleNames = 'My First Module';
+% Use Scope to change select a module and change the name and family to
+% match the names below.  Following examples will use the same names.
+familyName = 'Test Family';
+moduleNames = 'Test Actuator';
 
 group = HebiLookup.newGroupFromNames( familyName, moduleNames )
 

@@ -10,51 +10,50 @@
 % HEBI Robotics
 % June 2018
 
-%%
+%% Setup Group
 clear *;
 close all;
-
 HebiLookup.initialize();
 
-familyName = 'My Family';
-moduleNames = 'Test Module';  
+familyName = 'Test Family';
+moduleNames = 'Test Actuator';
 group = HebiLookup.newGroupFromNames( familyName, moduleNames );
 
+%% Non-Blocking Trajectory
+trajGen = HebiTrajectoryGenerator();
 cmd = CommandStruct();
-
-exampleDuration = 10;   % [sec]
-exampleTimer = tic;
-
 group.startLog( 'dir', 'logs' );
 
-trajGen = HebiTrajectoryGenerator();
-
 % Go from 0 to 180-degrees in 3 seconds
-waypoints = [ 0; 
-              pi ];
+waypoints = [
+    0;
+    pi ];
 time = [ 0 3 ];
 
+% This function generates smooth minimum jerk trajectories
 trajectory = trajGen.newJointMove( waypoints, 'time', time );
 
 % Visualize the trajectory
 HebiUtils.plotTrajectory(trajectory);
+drawnow;
 
-% This function executes the trajectory using the 'non-blocking' API.  In
+% This example executes the trajectory using the 'non-blocking' API.  In
 % this format, we have to make a while loop to step through the trajectory
 % at each timestep, evaluate the trajectory to get commands, and send them
-% to the actuator.  This makes the top-level code more complex, but it has
-% the advantage that it is easy to evaluate feedback every timestep and
-% change the trajectory or some other behavior
+% to the actuator.  This makes the top-level code more complex relative to
+% the blocking example, but it has the advantage that it is easy to 
+% evaluate feedback every timestep and change the trajectory or some other 
+% behavior
 t0 = tic();
 t = toc(t0);
 while t < trajectory.getDuration()
     
     fbk = group.getNextFeedback();
-
+    
     % Get trajectory state at the current time
     t = toc(t0);
     [pos, vel, accel] = trajectory.getState(t);
-
+    
     % Send the commands
     cmd.position = pos;
     cmd.velocity = vel;
@@ -71,21 +70,20 @@ t = toc(t0);
 while t < trajectory.getDuration()
     
     fbk = group.getNextFeedback();
-
+    
     % Get trajectory state at the current time
     t = toc(t0);
     [pos, vel, accel] = trajectory.getState(t);
-
+    
     % Send the commands
     cmd.position = pos;
     cmd.velocity = vel;
     group.send(cmd);
-
+    
 end
 
-log = group.stopLog(); 
-
-% Plot using some handy helper functions
+% Stop logging and plot the velocity data using helper functions
+log = group.stopLog();
 HebiUtils.plotLogs( log, 'position', 'figNum', 101 );
 HebiUtils.plotLogs( log, 'velocity', 'figNum', 102 );
 

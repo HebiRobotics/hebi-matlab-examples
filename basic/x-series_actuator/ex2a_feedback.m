@@ -1,52 +1,48 @@
-% Get feedback from a module and plot it live.
+% This example does a live visualization of sensor data gathered from
+% an actuator's gyroscope.
 %
 % For more information type:
 %    help HebiGroup
 %
-% This script assumes you have a group created with at least 1 module.
-%
 % HEBI Robotics
 % June 2018
 
-%%
+%% Setup group
 clear *;
 close all;
-
 HebiLookup.initialize();
 
 % Use Scope to change select a module and change the name and family to
 % match the names below.  Following examples will use the same names.
-familyName = 'My Family';
-moduleNames = 'Test Module';  
+familyName = 'Test Family';
+moduleNames = 'Test Actuator';  
 group = HebiLookup.newGroupFromNames( familyName, moduleNames );
 
-exampleDuration = 10; % [sec]
-exampleTimer = tic;
-
+%% Visualize Gyro Feedback
 disp('  Plotting gyro data from the module IMU.');
 disp('  Move the module around to make the feedback interesting...');  
-
-% Flag so that we only set the title, etc of plot one time
-isFirstDraw = true;
 
 figure(1);
 clf;
 
-while toc(exampleTimer) < exampleDuration
+duration = 10; % [sec]
+timer = tic();
+while toc(timer) < duration
 
+    % read a struct of sensor data
     fbk = group.getNextFeedback();
 
+    % visualize gyroscope data
     bar( [fbk.gyroX fbk.gyroY fbk.gyroZ] );
-
+    
+    % format plot
     yAxisMaxLim = 15; 
     yAxisMinLim = -15;
     ylim([yAxisMinLim yAxisMaxLim]);
-
-    title( 'Module Gyro Feedback' );
-    xlabel( 'Axis' );
-    ylabel( 'Angular Velocity (rad/sec)');
+    title('Actuator Gyro Feedback');
+    xlabel('Axis');
+    ylabel('Angular Velocity (rad/sec)');
     grid on;
-
     drawnow;
 
 end

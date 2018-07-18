@@ -9,41 +9,42 @@
 % HEBI Robotics
 % June 2018
 
-%%
+%% Setup
 clear *;
 close all;
-
 HebiLookup.initialize();
 
-familyName = 'My Family';
-moduleNames = 'Test Module';  
+familyName = 'Test Family';
+moduleNames = 'Test Actuator';  
 group = HebiLookup.newGroupFromNames( familyName, moduleNames );
 
-% The commmand struct will have fields for position, velocity, and effort.  
+%% Open-Loop Controller (Position)
+% The commmand struct has fields for position, velocity, and effort.  
 % Fields that are empty [] or NaN will be ignored when sending.
 cmd = CommandStruct(); 
 
-exampleDuration = 10; % [sec]
-exampleTimer = tic;
-
-group.startLog( 'dir', 'logs' );  % Starts logging in a sub-directory
+% Starts logging in the background
+group.startLog( 'dir', 'logs' );  
 
 % Parameters for sin/cos function
 freqHz = 1.0;           % [Hz]
 freq = freqHz * 2*pi;   % [rad / sec]
 amp = deg2rad( 45 );    % [rad]
 
-while toc(exampleTimer) < exampleDuration
+duration = 10; % [sec]
+timer = tic();
+while toc(timer) < duration
     
     % Even though we don't use the feedback, getting feedback conveniently 
-    % limits the loop rate to the feedback freq
+    % limits the loop rate to the feedback frequency
     fbk = group.getNextFeedback();  
 
-    cmd.position = amp * sin( freq * toc(exampleTimer) );   
+    % Update position set point
+    cmd.position = amp * sin( freq * toc(timer) );   
     group.send(cmd); 
+    
 end
 
-log = group.stopLog();  % Stops background logging
-
-% Plot using some handy helper functions
+% Stop logging and plot the position data using helper functions
+log = group.stopLog();
 HebiUtils.plotLogs( log, 'position' );
