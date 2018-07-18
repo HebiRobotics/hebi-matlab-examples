@@ -5,7 +5,11 @@
 %    help CommandStruct
 %    help HebiGroup
 %
-% This script assumes you can create a group with 1 module.
+% This script assumes you can create a group with 1 module.  It also
+% assumes that a load with some mass / inertia is attached to the output. 
+% If the output is unloaded, these commands will track worse than the
+% previous example that only commanded position + velocity.  See the
+% comments about inertia above Line 40 below.
 %
 % HEBI Robotics
 % June 2018
@@ -32,8 +36,9 @@ freqHz = 1.0;           % [Hz]
 freq = freqHz * 2*pi;   % [rad / sec]
 amp = deg2rad( 45 );    % [rad]
 
-% Inertia parameters for converting acceleration to torque
-inertia = 1E-8; % [kg * m^2]
+% Inertia parameters for converting acceleration to torque.  This inertia
+% value corresponds to roughly a 300mm X5 link extending off the output. 
+inertia = .01; % [kg * m^2]
 
 while toc(exampleTimer) < exampleDuration
     
