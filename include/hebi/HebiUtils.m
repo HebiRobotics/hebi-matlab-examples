@@ -708,7 +708,11 @@ classdef (Sealed) HebiUtils
             % from a binary .hebilog file
             %
             %   Example:
-            %       fileNames = HebiUtils.loadGroupLogsUI('format','raw');
+            %       [info, gains] = HebiUtils.readGroupLogInfo(path);
+            %
+            %   Example:
+            %       % Get info for all logs selected via a GUI
+            %       fileNames = HebiUtils.convertGroupLogsUI('format','raw');
             %       [infos, gains] = cellfun(@HebiUtils.readGroupLogInfo, ...
             %           fileNames, 'UniformOutput', false);
             

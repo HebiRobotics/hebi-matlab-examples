@@ -75,7 +75,9 @@ classdef (Sealed) HebiTrajectoryGenerator
     %      for i = 2:numWaypoints
     %           start = positions(i-1, :);
     %           finish = positions(i, :);
-    %           trajectory = trajGen.newJointMove([start; finish]);
+    %           trajectory = trajGen.newJointMove(...
+    %               [start; finish], ...
+    %               'time', time);
     %           trajGen.executeTrajectory(group, trajectory);
     %      end
     %
@@ -97,7 +99,9 @@ classdef (Sealed) HebiTrajectoryGenerator
     %      for i = 2:numWaypoints
     %         start = positions(i-1, :);
     %         finish = positions(i, :);
-    %         trajectory = trajGen.newJointMove([start; finish]);
+    %         trajectory = trajGen.newJointMove(...
+    %               [start; finish], ...
+    %               'time', time);
     %
     %         fbk = group.getNextFeedback();
     %         t0 = fbk.time;
