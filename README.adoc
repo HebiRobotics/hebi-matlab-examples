@@ -1,58 +1,38 @@
 # HEBI MATLAB API Examples
 
-This repository contains examples to go with the http://docs.hebi.us[online documentation] that help to get started with the HEBI Robotics APIs for MATLAB. Note that the scripts use actuators that we used for testing, so you will need to change any naming to match your own actuators.
+This repository contains examples to go with the http://docs.hebi.us/tools.html#matlab-api[online documentation] that help to get started with the HEBI Robotics APIs for MATLAB. 
+
 
 ## Setup
 
-All examples in this repository require the HEBI Robotics API for MATLAB in order to run. In order to use the bundled API, please run the `include.m` function in the include directory, or any of the `startup.m` scripts in the various example directories.
+All examples in this repository require the HEBI Robotics API for MATLAB in order to run. The API is included in this repository.  You can set it up using any of the `startup.m` scripts in the various example directories.
 
-If you are setting up a new project you can download the latest API as follows
-
-. download the latest API from the http://docs.hebi.us[documentation]
-. unzip the file into a directory of your choice
-. add the resulting _hebi_ folder to the MATLAB https://mathworks.com/help/matlab/ref/path.html[path]
-
-[source,matlab]
-----
-addpath([pwd '/hebi']);
-----
 
 ## Basic Examples
-This folder contains examples to get familiar with the core APIs. The accompanying html files show the expected output when being run on a correct setup.
 
-:basic: link:basic
-:basic-cdn: link:https://cdn.rawgit.com/HebiRobotics/hebi-matlab-examples/369965c4/basic
+This folder contains examples that help you get started with the HEBI 
+Robotics APIs for MATLAB.  There are separate examples for each of our 
+different products.
 
-[width="100%",options="header",cols="1a,3a"]
-|====================
-| File | Topics
+* X-Series Actuator
+* I/O Board
+* Mobile I/O
 
-|{basic-cdn}/ex1_lookup.html[ex1_lookup] ({basic}/ex1_lookup.m[script]) |
-* starting point of the API
-* discovering devices
-* establishing communications
+The examples provided in each product work progressively through the following concepts:
 
-|{basic-cdn}/ex2_feedback.html[ex2_feedback] ({basic}/ex2_feedback.m[script]) |
-* accessing basic feedback
+* Lookup / Groups
+* Feedback
+* Commands
+* Gains
+* Trajectories
+* Kinematics
+* Example - Robot Arm
 
-|{basic-cdn}/ex3_command.html[ex3_command] ({basic}/ex3_command.m[script]) |
-* sending basic commands
-* open-loop / closed-loop control
-* combined position/velocity control
+These API features and concepts are documented in more detail at:
 
-|{basic-cdn}/ex4_kinematics.html[ex4_kinematics] ({basic}/ex4_kinematics.m[script]) |
-* creating kinematic structures
-* forward kinematics
-* Jacobians
+* http://docs.hebi.us/tools.html#matlab-api
+* http://docs.hebi.us/core_concepts.html
 
-|{basic-cdn}/ex5_inverse_kinematics.html[ex5_inverse_kinematics] ({basic}/ex5_inverse_kinematics.m[script]) |
-* inverse kinematics
-
-|{basic-cdn}/ex6_trajectories.html[ex6_trajectories] ({basic}/ex6_trajectories.m[script]) |
-* trajectory generation
-* moving smoothly between points
-
-|====================
 
 ## Advanced Examples
 

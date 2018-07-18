@@ -1,4 +1,4 @@
-%% Setup
+ %% Setup
 % Robot specific setup. Edit as needed.
 [ group, kin, effortOffset, gravityVec ] = setupArm('4dof');
 

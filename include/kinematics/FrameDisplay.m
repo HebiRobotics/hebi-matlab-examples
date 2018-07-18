@@ -3,8 +3,14 @@ classdef FrameDisplay < handle
     %kinematic chain. The axes are color-coded RGB for XYZ.
     %
     %  FrameDisplay = FrameDisplay() opens a new figure for drawing
-    %  coordinate frames for transforms. The fiture gets closed
+    %  coordinate frames for transforms. The figure gets closed
     %  automatically when this variable is deleted.
+    %
+    %  Once set up, you display a coordinate frame with .setFrames(frames),
+    %  where frames is a 4x4xN set of N homogeneous transforms.  See the
+    %  example below.
+    %
+    %  Optional Initialization Arguments:
     %
     %  'axisLength' optionally specifies the length of each axis in [m]
     %
@@ -12,6 +18,8 @@ classdef FrameDisplay < handle
     %  initializes the figure handles in the constructor. Otherwise the
     %  figure handles will be initialized at the first call to setFrames.
     %
+    %
+    %  Frame Axis Color Coding:
     %  x - red
     %  y - green
     %  z - blue
@@ -43,24 +51,33 @@ classdef FrameDisplay < handle
     
     properties (Access = private)
         figHandle
+        axHandle
         x
         y
         z
         numFrames
-        axisLength = 0.1;
+        axisLength = 0.05;  % m 
+        xyzLimits = nan(3,2); % m (stacked [xLim; yLim; zLim])
     end
     
     methods(Access = public)
         
-        function this = FrameDisplay(axisLength, numFrames)
+
+        function this = FrameDisplay(axisLength, numFrames, xyzLimits)
+
             % Constructor gets called once. It creates a new figure and
             % formats it nicely.
             if nargin > 0
                 this.axisLength = axisLength; 
             end
-            if nargin > 1
+
+            if nargin > 1 && ~isempty(numFrames)
                 this.init(numFrames);
             end
+            if nargin > 2
+                this.xyzLimits = xyzLimits;
+            end
+
         end
         
         function init(this, numFrames)
@@ -79,24 +96,27 @@ classdef FrameDisplay < handle
                 this.z(i) = line( [0 0], [0 0], range,'Color', 'b', 'LineWidth', 3);
             end
             
-            % Draw small coordinate frame in the center
+            % Draw black coordinate frame at the origin
             line( range,[0 0], [0 0],'Color', 'k', 'LineWidth', 2);
             line( [0 0],range, [0 0],'Color', 'k', 'LineWidth', 2);
             line( [0 0],[0 0], range,'Color', 'k', 'LineWidth', 2);
-            grid minor;
-            box on;
-            axis square;
-            axis auto;
-            set(gca, 'PlotBoxAspectRatio', [1 1 1]);
+            grid on;
+            axis equal;
+            
+            this.axHandle = gca;
+            
+            set(this.axHandle, 'PlotBoxAspectRatio', [1 1 1]);
+
             hold off;
             view(3); 
             
             % labels
             legend x y z
             title('Frames');
-            xlabel('x');
-            ylabel('y');
-            zlabel('z');
+            xlabel('x (m)');
+            ylabel('y (m)');
+            zlabel('z (m)');
+
         end
         
         function setFrames(this, frames)
@@ -116,6 +136,10 @@ classdef FrameDisplay < handle
                     error(['expected input: 4x4x' num2str(this.numFrames)]);
                 end
             end
+            
+            xlim(this.axHandle,'auto');
+            ylim(this.axHandle,'auto');
+            zlim(this.axHandle,'auto');
             
             axes_base = [eye(3) * this.axisLength; ones(1,3)];
             orig_base = [zeros(3); ones(1,3)];
@@ -141,6 +165,18 @@ classdef FrameDisplay < handle
                     'ZData', [orig_T(3,3) axes_T(3,3)] );
             end
             
+            % Update axis limits if they grew larger, never shrink them
+            xyzLimitsNew(1,:) = get(this.axHandle,'XLim');
+            xyzLimitsNew(2,:) = get(this.axHandle,'YLim');
+            xyzLimitsNew(3,:) = get(this.axHandle,'ZLim');
+            
+            this.xyzLimits(:,1) = min( this.xyzLimits(:,1), xyzLimitsNew(:,1) );
+            this.xyzLimits(:,2) = max( this.xyzLimits(:,2), xyzLimitsNew(:,2) );  
+            
+            xlim(this.axHandle,this.xyzLimits(1,:));
+            ylim(this.axHandle,this.xyzLimits(2,:));
+            zlim(this.axHandle,this.xyzLimits(3,:));
+
         end
         
     end
