@@ -21,7 +21,7 @@ function rosieDemoRunner()
             disp('Did not recognize mobile base type');
             return;
     end
-                   
+
     % Start the demo
     while true
         try

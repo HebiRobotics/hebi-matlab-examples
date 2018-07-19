@@ -1,4 +1,4 @@
-%% Setup
+ %% Setup
 % Robot specific setup. Edit as needed.
 [ group, kin, effortOffset, gravityVec ] = setupArm('4dof');
 
@@ -93,7 +93,9 @@ end
 
 % Stop background logging and visualize
 if enableLogging
-   hebilog = group.stopLogFull();
-   plotLogCommands(hebilog, group);
+    hebilog = group.stopLogFull();
+    HebiUtils.plotLogs(hebilog, 'position', 'figNum', 101);
+    HebiUtils.plotLogs(hebilog, 'velocity', 'figNum', 102);
+    HebiUtils.plotLogs(hebilog, 'effort', 'figNum', 103);
 end
 

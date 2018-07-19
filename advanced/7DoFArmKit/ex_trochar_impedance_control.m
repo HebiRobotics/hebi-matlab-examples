@@ -170,9 +170,11 @@ end
 
 % Stop background logging and visualize
 if enableLogging
-   disp('Quitting. Loading and plotting log data...');
-   hebilog = group.stopLogFull();
-   plotLogCommands(hebilog, group);
+    disp('Quitting. Loading and plotting log data...');
+    hebilog = group.stopLogFull();
+    HebiUtils.plotLogs(hebilog, 'position', 'figNum', 101);
+    HebiUtils.plotLogs(hebilog, 'velocity', 'figNum', 102);
+    HebiUtils.plotLogs(hebilog, 'effort', 'figNum', 103);
 else
     disp('Quitting. No Logging...');
 end

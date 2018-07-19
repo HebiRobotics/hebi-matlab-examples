@@ -24,9 +24,15 @@ enableEffortComp = true;
 % Setup Group for the entire Robot
 robotFamily = 'Rosie';
 robotModuleNames = {
+<<<<<<< HEAD
     '_LeftWheel', '_RightWheel', ...
     'Base', 'Shoulder', 'Elbow', 'Wrist1', 'Wrist2', 'Wrist3', ... % arm modules
     'Spool' };
+=======
+    '_leftWheel', '_rightWheel', ...
+    'base', 'shoulder', 'elbow', 'wrist1', 'wrist2', 'wrist3', ... % arm modules
+    'spool' };
+>>>>>>> master
 
 wheelDOFs = 1:2;
 armDOFs = 3:8;
@@ -38,7 +44,11 @@ robotGroup.setFeedbackFrequency(100);
 
 % Setup Group for phone controller
 phoneFamily = 'HEBI';
+<<<<<<< HEAD
 phoneName = 'The Future is Here!';
+=======
+phoneName = 'The Future Is Here!';
+>>>>>>> master
 
 while true        
     try
@@ -47,7 +57,11 @@ while true
                         phoneFamily, phoneName );        
         disp('Phone Found.  Starting up');
         break;
+<<<<<<< HEAD
     catch me
+=======
+    catch
+>>>>>>> master
         pause(1.0);
     end
 
@@ -55,9 +69,15 @@ end
 
 
 %%  
+<<<<<<< HEAD
 %%%%%%%%%%%%%%%%%%%%%%%%%
 % Diff Drive Base Setup %
 %%%%%%%%%%%%%%%%%%%%%%%%%
+=======
+%%%%%%%%%%%%%%%%%%%
+% Omni Base Setup %
+%%%%%%%%%%%%%%%%%%%
+>>>>>>> master
 
 [chassisParams, chassisTrajGen] = setupDiffDriveBase();
 
@@ -94,6 +114,7 @@ numArmDOFs = armKin.getNumDoF();
 
 gripperForceScale = abs(armParams.gripperCloseEffort); 
 
+<<<<<<< HEAD
 % Make a group to set just the gains for the arm
 armGroup = HebiLookup.newGroupFromNames( robotFamily, ...
                                          robotModuleNames(armDOFs) );
@@ -101,6 +122,8 @@ armGroup.send('gains',armParams.armGains);
 pause(0.1);
 clear armGroup;
 
+=======
+>>>>>>> master
 %% Startup
 while true
     fbk = robotGroup.getNextFeedbackFull();
