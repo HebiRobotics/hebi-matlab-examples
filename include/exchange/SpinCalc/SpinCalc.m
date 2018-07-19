@@ -79,7 +79,7 @@ TYPES=cell(1,4);
 TYPES{1,1}='Q'; TYPES{1,2}='EV'; TYPES{1,3}='DCM'; TYPES{1,4}='EA';
 INPUT_TYPE=TYPES{1,i_type};
 OUTPUT_TYPE=TYPES{1,o_type};
-clear TYPES
+% clear TYPES
 %Confirm input as compared to program interpretation
 if i_type~=4 && o_type~=4,  %if input/output are NOT Euler angles
     CC=[INPUT_TYPE,'to',OUTPUT_TYPE];
@@ -149,7 +149,7 @@ else
         error('Error: Invalid entry for CONVERSION input string');
     end
 end
-clear i_type o_type CC
+% clear i_type o_type CC
 
 %From the input, determine the quaternions that uniquely describe the
 %rotation prescribed by that input.  The output will be calculated in the
@@ -192,7 +192,7 @@ switch INPUT_TYPE
                 fprintf('Warning: Input DCM(s) matrix not orthogonal to precision tolerance.')
             end
         end       
-        clear perturbed DCM_flag   
+        % clear perturbed DCM_flag   
         Q=NaN(4,N);
         for ii=1:N,
             denom=NaN(4,1);
@@ -225,7 +225,7 @@ switch INPUT_TYPE
             end
         end
         Q=Q';
-        clear denom
+        % clear denom
     case 'EV'  %Euler Vector Input Type
         if size(INPUT,2)~=4 || size(INPUT,3)~=1   %check dimensions
             error('Error: Input euler vector and rotation data matrix is not Nx4')            
@@ -239,7 +239,7 @@ switch INPUT_TYPE
             error('Input euler rotation angle(s) not between 0 and 360 degrees')
         end
         Q=[INPUT(:,1).*sin(MU/2),INPUT(:,2).*sin(MU/2),INPUT(:,3).*sin(MU/2),cos(MU/2)];   %quaternion
-        clear m1 m2 m3 MU
+        % clear m1 m2 m3 MU
     case 'EA'        
         psi=INPUT(:,1)*pi/180;  theta=INPUT(:,2)*pi/180;  phi=INPUT(:,3)*pi/180;
         N=size(INPUT,1);    %number of orientations
@@ -276,7 +276,7 @@ switch INPUT_TYPE
         else
             error('Error: Invalid input Euler angle order type (conversion string)');            
         end
-        clear c1 s1 c2 s2 c3 s3 c13 s13 c1_3 s1_3 c3_1 s3_1 psi theta phi
+        % clear c1 s1 c2 s2 c3 s3 c13 s13 c1_3 s1_3 c3_1 s3_1 psi theta phi
     case 'Q'
         if size(INPUT,2)~=4 || size(INPUT,3)~=1
             error('Error: Input quaternion matrix is not Nx4');            
@@ -289,7 +289,7 @@ switch INPUT_TYPE
         end
         Q=INPUT;
 end
-clear INPUT INPUT_TYPE EULER_order_in
+% clear INPUT INPUT_TYPE EULER_order_in
 
 %Normalize quaternions in case of deviation from unity.  User has already
 %been warned of deviation.
