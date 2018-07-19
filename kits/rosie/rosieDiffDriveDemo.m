@@ -343,7 +343,7 @@ while true
         [chassisCmd.vel, chassisCmd.accel, chassisCmd.jerk] = ...
             chassisTraj.getState( t );
       
-        % Chassis (convert linear to joint velocities)
+        % Chassis (convert x-y-theta velocities to wheel velocities)
         % Note that the maximum desired linear velocity is already limited, 
         % so we don't need to separately check whether the joint velocities 
         % along the trajectory are within achievable limits.

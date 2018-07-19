@@ -273,7 +273,7 @@ while true
         
         xVel = maxLinSpeed * fbkPhoneIO.a8; % Right Pad Up/Down
         yVel = -maxLinSpeed * fbkPhoneIO.a7; % Right Pad Left/Right 
-        rotVel = maxRotSpeed * fbkPhoneIO.a1; % Left Pad Up/Down
+        rotVel = maxRotSpeed * fbkPhoneIO.a1; % Left Pad Left/Right 
 
 
         % Pose Information for arm Control
