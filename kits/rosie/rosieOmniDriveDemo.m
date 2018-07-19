@@ -11,11 +11,8 @@
 
 % Copyright 2017-2018 HEBI Robotics
 
-<<<<<<< HEAD
+
 function rosieOmniDriveDemo()
-=======
-function drClawOmniDriveDemo()
->>>>>>> master
 %% Setup
 
 % Optional step to limit the lookup to a set of interfaces or modules
@@ -26,7 +23,6 @@ enableLogging = false;
 enableEffortComp = true;
 
 % Setup Group for the entire Robot
-<<<<<<< HEAD
 robotFamily = 'Rosie';
 robotModuleNames = {
     '_Wheel1', ...   % right front omni wheel
@@ -34,15 +30,7 @@ robotModuleNames = {
     '_Wheel3', ...   % back middle omni wheel
     'Base', 'Shoulder', 'Elbow', 'Wrist1', 'Wrist2', 'Wrist3', ... % arm modules
     'Spool' };
-=======
-robotFamily = 'Dr. Claw';
-robotModuleNames = {
-    '_wheel1', ...   % right front omni wheel
-    '_wheel2', ...   % left front omni wheel
-    '_wheel3', ...   % back middle omni wheel
-    'base', 'shoulder', 'elbow', 'wrist1', 'wrist2', 'wrist3', ... % arm modules
-    'spool' };
->>>>>>> master
+
 
 wheelDOFs = 1:3;
 armDOFs = 4:9;
@@ -54,11 +42,8 @@ robotGroup.setFeedbackFrequency(100);
 
 % Setup Group for phone controller
 phoneFamily = 'HEBI';
-<<<<<<< HEAD
 phoneName = 'The Future is Here!';
-=======
-phoneName = 'The Future Is Here!';
->>>>>>> master
+
 
 while true        
     try
@@ -75,15 +60,10 @@ end
 
 
 %%  
-<<<<<<< HEAD
 %%%%%%%%%%%%%%%%%%%
 % Omni Base Setup %
 %%%%%%%%%%%%%%%%%%%
-=======
-%%%%%%%%%%%%%%%%%%%%%%%
-% Omni Base Kinematics %
-%%%%%%%%%%%%%%%%%%%%%%%%
->>>>>>> master
+
 
 [chassisParams, chassisTrajGen] = setupOmniBase();
 
@@ -102,25 +82,17 @@ chassisToWheelVelocities = chassisParams.wheelVelocityMatrix;
 chassisEffortsToWheelEfforts = chassisParams.wheelEffortMatrix;
 
 %%
-<<<<<<< HEAD
 %%%%%%%%%%%%%
 % Arm Setup %
 %%%%%%%%%%%%%
-=======
-%%%%%%%%%%%%%%%%%%
-% Arm Kinematics %
-%%%%%%%%%%%%%%%%%%
->>>>>>> master
+
 
 [ armParams, armKin, armTrajGen ] = setupArmWithGripper();
 ikSeedPos = armParams.ikSeedPos;
 armEffortOffset = armParams.effortOffset;
 
-<<<<<<< HEAD
 gripperForceScale = abs(armParams.gripperCloseEffort); 
 
-=======
->>>>>>> master
 gravityVec = [0 0 -1];
 numArmDOFs = armKin.getNumDoF();
 
@@ -206,10 +178,8 @@ while true
     xyz_arKit_init = [ fbkPhone.position ...
                        fbkPhone.velocity ...
                        fbkPhone.effort ];
-<<<<<<< HEAD
+
     xyzPhoneNew = xyz_arKit_init;
-=======
->>>>>>> master
 
     endVelocities = zeros(1, numArmDOFs);
     endAccels = zeros(1, numArmDOFs);
@@ -295,7 +265,6 @@ while true
             xyz_arKit_init = xyzPhoneNew;
         end
             
-<<<<<<< HEAD
 %         % Joystick Input for Omnibase Control
 %         % I THINK THERE'S A BUG IN CONVENTION FOR X-Y, NEED TO CHECK.
 %         xVel = maxLinSpeed * fbkPhoneIO.a7;
@@ -305,13 +274,7 @@ while true
         xVel = maxLinSpeed * fbkPhoneIO.a8; % Right Pad Up/Down
         yVel = -maxLinSpeed * fbkPhoneIO.a7; % Right Pad Left/Right 
         rotVel = maxRotSpeed * fbkPhoneIO.a1; % Left Pad Up/Down
-=======
-        % Joystick Input for Omnibase Control
-        % I THINK THERE'S A BUG IN CONVENTION FOR X-Y, NEED TO CHECK.
-        xVel = maxLinSpeed * fbkPhoneIO.a7;
-        yVel = maxLinSpeed * fbkPhoneIO.a8;
-        rotVel = maxRotSpeed * fbkPhoneIO.a1;
->>>>>>> master
+
 
         % Pose Information for arm Control
         % CURRENTLY HACKED ON POS/VEL/EFFORT FEEDBACK UNTIL API UPDATE.
@@ -371,11 +334,8 @@ while true
         %%%%%%%%%%%%%%%%%%%
         % Gripper Control %
         %%%%%%%%%%%%%%%%%%%
-<<<<<<< HEAD
         cmd.effort(gripperDOF) = gripperForceScale * fbkPhoneIO.a6;
-=======
-        cmd.effort(gripperDOF) = 5 * fbkPhoneIO.a6;
->>>>>>> master
+
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % Evaluate Trajectory State %

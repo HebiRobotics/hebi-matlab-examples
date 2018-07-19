@@ -31,7 +31,6 @@ wheelBaseFrames(1:3,1:3,2) = R_z(-pi/2) * R_y(pi/2);
 params.wheelBaseFrames = wheelBaseFrames;
 
 % Maps XYZ chassis velocities to wheel velocities
-<<<<<<< HEAD
 %
 % FRAME CONVENTION (FROM THE "DRIVER'S SEAT"):
 % +X-AXIS = FORWARD
@@ -39,10 +38,7 @@ params.wheelBaseFrames = wheelBaseFrames;
 % +Z-AXIS = UP
 wheelTransform = [ 1 0 wheelBase;    % Left Wheel (_LeftWheel)
                   -1 0 wheelBase ];  % Right Wheel (_RightWheel)
-=======
-wheelTransform = [ 1 0 wheelBase;
-                  -1 0 wheelBase ];
->>>>>>> master
+
 
 params.wheelVelocityMatrix = wheelTransform ./ wheelRadius;
 params.wheelEffortMatrix = wheelTransform * wheelRadius;      
