@@ -27,6 +27,9 @@ params.wheelNames = { '_LeftWheel', ...
                       '_RightWheel' };
 params.numWheels = 2;
 
+% Load the gains for the wheels
+params.wheelGains = HebiUtils.loadGains('gains/diff-drive-wheel-gains');
+
 % Transform from the origin of the chassis to the Left Wheel
 wheelBaseFrames(:,:,1) = eye(4); 
 wheelBaseFrames(1:3,4,1) = [ 0; 
@@ -44,8 +47,8 @@ wheelBaseFrames(1:3,1:3,2) = R_z(-pi/2) * R_y(pi/2);
 params.wheelBaseFrames = wheelBaseFrames;
 
 % Setup a matrix to map XYZ chassis velocities to wheel velocities
-wheelMatrix = [ 1 0 wheelBase;    % Left Wheel (_LeftWheel)
-               -1 0 wheelBase ];  % Right Wheel (_RightWheel)
+wheelMatrix = [ 1 0 wheelBase/2;    % Left Wheel (_LeftWheel)
+               -1 0 wheelBase/2 ];  % Right Wheel (_RightWheel)
 
 params.wheelVelocityMatrix = wheelMatrix ./ wheelRadius;
 params.wheelEffortMatrix = wheelMatrix * wheelRadius;      
