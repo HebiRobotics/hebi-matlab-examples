@@ -10,7 +10,7 @@ function rosieDemo( mobileBaseType )
 
     % Optional step to limit the lookup to a set of interfaces or modules
     % HebiLookup.setLookupAddresses('10.10.10.255');
-    enableLogging = false;
+    enableLogging = true;
 
     %%
     %%%%%%%%%%%%%%%%%%%%%
@@ -126,6 +126,12 @@ function rosieDemo( mobileBaseType )
     % Begin the demo loop %
     %%%%%%%%%%%%%%%%%%%%%%%
     
+    % Start background logging
+    if enableLogging
+        robotGroup.startLog('dir','logs');
+        phoneGroup.startLog('dir','logs');
+    end
+    
     % This outer loop is what we fall back to anytime we 're-home' the arm
     while true
         fbk = robotGroup.getNextFeedbackFull();
@@ -136,12 +142,6 @@ function rosieDemo( mobileBaseType )
         cmd.effort = nan(size(fbk.position));
 
         xyzScale = [1; 1; 2];
-
-        % Start background logging
-        if enableLogging
-            robotGroup.startLog();
-            phoneGroup.startLog();
-        end
 
         % Move to current coordinates
         xyzTarget_init = [0.3; 0.0; 0.3];
