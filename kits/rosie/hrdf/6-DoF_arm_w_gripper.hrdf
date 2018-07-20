@@ -14,11 +14,8 @@
   <actuator type="X5-1"/>
   <bracket type="X5LightRight"/>
   <actuator type="X5-1"/>
-    
-  <!-- Add an extra body for the gripper (mass only until API fix) --> 
-  <rigid-body mass="0.300"/>
-  
+
   <!-- Add an extra body for the gripper -->
-  <!-- <rigid-body mass="0.300" com_trans="0.0 0.0 0.025" output_trans="0.0 0.0 0.075"/> -->
+  <rigid-body mass="0.300" com_trans="0.0 0.0 0.025" output_trans="0.0 0.0 0.075"/>
     
 </robot>
