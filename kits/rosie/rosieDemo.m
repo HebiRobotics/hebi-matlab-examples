@@ -79,19 +79,22 @@ function rosieDemo( mobileBaseType )
                                                robotModuleNames);
     robotGroup.setFeedbackFrequency(100);
     
-    % Set the gains on just the wheels
+    
+    %%
+    %%%%%%%%%%%%%%%%%
+    % Set the Gains %
+    %%%%%%%%%%%%%%%%%
+   
     wheelGroup = HebiLookup.newGroupFromNames( robotFamily, ...
                                                chassisParams.wheelModuleNames );
     wheelGroup.send( 'gains', chassisParams.wheelGains );
     clear wheelGroup;
-    
-    % Set the gains on just the arm
+
     armGroup = HebiLookup.newGroupFromNames( robotFamily, ...
                                              armParams.armModuleNames );
     armGroup.send( 'gains', armParams.armGains );
     clear armGroup;
-    
-    % Set the gains on just the gripper
+
     gripperGroup = HebiLookup.newGroupFromNames( robotFamily, ...
                                              armParams.gripperModuleNames );
     gripperGroup.send( 'gains', armParams.gripperGains );
@@ -141,6 +144,7 @@ function rosieDemo( mobileBaseType )
         cmd.velocity = nan(size(fbk.position));
         cmd.effort = nan(size(fbk.position));
 
+        % Exaggerate Z-Axis by 2x, X-Y are 1-to-1. 
         xyzScale = [1; 1; 2];
 
         % Move to current coordinates
