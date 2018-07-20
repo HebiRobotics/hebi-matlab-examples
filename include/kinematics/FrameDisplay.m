@@ -11,13 +11,19 @@ classdef FrameDisplay < handle
     %  example below.
     %
     %  Optional Initialization Arguments:
+    %  FrameDisplay = FrameDisplay( AXISLENGTH, NUMFRAMES, XYZLIMITS )
     %
-    %  'axisLength' optionally specifies the length of each axis in [m]
+    %  AXISLENGTH optionally specifies the length of each axis in [m], if
+    %  using later arguments without setting AXISLENGTH, use empty [].
+    %  Default length is 0.05 [m].
     %
-    %  'numFrames' optionally specifies the number of coordinate frames and
+    %  NUMFRAMES optionally specifies the number of coordinate frames and
     %  initializes the figure handles in the constructor. Otherwise the
     %  figure handles will be initialized at the first call to setFrames.
+    %  If using later arguments without setting NUMFRAMES, use empty [].
     %
+    %  XYZLIMITS optionally specifies and fixes the limits of the plot.  If 
+    %  it is not set the plot will scale automatically with each redraw.
     %
     %  Frame Axis Color Coding:
     %  x - red
@@ -58,6 +64,7 @@ classdef FrameDisplay < handle
         numFrames
         axisLength = 0.05;  % m 
         xyzLimits = nan(3,2); % m (stacked [xLim; yLim; zLim])
+        fixedLimits = false;
     end
     
     methods(Access = public)
@@ -67,15 +74,16 @@ classdef FrameDisplay < handle
 
             % Constructor gets called once. It creates a new figure and
             % formats it nicely.
-            if nargin > 0
+            if nargin > 0 && ~isempty(axisLength)
                 this.axisLength = axisLength; 
             end
 
             if nargin > 1 && ~isempty(numFrames)
                 this.init(numFrames);
             end
-            if nargin > 2
+            if nargin > 2 && ~isempty(xyzLimits)
                 this.xyzLimits = xyzLimits;
+                this.fixedLimits = true;
             end
 
         end
@@ -165,18 +173,21 @@ classdef FrameDisplay < handle
                     'ZData', [orig_T(3,3) axes_T(3,3)] );
             end
             
-            % Update axis limits if they grew larger, never shrink them
-            xyzLimitsNew(1,:) = get(this.axHandle,'XLim');
-            xyzLimitsNew(2,:) = get(this.axHandle,'YLim');
-            xyzLimitsNew(3,:) = get(this.axHandle,'ZLim');
-            
-            this.xyzLimits(:,1) = min( this.xyzLimits(:,1), xyzLimitsNew(:,1) );
-            this.xyzLimits(:,2) = max( this.xyzLimits(:,2), xyzLimitsNew(:,2) );  
+            % If we didn't set the axis limits, let them auto-update if
+            % they grow larger, never shrink them
+            if ~this.fixedLimits
+                xyzLimitsNew(1,:) = get(this.axHandle,'XLim');
+                xyzLimitsNew(2,:) = get(this.axHandle,'YLim');
+                xyzLimitsNew(3,:) = get(this.axHandle,'ZLim');
+
+                this.xyzLimits(:,1) = min( this.xyzLimits(:,1), xyzLimitsNew(:,1) );
+                this.xyzLimits(:,2) = max( this.xyzLimits(:,2), xyzLimitsNew(:,2) );          
+            end
             
             xlim(this.axHandle,this.xyzLimits(1,:));
             ylim(this.axHandle,this.xyzLimits(2,:));
             zlim(this.axHandle,this.xyzLimits(3,:));
-
+            
         end
         
     end
