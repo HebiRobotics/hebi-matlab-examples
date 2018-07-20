@@ -25,7 +25,10 @@ disp('  Move it around to make the feedback interesting...');
 group.startLog( 'dir', 'logs' ); 
 
 % Setup helper function to visualize the orientation
-mobilePose = FrameDisplay();
+xyzLimits = [ -0.05 0.05;
+              -0.05 0.05;
+              -0.05 0.05 ];
+mobilePose = FrameDisplay( [], [], xyzLimits );
 frames = eye(4);
 
 figure(1);
