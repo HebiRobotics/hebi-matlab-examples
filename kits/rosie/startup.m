@@ -1,15 +1,8 @@
 function [] = startup()
-% startup adds paths required to run demos
+% startup sets up libraries and should be run once on startup.
 
 localDir = fileparts(mfilename('fullpath'));
-addpath(fullfile(localDir));
-addpath(fullfile(localDir, 'hebi'));
+includeScript = fullfile(localDir, '..', '..', 'include', 'include.m');
+run(includeScript);
 
-addpath(fullfile(localDir, 'tools'));
-addpath(fullfile(localDir, 'tools', 'input'));
-addpath(fullfile(localDir, 'tools', 'kinematics'));
-
-hebi_load();
-HebiJoystick.loadLibs();
-HebiKeyboard.loadLibs();
 end
