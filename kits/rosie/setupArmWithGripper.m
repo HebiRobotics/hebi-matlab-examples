@@ -16,7 +16,6 @@ function [ params, armKin, trajGen ] = setupArmWithGripper( )
     shoulderJointComp = 0; % Nm  <--- Change this if you add a gas spring
     params.effortOffset = [0 shoulderJointComp 0 0 0 0];
 
-    
     % Torques for the gripper spool to open-close the gripper
     params.gripperOpenEffort = 1;
     params.gripperCloseEffort = -5;
