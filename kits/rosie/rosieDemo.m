@@ -91,6 +91,12 @@ function rosieDemo( mobileBaseType )
     armGroup.send( 'gains', armParams.armGains );
     clear armGroup;
     
+    % Set the gains on just the gripper
+    gripperGroup = HebiLookup.newGroupFromNames( robotFamily, ...
+                                             armParams.gripperModuleNames );
+    gripperGroup.send( 'gains', armParams.gripperGains );
+    clear gripperGroup;
+    
 
     %%
     %%%%%%%%%%%%%%%%%%%%%%%%%%
