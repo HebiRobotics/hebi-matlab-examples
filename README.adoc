@@ -34,6 +34,34 @@ These API features and concepts are documented in more detail at:
 * http://docs.hebi.us/core_concepts.html
 
 
+## Kits
+
+This folder contains example code for various preconfigured kits. Additional documentation is available in the corresponding kit directories.
+
+:kits: link:kits
+
+[width="100%",options="header",cols="1a,3a"]
+|====================
+| Kit | Comment
+
+| {kits}/arms[Arms] |
+* A variety of arm configurations, from 4-DoF to 6-DoF.
+
+| {kits}/hexapod[Hexapod] |
+* A 6-legged, 18-DoF, legged mobile robot
+
+| {kits}/igor[Igor] |
+* A 2-wheel, 2-arm, dynamic balancing mobile robot
+
+| {kits}/edward[Edward] |
+* An 2-arm omni-drive mobile robot
+
+| {kits}/rosie[Rosie] |
+* A 6-DoF mobile manipulator that includes a gripper
+
+|====================
+
+
 ## Advanced Examples
 
 This folder contains examples that show less commonly used concepts.
@@ -52,32 +80,6 @@ This folder contains examples that show less commonly used concepts.
 
 |====================
 
-## Kits
-
-This folder contains example code for various preconfigured kits. Additional documentation is available in the corresponding kit directories.
-
-:kits: link:kits
-
-[width="100%",options="header",cols="1a,3a"]
-|====================
-| Kit | Comment
-
-| {kits}/arms[Arms] |
-* A variety of arm configurations, from 4-DoF to 6-DoF.
-
-| kits}/hexapod[Hexapod] |
-* A 6-legged, 18-DoF, legged mobile robot
-
-| {kits}/igor[Igor] |
-* A 2-wheel, 2-arm, dynamic balancing mobile robot
-
-| {kits}/edward[Edward] |
-* An 2-arm omni-drive mobile robot
-
-| {kits}/rosie[Rosie] |
-* A 6-DoF mobile manipulator that includes a gripper
-
-|====================
 
 ## Demos
 
