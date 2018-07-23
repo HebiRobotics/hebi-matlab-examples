@@ -15,9 +15,9 @@ The demo will start up looking for the actuators in the robot, followed by the m
 
 ## Coordinate frame convention
 
-X = forward (from driver's perspective)
-Y = left (from driver's perspective)
-Theta = counter-clockwise rotation
+* `X` = forward (from driver's perspective)
+* `Y` = left (from driver's perspective)
+* `Theta` = counter-clockwise rotation
 
 ## Input Controls
 
