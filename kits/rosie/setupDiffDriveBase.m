@@ -26,8 +26,8 @@ params.chassisMass = 10;  % kg
 % For rotational inertia, assume the robot is a uniform disk
 params.chassisInertiaZZ = (1/2) * params.chassisMass * (wheelBase/2)^2;
 
-params.wheelNames = { '_LeftWheel', ...
-                      '_RightWheel' };
+params.wheelModuleNames = { '_LeftWheel', ...
+                            '_RightWheel' };
 params.numWheels = 2;
 
 % Load the gains for the wheels
@@ -58,5 +58,6 @@ params.wheelEffortMatrix = wheelMatrix * wheelRadius;
 
 % Trajectory generator
 trajGen = HebiTrajectoryGenerator();
+params.rampTime = 0.33;
 
 end
