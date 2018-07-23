@@ -19,6 +19,7 @@ Y = left (from driver's perspective)
 Theta = counter-clockwise rotation
 
 The controls are as follows:
+
 | Input*      | Command   | Note  |
 | ----------------- | ----------------- | ----------- |
 | Right Joystick (`A8` and `A7`)  | Base X-Y Velocity |  |
