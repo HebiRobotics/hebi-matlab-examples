@@ -27,7 +27,7 @@ Theta = counter-clockwise rotation
 | Left Joystick (`A1`) | Base Theta Velocity |  |
 | Slider (`A6`) | Gipper force | Drag down to close. Drag up to open |
 | Phone Pose | Arm end-effector pose |  |
-| Slider (`A3`_ | Scale of end-effector translation  | Should normally be all the way up. Drag this to all the way down, to reset the pose and hold it place. |
+| Slider (`A3` | Scale of end-effector translation  | Should normally be all the way up. Drag this to all the way down, to reset the pose and hold it place. |
 | Button (`B1`) | Reset Pose of the gripper| When you press this, make sure the phone is oriented face down, matching the gripper. |
 
 
