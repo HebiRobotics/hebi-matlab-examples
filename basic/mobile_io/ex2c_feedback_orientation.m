@@ -13,8 +13,8 @@ HebiLookup.initialize();
 
 % Use Scope to change select a module and change the name and family to
 % match the names below.  Following examples will use the same names.
-familyName = 'HEBI';
-moduleNames = 'Virtual IO';
+familyName = 'Dave';
+moduleNames = 'IO_00060';
 group = HebiLookup.newGroupFromNames( familyName, moduleNames );
 
 %% Visualize Device Orientation
@@ -25,7 +25,10 @@ disp('  Move it around to make the feedback interesting...');
 group.startLog( 'dir', 'logs' ); 
 
 % Setup helper function to visualize the orientation
-mobilePose = FrameDisplay();
+xyzLimits = [ -0.05 0.05;
+              -0.05 0.05;
+              -0.05 0.05 ];
+mobilePose = FrameDisplay( [], [], xyzLimits );
 frames = eye(4);
 
 figure(1);
