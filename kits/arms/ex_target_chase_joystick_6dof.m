@@ -105,6 +105,7 @@ HebiUtils.plotLogs(hLog, 'position', 'figNum', 101);
 HebiUtils.plotLogs(hLog, 'velocity', 'figNum', 102);
 HebiUtils.plotLogs(hLog, 'effort', 'figNum', 103);
 
+
 %% Get target coordinates and tip axis (from joystick)
 function [xyz, so3] = getTargetCoordinates(joy)
 
