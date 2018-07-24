@@ -8,8 +8,8 @@ This folder contains everything needed to run the Rosie mobile manipulator kit. 
 * Download this folder
 * Start Matlab (2013b or later)
 * run `startup.m`
-* run `rosieDemo( mobileBaseType )`
-** where `mobileBaseType` is: `diff-drive`, `omni`, or `mecanum`
+* run `rosieDemo( 'mobileBaseType' )`
+  - where `'mobileBaseType'` is: `'diff-drive'`, `'omni'`, or `'mecanum'`
 
 The demo will start up looking for the actuators in the robot, followed by the mobile device for input.  
 
