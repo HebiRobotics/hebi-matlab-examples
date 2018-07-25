@@ -28,7 +28,7 @@ enableEffortComp = true;
 phoneFamily = 'HEBI';
 phoneName = 'Mobile IO - Matt iPad';
 
-while true        
+while true  
     try
         fprintf('Searching for phone Controller...\n');
         phoneGroup = HebiLookup.newGroupFromNames( ...

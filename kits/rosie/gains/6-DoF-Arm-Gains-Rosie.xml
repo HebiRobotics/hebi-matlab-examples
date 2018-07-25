@@ -3,7 +3,7 @@
    <control_strategy>4 4 4 4 4 4</control_strategy>
    <position>
       <kp>50 50 25 5 2 2</kp>
-      <ki>50 76 25 10 5 5</ki>
+      <ki>50 50 25 10 5 5</ki>
       <kd>0 0 0 0 0 0</kd>
       <feed_forward>0 0 0 0 0 0</feed_forward>
       <dead_zone>0 0 0 0 0 0</dead_zone>
