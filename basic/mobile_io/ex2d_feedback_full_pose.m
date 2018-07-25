@@ -17,6 +17,8 @@ familyName = 'HEBI';
 moduleNames = 'Virtual IO';
 group = HebiLookup.newGroupFromNames( familyName, moduleNames );
 
+group.startLog('dir','logs');
+
 %% Visualize Full Pose
 disp('  Visualizing 6-DoF pose estimate from the mobile device.');
 disp('  Move it around to make the feedback interesting...');  
@@ -57,3 +59,5 @@ while toc(timer) < duration
 end
 
 disp('  All done!');
+
+log = group.stopLog('view','mobile');
