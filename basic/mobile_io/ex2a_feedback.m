@@ -1,6 +1,6 @@
 % Get feedback from a module and plot it live.
 %
-% Assumes that you have a group created with at least 1 module in it.
+% This script assumes that you have run 'startup.m' in this folder.
 %
 % HEBI Robotics
 % July 2018
@@ -20,9 +20,6 @@ group = HebiLookup.newGroupFromNames( familyName, moduleNames );
 disp('  Plotting gyro data from the mobile device IMU.');
 disp('  Move it around to make the feedback interesting...');  
 
-% Starts logging in the background
-group.startLog( 'dir', 'logs' );  
-
 figure(1);
 clf;
 
@@ -30,8 +27,8 @@ duration = 10; % [sec]
 timer = tic();
 while toc(timer) < duration
     
-   % read a struct of sensor data
-   fbk = group.getNextFeedback();
+   % read a struct of mobile specific sensor data
+   fbk = group.getNextFeedbackMobile();
    
    % visualize gyroscope data
    bar( [fbk.gyroX fbk.gyroY fbk.gyroZ] );
@@ -47,21 +44,3 @@ while toc(timer) < duration
    drawnow;
 
 end
-
-disp('  All Done!');
-
-% Stops background logging
-log = group.stopLog(); 
-
-%% Plot the logged gyro feedback
-figure(101);
-plot( log.time, log.gyroX );
-hold on;
-plot( log.time, log.gyroY );
-plot( log.time, log.gyroZ );
-hold off;
-title('3-Axis Gyro');
-xlabel('time (sec)');
-ylabel('angular velocity (rad/sec)');
-legend gyroX gyroY gyroZ;
-grid on;

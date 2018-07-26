@@ -1,7 +1,7 @@
-% Get analog feedback from the touch screen of a mobile device, log in the
-% background, visualize live, and plot offline.
+% Get analog and digital feedback from the touch screen of a mobile device, 
+% log in the background, visualize live, and plot offline.
 %
-% Assumes that you have a group created with at least 1 module in it.
+% This script assumes that you have run 'startup.m' in this folder.
 %
 % HEBI Robotics
 % July 2018
@@ -33,11 +33,11 @@ while toc(timer) < duration
     % Read feedback
     fbk = group.getNextFeedbackIO();
     
-    % Digital feedback
+    % Digital feedback (buttons)
     bar( [fbk.b1 fbk.b2 fbk.b3 fbk.b4 fbk.b5 fbk.b6 fbk.b7 fbk.b8], 'r' );
     hold on;
     
-    % Analog feedback
+    % Analog feedback (sliders)
     bar( [fbk.a1 fbk.a2 fbk.a3 fbk.a4 fbk.a5 fbk.a6 fbk.a7 fbk.a8], 'b' );
     hold off;
     
