@@ -1,26 +1,36 @@
 %%
-% Reset encoders!
-cmdIO.e1 = 0; %encoder 1
-cmdIO.e3 = 0; %encoder 2
-ioGroup.send(cmdIO);
-pause(0.5);
 
-cmdIO.e5 = 1; % Digital input 1 (preset encoder 1)
-cmdIO.e6 = 1; % Digital input 2 (preset encoder 2)
+% Reset encoders (old way)!
+cmdIO.(setX) = 0;
+cmdIO.(setY) = 0;
+ioGroup.send(cmdIO);
+pause(0.2);
+
+% % Reset encoders (new way)
+% cmdIO.(resetXY) = 1; 
+% ioGroup.send(cmdIO);
+% pause(0.01);
+% 
+% cmdIO.(resetXY) = 0; 
+% ioGroup.send(cmdIO);
+% pause(0.01);
+
+cmdIO.(scannerSetX) = 1; % DIN 1 (preset encoder 1)
+cmdIO.(scannerSetY) = 1; % DIN 2 (preset encoder 2)
 ioGroup.send(cmdIO);
 pause(0.1);
 
-cmdIO.e5 = 0; % Digital input 1 (preset encoder 1)
-cmdIO.e6 = 0; % Digital input 2 (preset encoder 2)
+cmdIO.(scannerSetX) = 0; % DIN 1 (preset encoder 1)
+cmdIO.(scannerSetY) = 0; % DIN 2 (preset encoder 2)
 ioGroup.send(cmdIO);
 pause(0.1);
 
 %%
-%Clear data
-cmdIO.e7 = 1; % Digital Input 3 (Clear data)
+% Clear data
+cmdIO.(scannerClearData) = 1; % Digital Input 3 (Clear data)
 ioGroup.send(cmdIO);
 pause(0.1);
 
-cmdIO.e7 = 0; % Digital Input 3 (Clear data)
+cmdIO.(scannerClearData) = 0; % Digital Input 3 (Clear data)
 ioGroup.send(cmdIO);
 pause(0.1);

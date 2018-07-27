@@ -12,6 +12,7 @@ HebiLookup.initialize();
 kin = HebiKinematics('scanningArm_4DoF');
 gains = HebiUtils.loadGains('scanningArm_4DoF_gains');
   
+%%
 familyName = 'scanArm';
 moduleNames = {'Base','Choulder','Elbow','Wrist'};
 group = HebiLookup.newGroupFromNames( familyName, moduleNames );
@@ -21,14 +22,22 @@ group.send('gains',gains);
 group.setFeedbackFrequency(200);
 numDoF = group.getNumModules();
 
+fbk = group.getNextFeedback();
+
 %%
 ioBoardName = 'scanIO';
 ioGroup = HebiLookup.newGroupFromNames( familyName, ioBoardName );
 cmdIO = IoCommandStruct();
 
 % Pin mappings for IO Board
-setX = 'e1';
-setY = 'e3';
+setX = 'e1';      % [ticks] to increment
+setY = 'e3';      % [ticks] to increment
+% resetXY = 'e2';    % Non-zero value resets encoder ticks to 0.
+% % resetXY = 'e4';  % Does same thing as 'e2'.
+scannerSetX = 'e5';
+scannerSetY = 'e6';
+scannerClearData = 'e7';
+
 readX = 'c1';
 readY = 'c4';
 
@@ -54,9 +63,12 @@ phoneGroup.setFeedbackFrequency(200);
 phoneFbkIO = phoneGroup.getNextFeedbackIO();
 
 % IO mapping for phone
-startStop = 'b1';
+startStop = 'b8';
+resetScanner = 'b4';
+handPositionMode = 'b1';
 joyX = 'a1';
 joyY = 'a2';
+joyScale = .200;
 
 encoderResX = 10 * 1000; % [tics / mm] * [mm / m]
 encoderResY = 10 * 1000; % [tics / mm] * [mm / m]
@@ -76,12 +88,6 @@ kb = HebiKeyboard();
 stopBetweenWaypoints = true;
 
 %% Record waypoints in gravity compensated mode
-disp('Define origin with ALT.');
-
-waypoints = [];
-keys = read(kb);
-prevKeys = keys;
-
 abortFlag = false;
 
 gravityVec = [ 0 0 -1 ];
@@ -90,29 +96,91 @@ kin.setPayload( 0.25 );  % kg
 
 % Raster Params
 rasterLimitsXY_mm = [75 75];
-rasterWidth = 0.5;
-rasterSpeed_mm = 200;
+rasterWidth_mm = 0.5;
+rasterSpeed_mm = 200; % [m/sec]
 
 rasterLimitsXY = rasterLimitsXY_mm / 1000;% [m]
-rasterWidth = rasterWidth / 1000;% [m]
+rasterWidth = rasterWidth_mm / 1000;% [m]
 rasterSpeed = rasterSpeed_mm / 1000;% [m / sec]
 
 waypointSpacing_mm = 10;
 waypointSpacing = waypointSpacing_mm / 1000; % [m]
 
+fbk = group.getNextFeedback();
+tLast = fbk.time;
+
+cmdPosition = fbk.position';
+cmdVelocity = zeros(size(cmdPosition));
+cmdFK = kin.getFK('EndEffector', cmdPosition);
+cmdXYZ = cmdFK(1:3,4);
+    
 while true
+    
+    fbk = group.getNextFeedback();        
+    dt = fbk.time - tLast;
+    tLast = fbk.time;
     
     newPhoneFbkIO = phoneGroup.getNextFeedbackIO( 'timeout', 0 );
     if ~isempty(newPhoneFbkIO)
         phoneFbkIO = newPhoneFbkIO;
     end
     
+    if ~exist('probeXYZ_init','var') || phoneFbkIO.(resetScanner)
+        
+        % Clear data
+        cmdIO.(scannerClearData) = 1; % Digital Input 3 (Clear data)
+        ioGroup.send(cmdIO);
+        pause(0.06);
+
+        cmdIO.(scannerClearData) = 0; % Digital Input 3 (Clear data)
+        ioGroup.send(cmdIO);
+        pause(0.06);
+        
+        probeFK = kin.getFK('EndEffector', fbk.position);
+        probeXYZ_init = probeFK(1:3,4) - .5*[rasterLimitsXY'; 0];
+    end
+    
     % Do grav-comp while training waypoints
-    fbk = group.getNextFeedback();
     cmd.effort = kin.getGravCompEfforts(fbk.position, gravityVec);
+    
+    if phoneFbkIO.(handPositionMode)
+        cmdFK = kin.getFK('EndEffector', fbk.position);
+        cmdXYZ = cmdFK(1:3,4);
+        cmdPosition = kin.getIK( 'XYZ', cmdXYZ, ...
+                                 'tipAxis', [0 0 -1], ...
+                                 'initial', fbk.position );
+        
+        cmd.position = cmdPosition;
+        cmd.velocity = nan(1,numDoF);
+    else
+        xyzVel = joyScale * [ sign(phoneFbkIO.(joyX)) * (phoneFbkIO.(joyX))^2;
+                              sign(phoneFbkIO.(joyY)) * (phoneFbkIO.(joyY))^2;
+                              0 ];
+        cmdXYZ = cmdXYZ + xyzVel*dt;
+        
+        J = kin.getJacobianEndEffector(fbk.position);
+        J = J(1:3,:);
+        
+        cmdVelocity = J \ xyzVel;           
+        cmdPosition = kin.getIK( 'XYZ', cmdXYZ, ...
+                                 'tipAxis', [0 0 -1], ...
+                                 'initial', fbk.position );
+        
+        cmd.velocity = cmdVelocity';
+        cmd.position = cmdPosition;
+    end
     group.send(cmd);
     
-    % Define origin when we press a button on the phone
+    
+    % Get probe position from FK and update the scanner
+    probeFK = kin.getFK('EndEffector', fbk.position);
+    probeXYZ = probeFK(1:3,4) - probeXYZ_init;
+    cmdIO.(setX) = round(encoderResX * probeXYZ(1));
+    cmdIO.(setY) = round(encoderResY * probeXYZ(2));
+    ioGroup.send(cmdIO);
+    
+    % If we press a button on the phone:
+    % Define the origin begin raster scan
     if phoneFbkIO.(startStop)
         probeFK = kin.getFK('EndEffector', fbk.position);
         probeXYZ_init = probeFK(1:3,4);
@@ -121,6 +189,9 @@ while true
     end
 
 end
+
+% TODO: Make this a function and make the set more reliable
+scanArm_IO_reset;
 
 %% Build the raster plan
 % xPts = (0:rasterWidth:rasterLimitsXY(1)) + probeXYZ_init(1);
@@ -159,6 +230,8 @@ logFile = group.startLog('dir','logs');
 %%
 disp('Rastering...')
 
+movingBackwards = false;
+
 % Move along the rasters
 
 % Split waypoints into individual movements
@@ -166,27 +239,6 @@ numMoves = size(waypoints,3);
 for i = 1:numMoves
 
     fbk = group.getNextFeedback();
-    
-    while pauseFlag
-        
-        fbk = group.getNextFeedback();
-        
-        newPhoneFbkIO = phoneGroup.getNextFeedbackIO( 'timeout', 0 );
-        if ~isempty(newPhoneFbkIO)
-            phoneFbkIO = newPhoneFbkIO;
-        end
-        
-        if phoneFbkIO.(startStop)
-            pauseFlag = false;
-            pause(0.1);
-        end 
-        
-        cmd.position = fbk.positionCmd;
-        cmd.velocity = fbk.velocityCmd;
-        cmd.effort = fbk.effortCmd;
-        group.send(cmd);
-
-    end
     
     moveWaypoints = waypoints(:,:,i);
     tMax = rasterLimitsXY(2) / rasterSpeed;
@@ -199,27 +251,29 @@ for i = 1:numMoves
     trajTime(end) = trajTime(end) + startStopTimeBuffer;
 
     traj = trajGen.newJointMove( moveWaypoints, 'time', trajTime );
-    t0 = fbk.time;
     t = 0;
+    tLast = fbk.time;
 
-    while (t < traj.getDuration) && ~abortFlag
+    while (t <= traj.getDuration) && (t >= 0) && ~abortFlag
 
         fbk = group.getNextFeedback();
+        dt = fbk.time - tLast;
+        tLast = fbk.time;
 
         newPhoneFbkIO = phoneGroup.getNextFeedbackIO( 'timeout', 0 );
         if ~isempty(newPhoneFbkIO)
             phoneFbkIO = newPhoneFbkIO;
         end
         
-        if phoneFbkIO.(startStop)
-            pauseFlag = true;
-            disp('Pausing...');
-        end
+        timeScale = .5 * (1 + phoneFbkIO.a3);        
+        t = t + timeScale*dt;
 
         % Get commanded positions, velocities, and accelerations
-        % from the new trajectory state at the current time
-        t = fbk.time - t0;
-        [pos, vel, accel] = traj.getState(t);
+        % from the new trajectory state at the current time.
+        [pos, vel, acc] = traj.getState(t);
+        pos = pos;
+        vel = timeScale * vel;
+        acc = timeScale^2 * acc;
 
         % Compensate for gravity
         gravCompEffort = kin.getGravCompEfforts( ...
@@ -228,7 +282,7 @@ for i = 1:numMoves
         % Compensate for dynamics based on the new commands
         accelCompEffort = kin.getDynamicCompEfforts(...
             fbk.position, ... % Used for calculating jacobian
-            pos, vel, accel);
+            pos, vel, acc);
 
         cmd.position = pos;
         cmd.velocity = vel;
@@ -247,30 +301,33 @@ for i = 1:numMoves
     if i < numRasters
         moveWaypoints = [ squeeze( waypoints(end,:,i) );
                           squeeze( waypoints(1,:,i+1) ) ];
-
     
         rasterSwitchTime = 0.1; % [sec]              
         traj = trajGen.newJointMove( moveWaypoints, ...
                                      'time', [0 rasterSwitchTime] );
-        t0 = fbk.time;
         t = 0;
-    
-        while (t < traj.getDuration) && ~abortFlag
+        tLast = fbk.time;
+
+        while (t <= traj.getDuration) && (t >= 0) && ~abortFlag
 
             fbk = group.getNextFeedback();
-
-            % Check for keyboard input and break out of the main loop
-            % if the ESC key is pressed.  
-            keys = read(kb);    
-            if keys.ESC == 1
-                abortFlag = true;
-                break;
-            end
+            dt = fbk.time - tLast;
+            tLast = fbk.time;
 
             % Get commanded positions, velocities, and accelerations
             % from the new trajectory state at the current time
-            t = fbk.time - t0;
-            [pos, vel, accel] = traj.getState(t);
+            newPhoneFbkIO = phoneGroup.getNextFeedbackIO( 'timeout', 0 );
+            if ~isempty(newPhoneFbkIO)
+                phoneFbkIO = newPhoneFbkIO;
+            end
+
+            timeScale = .5 * (1 + phoneFbkIO.a3);      
+            t = t + timeScale*dt;
+            
+            [pos, vel, acc] = traj.getState(t);
+            pos = pos;
+            vel = timeScale * vel;
+            acc = timeScale^2 * acc;
 
             % Compensate for gravity
             gravCompEffort = kin.getGravCompEfforts( ...
@@ -279,7 +336,7 @@ for i = 1:numMoves
             % Compensate for dynamics based on the new commands
             accelCompEffort = kin.getDynamicCompEfforts(...
                 fbk.position, ... % Used for calculating jacobian
-                pos, vel, accel);
+                pos, vel, acc);
 
             cmd.position = pos;
             cmd.velocity = vel;
@@ -294,6 +351,7 @@ for i = 1:numMoves
             cmdIO.(setY) = round(encoderResY * probeXYZ(2));
             ioGroup.send(cmdIO);
         end
+        
     end
 end
 
@@ -308,6 +366,7 @@ HebiUtils.plotLogs(log, 'position', 'figNum', 101);
 HebiUtils.plotLogs(log, 'velocity', 'figNum', 102);
 HebiUtils.plotLogs(log, 'effort', 'figNum', 103);
 
+scanningArmKinematics( log );
 
 
 

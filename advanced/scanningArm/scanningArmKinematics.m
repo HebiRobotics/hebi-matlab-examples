@@ -1,16 +1,17 @@
+function [] = scanningArmKinematics( log )
 %%
 % Load a log from scanningArmRaster and plot stuff
 %
 % Dave Rollinson
 % Jul 2018
 
-clear *;
-close all;
-
 kin = HebiKinematics('scanningArm_4DoF');
-log = HebiUtils.loadGroupLog('logs/2018-07-26_17-48-00.497','view','full');
+if nargin < 1
+    disp('  No log given, please choose a log file...');
+    log = HebiUtils.loadGroupLogsUI('view','full');
+end
 log = struct(log);
-
+    
 %%
 % Plotting XYZ tracking
 logLength = length(log.time);

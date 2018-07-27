@@ -1,4 +1,4 @@
-% Demo of a 4-DoF arm for scanning a flate plate
+% Demo of a 4-DoF arm for scanning a flat plate
 % 
 % Dave Rollinson
 % Jul 2018
