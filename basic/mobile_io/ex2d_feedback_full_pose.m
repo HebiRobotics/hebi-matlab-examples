@@ -1,7 +1,6 @@
-% Get full pose feedback from a mobile device, visualize online, log in 
-% the background, and plot logged data offline.
+% Get full pose feedback from a mobile device and visualize online
 %
-% Assumes that you have a group created with at least 1 module in it.
+% This script assumes that you have run 'startup.m' in this folder.
 %
 % HEBI Robotics
 % July 2018
@@ -21,36 +20,34 @@ group = HebiLookup.newGroupFromNames( familyName, moduleNames );
 disp('  Visualizing 6-DoF pose estimate from the mobile device.');
 disp('  Move it around to make the feedback interesting...');  
 
-% Setup helper function to visualize the orientation
-mobilePose = FrameDisplay();
-frames = eye(4);
+% Setup helper function to visualize the pose
+frameDisplay = FrameDisplay();
 
-figure(1);
-clf;
-
-duration = 60; % [sec]
+duration = 30; % [sec]
 timer = tic();
 while toc(timer) < duration
     
+    % Read a struct of mobile specific sensor data
     fbk = group.getNextFeedbackMobile();
 
-    % Get the orientation feedback and convert to rotation matrix so that it
-    % can be visualized.
+    % Get the AR orientation feedback and convert to rotation matrix  
+    % so that it can be visualized.
     mobileQuaterion = [ fbk.arOrientationW ...
                         fbk.arOrientationX ...
                         fbk.arOrientationY ...
                         fbk.arOrientationZ ];
     mobileRotMat = HebiUtils.quat2rotMat( mobileQuaterion );
 
+    % Get the AR position feedback
     mobileXYZ = [ fbk.arPositionX;
                   fbk.arPositionY;
                   fbk.arPositionZ ];
    
+    % Visualize full 6-DoF pose 
     arTransform = eye(4);
     arTransform(1:3,1:3) = mobileRotMat;
     arTransform(1:3,4) = mobileXYZ;
-          
-    mobilePose.setFrames( arTransform );
+    frameDisplay.setFrames( arTransform );
     title(['AR Quality: ' num2str(fbk.arQuality)]);
     drawnow;
 
