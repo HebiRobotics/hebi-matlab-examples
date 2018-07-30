@@ -6,7 +6,7 @@
   <actuator type="X8-9"/>
   <bracket type="X5HeavyRightOutside"/>
   <actuator type="X8-16"/>
-  <link type="X5" extension="0.325" twist="pi"/>
+  <link type="X5" extension="0.325" twist="pi" mass_offset="0.500"/>
   <actuator type="X8-9"/>
   <link type="X5" extension="0.325" twist="pi"/>
   <actuator type="X5-1"/>

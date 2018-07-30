@@ -1,6 +1,11 @@
- %% Setup
+% Demo of a 4-DoF arm for scanning a flate plate
+% 
+% Dave Rollinson
+% Jul 2018
+
 % Robot specific setup. Edit as needed.
-[ group, kin, params ] = setupArm('6dof');
+kin = HebiKinematics('scanningArm_4DoF');
+gains = HebiKinematics('scanningArm_4DoF_gains');
 
 effortOffset = params.effortOffset;
 gravityVec = params.gravityVec;
@@ -18,8 +23,7 @@ kb = HebiKeyboard();
 % multiple trajectories that stop in between.
 stopBetweenWaypoints = true;
 
-% Select whether you want to log and visualize the replay movement
-enableLogging = true;
+group.startLog('dir','logs');
 
 %% Record waypoints in gravity compensated mode
 disp('Add waypoint with ALT.  Exit teaching mode with ESC');

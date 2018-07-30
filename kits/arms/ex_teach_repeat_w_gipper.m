@@ -1,6 +1,6 @@
- %% Setup
+%% Setup
 % Robot specific setup. Edit as needed.
-[ group, kin, params ] = setupArm('6dof');
+[ group, kin, params ] = setupArm('6dof_w_gripper');
 
 effortOffset = params.effortOffset;
 gravityVec = params.gravityVec;
@@ -117,9 +117,9 @@ end
 
 % Stop background logging and visualize
 if enableLogging
-    hebilog = group.stopLogFull();
-    HebiUtils.plotLogs(hebilog, 'position', 'figNum', 101);
-    HebiUtils.plotLogs(hebilog, 'velocity', 'figNum', 102);
-    HebiUtils.plotLogs(hebilog, 'effort', 'figNum', 103);
+   hebilog = group.stopLogFull();
+   HebiUtils.plotLogs(hebilog, 'position');
+   HebiUtils.plotLogs(hebilog, 'velocity');
+   HebiUtils.plotLogs(hebilog, 'effort');
 end
 
