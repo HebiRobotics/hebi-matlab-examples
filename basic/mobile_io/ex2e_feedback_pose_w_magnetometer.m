@@ -59,11 +59,10 @@ log = group.stopLogMobile();
 
 %% Analyze logged data
 % Calculate magnetic field strength
-magnetometer = [
-    log.magnetometerX ...
-    log.magnetometerY ...
-    log.magnetometerZ]; % [T]
-fieldStrength = vecnorm(magnetometer,2,2) * 1E6; % [uT]
+fieldStrength = log.magnetometerX.^2 + ...
+                log.magnetometerY.^2 +  ...
+                log.magnetometerZ.^2; % [T]
+fieldStrength = sqrt( fieldStrength ) * 1E6; % [uT]
 
 % Select only data with a good pose estimate
 selected = (log.arQuality == 0);
