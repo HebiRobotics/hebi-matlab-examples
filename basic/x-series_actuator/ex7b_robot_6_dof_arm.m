@@ -32,9 +32,9 @@ cmd = CommandStruct();
 group.startLog('dir','logs');
 
 % Four Corners of a Box
-xyzTargets = [ 0.20  0.50  0.50  0.20;    % x [m]
+xyzTargets = [ 0.40  0.40  0.40  0.40;    % x [m]
                0.20  0.20 -0.20 -0.20;    % y [m]
-               0.20  0.20  0.20  0.20 ];  % z [m]
+               0.10  0.50  0.50  0.10 ];  % z [m]
 
 % Rotation matrix that makes the end-effector point straight forward
 rotMatTarget = R_y(pi/2);   % [3x3 SO3 Matrix]
