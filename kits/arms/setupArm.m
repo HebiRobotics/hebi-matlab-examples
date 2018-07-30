@@ -117,8 +117,20 @@ switch kit
         kin.addBody('X5-LightBracket', 'mount', 'right');
         kin.addBody('X5-1');
         
-        % Account for external efforts due to the gas spring
-        params.effortOffset = [0 -9.8 0 0 0 0];
+        % Compensation to joint efforts due to a gas spring (if present)
+        shoulderJointComp = 0; % Nm  <--- Change this if you add a gas spring
+        params.effortOffset = [0 shoulderJointComp 0 0 0 0];
+        
+        % Default seed positions for doing inverse kinematics
+        params.ikSeedPos = [0 1 2.5 1.5 -1.5 1];
+        
+        % Load and send the gains
+        gains = HebiUtils.loadGains('6-DoF-Arm-Gains');
+        
+        gains.positionKp = gains.positionKp / 2;
+        
+        group.send('gains',gains);
+        params.gains = gains;
         
     case '5dof' % A-2084-05
         %%
