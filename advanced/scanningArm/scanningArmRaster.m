@@ -69,6 +69,7 @@ handPositionMode = 'b1';
 joyX = 'a1';
 joyY = 'a2';
 joyScale = .200;
+scanSpeed = 'a3';
 
 encoderResX = 10 * 1000; % [tics / mm] * [mm / m]
 encoderResY = 10 * 1000; % [tics / mm] * [mm / m]
@@ -265,7 +266,7 @@ for i = 1:numMoves
             phoneFbkIO = newPhoneFbkIO;
         end
         
-        timeScale = .5 * (1 + phoneFbkIO.a3);        
+        timeScale = .5 * (1 + phoneFbkIO.(scanSpeed));        
         t = t + timeScale*dt;
 
         % Get commanded positions, velocities, and accelerations
@@ -321,7 +322,7 @@ for i = 1:numMoves
                 phoneFbkIO = newPhoneFbkIO;
             end
 
-            timeScale = .5 * (1 + phoneFbkIO.a3);      
+            timeScale = .5 * (1 + phoneFbkIO.(scanSpeed));      
             t = t + timeScale*dt;
             
             [pos, vel, acc] = traj.getState(t);
