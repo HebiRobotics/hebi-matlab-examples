@@ -15,10 +15,7 @@ close all;
 % Bring up a dialog box to interactively choose log file(s) to load
 logs = HebiUtils.loadGroupLogsUI();
 
-% Select the first log for plotting
-log = logs{1};
-
 % Plot using some handy helper functions
-HebiUtils.plotLogs( log, 'position', 'figNum', 101 );
-HebiUtils.plotLogs( log, 'velocity', 'figNum', 102 );
-HebiUtils.plotLogs( log, 'effort', 'figNum', 103 );
+HebiUtils.plotLogs( logs, 'position', 'figNum', 101 );
+HebiUtils.plotLogs( logs, 'velocity', 'figNum', 102 );
+HebiUtils.plotLogs( logs, 'effort', 'figNum', 103 );
