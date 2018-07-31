@@ -12,7 +12,8 @@
 clear *;
 close all;
 
-% Bring up a dialog box to interactively choose log file(s) to load
+% Bring up a dialog box to interactively choose log file(s) to load.  Note
+% that when using the UI to select logs they get returned as a cell array.
 logs = HebiUtils.loadGroupLogsUI();
 
 % Plot using some handy helper functions
