@@ -1,4 +1,4 @@
-% Put everything together to control a 3-DoF arm.
+% Put everything together to control a 6-DoF arm.
 %
 % For more information type:
 %    help hebi
