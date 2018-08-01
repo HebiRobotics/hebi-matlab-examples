@@ -15,14 +15,14 @@ gains = HebiUtils.loadGains('scanningArm_4DoF_gains');
 %%
 familyName = 'scanArm';
 moduleNames = {'Base','Choulder','Elbow','Wrist'};
-group = HebiLookup.newGroupFromNames( familyName, moduleNames );
+armGroup = HebiLookup.newGroupFromNames( familyName, moduleNames );
 cmd = CommandStruct();
 
-group.send('gains',gains);
-group.setFeedbackFrequency(200);
-numDoF = group.getNumModules();
+armGroup.send('gains',gains);
+armGroup.setFeedbackFrequency(200);
+numDoF = armGroup.getNumModules();
 
-fbk = group.getNextFeedback();
+fbk = armGroup.getNextFeedback();
 
 %%
 ioBoardName = 'scanIO';
@@ -104,10 +104,10 @@ rasterLimitsXY = rasterLimitsXY_mm / 1000;% [m]
 rasterWidth = rasterWidth_mm / 1000;% [m]
 rasterSpeed = rasterSpeed_mm / 1000;% [m / sec]
 
-waypointSpacing_mm = 10;
+waypointSpacing_mm = 5;
 waypointSpacing = waypointSpacing_mm / 1000; % [m]
 
-fbk = group.getNextFeedback();
+fbk = armGroup.getNextFeedback();
 tLast = fbk.time;
 
 cmdPosition = fbk.position';
@@ -117,7 +117,7 @@ cmdXYZ = cmdFK(1:3,4);
     
 while true
     
-    fbk = group.getNextFeedback();        
+    fbk = armGroup.getNextFeedback();        
     dt = fbk.time - tLast;
     tLast = fbk.time;
     
@@ -170,14 +170,14 @@ while true
         cmd.velocity = cmdVelocity';
         cmd.position = cmdPosition;
     end
-    group.send(cmd);
+    armGroup.send(cmd);
     
     
     % Get probe position from FK and update the scanner
     probeFK = kin.getFK('EndEffector', fbk.position);
     probeXYZ = probeFK(1:3,4) - probeXYZ_init;
     cmdIO.(setX) = round(encoderResX * probeXYZ(1));
-    cmdIO.(setY) = round(encoderResY * probeXYZ(2));
+    cmdIO.(setY)  = round(encoderResY * probeXYZ(2));
     ioGroup.send(cmdIO);
     
     % If we press a button on the phone:
@@ -220,12 +220,12 @@ for i = 1:numRasters
         ikSeedPos = waypoints(j,:,i);
     end
     
-    % Once we've built a run, flip the yPts so they run back and forth
+    % Once we've built a run, flip the xPts so they run back and forth
     xPts = flip(xPts);
 end
 
 % Start background logging 
-logFile = group.startLog('dir','logs'); 
+logFile = armGroup.startLog('dir','logs'); 
 
 
 %%
@@ -239,7 +239,7 @@ movingBackwards = false;
 numMoves = size(waypoints,3);
 for i = 1:numMoves
 
-    fbk = group.getNextFeedback();
+    fbk = armGroup.getNextFeedback();
     
     moveWaypoints = waypoints(:,:,i);
     tMax = rasterLimitsXY(2) / rasterSpeed;
@@ -252,52 +252,8 @@ for i = 1:numMoves
     trajTime(end) = trajTime(end) + startStopTimeBuffer;
 
     traj = trajGen.newJointMove( moveWaypoints, 'time', trajTime );
-    t = 0;
-    tLast = fbk.time;
-
-    while (t <= traj.getDuration) && (t >= 0) && ~abortFlag
-
-        fbk = group.getNextFeedback();
-        dt = fbk.time - tLast;
-        tLast = fbk.time;
-
-        newPhoneFbkIO = phoneGroup.getNextFeedbackIO( 'timeout', 0 );
-        if ~isempty(newPhoneFbkIO)
-            phoneFbkIO = newPhoneFbkIO;
-        end
-        
-        timeScale = .5 * (1 + phoneFbkIO.(scanSpeed));        
-        t = t + timeScale*dt;
-
-        % Get commanded positions, velocities, and accelerations
-        % from the new trajectory state at the current time.
-        [pos, vel, acc] = traj.getState(t);
-        pos = pos;
-        vel = timeScale * vel;
-        acc = timeScale^2 * acc;
-
-        % Compensate for gravity
-        gravCompEffort = kin.getGravCompEfforts( ...
-                                    fbk.position, gravityVec );
-
-        % Compensate for dynamics based on the new commands
-        accelCompEffort = kin.getDynamicCompEfforts(...
-            fbk.position, ... % Used for calculating jacobian
-            pos, vel, acc);
-
-        cmd.position = pos;
-        cmd.velocity = vel;
-        cmd.effort = gravCompEffort + accelCompEffort;
-        group.send(cmd);
-
-        % Get probe position from FK
-        probeFK = kin.getFK('EndEffector', fbk.position);
-        probeXYZ = probeFK(1:3,4) - probeXYZ_init;
-
-        cmdIO.(setX) = round(encoderResX * probeXYZ(1));
-        cmdIO.(setY) = round(encoderResY * probeXYZ(2));
-        ioGroup.send(cmdIO);
-    end
+    [cmd, cmdIO, abortFlag] = executeTrajectory( armGroup, phoneGroup, ioGroup, ...
+                                    cmd, cmdIO, kin, traj, probeXYZ_init );
     
     if i < numRasters
         moveWaypoints = [ squeeze( waypoints(end,:,i) );
@@ -306,52 +262,8 @@ for i = 1:numMoves
         rasterSwitchTime = 0.1; % [sec]              
         traj = trajGen.newJointMove( moveWaypoints, ...
                                      'time', [0 rasterSwitchTime] );
-        t = 0;
-        tLast = fbk.time;
-
-        while (t <= traj.getDuration) && (t >= 0) && ~abortFlag
-
-            fbk = group.getNextFeedback();
-            dt = fbk.time - tLast;
-            tLast = fbk.time;
-
-            % Get commanded positions, velocities, and accelerations
-            % from the new trajectory state at the current time
-            newPhoneFbkIO = phoneGroup.getNextFeedbackIO( 'timeout', 0 );
-            if ~isempty(newPhoneFbkIO)
-                phoneFbkIO = newPhoneFbkIO;
-            end
-
-            timeScale = .5 * (1 + phoneFbkIO.(scanSpeed));      
-            t = t + timeScale*dt;
-            
-            [pos, vel, acc] = traj.getState(t);
-            pos = pos;
-            vel = timeScale * vel;
-            acc = timeScale^2 * acc;
-
-            % Compensate for gravity
-            gravCompEffort = kin.getGravCompEfforts( ...
-                                        fbk.position, gravityVec );
-
-            % Compensate for dynamics based on the new commands
-            accelCompEffort = kin.getDynamicCompEfforts(...
-                fbk.position, ... % Used for calculating jacobian
-                pos, vel, acc);
-
-            cmd.position = pos;
-            cmd.velocity = vel;
-            cmd.effort = gravCompEffort + accelCompEffort;
-            group.send(cmd);
-
-            % Get probe position from FK
-            probeFK = kin.getFK('EndEffector', fbk.position);
-            probeXYZ = probeFK(1:3,4) - probeXYZ_init;
-
-            cmdIO.(setX) = round(encoderResX * probeXYZ(1));
-            cmdIO.(setY) = round(encoderResY * probeXYZ(2));
-            ioGroup.send(cmdIO);
-        end
+        [cmd, cmdIO, abortFlag] = executeTrajectory( armGroup, phoneGroup, ioGroup, ...
+                                    cmd, cmdIO, kin, traj, probeXYZ_init );
         
     end
 end
@@ -359,7 +271,7 @@ end
 
 %%
 % Stop background logging
-log = group.stopLogFull();
+log = armGroup.stopLogFull();
 
 %%
 % Plotting Joint Data
