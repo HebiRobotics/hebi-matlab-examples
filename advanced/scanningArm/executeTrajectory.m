@@ -20,7 +20,7 @@ function [ cmd, cmdIO, abortFlag ] = executeTrajectory( armGroup, ...
     abortFlag = false;
     
     damperGains = [5; 10; 5; .1; .1; .0;]; % [N/(m/sec)] or [Nm/(rad/sec)]
-    springGains = [500; 1000; 50; 5; 5; 0];  % [N/m] or [Nm/rad]
+    springGains = [500; 1000; 50; 2; 2; 0];  % [N/m] or [Nm/rad]
     
     pushDownWrench = [0; 0; -5; 0; 0; 0];
     
@@ -65,7 +65,7 @@ function [ cmd, cmdIO, abortFlag ] = executeTrajectory( armGroup, ...
         
         % Rotational error involves calculating axis-angle from the
         % resulting error in S03 and providing a torque around that axis.
-        errorRotMat = R_y(pi) * armTipFK(1:3,1:3)';
+        errorRotMat = armTipFK_cmd(1:3,1:3) * armTipFK(1:3,1:3)';
         [axis, angle] = HebiUtils.rotMat2axAng( errorRotMat );
         rotErrorVec = angle * axis;
         

@@ -10,9 +10,16 @@
   <control_strategy>4 4 4 4</control_strategy>
   
   <position>
-    <!-- Stiff Control -->
-    <kp>100 150 50 25</kp>
-    <ki>100 100 100 100</ki>
+    <!-- Stiff Control w/ integral term -->
+    <!-- <kp>100 150 50 25</kp> -->
+    <!-- <ki>100 100 100 100</ki> -->
+    <!-- <i_clamp>2 5 2 1</i_clamp> -->
+    
+    <!-- Stiff Control w/o integral term -->
+    <kp>200 150 50 25</kp>
+    <ki>0 0 0 0</ki>
+    <i_clamp>0 0 0 0</i_clamp>
+    
     <!-- Compliant Control (Relies on effort from impedance control) -->
     <!-- <kp>0 0 0 0</kp> -->
     <!-- <ki>0 0 0 0</ki> -->

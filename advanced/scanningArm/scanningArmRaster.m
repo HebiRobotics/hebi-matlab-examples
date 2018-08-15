@@ -33,7 +33,7 @@ cmdIO = IoCommandStruct();
 setX = 'e1';      % [ticks] to increment
 setY = 'e3';      % [ticks] to increment
 % resetXY = 'e2';    % Non-zero value resets encoder ticks to 0.
-% % resetXY = 'e4';  % Does same thing as 'e2'.
+% resetXY = 'e4';    % Does same thing as 'e2'.
 scannerSetX = 'e5';
 scannerSetY = 'e6';
 scannerClearData = 'e7';
@@ -96,8 +96,8 @@ kin.setPayload( 0.25 );  % kg
 
 
 % Raster Params
-rasterLimitsXY_mm = [75 75];
-rasterWidth_mm = 0.5;
+rasterLimitsXY_mm = [70 70];
+rasterWidth_mm = 1.0;
 rasterSpeed_mm = 200; % [m/sec]
 
 rasterLimitsXY = rasterLimitsXY_mm / 1000;% [m]
