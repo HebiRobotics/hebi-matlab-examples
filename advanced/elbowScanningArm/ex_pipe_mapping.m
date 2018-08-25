@@ -3,7 +3,7 @@ clear *;
 close all;
 
 % Robot specific setup. Edit as needed.
-[group, kin, gravityVec] = setupArm_chevron();
+[group, kin, gravityVec] = setupArm_elbowScanner();
 
 % Trajectory
 trajGen = HebiTrajectoryGenerator(kin);
@@ -115,6 +115,7 @@ meanPipeDiameter = mean(pipeDiameters);
 stdPipeDiameter = std(pipeDiameters);
 
 elbowBendRadius = elbowBendRadius - meanPipeDiameter/2;
+elbowSweepAngle = deg2rad( 90 );
 
 % The elbow origin tends to be off in the y-direction, so shift it so that
 % it matches the average y-value of the centerpoints.
@@ -135,6 +136,7 @@ end
 [pipeCenters, pipeSurfacePoints, elbowSweepAngles] = ...
                           getPipeModelPoints( elbowBendRadius, ...
                                               meanPipeDiameter, ...
+                                              elbowSweepAnlge, ...
                                               elbowOriginXYZ );
 
 %% Plotting

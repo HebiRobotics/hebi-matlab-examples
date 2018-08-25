@@ -1,6 +1,8 @@
 function [pipeCenters, pipeSurfacePoints, elbowSweepAngles] = ...
-       getPipeModelPoints( bendRadius, pipeDiameter, elbowOriginXYZ, ...
-                           elbowSweepRes, pipeSurfaceRes )
+       getPipeModelPoints( bendRadius, pipeDiameter, elbowSweepAngle, ...
+                           elbowOriginXYZ, elbowSweepRes, pipeSurfaceRes )
+% GETPIPEMODELPOINTS takes in parameters of an ideal pipe elbow and
+% generates a bunch of points along the surface of the elbow.
             
     if size(elbowOriginXYZ,2) > 1
         elbowOriginXYZ = elbowOriginXYZ';
@@ -8,11 +10,9 @@ function [pipeCenters, pipeSurfacePoints, elbowSweepAngles] = ...
 
     pipeRadius = pipeDiameter / 2;
     
-    elbowSweepAngle = pi/2;
-    
     if nargin < 4
-        elbowSweepRes = 90; % num points around elbow sweep
-        pipeSurfaceRes = 90; % num points around circumference
+        elbowSweepRes = 90; % number of points along elbow sweep
+        pipeSurfaceRes = 90; % number of points around circumference
     end
 
     elbowSweepAngles = linspace( elbowSweepAngle, 0, elbowSweepRes );

@@ -3,7 +3,7 @@ function [ group, kin, gravityVec ] = setupArm_elbowScanner()
     % NOTE: CHANGE AS NEEDED TO MATCH YOUR CONFIGURATION
 
     % Communications
-    familyName = 'chevronArm';
+    familyName = 'elbowScanningArm';
     moduleNames = { 'base'
                     'shoulder1'
                     'shoulder2'
@@ -54,7 +54,7 @@ function [ group, kin, gravityVec ] = setupArm_elbowScanner()
         fbk = group.getNextFeedback();
         gravityVec = -[fbk.accelX(1) fbk.accelY(1) fbk.accelZ(1)];
 
-        gains = HebiUtils.loadGains('chevronArmGains');
+        gains = HebiUtils.loadGains('elbowScanningArmGains');
         group.send('gains',gains);
     end
 

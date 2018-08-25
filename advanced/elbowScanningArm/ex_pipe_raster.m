@@ -24,9 +24,10 @@ elbowSweepRes = 15;
 pipeSurfaceRes = round( pipeCircumference / surfaceRasterSpacing );
 
 meanPipeDiameter = 1.00 * meanPipeDiameter;
+elbowSweepAngle = deg2rad( 90 );
 
 [pipeCenters, pipeSurfacePoints, elbowSweepAngles] =  getPipeModelPoints( ...
-    elbowBendRadius, meanPipeDiameter, elbowOriginXYZ, ...
+    elbowBendRadius, meanPipeDiameter, elbowSweepAngle, elbowOriginXYZ, ...
     elbowSweepRes, pipeSurfaceRes );
 
 % Trajectory
