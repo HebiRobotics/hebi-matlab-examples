@@ -96,7 +96,7 @@ end
 waypoints = [];
 
 initIKRasters = 1:pipeSurfaceRes;
-C = interp1( demonstratedIKRasters, ...
+initIKPositions = interp1( demonstratedIKRasters, ...
                            demonstratedIKPositions, ...
                            initIKRasters );
 
@@ -255,4 +255,4 @@ end
 
 %%
 % Kinematics Plotting / Analysis
-ex_pipe_kinematics;
+plotEndEffectorError( log, kin, group );

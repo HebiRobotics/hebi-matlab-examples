@@ -31,8 +31,6 @@ keys = read(kb);
 prevKeys = keys;
 cmd = CommandStruct();
 
-waypointRate = .5; % sec
-
 while keys.ESC == 0
     
     % Do grav-comp while training waypoints
@@ -110,7 +108,6 @@ while true
 
     else
         
-        keys = read(kb);
         if keys.ESC == 1
             break;
         end
