@@ -11,7 +11,7 @@ log = HebiUtils.loadGroupLog( logFileName, 'view', 'full' );
 log = struct( log );  % Convert to Matlab struct to speed things up later
 
 if ~exist('kin','var')
-    [~, kin, gravityVec] = setupArm_chevron();
+    [~, kin, gravityVec] = setupArm_elbowScanner();
 end
 
 group = HebiUtils.newGroupFromLog( logFileName );

@@ -1,4 +1,4 @@
-function [ group, kin, gravityVec ] = setupArm_chevron()
+function [ group, kin, gravityVec ] = setupArm_elbowScanner()
 
     % NOTE: CHANGE AS NEEDED TO MATCH YOUR CONFIGURATION
 
