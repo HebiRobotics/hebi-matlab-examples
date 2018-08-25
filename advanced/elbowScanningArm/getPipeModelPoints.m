@@ -10,7 +10,7 @@ function [pipeCenters, pipeSurfacePoints, elbowSweepAngles] = ...
 
     pipeRadius = pipeDiameter / 2;
     
-    if nargin < 4
+    if nargin < 5
         elbowSweepRes = 90; % number of points along elbow sweep
         pipeSurfaceRes = 90; % number of points around circumference
     end

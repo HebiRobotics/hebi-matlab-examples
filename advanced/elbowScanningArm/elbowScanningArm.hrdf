@@ -3,13 +3,13 @@
   <actuator type="X5-9"/>
   <bracket type="X5HeavyRightOutside"/>
   <actuator type="X8-16"/>
-  <link type="X5" extension="0.275" twist="pi/2"/>
+  <link type="X5" extension="0.275" twist="-pi/2"/>
   <actuator type="X5-9"/>
-  <link type="X5" extension="0.275" twist="pi/2"/>
+  <link type="X5" extension="0.275" twist="-pi/2"/>
   <actuator type="X5-9"/>
-  <link type="X5" extension="0.225" twist="0"/>
+  <link type="X5" extension="0.225" twist="pi"/>
   <actuator type="X5-9"/>
-  <link type="X5" extension="0.225" twist="0"/>
+  <link type="X5" extension="0.225" twist="pi"/>
   <actuator type="X5-4"/>
   <bracket type="X5LightRight"/>
   <actuator type="X5-4"/>

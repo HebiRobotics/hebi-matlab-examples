@@ -22,7 +22,10 @@ stopBetweenWaypoints = false;
 
 waypointRate = .1; % sec
 
+logDirectory = 'logs';
+
 disp('Recording waypoints...');
+disp('   Advance to the next waypoint by pressing ALT');
 disp('   Exit recording mode with ESC');
 
 numClusters = 0;
@@ -42,7 +45,7 @@ while keys.ESC == 0
     if keys.ALT == 1 && prevKeys.ALT == 0 % diff state
         
         if numClusters==0
-            group.startLog();
+            group.startLog('dir',logDirectory);
         else
             allWaypoints{numClusters} = waypoints;
         end
@@ -50,7 +53,14 @@ while keys.ESC == 0
         numClusters = numClusters+1;
         waypoints = [];
         
-        disp('Starting waypoint logging...');
+        if numClusters==1  
+            disp('Move along the extrados (outer arc) of the pipe elbow...');
+        elseif numClusters==2
+            disp('Starting near the arm base, move radially around the pipe...');
+        else
+            disp('Advance down the elbow, move radially around the pipe...');
+        end
+        
         pause(.1);
         waypointTimer = tic();
     end
@@ -58,7 +68,7 @@ while keys.ESC == 0
     
     if exist('waypointTimer','var') && toc(waypointTimer) > waypointRate
         waypoints(end+1,:) = fbk.position;
-        disp('New waypoint recorded.');     
+        % disp('New waypoint recorded.');     
         waypointTimer = tic();
     end
     
@@ -136,7 +146,7 @@ end
 [pipeCenters, pipeSurfacePoints, elbowSweepAngles] = ...
                           getPipeModelPoints( elbowBendRadius, ...
                                               meanPipeDiameter, ...
-                                              elbowSweepAnlge, ...
+                                              elbowSweepAngle, ...
                                               elbowOriginXYZ );
 
 %% Plotting

@@ -6,10 +6,10 @@ close all;
 [group, kin, gravityVec] = setupArm_elbowScanner();
 
 % Load waypoint data
-load('pipeData1.mat');
+load('pipeData_default.mat');
 
-originAdjustXYZ = [  0.010;
-                    -0.020;
+originAdjustXYZ = [  0.000;
+                     0.000;
                      0.000 ]; % m
 
 elbowOriginXYZ = elbowOriginXYZ + originAdjustXYZ';    
@@ -44,6 +44,7 @@ cmd = CommandStruct();
 
 % Select whether you want to log and visualize the replay movement
 enableLogging = true;
+logDirectory = 'logs';
 
 % Choose if we want to preview the IK solutions
 visualizeIK = false;
@@ -51,6 +52,7 @@ visualizeIK = false;
 %% Record starting IK configuration in gravity compensated mode
 disp('Select starting IK configurations with ALT.');
 disp('  Choose positions spaced evenly around the pipe.');
+disp('  Skip this step by pressing ESC.  This will use default congifurations.');
 
 waypoints = [];
 keys = read(kb);
@@ -79,20 +81,22 @@ end
 
 if isempty(waypoints)
     % If skipped training, load saved 
-    load('demoIKPositions');
+    load('defaultIKPositions');
     disp('Loading previously saved IK seed positions.');
     demonstratedIKRasters = demonstratedIKRasters /...
                 max(demonstratedIKRasters) * pipeSurfaceRes;
     demonstratedIKRasters(1) = 1;
 else
     demonstratedIKPositions = waypoints;
-    demonstratedIKRasters = linspace(1,pipeSurfaceRes,size(waypoints,1)); 
+    demonstratedIKRasters = linspace(1,pipeSurfaceRes,size(waypoints,1));
+    save( 'latestIKPositions', ....
+          'demonstratedIKPositions', 'demonstratedIKRasters');
 end
 
 waypoints = [];
 
 initIKRasters = 1:pipeSurfaceRes;
-initIKPositions = interp1( demonstratedIKRasters, ...
+C = interp1( demonstratedIKRasters, ...
                            demonstratedIKPositions, ...
                            initIKRasters );
 
@@ -170,7 +174,7 @@ trajGen.moveJoint( group, [currentPosition; startPosition], ...
 
 % Start background logging 
 if enableLogging
-   logFile = group.startLog(); 
+   logFile = group.startLog('dir',logDirectory); 
 end          
 
 trajGen.setMinDuration(0.50); 

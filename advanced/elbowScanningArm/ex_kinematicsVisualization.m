@@ -37,6 +37,8 @@ while true
     % Calculate kinematics
     fbk = group.getNextFeedbackFull();
     
+    frames = kin.getForwardKinematics('output', fbk.position);
+    
     % Orient the robot based on the estimated orientation from the first
     % module.  Commment this section of code out to visualize in the frame 
     % of the first module.
@@ -46,9 +48,9 @@ while true
                        fbk.orientationZ(1) ];
     baseRotMat = HebiUtils.quat2rotMat( baseQuaternion );
     baseTransform(1:3,1:3) = baseRotMat; 
-    kin.setBaseFrame( baseTransform );  
-    
-    frames = kin.getForwardKinematics('output', fbk.position);
+    for i=1:size(frames,3)
+        frames(:,:,i) = baseTransform * frames(:,:,i);
+    end
     
     cmd.effort = kin.getGravCompEfforts( fbk.position, gravityVec );
     group.send(cmd);

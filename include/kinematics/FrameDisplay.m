@@ -195,8 +195,11 @@ classdef FrameDisplay < handle
     methods (Access = private)
         function delete(this)
             % close figure if it is still open
-            if any(findall(0,'Type','Figure') == this.figHandle)
-                close(this.figHandle);
+            try
+                if any(findall(0,'Type','Figure') == this.figHandle)
+                    close(this.figHandle);
+                end
+            catch
             end
         end
     end
