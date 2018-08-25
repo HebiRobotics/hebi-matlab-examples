@@ -2,8 +2,8 @@
 <group_gains>
    <control_strategy>4 4 4 4 4 4 4 4</control_strategy>
    <position>
-      <kp>100 100 75 100 75 30 30 30</kp>
-      <ki>50 75 50 50 50 10 10 10</ki>
+      <kp>200 100 100 100 75 30 30 30</kp>
+      <ki>50 75 25 50 50 10 10 10</ki>
       <kd>0 0 0 0 0 0 0 0</kd>
       <feed_forward>0 0 0 0 0 0 0 0</feed_forward>
       <dead_zone>0 0 0 0 0 0 0 0</dead_zone>
@@ -18,7 +18,7 @@
       <d_on_error>1 1 1 1 1 1 1 1</d_on_error>
    </position>
    <velocity>
-      <kp>0.2 0.3 0.2 0.2 0.1 0.05 0.05 0.05</kp>
+      <kp>0.4 0.3 0.2 0.2 0.1 0.05 0.05 0.05</kp>
       <ki>0 0 0 0 0 0 0 0</ki>
       <kd>0 0 0 0 0 0 0 0</kd>
       <feed_forward>1 1 1 1 1 1 1 1</feed_forward>
@@ -30,7 +30,7 @@
       <target_lowpass>1 1 1 1 1 1 1 1</target_lowpass>
       <min_output>-1 -1 -1 -1 -1 -1 -1 -1</min_output>
       <max_output>1 1 1 1 1 1 1 1</max_output>
-      <output_lowpass>0.75 0.75 0.75 0.75 0.75 0.75 0.75 0.75</output_lowpass>
+      <output_lowpass>0.5 0.5 0.5 0.75 0.75 0.75 0.75 0.75</output_lowpass>
       <d_on_error>1 1 1 1 1 1 1 1</d_on_error>
    </velocity>
    <effort>
@@ -38,7 +38,7 @@
       <ki>0 0 0 0 0 0 0 0</ki>
       <kd>0.001 0.0001 0.001 0.001 0.001 0.001 0.001 0.001</kd>
       <feed_forward>1 1 1 1 1 1 1 1</feed_forward>
-      <dead_zone>0 0 0 0 0 0 0 0</dead_zone>
+      <dead_zone>0.5 0 0.5 0 0 0 0 0</dead_zone>
       <i_clamp>0.25 0.25 0.25 0.25 0.25 0.25 0.25 0.25</i_clamp>
       <punch>-0 -0 -0 -0 -0 -0 -0 -0</punch>
       <min_target>-20 -40 -20 -20 -20 -10 -10 -10</min_target>
@@ -46,7 +46,7 @@
       <target_lowpass>1 1 1 1 1 1 1 1</target_lowpass>
       <min_output>-1 -1 -1 -1 -1 -1 -1 -1</min_output>
       <max_output>1 1 1 1 1 1 1 1</max_output>
-      <output_lowpass>0.9 0.9 0.9 0.9 0.9 0.9 0.9 0.9</output_lowpass>
+      <output_lowpass>0.75 0.75 0.75 0.9 0.9 0.9 0.9 0.9</output_lowpass>
       <d_on_error>0 0 0 0 0 0 0 0</d_on_error>
    </effort>
 </group_gains>
