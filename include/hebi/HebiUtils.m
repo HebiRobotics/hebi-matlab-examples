@@ -627,13 +627,13 @@ classdef (Sealed) HebiUtils
         end
         
         function [ R ] = quat2rotMat( q )
-            %QUAT2DCM Conversion of a quaternion to an orthogonal rotation matrix.
+            %QUAT2ROTMAT Conversion of a quaternion to an orthogonal rotation matrix.
             %Assumes that the scalar element, q_w, is the first element of the 
             %quaternion vector, q = [q_w q_x q_y q_z].
             %
             %   R = quat2rotMat( q )
             %
-            %   If q needs to be a [4x1] row vector. R is a [3x3] SO3 rotation 
+            %   If q needs to be a [1x4] row vector. R is a [3x3] SO3 rotation 
             %   matrix. You can batch process N quaternions by passing in a [Nx4] 
             %   matrix where each row is a quaternion. In this case thefunction 
             %   will return N rotation matrices of size [3x3xN].

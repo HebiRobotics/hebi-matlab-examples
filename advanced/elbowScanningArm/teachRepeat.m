@@ -20,6 +20,7 @@ stopBetweenWaypoints = true;
 
 % Select whether you want to log and visualize the replay movement
 enableLogging = true;
+logDirectory = 'logs';
 
 %% Record waypoints in gravity compensated mode
 disp('Add waypoint with ALT.');
@@ -65,10 +66,9 @@ disp('   Exit playback mode with ESC.');
 
 % Start background logging 
 if enableLogging
-   logFile = group.startLog(); 
+   logFile = group.startLog( 'dir', logDirectory ); 
 end
 
-keys = read(kb);
 % Move from current position to first waypoint
 startPosition = group.getNextFeedback().position;
 trajGen.moveJoint( group, [startPosition; waypoints(1,:)], ...
