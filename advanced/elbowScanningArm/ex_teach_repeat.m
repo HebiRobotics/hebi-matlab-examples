@@ -3,7 +3,7 @@ clear *;
 close all;
 
 % Robot specific setup. Edit as needed.
-[group, kin, gravityVec] = setupArm_chevron();
+[group, kin, gravityVec] = setupArm_elbowScanner();
 
 % Trajectory
 trajGen = HebiTrajectoryGenerator(kin);
