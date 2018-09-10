@@ -1,5 +1,5 @@
 % Make a group consisting of a single module.  A 'module' can be an
-% actuator, and I/O board, or a mobile device running the Mobile I/O app.
+% actuator, an I/O board, or a mobile device running the Mobile I/O app.
 %
 % For more information type:
 %    help HebiGroup
