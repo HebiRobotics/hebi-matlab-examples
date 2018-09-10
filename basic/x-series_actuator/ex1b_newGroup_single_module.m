@@ -21,7 +21,7 @@ HebiLookup.initialize();
 % Use Scope to change select a module and change the name and family to
 % match the names below.  Following examples will use the same names.
 familyName = 'Test Family';
-moduleNames = 'Test Actuator';
+moduleName = 'Test Actuator';
 
-group = HebiLookup.newGroupFromNames( familyName, moduleNames )
+group = HebiLookup.newGroupFromNames( familyName, moduleName )
 
