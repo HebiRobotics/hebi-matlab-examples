@@ -1,15 +1,16 @@
  %% Setup
 % Robot specific setup. Edit as needed.
-[ group, kin, params ] = setupArm('6dof');
+familyName = '3-DoF Arm';
+[ group, kin, params ] = setupArm('3-DoF',familyName);
 
 effortOffset = params.effortOffset;
 gravityVec = params.gravityVec;
 
 % Trajectory
 trajGen = HebiTrajectoryGenerator(kin);
-trajGen.setMinDuration(2.0); % Min move time for 'small' movements
+trajGen.setMinDuration(1.0); % Min move time for 'small' movements
                              % (default is 1.0)
-trajGen.setSpeedFactor(0.5); % Slow down movements to a safer speed.
+trajGen.setSpeedFactor(0.9); % Slow down movements to a safer speed.
                              % (default is 1.0)
 % Keyboard input
 kb = HebiKeyboard();
@@ -54,7 +55,7 @@ disp(['Replaying ' num2str(size(waypoints,1)) ' waypoints'])
 
 % Start background logging 
 if enableLogging
-   logFile = group.startLog(); 
+   logFile = group.startLog('dir','logs'); 
 end
 
 % Move from current position to first waypoint
@@ -115,6 +116,7 @@ while true
         'EffortOffset', effortOffset );
 end
 
+%%
 % Stop background logging and visualize
 if enableLogging
     hebilog = group.stopLogFull();

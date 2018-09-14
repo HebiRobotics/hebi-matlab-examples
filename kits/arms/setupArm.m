@@ -195,6 +195,15 @@ switch kit
         kin.addBody('X5-Link', 'extension', 0.325, 'twist', 0);
         kin.addBody('X5-1');
         
+    case '3-DoF' % A-2084-01
+        
+        group = HebiLookup.newGroupFromNames(family, {
+            'Base'
+            'Shoulder'
+            'Elbow' } );
+        
+        kin = HebiKinematics('/hrdf/3-DoF_arm_example');
+
     otherwise
         error([kit ' is not a supported kit name']);
         
