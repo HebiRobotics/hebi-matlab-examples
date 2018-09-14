@@ -3,3 +3,4 @@
 
 *.hebilog
 !**/exampleLog.hebilog
+!**/3-DoF_arm_example_log.hebilog
