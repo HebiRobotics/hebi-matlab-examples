@@ -19,7 +19,7 @@ moduleNames = 'Test Actuator';
 group = HebiLookup.newGroupFromNames( familyName, moduleNames );
 
 %% Open-Loop Controller (Position)
-% The commmand struct has fields for position, velocity, and effort.  
+% The command struct has fields for position, velocity, and effort.  
 % Fields that are empty [] or NaN will be ignored when sending.
 cmd = CommandStruct(); 
 
