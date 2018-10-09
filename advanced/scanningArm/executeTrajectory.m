@@ -19,8 +19,8 @@ function [ cmd, cmdIO, abortFlag ] = executeTrajectory( armGroup, ...
     
     abortFlag = false;
     
-    damperGains = [5; 10; 5; .1; .1; .0;]; % [N/(m/sec)] or [Nm/(rad/sec)]
-    springGains = [500; 1000; 50; 2; 2; 0];  % [N/m] or [Nm/rad]
+    damperGains = [5; 5; 5;   .1; .1; .0;]; % [N/(m/sec)] or [Nm/(rad/sec)]
+    springGains = .5 * [500; 500; 50;   2; 2; 0];  % [N/m] or [Nm/rad]
     
     pushDownWrench = [0; 0; -5; 0; 0; 0];
     

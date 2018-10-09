@@ -16,13 +16,15 @@
     <!-- <i_clamp>2 5 2 1</i_clamp> -->
     
     <!-- Stiff Control w/o integral term -->
-    <kp>200 150 50 25</kp>
+    <kp>100 75 50 25</kp>
     <ki>0 0 0 0</ki>
     <i_clamp>0 0 0 0</i_clamp>
     
     <!-- Compliant Control (Relies on effort from impedance control) -->
     <!-- <kp>0 0 0 0</kp> -->
     <!-- <ki>0 0 0 0</ki> -->
+    <!-- <i_clamp>0 0 0 0</i_clamp> -->
+    
     <kd>0 0 0 0</kd>
     <feed_forward>0 0 0 0</feed_forward>
     <dead_zone>0 0 0 0</dead_zone>
@@ -55,7 +57,7 @@
   </velocity>
   
   <effort>
-    <kp>0.25 0.1 0.25 0.25</kp>
+    <kp>0.25 0.25 0.25 0.25</kp>
     <ki>0 0 0 0</ki>
     <kd>0.001 0.001 0.001 0.001</kd>
     <feed_forward>1 1 1 1</feed_forward>

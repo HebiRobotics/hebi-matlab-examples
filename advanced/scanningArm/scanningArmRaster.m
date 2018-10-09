@@ -25,7 +25,7 @@ numDoF = armGroup.getNumModules();
 fbk = armGroup.getNextFeedback();
 
 %%
-ioBoardName = 'scanIO';
+ioBoardName = '_scanIO';
 ioGroup = HebiLookup.newGroupFromNames( familyName, ioBoardName );
 cmdIO = IoCommandStruct();
 
@@ -92,7 +92,7 @@ stopBetweenWaypoints = true;
 abortFlag = false;
 
 gravityVec = [ 0 0 -1 ];
-kin.setPayload( 0.25 );  % kg
+kin.setPayload( 0.1 );  % kg
 
 
 % Raster Params
