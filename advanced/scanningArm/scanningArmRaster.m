@@ -68,7 +68,7 @@ resetScanner = 'b4';
 handPositionMode = 'b1';
 joyX = 'a1';
 joyY = 'a2';
-joyScale = .200;
+joyScale = .100;
 scanSpeed = 'a3';
 
 encoderResX = 10 * 1000; % [tics / mm] * [mm / m]
@@ -195,17 +195,21 @@ end
 scanArm_IO_reset;
 
 %% Build the raster plan
+
+% % Rasters run along Y
 % xPts = (0:rasterWidth:rasterLimitsXY(1)) + probeXYZ_init(1);
 % yPts = (0:waypointSpacing:rasterLimitsXY(2)) + probeXYZ_init(2);
+% numRasters = length(xPts);
+% numWaypoints = length(yPts);
 
+% Raster run along X
 xPts = (0:waypointSpacing:rasterLimitsXY(1)) + probeXYZ_init(1);
 yPts = (0:rasterWidth:rasterLimitsXY(2)) + probeXYZ_init(2);
+numRasters = length(yPts);
+numWaypoints = length(xPts);
 
 zPt = 0.000 + probeXYZ_init(3);
 waypoints = nan(length(xPts),numDoF,length(yPts));
-
-numRasters = length(yPts);
-numWaypoints = length(xPts);
 
 for i = 1:numRasters
     
@@ -222,6 +226,7 @@ for i = 1:numRasters
     
     % Once we've built a run, flip the xPts so they run back and forth
     xPts = flip(xPts);
+    % yPts = flip(yPts);
 end
 
 % Start background logging 
@@ -279,7 +284,7 @@ HebiUtils.plotLogs(log, 'position', 'figNum', 101);
 HebiUtils.plotLogs(log, 'velocity', 'figNum', 102);
 HebiUtils.plotLogs(log, 'effort', 'figNum', 103);
 
-scanningArmKinematics( log );
+scanningArmAnalysis( log );
 
 
 

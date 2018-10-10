@@ -6,6 +6,7 @@ function [ cmd, cmdIO, abortFlag ] = executeTrajectory( armGroup, ...
 
     % These are copied from the higher level.  Not the best practice :-(
     scanSpeed = 'a3';  
+    downForce = 'a6';
     setX = 'e1';      % [ticks] to increment
     setY = 'e3';      % [ticks] to increment
     encoderResX = 10 * 1000; % [tics / mm] * [mm / m]
@@ -19,10 +20,11 @@ function [ cmd, cmdIO, abortFlag ] = executeTrajectory( armGroup, ...
     
     abortFlag = false;
     
-    damperGains = [5; 5; 5;   .1; .1; .0;]; % [N/(m/sec)] or [Nm/(rad/sec)]
-    springGains = .5 * [500; 500; 50;   2; 2; 0];  % [N/m] or [Nm/rad]
+    damperGains = [2; 2; 2; 0.1; 0.1; 0.0;]; % [N/(m/sec)] or [Nm/(rad/sec)]
+    springGains = [200; 200; 50; 1; 1; 0];  % [N/m] or [Nm/rad]
     
-    pushDownWrench = [0; 0; -5; 0; 0; 0];
+    maxPushDownForce = 20;  % N
+    pushDownWrench = [0; 0; -maxPushDownForce; 0; 0; 0];
     
     % Assume gravity points down in base frame
     gravityVec = [0 0 -1];
@@ -39,9 +41,11 @@ function [ cmd, cmdIO, abortFlag ] = executeTrajectory( armGroup, ...
         end
         
         if exist('phoneFbkIO','var')
-            timeScale = .5 * (1 + phoneFbkIO.(scanSpeed));        
+            timeScale = .5 * (1 + phoneFbkIO.(scanSpeed));
+            downForceScale = .5 * (1 + phoneFbkIO.(downForce));
         else
             timeScale = 1;   
+            downForceScale = 1;
         end
         t = t + timeScale*dt;
 
@@ -87,8 +91,9 @@ function [ cmd, cmdIO, abortFlag ] = executeTrajectory( armGroup, ...
         
         damperWrench(1:3) = damperGains(1:3) .* velError(1:3); % linear damping
         damperWrench(4:6) = damperGains(4:6) .* velError(4:6); % rotational damping
-
-        fullWrench = springWrench + damperWrench + pushDownWrench;
+        
+        fullWrench = springWrench + damperWrench + ...
+                                        downForceScale*pushDownWrench;
         impedanceEffort = J_armTip' * fullWrench; 
         
 

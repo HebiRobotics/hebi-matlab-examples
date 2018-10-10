@@ -16,7 +16,7 @@
     <!-- <i_clamp>2 5 2 1</i_clamp> -->
     
     <!-- Stiff Control w/o integral term -->
-    <kp>100 75 50 25</kp>
+    <kp>75 75 25 15</kp>
     <ki>0 0 0 0</ki>
     <i_clamp>0 0 0 0</i_clamp>
     
@@ -28,7 +28,6 @@
     <kd>0 0 0 0</kd>
     <feed_forward>0 0 0 0</feed_forward>
     <dead_zone>0 0 0 0</dead_zone>
-    <i_clamp>2 5 2 1</i_clamp>
     <punch>0 0 0 0</punch>
     <min_target>-inf -inf -inf -inf</min_target>
     <max_target>inf inf inf inf</max_target>
@@ -40,7 +39,7 @@
   </position>
   
   <velocity>
-    <kp>0.1 0.1 0.05 0.03</kp>
+    <kp>0.2 0.3 0.1 0.1</kp>
     <ki>0 0 0 0</ki>
     <kd>0 0 0 0</kd>
     <feed_forward>1 1 1 1</feed_forward>
@@ -64,8 +63,8 @@
     <dead_zone>0 0 0 0</dead_zone>
     <i_clamp>0.25 0.25 0.25 0.25</i_clamp>
     <punch>0 0 0 0</punch>
-    <min_target>-10 -20 -10 -4</min_target>
-    <max_target>10 20 10 4</max_target>
+    <min_target>-10 -20 -10 -10</min_target>
+    <max_target>10 20 10 10</max_target>
     <target_lowpass>1 1 1 1</target_lowpass>
     <min_output>-1 -1 -1 -1</min_output>
     <max_output>1 1 1 1</max_output>

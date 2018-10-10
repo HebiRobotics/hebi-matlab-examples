@@ -1,4 +1,4 @@
-function [] = scanningArmKinematics( log )
+function [] = scanningArmAnalysis( log )
 %%
 % Load a log from scanningArmRaster and plot stuff
 %
