@@ -1,4 +1,4 @@
-function [ cmd, cmdIO, abortFlag ] = executeTrajectory( armGroup, ...
+function [ cmd, cmdIO, otherInfo, abortFlag ] = executeTrajectory( armGroup, ...
                                         phoneGroup, ioGroup, cmd, cmdIO, ...
                                         kin, traj, otherInfo )
 %EXECUTETRAJECTORY Plays out a trajectory similar to how the old blocking
@@ -56,10 +56,13 @@ function [ cmd, cmdIO, abortFlag ] = executeTrajectory( armGroup, ...
             downForceScale = .5 * (1 + phoneFbkIO.(downForce));  % scale [0-1]
             wristPosTweak = phoneFbkIO.(wristAdjust) * wristAdjustScale;
             stopRaster = phoneFbkIO.(startStop);
+            otherInfo.timeScale = timeScale;   
+            otherInfo.downForceScale = downForceScale;
+            otherInfo.wristPosTweak = wristPosTweak;
         else
-            timeScale = 1;   
-            downForceScale = 1;
-            wristPosTweak = 0;
+            timeScale = otherInfo.timeScale;   
+            downForceScale = otherInfo.downForceScale;
+            wristPosTweak = otherInfo.wristPosTweak;
             stopRaster = 0;
         end
         

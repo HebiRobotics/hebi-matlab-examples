@@ -137,6 +137,10 @@ function [] = scanningArmRaster()
             if ~isempty(newPhoneFbkIO)
                 phoneFbkIO = newPhoneFbkIO;
             end
+            
+            timeScale = .5 * (1 + phoneFbkIO.(scanSpeed));  % scale [0-1]
+            downForceScale = .5 * (1 + phoneFbkIO.(downForce));  % scale [0-1]
+            wristPosTweak = phoneFbkIO.(wristAdjust) * wristAdjustScale;
 
             if ~exist('probeXYZ_init','var') || phoneFbkIO.(resetScanner)
 
@@ -157,7 +161,6 @@ function [] = scanningArmRaster()
             gravComp = kin.getGravCompEfforts(fbk.position, gravityVec);  
             
             J_armTip = kin.getJacobian('endeffector',fbk.position);
-            downForceScale = .5 * (1 + phoneFbkIO.(downForce)); % scale [0-1]
             downForceEfforts = J_armTip' * downForceScale*pushDownWrench; 
             cmd.effort = gravComp + downForceEfforts';
 
@@ -269,6 +272,10 @@ function [] = scanningArmRaster()
 
         otherInfo.damperGains = damperGains;  % [N/(m/sec)] or [Nm/(rad/sec)]
         otherInfo.springGains = springGains;  % [N/m] or [Nm/rad]
+        
+        otherInfo.timeScale = timeScale;  % scale [0-1]
+        otherInfo.downForceScale = downForceScale;  % scale [0-1]
+        otherInfo.wristPosTweak = wristPosTweak;
 
 
         %%
@@ -290,8 +297,9 @@ function [] = scanningArmRaster()
             trajTime(end) = trajTime(end) + startStopTimeBuffer;
 
             traj = trajGen.newJointMove( moveWaypoints, 'time', trajTime );
-            [cmd, cmdIO, abortFlag] = executeTrajectory( armGroup, phoneGroup, ioGroup, ...
-                                            cmd, cmdIO, kin, traj, otherInfo );
+            [cmd, cmdIO, otherInfo, abortFlag] = executeTrajectory( ...
+                                    armGroup, phoneGroup, ioGroup, ...
+                                    cmd, cmdIO, kin, traj, otherInfo );
 
             if abortFlag
                 fprintf('STOPPED!\n');
@@ -307,8 +315,9 @@ function [] = scanningArmRaster()
                 rasterSwitchTime = 0.1; % [sec]              
                 traj = trajGen.newJointMove( moveWaypoints, ...
                                              'time', [0 rasterSwitchTime] );
-                [cmd, cmdIO, abortFlag] = executeTrajectory( armGroup, phoneGroup, ioGroup, ...
-                                            cmd, cmdIO, kin, traj, otherInfo );
+                [cmd, cmdIO, otherInfo, abortFlag] = executeTrajectory( ...
+                                    armGroup, phoneGroup, ioGroup, ...
+                                    cmd, cmdIO, kin, traj, otherInfo );
             end
 
             if abortFlag

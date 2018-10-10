@@ -12,6 +12,7 @@ function scanningArmDemoRunner( )
         try
             scanningArmRaster();
         catch me
+            disp('CAUGHT ERROR!');
             disp(me.message);
         end
     end
