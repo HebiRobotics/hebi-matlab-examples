@@ -197,7 +197,6 @@ function [] = scanningArmRaster()
 
             armGroup.send(cmd);
 
-
             % Get probe position from FK and update the scanner
             probeFK = kin.getFK('EndEffector', fbk.position);
             probeXYZ = probeFK(1:3,4) - probeXYZ_init;
@@ -241,7 +240,15 @@ function [] = scanningArmRaster()
                                               'tipAxis', [0 0 -1], ...
                                               'initial', ikSeedPos );
                 ikSeedPos = waypoints(j,:,i);
+                
             end
+            
+            % Send commands to the arm to keep it from timing out
+            fbk = armGroup.getNextFeedback();
+            cmd.position = fbk.positionCmd;
+            cmd.velocity = fbk.velocityCmd;
+            cmd.effort = fbk.effortCmd;
+            armGroup.send(cmd);
 
             % Once we've built a run, flip the xPts so they run back and forth
             xPts = flip(xPts);
