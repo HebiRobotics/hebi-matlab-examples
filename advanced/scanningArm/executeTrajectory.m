@@ -40,6 +40,12 @@ function [ cmd, cmdIO, abortFlag ] = executeTrajectory( armGroup, ...
         dt = fbk.time - tLast;
         tLast = fbk.time;
         
+        % Check for M-Stop and throw an error to restart if detected
+        fbkIO = armGroup.getNextFeedbackIO();
+        if any(fbkIO.a1==0)
+            error('M-Stop Detected!');
+        end
+        
         newPhoneFbkIO = phoneGroup.getNextFeedbackIO( 'timeout', 0 );
         if ~isempty(newPhoneFbkIO)
             phoneFbkIO = newPhoneFbkIO;

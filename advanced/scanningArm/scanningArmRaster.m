@@ -4,8 +4,7 @@ function [] = scanningArmRaster()
     % Dave Rollinson
     % Jul 2018
 
-    HebiLookup.initialize();
-    
+    HebiLookup.initialize();   
     enableLogging = false;
 
     % Robot specific setup. Edit as needed.
@@ -18,11 +17,22 @@ function [] = scanningArmRaster()
     armGroup = HebiLookup.newGroupFromNames( familyName, moduleNames );
     cmd = CommandStruct();
 
-    armGroup.send('gains',gains);
+    % Set gains, assume that if control strategy isn't 0 then the gains
+    % were set correctly.  This covers the main use case that we're setting
+    % after having pressed an e-stop.
+    gainsAreSet = false;
+    while ~gainsAreSet
+        disp('Setting Gains');
+        armGroup.send('gains',gains);
+        pause(.05);
+        fbkGains = armGroup.getGains();
+        if all(fbkGains.controlStrategy>0)
+            gainsAreSet = true;
+        end
+    end
+    
     armGroup.setFeedbackFrequency(200);
     numDoF = armGroup.getNumModules();
-
-    fbk = armGroup.getNextFeedback();
 
     %%
     ioBoardName = '_scanIO';
@@ -76,8 +86,8 @@ function [] = scanningArmRaster()
 
     wristAdjustScale = .03;
 
-    damperGains = [3; 3; 1; 0.1; 0.1; 0.0;]; % [N/(m/sec)] or [Nm/(rad/sec)]
-    springGains = [300; 300; 30; 1; 1; 0];  % [N/m] or [Nm/rad]
+    damperGains = [2; 2; 2; 0.1; 0.1; 0.0;]; % [N/(m/sec)] or [Nm/(rad/sec)]
+    springGains = [200; 200; 20; 1; 1; 0];  % [N/m] or [Nm/rad]
 
     maxPushDownForce = 20;  % N
     pushDownWrench = [0; 0; -maxPushDownForce; 0; 0; 0];
@@ -116,6 +126,12 @@ function [] = scanningArmRaster()
             fbk = armGroup.getNextFeedback();        
             dt = fbk.time - tLast;
             tLast = fbk.time;
+            
+            % Check for M-Stop and throw an error to restart if detected
+            fbkIO = armGroup.getNextFeedbackIO();
+            if any(fbkIO.a1==0)
+                error('M-Stop Detected!');
+            end
 
             newPhoneFbkIO = phoneGroup.getNextFeedbackIO( 'timeout', 0 );
             if ~isempty(newPhoneFbkIO)
@@ -202,12 +218,6 @@ function [] = scanningArmRaster()
 
         %% Build the raster plan
 
-        % % Rasters run along Y
-        % xPts = (0:rasterWidth:rasterLimitsXY(1)) + probeXYZ_init(1);
-        % yPts = (0:waypointSpacing:rasterLimitsXY(2)) + probeXYZ_init(2);
-        % numRasters = length(xPts);
-        % numWaypoints = length(yPts);
-
         % Raster run along X
         xPts = (0:waypointSpacing:rasterLimitsXY(1)) + probeXYZ_init(1);
         yPts = (0:rasterWidth:rasterLimitsXY(2)) + probeXYZ_init(2);
@@ -268,9 +278,7 @@ function [] = scanningArmRaster()
         % Split waypoints into individual movements
         numMoves = size(waypoints,3);
         for i = 1:numMoves
-
-            fbk = armGroup.getNextFeedback();
-
+            
             moveWaypoints = waypoints(:,:,i);
             tMax = rasterLimitsXY(1) / rasterSpeed;
             trajTime = linspace(0,tMax,numWaypoints);
@@ -311,7 +319,7 @@ function [] = scanningArmRaster()
         end
         
         if ~abortFlag
-        	printf('DONE!\n');
+        	fprintf('DONE!\n');
         end
         
         % Get the current arm position so that it doesn't jerk back to the
