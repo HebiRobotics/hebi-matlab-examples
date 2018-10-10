@@ -16,7 +16,7 @@
     <!-- <i_clamp>2 5 2 1</i_clamp> -->
     
     <!-- Stiff Control w/o integral term -->
-    <kp>75 75 25 15</kp>
+    <kp>50 75 25 10</kp>
     <ki>0 0 0 0</ki>
     <i_clamp>0 0 0 0</i_clamp>
     

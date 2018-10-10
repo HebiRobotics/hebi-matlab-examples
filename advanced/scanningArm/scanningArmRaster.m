@@ -38,6 +38,9 @@ scannerSetX = 'e5';
 scannerSetY = 'e6';
 scannerClearData = 'e7';
 
+encoderResX = 10 * 1000; % [tics / mm] * [mm / m]
+encoderResY = 10 * 1000; % [tics / mm] * [mm / m]
+
 readX = 'c1';
 readY = 'c4';
 
@@ -45,7 +48,7 @@ readY = 'c4';
 scanArm_IO_reset;
 
 %%
-phoneName = 'Future in My Pocket'; 
+phoneName = '_scanUI'; 
 while true        
     try
         fprintf('Searching for phone Controller...\n');
@@ -70,9 +73,16 @@ joyX = 'a1';
 joyY = 'a2';
 joyScale = .100;
 scanSpeed = 'a3';
+downForce = 'a6';
+wristAdjust = 'a4';
 
-encoderResX = 10 * 1000; % [tics / mm] * [mm / m]
-encoderResY = 10 * 1000; % [tics / mm] * [mm / m]
+wristAdjustScale = .03;
+
+damperGains = [3; 3; 1; 0.1; 0.1; 0.0;]; % [N/(m/sec)] or [Nm/(rad/sec)]
+springGains = [300; 300; 30; 1; 1; 0];  % [N/m] or [Nm/rad]
+
+maxPushDownForce = 20;  % N
+pushDownWrench = [0; 0; -maxPushDownForce; 0; 0; 0];
 
 % Trajectory
 trajGen = HebiTrajectoryGenerator(kin);
@@ -96,15 +106,15 @@ kin.setPayload( 0.1 );  % kg
 
 
 % Raster Params
-rasterLimitsXY_mm = [70 70];
+rasterLimitsXY_mm = [70 150];
 rasterWidth_mm = 1.0;
-rasterSpeed_mm = 200; % [m/sec]
+rasterSpeed_mm = 300; % [m/sec]
 
 rasterLimitsXY = rasterLimitsXY_mm / 1000;% [m]
 rasterWidth = rasterWidth_mm / 1000;% [m]
 rasterSpeed = rasterSpeed_mm / 1000;% [m / sec]
 
-waypointSpacing_mm = 5;
+waypointSpacing_mm = 10;
 waypointSpacing = waypointSpacing_mm / 1000; % [m]
 
 fbk = armGroup.getNextFeedback();
@@ -141,8 +151,13 @@ while true
         probeXYZ_init = probeFK(1:3,4) - .5*[rasterLimitsXY'; 0];
     end
     
-    % Do grav-comp while training waypoints
-    cmd.effort = kin.getGravCompEfforts(fbk.position, gravityVec);
+    % Add Gravity Compensation and Down-Force
+
+    
+    % Add Gravity Compensation and Down-Force
+    gravComp = kin.getGravCompEfforts(fbk.position, gravityVec);
+    
+    cmd.effort = gravComp;
     
     if phoneFbkIO.(handPositionMode)
         cmdFK = kin.getFK('EndEffector', fbk.position);
@@ -170,6 +185,11 @@ while true
         cmd.velocity = cmdVelocity';
         cmd.position = cmdPosition;
     end
+    
+    % Tweak the wrist a little bit
+    wristPosTweak = phoneFbkIO.(wristAdjust) * wristAdjustScale;
+    cmd.position(4) = cmd.position(4) + wristPosTweak;
+        
     armGroup.send(cmd);
     
     
@@ -232,6 +252,26 @@ end
 % Start background logging 
 logFile = armGroup.startLog('dir','logs'); 
 
+% Copy various import variables into a struct to pass into the function 
+% that executes the raster trajectories.
+otherInfo.probeXYZ_init = probeXYZ_init;
+
+% These are copied from the higher level.  Not the best practice :-(
+otherInfo.setX = setX;      % [ticks] to increment
+otherInfo.setY = setY;      % [ticks] to increment
+otherInfo.encoderResX = encoderResX; % [tics / mm] * [mm / m]
+otherInfo.encoderResY = encoderResY; % [tics / mm] * [mm / m]
+
+otherInfo.scanSpeed = scanSpeed;  
+otherInfo.downForce = downForce;
+otherInfo.maxPushDownForce = maxPushDownForce;
+otherInfo.startStop = startStop;
+otherInfo.wristAdjust = wristAdjust;
+otherInfo.wristAdjustScale = wristAdjustScale;
+
+otherInfo.damperGains = damperGains;  % [N/(m/sec)] or [Nm/(rad/sec)]
+otherInfo.springGains = springGains;  % [N/m] or [Nm/rad]
+
 
 %%
 disp('Rastering...')
@@ -247,7 +287,7 @@ for i = 1:numMoves
     fbk = armGroup.getNextFeedback();
     
     moveWaypoints = waypoints(:,:,i);
-    tMax = rasterLimitsXY(2) / rasterSpeed;
+    tMax = rasterLimitsXY(1) / rasterSpeed;
     trajTime = linspace(0,tMax,numWaypoints);
 
     % Stretch the first and last waypoint times to avoid jerking
@@ -258,7 +298,7 @@ for i = 1:numMoves
 
     traj = trajGen.newJointMove( moveWaypoints, 'time', trajTime );
     [cmd, cmdIO, abortFlag] = executeTrajectory( armGroup, phoneGroup, ioGroup, ...
-                                    cmd, cmdIO, kin, traj, probeXYZ_init );
+                                    cmd, cmdIO, kin, traj, otherInfo );
     
     if i < numRasters
         moveWaypoints = [ squeeze( waypoints(end,:,i) );
@@ -268,8 +308,7 @@ for i = 1:numMoves
         traj = trajGen.newJointMove( moveWaypoints, ...
                                      'time', [0 rasterSwitchTime] );
         [cmd, cmdIO, abortFlag] = executeTrajectory( armGroup, phoneGroup, ioGroup, ...
-                                    cmd, cmdIO, kin, traj, probeXYZ_init );
-        
+                                    cmd, cmdIO, kin, traj, otherInfo );
     end
 end
 

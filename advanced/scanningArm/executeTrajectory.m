@@ -1,16 +1,25 @@
 function [ cmd, cmdIO, abortFlag ] = executeTrajectory( armGroup, ...
                                         phoneGroup, ioGroup, cmd, cmdIO, ...
-                                        kin, traj, probeXYZ_init )
+                                        kin, traj, otherInfo )
 %EXECUTETRAJECTORY Plays out a trajectory similar to how the old blocking
 %API works.
 
     % These are copied from the higher level.  Not the best practice :-(
-    scanSpeed = 'a3';  
-    downForce = 'a6';
-    setX = 'e1';      % [ticks] to increment
-    setY = 'e3';      % [ticks] to increment
-    encoderResX = 10 * 1000; % [tics / mm] * [mm / m]
-    encoderResY = 10 * 1000; % [tics / mm] * [mm / m]
+    setX = otherInfo.setX;      % [ticks] to increment
+    setY = otherInfo.setY;      % [ticks] to increment
+    encoderResX = otherInfo.encoderResX; % [tics / mm] * [mm / m]
+    encoderResY = otherInfo.encoderResY; % [tics / mm] * [mm / m]
+    probeXYZ_init = otherInfo.probeXYZ_init;
+    
+    scanSpeed = otherInfo.scanSpeed;  
+    downForce = otherInfo.downForce;
+    maxPushDownForce = otherInfo.maxPushDownForce;
+    startStop = otherInfo.startStop;
+    wristAdjust = otherInfo.wristAdjust;
+    wristAdjustScale = otherInfo.wristAdjustScale;
+    
+    damperGains = otherInfo.damperGains;  % [N/(m/sec)] or [Nm/(rad/sec)]
+    springGains = otherInfo.springGains;  % [N/m] or [Nm/rad]
     
     numDoF = kin.getNumDoF();
 
@@ -20,14 +29,10 @@ function [ cmd, cmdIO, abortFlag ] = executeTrajectory( armGroup, ...
     
     abortFlag = false;
     
-    damperGains = [2; 2; 2; 0.1; 0.1; 0.0;]; % [N/(m/sec)] or [Nm/(rad/sec)]
-    springGains = [200; 200; 50; 1; 1; 0];  % [N/m] or [Nm/rad]
-    
-    maxPushDownForce = 20;  % N
-    pushDownWrench = [0; 0; -maxPushDownForce; 0; 0; 0];
-    
     % Assume gravity points down in base frame
     gravityVec = [0 0 -1];
+    
+    pushDownWrench = [0; 0; -maxPushDownForce; 0; 0; 0];
     
     while (t <= traj.getDuration) && (t >= 0) && ~abortFlag
 
@@ -43,9 +48,11 @@ function [ cmd, cmdIO, abortFlag ] = executeTrajectory( armGroup, ...
         if exist('phoneFbkIO','var')
             timeScale = .5 * (1 + phoneFbkIO.(scanSpeed));
             downForceScale = .5 * (1 + phoneFbkIO.(downForce));
+            wristPosTweak = phoneFbkIO.(wristAdjust) * wristAdjustScale;
         else
             timeScale = 1;   
             downForceScale = 1;
+            wristPosTweak = 0;
         end
         t = t + timeScale*dt;
 
@@ -105,12 +112,18 @@ function [ cmd, cmdIO, abortFlag ] = executeTrajectory( armGroup, ...
         accelCompEffort = kin.getDynamicCompEfforts(...
             fbk.position, ... % Used for calculating jacobian
             pos, vel, acc);
+        
+        % Tweak the wrist a little bit
+        pos(4) = pos(4) + wristPosTweak;
+        
+        armGroup.send(cmd);
 
         cmd.position = nan(1,numDoF);
         cmd.position = pos;
         cmd.velocity = vel;
         cmd.effort = gravCompEffort + accelCompEffort + impedanceEffort';
-        armGroup.send(cmd);
+        
+
 
         % Get probe position from FK
         probeXYZ = armTipFK(1:3,4) - probeXYZ_init;

@@ -9,7 +9,14 @@
   <actuator type="X5-4"/>
   
   <!-- Extra body for the probe -->
-  <rigid-body mass="0.200" 
+  
+  <!-- NDT Automation - CBRZ5X2 -->
+  <!-- <rigid-body mass="0.100" 
+              output_trans="0.070 0.0 0.0175"
+              output_rot="Ry(pi/2)"/> -->
+              
+  <!-- Panametrics-NDT - D790-SM -->
+  <rigid-body mass="0.100" 
               output_trans="0.045 0.0 0.0175"
               output_rot="Ry(pi/2)"/>
 </robot>
