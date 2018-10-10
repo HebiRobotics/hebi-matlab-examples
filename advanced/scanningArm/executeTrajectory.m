@@ -46,14 +46,21 @@ function [ cmd, cmdIO, abortFlag ] = executeTrajectory( armGroup, ...
         end
         
         if exist('phoneFbkIO','var')
-            timeScale = .5 * (1 + phoneFbkIO.(scanSpeed));
-            downForceScale = .5 * (1 + phoneFbkIO.(downForce));
+            timeScale = .5 * (1 + phoneFbkIO.(scanSpeed));  % scale [0-1]
+            downForceScale = .5 * (1 + phoneFbkIO.(downForce));  % scale [0-1]
             wristPosTweak = phoneFbkIO.(wristAdjust) * wristAdjustScale;
+            stopRaster = phoneFbkIO.(startStop);
         else
             timeScale = 1;   
             downForceScale = 1;
             wristPosTweak = 0;
+            stopRaster = 0;
         end
+        
+        if stopRaster==1
+            abortFlag = true;
+        end
+        
         t = t + timeScale*dt;
 
         % Get commanded positions, velocities, and accelerations
@@ -103,7 +110,6 @@ function [ cmd, cmdIO, abortFlag ] = executeTrajectory( armGroup, ...
                                         downForceScale*pushDownWrench;
         impedanceEffort = J_armTip' * fullWrench; 
         
-
         % Compensate for gravity
         gravCompEffort = kin.getGravCompEfforts( ...
                                     fbk.position, gravityVec );
@@ -122,9 +128,7 @@ function [ cmd, cmdIO, abortFlag ] = executeTrajectory( armGroup, ...
         cmd.position = pos;
         cmd.velocity = vel;
         cmd.effort = gravCompEffort + accelCompEffort + impedanceEffort';
-        
-
-
+ 
         % Get probe position from FK
         probeXYZ = armTipFK(1:3,4) - probeXYZ_init;
 
