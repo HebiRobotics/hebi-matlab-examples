@@ -61,9 +61,9 @@ function [] = scanningArmRaster()
     phoneName = '_scanUI'; 
     while true        
         try
-            fprintf('Searching for phone Controller...\n');
+            fprintf('Searching for Mobile Controller...\n');
             phoneGroup = HebiLookup.newGroupFromNames( familyName, phoneName );
-            disp('Phone Found.  Starting up');
+            disp('Mobile Device Found.  Starting up');
             break;
         catch
             pause(1.0);
