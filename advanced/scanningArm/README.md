@@ -8,7 +8,7 @@ This folder contains everything needed to run the NDT scanning arm. It assumes t
 * iOS or Android device running the HEBI Mobile I/O App.
 
 
-## To get started:
+## Getting Started
 
 Download the `hebi-matlab-examples` folder (make sure you get this branch).
 Start Matlab (2013b or later)
