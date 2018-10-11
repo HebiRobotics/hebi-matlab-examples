@@ -24,11 +24,11 @@ To run a version of the demo that wraps try-catch block so that it never crashes
 | Input      | Command   | Note  |
 | ----------------- | ----------------- | ----------- |
 | Button (`B1`)  | Hold down to allow hand-positioning of probe | Arm will do IK to keep the probe aligned with Z-axis of the base frame. |
-| Button (`B4`)  | Reset Omniscan display and coordinates |  |
-| Button (`B8`)  | Begin raster scanning |  |
+| Button (`B4`)  | Reset Omniscan display and coordinates | This is a little janky.  Might need to press twice. |
+| Button (`B8`)  | Start/stop raster scanning |  |
 | Left Joystick (`A1` and `A2`)  | Jog probe in X-Y plane |  |
 | Slider (`A3`) | Raster speed | Top position is top speed.  Bottom position will completely pause rastering. |
-| Slider (`A4`) | Probe angle adjust | Middle is no adjustment.  Going to either side adjusts the probe angle for better contact. |
+| Slider (`A4`) | Probe angle adjust | Middle is no adjustment. Up and down slightly adjusts the angle of the wrist module for better probe contact. |
 | Slider (`A6`) | Downward force | Top position is full down-force.  Bottom position is no additional down-force (arm is 'weightless'). 
 
 
