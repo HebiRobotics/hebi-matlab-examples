@@ -40,8 +40,8 @@ function [] = scanningArmRaster()
     cmdIO = IoCommandStruct();
 
     % Pin mappings for IO Board
-    setX = 'e1';      % [ticks] to increment
-    setY = 'e3';      % [ticks] to increment
+    setX = 'e3';      % [ticks] to increment
+    setY = 'e1';      % [ticks] to increment
     % resetXY = 'e2';    % Non-zero value resets encoder ticks to 0.
     % resetXY = 'e4';    % Does same thing as 'e2'.
     scannerSetX = 'e5';
@@ -100,7 +100,7 @@ function [] = scanningArmRaster()
     kin.setPayload( 0.0 );  % kg
 
     % Raster Params
-    rasterLimitsXY_mm = [70 150];
+    rasterLimitsXY_mm = [150 70];
     rasterWidth_mm = 1.0;
     rasterSpeed_mm = 300; % [m/sec]
 
@@ -219,22 +219,28 @@ function [] = scanningArmRaster()
         scanArm_IO_reset;
 
         %% Build the raster plan
+        
+%         % Raster run along Y
+%         xPts = (0:waypointSpacing:rasterLimitsXY(1)) + probeXYZ_init(1);
+%         yPts = (0:rasterWidth:rasterLimitsXY(2)) + probeXYZ_init(2);
+%         numRasters = length(yPts);
+%         numWaypoints = length(xPts);
 
-        % Raster run along X
-        xPts = (0:waypointSpacing:rasterLimitsXY(1)) + probeXYZ_init(1);
-        yPts = (0:rasterWidth:rasterLimitsXY(2)) + probeXYZ_init(2);
-        numRasters = length(yPts);
-        numWaypoints = length(xPts);
-
+        % Raster run along Y
+        xPts = (0:rasterWidth:rasterLimitsXY(1)) + probeXYZ_init(1);
+        yPts = (0:waypointSpacing:rasterLimitsXY(2)) + probeXYZ_init(2);
+        numRasters = length(xPts);
+        numWaypoints = length(yPts);
+        
+        waypoints = nan(numWaypoints,numDoF,numRasters);
         zPt = 0.000 + probeXYZ_init(3);
-        waypoints = nan(length(xPts),numDoF,length(yPts));
 
         for i = 1:numRasters
 
             % Build a run of waypoints
             for j = 1:numWaypoints
-                targetXYZ = [ xPts(j); 
-                              yPts(i); 
+                targetXYZ = [ xPts(i); 
+                              yPts(j); 
                               zPt ];
                 waypoints(j,:,i) = kin.getIK( 'XYZ', targetXYZ, ...
                                               'tipAxis', [0 0 -1], ...
@@ -251,8 +257,8 @@ function [] = scanningArmRaster()
             armGroup.send(cmd);
 
             % Once we've built a run, flip the xPts so they run back and forth
-            xPts = flip(xPts);
-            % yPts = flip(yPts);
+            % xPts = flip(xPts);
+            yPts = flip(yPts);
         end
 
         % Start background logging 
@@ -294,7 +300,7 @@ function [] = scanningArmRaster()
         for i = 1:numMoves
             
             moveWaypoints = waypoints(:,:,i);
-            tMax = rasterLimitsXY(1) / rasterSpeed;
+            tMax = rasterLimitsXY(2) / rasterSpeed;
             trajTime = linspace(0,tMax,numWaypoints);
 
             % Stretch the first and last waypoint times to avoid jerking

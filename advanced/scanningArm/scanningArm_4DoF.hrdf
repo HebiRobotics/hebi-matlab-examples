@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<robot version="1.1.0">
+<robot version="1.1.0"
+       rot="Rz(-pi/2)" 
+       trans="0.0 0.0 0.0">  
+    
   <actuator type="X5-4"/>
   <bracket type="X5HeavyLeftOutside"/>
   <actuator type="X5-9"/>
