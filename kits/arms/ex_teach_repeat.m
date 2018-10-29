@@ -129,6 +129,12 @@ while (trajTime < trajectory.getDuration) && ~abortFlag
     group.send(cmd);
 end
 
+tic;
+while toc < 1.0
+    fbk = group.getNextFeedback();
+    keys = read(kb);
+end
+
 % Move along waypoints
 while true && ~abortFlag
     
