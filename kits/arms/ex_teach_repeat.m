@@ -59,6 +59,12 @@ while keys.ESC == 0
     
 end
 
+tic;
+while toc < 1.0
+    fbk = group.getNextFeedback();
+    keys = read(kb);
+end
+
 %% 
 %%%%%%%%%%%%%%%%%%%%
 % Replay waypoints %
@@ -99,7 +105,6 @@ while (trajTime < trajectory.getDuration) && ~abortFlag
         break;
     end
 
-
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % If you want to do something with the lastest feedback to
     % change the commands, replan a trajectory, abort, or do 
@@ -127,12 +132,6 @@ while (trajTime < trajectory.getDuration) && ~abortFlag
     cmd.effort = gravCompEffort + accelCompEffort + ...
                                             effortOffset;
     group.send(cmd);
-end
-
-tic;
-while toc < 1.0
-    fbk = group.getNextFeedback();
-    keys = read(kb);
 end
 
 % Move along waypoints
