@@ -14,8 +14,7 @@
 clear *;
 close all;
 
-% Optional step to limit the lookup to a set of interfaces or modules
-% HebiLookup.setLookupAddresses('10.10.10.255');
+HebiLookup.initialize();
 
 enableLogging = false;
 enableEffortComp = true;
@@ -26,7 +25,14 @@ enableEffortComp = true;
 % Mobile Device Setup %
 %%%%%%%%%%%%%%%%%%%%%%%
 phoneFamily = 'HEBI';
-phoneName = 'Virtual IO';
+phoneName = 'Mobile IO';
+
+resetPoseButton = 'b1';
+quitDemoButton = 'b8';
+translationScaleSlider = 'a3';
+gripForceSlider = 'a6';
+
+abortFlag = false;
 
 while true  
     try
@@ -47,14 +53,24 @@ end
 % Arm Setup %
 %%%%%%%%%%%%%
 
-[ robotGroup, armKin, armParams ] = setupArm('6dof');
+armFamily = 'Arm';
+
+[ armGroup, armKin, armParams ] = setupArm( '6-DoF + gripper', armFamily );
 
 ikSeedPos = armParams.ikSeedPos;
 armEffortOffset = armParams.effortOffset;
-gravityVec = [0 0 -1];
+gravityVec = armParams.gravityVec;
+
+if armParams.hasGripper
+    gripperGroup = HebiLookup.newGroupFromNames( armFamily, 'Spool' );
+    gripperGroup.send( 'gains', armParams.gripperGains );
+    gripperForceScale = abs(armParams.gripperCloseEffort); 
+    gripperCmd = CommandStruct();
+end
+
 numArmDOFs = armKin.getNumDoF();
 
-numModules = robotGroup.getNumModules;
+numModules = armGroup.getNumModules;
 
 armDOFs = 1:numModules;
 
@@ -64,12 +80,23 @@ armTrajGen.setMinDuration(1.0); % Min move time for 'small' movements
                              % (default is 1.0)
 armTrajGen.setSpeedFactor(1.0); % Slow down movements to a safer speed.
                              % (default is 1.0)
+                             
+disp('  ');
+disp('Arm end-effector is now following the mobile device pose.');
+disp('The control interface has the following commands:');
+disp('  B1 - Reset/re-align poses.');
+disp('       This takes the arm to home and aligns with mobile device.');
+disp('  A3 - Scale down the translation commands to the arm.');
+disp('       Sliding all the way down means the end-effector only rotates.');
+disp('  A6 - Control the gripper (if the arm has gripper).');
+disp('       Sliding down closes the gripper, sliding up opens.');
+disp('  B8 - Quits the demo.');
 
 
 %% Startup
-while true
-    fbk = robotGroup.getNextFeedbackFull();
-    fbkPhone = phoneGroup.getNextFeedback('view','debug');
+while ~abortFlag
+    fbk = armGroup.getNextFeedbackFull();
+    fbkPhoneMobile = phoneGroup.getNextFeedback('view','mobile');
     fbkPhoneIO = phoneGroup.getNextFeedback('view','io');
 
     cmd = CommandStruct();
@@ -77,28 +104,29 @@ while true
     cmd.velocity = nan(size(fbk.position));
     cmd.effort = nan(size(fbk.position));
 
-    xyzScale = [1 1 2];
+    xyzScale = [1 1 2]';
 
     % Start background logging
     if enableLogging
-        robotGroup.startLog();
-        phoneGroup.startLog();
+        armGroup.startLog('dir','logs');
+        phoneGroup.startLog('dir','logs');
     end
 
     % Move to current coordinates
-    xyzTarget_init = [0.3 0.0 0.2];
+    xyzTarget_init = [0.5 0.0 0.1]';
     rotMatTarget_init = R_y(pi);
 
     ikPosition = armKin.getIK( 'xyz', xyzTarget_init, ...
                                'so3', rotMatTarget_init, ...
                                'initial', ikSeedPos );
 
+    % Slow trajectories down for the initial move to home position                       
     armTrajGen.setSpeedFactor( 0.5 );   
-    %armTrajGen.setMinDuration( 1.0 );  
     
     armTraj = armTrajGen.newJointMove([fbk.position(armDOFs); ikPosition]);
     
-    armTrajGen.setSpeedFactor( 0.9 );   
+    % Set trajectories to normal speed for following mobile input
+    armTrajGen.setSpeedFactor( 1.0 );   
     armTrajGen.setMinDuration( 0.33 );  
 
     t0 = fbk.time;
@@ -106,7 +134,7 @@ while true
 
     while t < armTraj.getDuration()
 
-        fbk = robotGroup.getNextFeedbackFull();
+        fbk = armGroup.getNextFeedbackFull();
         t = min(fbk.time - t0,armTraj.getDuration);
 
         [pos,vel,accel] = armTraj.getState(t);
@@ -121,22 +149,23 @@ while true
             cmd.effort(armDOFs) = dynamicsComp + gravComp + armEffortOffset;
         end
 
-        robotGroup.send(cmd);
+        armGroup.send(cmd);
 
     end
     
     % Grab initial pose
-    latestPhoneMobile = phoneGroup.getNextFeedback('view','mobile');
+    fbkPhoneMobile = phoneGroup.getNextFeedback('view','mobile');
+    latestPhoneMobile = fbkPhoneMobile;
 
-    q = [ latestPhoneMobile.arOrientationW ...
-          latestPhoneMobile.arOrientationX ...
-          latestPhoneMobile.arOrientationY ...
-          latestPhoneMobile.arOrientationZ ];     
+    q = [ fbkPhoneMobile.arOrientationW ...
+          fbkPhoneMobile.arOrientationX ...
+          fbkPhoneMobile.arOrientationY ...
+          fbkPhoneMobile.arOrientationZ ];     
     R_init = HebiUtils.quat2rotMat( q );
 
-    xyz_init = [ latestPhoneMobile.arPositionX;
-                 latestPhoneMobile.arPositionY; 
-                 latestPhoneMobile.arPositionZ ];
+    xyz_init = [ fbkPhoneMobile.arPositionX;
+                 fbkPhoneMobile.arPositionY; 
+                 fbkPhoneMobile.arPositionZ ];
 
     xyzPhoneNew = xyz_init;
 
@@ -151,13 +180,13 @@ while true
 
     firstRun = true;
 
-    while true
+    while ~abortFlag
 
         %%%%%%%%%%%%%%%%%%%
         % Gather Feedback %
         %%%%%%%%%%%%%%%%%%%
         try
-            fbk = robotGroup.getNextFeedback( 'view', 'full' );
+            fbk = armGroup.getNextFeedback( 'view', 'full' );
         catch
             disp('Could not get robot feedback!');
             break;
@@ -190,13 +219,26 @@ while true
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%
         
         % Check for restart command
-        if fbkPhoneIO.b1
+        if fbkPhoneIO.(resetPoseButton)
             break;
         end
         
+        % Check for quit command
+        if fbkPhoneIO.(quitDemoButton)
+            abortFlag = true;
+            break;
+        end
+        
+        if armParams.hasGripper
+            gripperForceScale = abs(armParams.gripperCloseEffort); 
+            gripperCmd.effort = gripperForceScale * ...
+                                    latestPhoneIO.(gripForceSlider);
+            gripperGroup.send(gripperCmd);
+        end
+        
         % Parameter to limit XYZ Translation of the arm if a slider is
-        % pulled down.
-        phoneControlScale = (fbkPhoneIO.a3 + 1) / 2 ;
+        % pulled down.  Pulling all the way down resets translation.
+        phoneControlScale = (fbkPhoneIO.(translationScaleSlider) + 1) / 2 ;
         if phoneControlScale < .1
             xyz_init = xyzPhoneNew;
         end
@@ -267,7 +309,7 @@ while true
         %%%%%%%%%%%%%%%%%
         % Send to robot %
         %%%%%%%%%%%%%%%%%
-        robotGroup.send(cmd);
+        armGroup.send(cmd);
 
     end
 
