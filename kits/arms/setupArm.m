@@ -10,7 +10,12 @@ function [ group, kin, params ] = setupArm(kit, family)
 % INPUTS:
 % The 'kit' argument currently supports the following names:
 %
-%    '6-DoF + gripper', '6-DoF', '5-DoF', '4-DoF', '4-DoF SCARA', '3-DoF'
+%    '6-DoF + gripper', 
+%    '6-DoF'
+%    '5-DoF'
+%    '4-DoF
+%    '4-DoF SCARA'
+%    '3-DoF'
 %
 % The 'family' argument specifies the family name of the modules that
 % should be selected. It is optional and defaults to 'Arm'.
@@ -35,7 +40,8 @@ if nargin < 2
    family = 'Arm'; 
 end
 
-shoulderJointComp = 0; % Nm  <--- Change this if you add a gas spring
+shoulderJointComp = -7; % Nm  <--- This should be around -7 Nm if you have
+                        %          a gas spring.  Otherwise it should be 0.           
 
 %% Setup kinematic models
 switch kit
@@ -58,9 +64,10 @@ switch kit
         group.send( 'gains', params.gains);
         
         % Settings / gains for the gripper spool to open-close the gripper
+        params.hasGripper = true;
         params.gripperOpenEffort = 1;
         params.gripperCloseEffort = -5;
-        params.gripperGains = [];
+        params.gripperGains = HebiUtils.loadGains('gains/gripper_spool_gains');
         
         % Compensation to joint efforts due to a gas spring (if present)
         params.effortOffset = [0 shoulderJointComp 0 0 0 0];
@@ -86,6 +93,9 @@ switch kit
         params.gains = HebiUtils.loadGains('gains/6-DoF_arm_gains');     
         group.send( 'gains', params.gains);
         
+        % No Gripper
+        params.hasGripper = false;
+        
         % Compensation to joint efforts due to a gas spring (if present)
         params.effortOffset = [0 shoulderJointComp 0 0 0 0];
         
@@ -109,6 +119,9 @@ switch kit
         params.gains = HebiUtils.loadGains('gains/5-DoF_arm_gains');     
         group.send( 'gains', params.gains);
         
+        % No Gripper
+        params.hasGripper = false;
+        
         % Account for external efforts due to the gas spring
         params.effortOffset = [0 shoulderJointComp 0 0 0];
         
@@ -130,9 +143,12 @@ switch kit
         % Load and send arm gains
         params.gains = HebiUtils.loadGains('gains/4-DoF_arm_gains');     
         group.send( 'gains', params.gains);
+                
+        % No Gripper
+        params.hasGripper = false;
         
         % Account for external efforts due to the gas spring
-        params.effortOffset = [0 shoulderJointComp 0 0 0];
+        params.effortOffset = [0 shoulderJointComp 0 0];
         
         % Default seed positions for doing inverse kinematics
         params.ikSeedPos = [0.01 1.0 2.5 1.5];
@@ -152,6 +168,9 @@ switch kit
         % Load and send arm gains
         params.gains = HebiUtils.loadGains('gains/5-DoF_arm_scara_gains');     
         group.send( 'gains', params.gains);
+                
+        % No Gripper
+        params.hasGripper = false;
         
         % Account for external efforts due to the gas spring
         params.effortOffset = [0 shoulderJointComp 0 0];
@@ -172,9 +191,12 @@ switch kit
         % Load and send arm gains
         params.gains = HebiUtils.loadGains('gains/3-DoF_arm_gains');     
         group.send( 'gains', params.gains);
+                
+        % No Gripper
+        params.hasGripper = false;
         
         % Account for external efforts due to the gas spring
-        params.effortOffset = [0 shoulderJointComp 0 0];
+        params.effortOffset = [0 shoulderJointComp 0];
         
         % Default seed positions for doing inverse kinematics
         params.ikSeedPos = [0.01 1.0 2.5];
