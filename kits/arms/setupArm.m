@@ -38,7 +38,7 @@ end
 %% Setup kinematic models
 switch kit
     
-    case '6dof_w_gripper' % A-2084-06
+    case '6-DoF + gripper' % A-2084-06
         %%
         % Create group for communications
         group = HebiLookup.newGroupFromNames(family, {
@@ -49,50 +49,30 @@ switch kit
             'Wrist2'
             'Wrist3' });
         
-        % Approximate kinematics to the tip of the gripper, expressed in the
-        % output frame of the last module on the arm
-        gripperOutput = eye(4);
-        gripperOutput(1:3,4) = [0; 0; .075];
-
         % Kinematic Model
-        % 6-DoF Arm w/ Gripper
-        kin = HebiKinematics();
-        kin.addBody('X8-9');
-        kin.addBody('X5-HeavyBracket', 'mount', 'right-inside');
-        kin.addBody('X8-16'); 
-        kin.addBody('X5-Link', 'extension', 0.325, 'twist', pi, ...
-                        'mass', .500); % Added mass for the gripper spool
-        kin.addBody('X8-9');
-        kin.addBody('X5-Link', 'extension', 0.325, 'twist', pi);
-        kin.addBody('X5-4');
-        kin.addBody('X5-LightBracket', 'mount', 'right');
-        kin.addBody('X5-1');
-        kin.addBody('X5-LightBracket', 'mount', 'right');
-        kin.addBody('X5-1');
-        kin.addBody( 'GenericLink', 'CoM', [0 0 .025], ...
-                                    'Output', gripperOutput, ...
-                                    'Mass', .100 );
+        kin = HebiKinematics('hrdf/6-DoF_arm_w_gripper');
 
         % Compensation to joint efforts due to a gas spring (if present)
         shoulderJointComp = 0; % Nm  <--- Change this if you add a gas spring
         params.effortOffset = [0 shoulderJointComp 0 0 0 0];
 
-        % Torques for the girpper spool to open-close the gripper
+        % Torques for the gripper spool to open-close the gripper
         params.gripperOpenEffort = 1;
         params.gripperCloseEffort = -5;
+        params.gripperGains = [];
 
         % Default seed positions for doing inverse kinematics
         params.ikSeedPos = [0 1 2.5 1.5 -1.5 1];
         
         % Load and send the gains
-        gains = HebiUtils.loadGains('6-DoF-Arm-Gains');
+        gains = HebiUtils.loadGains('gains/6-DoF-Arm-Gains');
         
         gains.positionKp = gains.positionKp / 2;
         
         group.send('gains',gains);
         params.gains = gains;
   
-    case '6dof' % A-2084-06
+    case '6-DoF' % A-2084-06
         %%
         % Create group for communications
         group = HebiLookup.newGroupFromNames(family, {
@@ -104,18 +84,7 @@ switch kit
             'Wrist3' });
         
         % Kinematic Model
-        kin = HebiKinematics();
-        kin.addBody('X8-9');
-        kin.addBody('X5-HeavyBracket', 'mount', 'right-outside');
-        kin.addBody('X8-9', 'PosLim', [-0.6 1.2]); % gas spring limits
-        kin.addBody('X5-Link', 'extension', 0.325, 'twist', pi);
-        kin.addBody('X5-9');
-        kin.addBody('X5-Link', 'extension', 0.325, 'twist', pi);
-        kin.addBody('X5-1');
-        kin.addBody('X5-LightBracket', 'mount', 'right');
-        kin.addBody('X5-1');
-        kin.addBody('X5-LightBracket', 'mount', 'right');
-        kin.addBody('X5-1');
+        kin = HebiKinematics('hrdf/6-DoF_arm');
         
         % Compensation to joint efforts due to a gas spring (if present)
         shoulderJointComp = 0; % Nm  <--- Change this if you add a gas spring
@@ -125,14 +94,14 @@ switch kit
         params.ikSeedPos = [0 1 2.5 1.5 -1.5 1];
         
         % Load and send the gains
-        gains = HebiUtils.loadGains('6-DoF-Arm-Gains');
+        gains = HebiUtils.loadGains('gains/6-DoF_arm_gains');
         
         gains.positionKp = gains.positionKp / 2;
         
         group.send('gains',gains);
         params.gains = gains;
         
-    case '5dof' % A-2084-05
+    case '5-DoF' % A-2084-05
         %%
         % Create group for communications
         group = HebiLookup.newGroupFromNames(family, {
@@ -157,7 +126,7 @@ switch kit
         % Account for external efforts due to the gas spring
         params.effortOffset = [0 -9.8 0 0 0];
         
-    case '4dof' % A-2085-04
+    case '4-DoF' % A-2085-04
         %%
         % Create group for communications
         group = HebiLookup.newGroupFromNames(family, {
@@ -167,16 +136,9 @@ switch kit
             'Wrist1' });
         
         % Kinematic Model
-        kin = HebiKinematics();
-        kin.addBody('X5-4');
-        kin.addBody('X5-HeavyBracket', 'mount', 'right-outside');
-        kin.addBody('X5-9');
-        kin.addBody('X5-Link', 'extension', 0.325, 'twist', pi);
-        kin.addBody('X5-4');
-        kin.addBody('X5-Link', 'extension', 0.325, 'twist', pi);
-        kin.addBody('X5-1');
+        kin = HebiKinematics('hrdf/4-DoF_arm');
         
-    case '4dof-scara' % A-2084-01
+    case '4-DoF_SCARA' % A-2084-01
         %%
         % Create group for communications
         group = HebiLookup.newGroupFromNames(family, {
@@ -186,14 +148,7 @@ switch kit
             'Wrist1' });
         
         % Kinematic Model
-        kin = HebiKinematics();
-        kin.addBody('X5-4');
-        kin.addBody('X5-HeavyBracket', 'mount', 'right-outside');
-        kin.addBody('X5-9');
-        kin.addBody('X5-Link', 'extension', 0.325, 'twist', pi/2);
-        kin.addBody('X5-4');
-        kin.addBody('X5-Link', 'extension', 0.325, 'twist', 0);
-        kin.addBody('X5-1');
+        kin = HebiKinematics('hrdf/4-DoF_arm_scara');
         
     case '3-DoF' % A-2084-01
         
@@ -202,9 +157,10 @@ switch kit
             'Shoulder'
             'Elbow' } );
         
-        kin = HebiKinematics('/hrdf/3-DoF_arm_example');
+        kin = HebiKinematics('/hrdf/3-DoF_arm');
 
     otherwise
+        
         error([kit ' is not a supported kit name']);
         
 end
