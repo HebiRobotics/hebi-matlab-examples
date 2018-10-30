@@ -64,7 +64,10 @@ gravityVec = armParams.gravityVec;
 if armParams.hasGripper
     gripperGroup = HebiLookup.newGroupFromNames( armFamily, 'Spool' );
     gripperGroup.send( 'gains', armParams.gripperGains );
-    gripperForceScale = abs(armParams.gripperCloseEffort); 
+    gripForceScale = 0.5 * (armParams.gripperOpenEffort - ...
+                            armParams.gripperCloseEffort); 
+    gripForceShift = mean( [ armParams.gripperOpenEffort, ...
+                             armParams.gripperCloseEffort] ); 
     gripperCmd = CommandStruct();
 end
 
@@ -230,9 +233,9 @@ while ~abortFlag
         end
         
         if armParams.hasGripper
-            gripperForceScale = abs(armParams.gripperCloseEffort); 
-            gripperCmd.effort = gripperForceScale * ...
-                                    latestPhoneIO.(gripForceSlider);
+            gripperCmd.effort = gripForceScale * ...
+                                    latestPhoneIO.(gripForceSlider) + ...
+                                    gripForceShift;
             gripperGroup.send(gripperCmd);
         end
         
