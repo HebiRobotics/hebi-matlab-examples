@@ -1,18 +1,19 @@
-%% Setup
+ %% Setup
 
 % Reset the workspace
 clear *;
 close all;
 
 % Robot specific setup. Edit as needed.
-[ group, kin, params ] = setupArm('6dof_w_gripper');
+[ group, kin, params ] = setupArm('6-DoF + gripper');
+group.setFeedbackFrequency(100);
 
 effortOffset = params.effortOffset;
 gravityVec = params.gravityVec;
 
 % Trajectory
 trajGen = HebiTrajectoryGenerator(kin);
-trajGen.setMinDuration(1.0); % Min move time for 'small' movements
+trajGen.setMinDuration(2.0); % Min move time for 'small' movements
                              % (default is 1.0)
 trajGen.setSpeedFactor(0.75); % Slow down movements to a safer speed.
                              % (default is 1.0)
@@ -21,7 +22,7 @@ kb = HebiKeyboard();
 
 % Select whether waypoints should be done as a single trajectory, or
 % multiple trajectories that stop in between.
-stopBetweenWaypoints = false;
+stopBetweenWaypoints = true;
 
 % Select whether you want to log and visualize the replay movement
 enableLogging = true;
@@ -30,12 +31,16 @@ enableLogging = true;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Record waypoints in gravity compensated mode %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-disp('  Add waypoint with ALT.  Exit teaching mode with ESC');
+disp('Move the arm to different positions to set waypoints.');
+disp('  ALT  - Adds a new waypoint.');  
+disp('  ESC  - Exits waypoint training mode.');
+disp('         If no waypoints are set, default waypoints are loaded.');
+disp('  ');
+
 
 waypoints = [];
 keys = read(kb);
 prevKeys = keys;
-abortFlag = false;
 
 cmd = CommandStruct();
 
@@ -44,37 +49,53 @@ while keys.ESC == 0
     % Do grav-comp while training waypoints
     fbk = group.getNextFeedback();
     cmd.effort = kin.getGravCompEfforts(fbk.position, gravityVec) ...
-        + effortOffset;
+                                                        + effortOffset;
     group.send(cmd);
     
-    % Add new waypoint on space bar press
+    % Add new waypoints 
     keys = read(kb);
-    if keys.ALT == 1 && prevKeys.ALT == 0 % diff state
-        
+    
+    if keys.ALT == 1 && prevKeys.ALT == 0 % diff state     
         waypoints(end+1,:) = fbk.position;
-        disp('  Enter next waypoint with ALT.  Exit teaching mode with ESC');
-        
+        disp('Waypoint added.');
     end
+    
     prevKeys = keys;
     
 end
 
-tic;
-while toc < 1.0
+numWaypoints = size(waypoints,1);
+
+if numWaypoints == 0
+    load('defaultWaypoints');
+    disp('  '); 
+    disp('No waypoints saved.  Loading default waypoints.');  
+else
+    disp( '  ' ); 
+    disp( [ num2str(numWaypoints) ' waypoints saved.' ] );  
+end
+disp( 'Press SPACE to move to first waypoint.' );
+
+% Stay in grav-comp mode to prevent jerking from effort commands turnning
+% on and off.
+while keys.SPACE == 0
     fbk = group.getNextFeedback();
+    cmd.effort = kin.getGravCompEfforts(fbk.position, gravityVec) ...
+                                                        + effortOffset;
+    group.send(cmd);
     keys = read(kb);
 end
+
+abortFlag = false;
 
 %% 
 %%%%%%%%%%%%%%%%%%%%
 % Replay waypoints %
 %%%%%%%%%%%%%%%%%%%%
-disp(['  Replaying ' num2str(size(waypoints,1)) ' waypoints'])
-disp('     Stop replay by pressing ESC.')
 
 % Start background logging 
 if enableLogging
-   logFile = group.startLog(); 
+   logFile = group.startLog('dir','logs'); 
 end
 
 % Move from current position to first waypoint
@@ -93,6 +114,7 @@ trajectory = trajGen.newJointMove( movePositions );
 trajStartTime = fbk.time;
 trajTime = 0;
 
+% Execute the trajectory to the first waypoint
 while (trajTime < trajectory.getDuration) && ~abortFlag
 
     fbk = group.getNextFeedback();
@@ -110,7 +132,6 @@ while (trajTime < trajectory.getDuration) && ~abortFlag
     % change the commands, replan a trajectory, abort, or do 
     % anything else, this is a pretty good place to do it.    
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 
     % Get commanded positions, velocities, and accelerations
     % from the new trajectory state at the current time
@@ -134,8 +155,29 @@ while (trajTime < trajectory.getDuration) && ~abortFlag
     group.send(cmd);
 end
 
+% Hang out at the first waypoint until we press SPACE
+disp('  '); 
+disp('Ready to begin playback.');
+disp('Press SPACE to begin.');
+
+while keys.SPACE == 0
+    
+    fbk = group.getNextFeedback();
+    
+    cmd.position = fbk.positionCmd;
+    cmd.velocity = fbk.velocityCmd;
+    cmd.effort = fbk.effortCmd;
+    group.send(cmd);
+    
+    keys = read(kb);
+end
+
+% Hang out at the first waypoint until we press SPACE
+disp('Beginning playback.');
+disp('Press ESC to stop.');
+
 % Move along waypoints
-while true && ~abortFlag
+while ~abortFlag
     
     if stopBetweenWaypoints
 
@@ -294,6 +336,10 @@ while true && ~abortFlag
                               'EffortOffset', effortOffset);
 end
 
+disp('  ');
+disp('Quitting playback.');
+disp('Plotting logged feedback.');
+
 
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
@@ -303,10 +349,18 @@ if enableLogging
     
    hebilog = group.stopLogFull();
    
+   % Plot tracking / error from the joints in the arm
    HebiUtils.plotLogs(hebilog, 'position');
    HebiUtils.plotLogs(hebilog, 'velocity');
    HebiUtils.plotLogs(hebilog, 'effort');
    
-   % Feel free to put more plotting code here
+   % Plot the end-effectory trajectory and error
+   kinematics_analysis( hebilog, kin );
+   
+   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+   % Feel free to put more plotting code here %
+   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 end
+
+disp('DONE.');
 
