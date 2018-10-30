@@ -38,7 +38,7 @@
     <ki>0 0 0 0</ki>
     <kd>0.001 0.001 0.001 0.001</kd>
     <feed_forward>1 1 1 1</feed_forward>
-    <dead_zone>0 0 0 0</dead_zone>
+    <dead_zone>0.1 0.1 0.1 0.05</dead_zone>
     <i_clamp>0.25 0.25 0.25 0.25</i_clamp>
     <punch>0 0 0 0</punch>
     <min_target>-20 -20 -10 -5</min_target>
