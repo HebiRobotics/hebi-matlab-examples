@@ -1,4 +1,4 @@
-function [] = arm_kinematics_analysis( log, kin )
+function [] = kinematics_analysis( log, kin )
 %%
 % Use a log file and kinematic info for an arm and plot end-effector
 % motion and tracking error.
