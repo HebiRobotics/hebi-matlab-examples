@@ -11,7 +11,7 @@
     <punch>0 0 0 0</punch>
     <min_target>-inf -inf -inf -inf</min_target>
     <max_target>inf inf inf inf</max_target>
-    <target_lowpass>1 1 11 </target_lowpass>
+    <target_lowpass>1 1 1 1 </target_lowpass>
     <min_output>-20 -20 -10 -5</min_output>
     <max_output>20 20 10 5</max_output>
     <output_lowpass>1 1 1 1</output_lowpass>
