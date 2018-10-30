@@ -54,7 +54,7 @@ plot(log.time, errorXYZ_mm(:,2), 'g');
 plot(log.time, errorXYZ_mm(:,3), 'b');
 hold off;
 
-title('End-Effector Error - Time');
+title('End-Effector XYZ Error - Time');
 xlabel('time (sec)');
 ylabel('error (mm)');
 grid on;
