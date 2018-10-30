@@ -10,7 +10,7 @@ function [] = kinematics_analysis( log, kin )
 log = struct(log);
     
 %%
-% Plotting XYZ tracking
+% XYZ tracking
 logLength = length(log.time);
 cmdXYZ_mm = nan(logLength,3);
 fbkXYZ_mm = nan(logLength,3); 
@@ -31,6 +31,7 @@ errorNorm_mm = sqrt( errorXYZ_mm(:,1).^2 + ...
                      errorXYZ_mm(:,3).^2 );
    
 %%
+% Plotting
 figure(201);
 plot3( fbkXYZ_mm(:,1), fbkXYZ_mm(:,2), fbkXYZ_mm(:,3), 'b' );
 hold on;
@@ -45,30 +46,31 @@ axis equal;
 grid on;
 legend feedback command;
 
+% If there were commanded positions, plot the tracking error
+if all(~isnan(cmdXYZ_mm(:)))
+    figure(202);
+    subplot(2,1,1);
+    plot(log.time, errorXYZ_mm(:,1), 'r');
+    hold on;
+    plot(log.time, errorXYZ_mm(:,2), 'g');
+    plot(log.time, errorXYZ_mm(:,3), 'b');
+    hold off;
 
-figure(202);
-subplot(2,1,1);
-plot(log.time, errorXYZ_mm(:,1), 'r');
-hold on;
-plot(log.time, errorXYZ_mm(:,2), 'g');
-plot(log.time, errorXYZ_mm(:,3), 'b');
-hold off;
+    title('End-Effector XYZ Error - Time');
+    xlabel('time (sec)');
+    ylabel('error (mm)');
+    grid on;
+    xlim([0 log.time(end)]);
+    legend x y z;
 
-title('End-Effector XYZ Error - Time');
-xlabel('time (sec)');
-ylabel('error (mm)');
-grid on;
-xlim([0 log.time(end)]);
-legend x y z;
-
-subplot(2,1,2);
-plot(log.time, errorNorm_mm, 'k');
-title('End-Effector Total Error - Time');
-xlabel('time (sec)');
-ylabel('error (mm)');
-grid on;
-xlim([0 log.time(end)]);
-
+    subplot(2,1,2);
+    plot(log.time, errorNorm_mm, 'k');
+    title('End-Effector Total Error - Time');
+    xlabel('time (sec)');
+    ylabel('error (mm)');
+    grid on;
+    xlim([0 log.time(end)]);        
+end
 
 
 

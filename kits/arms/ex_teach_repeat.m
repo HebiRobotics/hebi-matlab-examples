@@ -4,8 +4,11 @@
 clear *;
 close all;
 
+armName = '6-DoF + gripper';
+armFamily = 'Arm';
+
 % Robot specific setup. Edit as needed.
-[ group, kin, params ] = setupArm('6-DoF + gripper');
+[ group, kin, params ] = setupArm( armName, armFamily );
 group.setFeedbackFrequency(100);
 
 effortOffset = params.effortOffset;

@@ -1,31 +1,65 @@
-% -------------------------------------------------------------------------
-% NOTE
-% Controlling only torques (or forces) will always exhibit some amount of 
-% drift due to noise in the sensors and a non-perfect model of the robot. 
-% This can be mitigated by adding an extra controller that can add torques
-% to remain at a position when the robot is not actively beind held.
-% -------------------------------------------------------------------------
-
 %% Setup
-% Robot specific setup. Edit as needed.
-[ group, kin, effortOffset, gravityVec ] = setupArm('4dof');
+clear *;
+close all;
 
-% Select the duration in seconds
-demoDuration = 30;
+HebiLookup.initialize();
+
+armName = '6-DoF + gripper';
+armFamily = 'Arm';
+
+[ armGroup, armKin, armParams ] = setupArm( armName, armFamily );
+gravityVec = armParams.gravityVec;
+effortOffset = armParams.effortOffset;
+
+enableLogging = true;
+
+if enableLogging
+    armGroup.startLog('dir','logs');
+end
 
 %% Gravity compensated mode
 cmd = CommandStruct();
-demoTimer = tic();
-while toc(demoTimer) < demoDuration
+
+% Keyboard input
+kb = HebiKeyboard();
+keys = read(kb);
+
+disp('Commanded gravity-compensated zero torques to the arm.');
+disp('Press ESC to stop.');
+
+while ~keys.ESC   
     
-    % Gather sensor data
-    fbk = group.getNextFeedback();
+    % Gather sensor data from the arm
+    fbk = armGroup.getNextFeedback();
     
     % Calculate required torques to negate gravity at current position
-    cmd.effort = kin.getGravCompEfforts( fbk.position, gravityVec ) ...
+    cmd.effort = armKin.getGravCompEfforts( fbk.position, gravityVec ) ...
         + effortOffset;
     
     % Send to robot
-    group.send(cmd);
+    armGroup.send(cmd);
+
+    % Check for new key presses on the keyboard
+    keys = read(kb);
     
+end
+
+%%
+if enableLogging
+    
+   hebilog = armGroup.stopLogFull();
+   
+   % Plot tracking / error from the joints in the arm.  Note that there
+   % will not by any 'error' in tracking for position and velocity, since
+   % this example only commands effort.
+   HebiUtils.plotLogs(hebilog, 'position');
+   HebiUtils.plotLogs(hebilog, 'velocity');
+   HebiUtils.plotLogs(hebilog, 'effort');
+   
+   % Plot the end-effectory trajectory and error
+   kinematics_analysis( hebilog, armKin );
+   
+   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+   % Feel free to put more plotting code here %
+   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 end

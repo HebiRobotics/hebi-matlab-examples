@@ -53,9 +53,10 @@ end
 % Arm Setup %
 %%%%%%%%%%%%%
 
+armName = '6-DoF + gripper';
 armFamily = 'Arm';
 
-[ armGroup, armKin, armParams ] = setupArm( '6-DoF + gripper', armFamily );
+[ armGroup, armKin, armParams ] = setupArm( armName, armFamily );
 
 ikSeedPos = armParams.ikSeedPos;
 armEffortOffset = armParams.effortOffset;
@@ -67,7 +68,7 @@ if armParams.hasGripper
     gripForceScale = 0.5 * (armParams.gripperOpenEffort - ...
                             armParams.gripperCloseEffort); 
     gripForceShift = mean( [ armParams.gripperOpenEffort, ...
-                             armParams.gripperCloseEffort] ); 
+                             armParams.gripperCloseEffort ] ); 
     gripperCmd = CommandStruct();
 end
 
