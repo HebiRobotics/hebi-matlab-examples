@@ -4,6 +4,8 @@ close all;
 
 HebiLookup.initialize();
 
+localDir = fileparts(mfilename('fullpath'));
+
 armName = '6-DoF + gripper';
 armFamily = 'Arm';
 
@@ -13,8 +15,9 @@ effortOffset = armParams.effortOffset;
 
 enableLogging = true;
 
+% Start background logging 
 if enableLogging
-    armGroup.startLog('dir','logs');
+   logFile = armGroup.startLog('dir',[localDir '/logs']); 
 end
 
 %% Gravity compensated mode

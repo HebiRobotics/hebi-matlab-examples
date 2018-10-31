@@ -16,7 +16,9 @@ close all;
 
 HebiLookup.initialize();
 
-enableLogging = false;
+localDir = fileparts(mfilename('fullpath'));
+
+enableLogging = true;
 enableEffortComp = true;
 
 
@@ -112,8 +114,8 @@ while ~abortFlag
 
     % Start background logging
     if enableLogging
-        armGroup.startLog('dir','logs');
-        phoneGroup.startLog('dir','logs');
+        armGroup.startLog('dir',[localDir '/logs']);
+        phoneGroup.startLog('dir',[localDir '/logs']);
     end
 
     % Move to current coordinates
@@ -319,4 +321,23 @@ while ~abortFlag
 
 end
 
+%%
+if enableLogging
+    
+   hebilog = armGroup.stopLogFull();
+   
+   % Plot tracking / error from the joints in the arm.  Note that there
+   % will not by any 'error' in tracking for position and velocity, since
+   % this example only commands effort.
+   HebiUtils.plotLogs(hebilog, 'position');
+   HebiUtils.plotLogs(hebilog, 'velocity');
+   HebiUtils.plotLogs(hebilog, 'effort');
+   
+   % Plot the end-effectory trajectory and error
+   kinematics_analysis( hebilog, armKin );
+   
+   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+   % Feel free to put more plotting code here %
+   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+end
 

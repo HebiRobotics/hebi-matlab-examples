@@ -2,6 +2,8 @@
 clear *;
 close all;
 
+localDir = fileparts(mfilename('fullpath'));
+
 HebiLookup.initialize();
 
 armName = '6-DoF + gripper';

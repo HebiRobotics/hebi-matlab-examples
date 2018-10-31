@@ -40,6 +40,8 @@ if nargin < 2
    family = 'Arm'; 
 end
 
+localDir = fileparts(mfilename('fullpath'));
+
 shoulderJointComp = -7; % Nm  <--- This should be around -7 Nm if you have
                         %          a gas spring.  Otherwise it should be 0.           
 
@@ -57,17 +59,18 @@ switch kit
             'Wrist3' });
         
         % Kinematic Model
-        kin = HebiKinematics('hrdf/6-DoF_arm_w_gripper');
+        kin = HebiKinematics([localDir '/hrdf/6-DoF_arm_w_gripper']);
         
         % Load and send arm gains
-        params.gains = HebiUtils.loadGains('gains/6-DoF_arm_gains');     
+        params.gains = HebiUtils.loadGains([localDir '/gains/6-DoF_arm_gains']);     
         group.send( 'gains', params.gains);
         
         % Settings / gains for the gripper spool to open-close the gripper
         params.hasGripper = true;
         params.gripperOpenEffort = 1;
         params.gripperCloseEffort = -5;
-        params.gripperGains = HebiUtils.loadGains('gains/gripper_spool_gains');
+        params.gripperGains = HebiUtils.loadGains( ...
+                                [localDir '/gains/gripper_spool_gains'] );
         
         % Compensation to joint efforts due to a gas spring (if present)
         params.effortOffset = [0 shoulderJointComp 0 0 0 0];
@@ -87,10 +90,10 @@ switch kit
             'Wrist3' });
         
         % Kinematic Model
-        kin = HebiKinematics('hrdf/6-DoF_arm');
+        kin = HebiKinematics([localDir '/hrdf/6-DoF_arm']);
         
         % Load and send arm gains
-        params.gains = HebiUtils.loadGains('gains/6-DoF_arm_gains');     
+        params.gains = HebiUtils.loadGains([localDir '/gains/6-DoF_arm_gains']);     
         group.send( 'gains', params.gains);
         
         % No Gripper
@@ -113,10 +116,10 @@ switch kit
             'Wrist2' });
         
         % Kinematic Model
-        kin = HebiKinematics('hrdf/5-DoF_arm');
+        kin = HebiKinematics([localDir 'hrdf/5-DoF_arm']);
         
         % Load and send arm gains
-        params.gains = HebiUtils.loadGains('gains/5-DoF_arm_gains');     
+        params.gains = HebiUtils.loadGains([localDir 'gains/5-DoF_arm_gains']);     
         group.send( 'gains', params.gains);
         
         % No Gripper
@@ -138,10 +141,10 @@ switch kit
             'Wrist1' });
         
         % Kinematic Model
-        kin = HebiKinematics('hrdf/4-DoF_arm');
+        kin = HebiKinematics([localDir 'hrdf/4-DoF_arm']);
         
         % Load and send arm gains
-        params.gains = HebiUtils.loadGains('gains/4-DoF_arm_gains');     
+        params.gains = HebiUtils.loadGains([localDir 'gains/4-DoF_arm_gains']);     
         group.send( 'gains', params.gains);
                 
         % No Gripper
@@ -163,10 +166,10 @@ switch kit
             'Wrist1' });
         
         % Kinematic Model
-        kin = HebiKinematics('hrdf/4-DoF_arm_scara');
+        kin = HebiKinematics([localDir 'hrdf/4-DoF_arm_scara']);
         
         % Load and send arm gains
-        params.gains = HebiUtils.loadGains('gains/5-DoF_arm_scara_gains');     
+        params.gains = HebiUtils.loadGains([localDir 'gains/5-DoF_arm_scara_gains']);     
         group.send( 'gains', params.gains);
                 
         % No Gripper
@@ -186,10 +189,10 @@ switch kit
             'Shoulder'
             'Elbow' } );
         
-        kin = HebiKinematics('/hrdf/3-DoF_arm');
+        kin = HebiKinematics([localDir '/hrdf/3-DoF_arm']);
         
         % Load and send arm gains
-        params.gains = HebiUtils.loadGains('gains/3-DoF_arm_gains');     
+        params.gains = HebiUtils.loadGains([localDir 'gains/3-DoF_arm_gains']);     
         group.send( 'gains', params.gains);
                 
         % No Gripper

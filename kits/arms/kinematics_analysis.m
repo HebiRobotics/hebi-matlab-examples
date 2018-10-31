@@ -46,8 +46,8 @@ axis equal;
 grid on;
 legend feedback command;
 
-% If there were commanded positions, plot the tracking error
-if all(~isnan(cmdXYZ_mm(:)))
+% If there were any commanded positions, plot the tracking error
+if any(~isnan(cmdXYZ_mm(:)))
     figure(202);
     subplot(2,1,1);
     plot(log.time, errorXYZ_mm(:,1), 'r');
