@@ -1,12 +1,14 @@
-% 6-dof arm & gripper tele-op Demo
+% 6-DoF Arm & Gripper Tele-Op Demo 
 %
-% Features:      iOS App input to control motions of arm and gripper
+% Features:      Mobile App input to control motions of arm and gripper
 %
 % Requirements:  MATLAB 2013b or higher
+%                Android or iOS device running HEBI Mobile I/O that
+%                supports ARCore / ARKit.
 %
 % Author:        Dave Rollinson
 %                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
-% Date:          June 2018
+% Date:          Oct 2018
 
 % Copyright 2017-2018 HEBI Robotics
 
