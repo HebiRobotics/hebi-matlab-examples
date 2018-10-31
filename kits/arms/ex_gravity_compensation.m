@@ -1,3 +1,16 @@
+% Arm Gravity Compensation Demo
+%
+% Features:      Demo where the arm can be interacted with and moved around
+%                while in a zero-force gravity-compensated mode.
+%
+% Requirements:  MATLAB 2013b or higher
+%
+% Author:        Dave Rollinson
+%                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
+% Date:          Oct 2018
+
+% Copyright 2017-2018 HEBI Robotics
+
 %% Setup
 clear *;
 close all;

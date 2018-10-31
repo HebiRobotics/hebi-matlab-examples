@@ -1,4 +1,18 @@
- %% Setup
+% Arm Teach-Repeat Demo
+%
+% Features:      Demo with two modes.  One for moving the arm to different
+%                waypoints while in a zero-force gravity-compensated mode.
+%                And a second mode for playing back the waypoints.
+%
+% Requirements:  MATLAB 2013b or higher
+%
+% Author:        Dave Rollinson
+%                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
+% Date:          Oct 2018
+
+% Copyright 2017-2018 HEBI Robotics
+
+%% Setup
 
 % Reset the workspace
 clear *;

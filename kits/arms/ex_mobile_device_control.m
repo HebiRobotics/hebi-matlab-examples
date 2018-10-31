@@ -1,4 +1,4 @@
-% 6-DoF Arm & Gripper Tele-Op Demo 
+% 6-DoF Arm (w/ Optional Gripper) Tele-Op Demo 
 %
 % Features:      Mobile App input to control motions of arm and gripper
 %

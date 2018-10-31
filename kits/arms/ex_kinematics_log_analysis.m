@@ -1,8 +1,16 @@
-% Load a log file and kinematics description for plotting end effector
-% errror and tracking.
+% Kinematics Logged Data Analysis
 %
-% Dave Rollinson
-% Sep 2018
+% Features:      Loads an example log file and kinematics description for 
+%                plotting end-effector error and tracking.
+%
+% Requirements:  MATLAB 2013b or higher
+%
+% Author:        Dave Rollinson
+%                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
+% Date:          Oct 2018
+
+% Copyright 2017-2018 HEBI Robotics
+
 
 localDir = fileparts(mfilename('fullpath'));
 
