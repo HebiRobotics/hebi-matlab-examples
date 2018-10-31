@@ -1,67 +1,200 @@
-% -------------------------------------------------------------------------
-% NOTE
-% As seen in the basic grav comp example controlling only efforts to 
-% compenstate for gravity will result in some amount of drift, depending on
-% the accuracy of your mass models and torque sensing. 
+% End-Effector Impedance Control Demo
 %
-% One way to mitigate this drift is by adding other layers of control, like
-% a virtual spring that adds additional efforts to remain at the position
-% where it was let go.
+% Features:      Demo where the arm can be interacted with and moved around
+%                while in a zero-force gravity-compensated mode, and an
+%                impedance controller can be turned on and off where the
+%                end-effector is controlled based on virtual springs and
+%                dampers in Cartesian space.
 %
-% ADDITIONAL NOTES
-% Another way to get the same effect would be by commanding positions in
-% strategy 4 as the position loop feeds into the torque loop.  In this case
-% the Kp gains on the position loop on each module would correspond to the
-% 'stiffness' parameter below.
-% -------------------------------------------------------------------------
+% Requirements:  MATLAB 2013b or higher
+%
+% Author:        Dave Rollinson
+%                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
+% Date:          Oct 2018
+
+% Copyright 2017-2018 HEBI Robotics
 
 %% Setup
-% Robot specific setup. Edit as needed.
-[ group, kin, effortOffset, gravityVec ] = setupArm('4dof');
+clear *;
+close all;
 
-% Select the duration in seconds
-demoDuration = 30;
+HebiLookup.initialize();
 
-% Velocity threshold below which robot is considered moving. Instead of
-% trying to determine movement based on sensor data, it could also be a
-% physical button on the robot that users would need to press before being
-% able to move the robot.
-velocityThreshold = 0.5;
+localDir = fileparts(mfilename('fullpath'));
 
-% Stiffness (like Kp gain) of the virtual spring. i.e., how hard should  
-% it try to keep the position. Can be different for each module (vector)
-% and may need some tuning. A stiffness of all zeros effectively disables 
-% the spring.
-stiffness = 10 * ones(1,kin.getNumDoF());
+armName = '6-DoF + gripper';
+armFamily = 'Arm';
+
+[ armGroup, armKin, armParams ] = setupArm( armName, armFamily );
+armGroup.setFeedbackFrequency(200);
+
+gravityVec = armParams.gravityVec;
+effortOffset = armParams.effortOffset;
+
+numDoF = armKin.getNumDoF;
+
+enableLogging = true;
+
+% Start background logging 
+if enableLogging
+   logFile = armGroup.startLog('dir',[localDir '/logs']); 
+end
 
 %% Gravity compensated mode
-fbk = group.getNextFeedback();
-idlePos = fbk.position;
-stiffness = stiffness .* ones(1,group.getNumModules()); % turn into vector
-
 cmd = CommandStruct();
-demoTimer = tic();
-while toc(demoTimer) < demoDuration
+
+% Keyboard input
+kb = HebiKeyboard();
+keys = read(kb);
+
+disp('Commanded gravity-compensated zero force to the arm.');
+disp('  SPACE - Toggles an impedance controller on/off:');
+disp('          ON  - Apply controller based on current position');
+disp('          OFF - Go back to gravity-compensated mode');
+disp('  ESC - Exits the demo.');
+
+% Impendance Control Gains
+% NOTE: The gains corespond to:
+% [ trans_x trans_y trans_z rot_x rot_y rot_z ]
+%
+% Translations and Rotations can be specified in the
+% base frame or in the end effector frame.  See code below for
+% details.
+%
+% GAINS ARE IN THE END-EFFECTOR FRAME
+
+%     % HOLD POSITION ONLY (Allow rotation around end-effector position)
+%     gainsInEndEffectorFrame = true;
+%     damperGains = [5; 5; 5; .0; .0; .0;]; % (N/(m/sec)) or (Nm/(rad/sec))
+%     springGains = [500; 500; 500; 0; 0; 0];  % (N/m) or (Nm/rad)
+
+%     % HOLD ROTATION ONLY
+%     gainsInEndEffectorFrame = true;
+%     damperGains = [0; 0; 0; .1; .1; .1;]; % (N/(m/sec)) or (Nm/(rad/sec))
+%     springGains = [0; 0; 0; 10; 10; 10];  % (N/m) or (Nm/rad)
+ 
+%     % HOLD POSITION AND ROTATION - ALLOW MOTION ALONG Z-AXIS
+%     gainsInEndEffectorFrame = true;
+%     damperGains = [5; 5; 0; .1; .1; .1;]; % (N/(m/sec)) or (Nm/(rad/sec))
+%     springGains = [500; 500; 0; 10; 10; 10];  % (N/m) or (Nm/rad)
     
-    % Gather sensor data and always do grav comp
-    fbk = group.getNextFeedback();
+    % HOLD POSITION AND ROTATION - ALLOW MOTION IN XY-PLANE IN BASE FRAME
+    gainsInEndEffectorFrame = false;
+    damperGains = [0; 0; 5; .1; .1; .1;]; % (N/(m/sec)) or (Nm/(rad/sec))
+    springGains = [0; 0; 500; 10; 10; 10];  % (N/m) or (Nm/rad)
+
+% Get the current location of the end effector
+fbk = armGroup.getNextFeedback();
+armTipFK = armKin.getFK('endeffector',fbk.position);
+endEffectorXYZ = armTipFK(1:3,4);
+endEffectorRotMat = armTipFK(1:3,1:3);
     
-    cmd.effort = kin.getGravCompEfforts (fbk.position, gravityVec ) ...
-        + effortOffset;
+controllerOn = false;
+
+% Velocity commands
+armCmdJointAngs = fbk.position;
+armCmdJointVels = zeros(1,numDoF);
+
+while ~keys.ESC   
     
-    % Find whether robot is actively moving
-    isMoving = max(abs(fbk.velocity)) > velocityThreshold;
-    if isMoving
-        % Update idle position
-        idlePos = fbk.position;
+    % Gather sensor data from the arm
+    fbk = armGroup.getNextFeedback();
+    
+    %%%%%%%%%%%%%%%%%%%%%%%%
+    % Gravity Compensation %
+    %%%%%%%%%%%%%%%%%%%%%%%%
+    
+    % Calculate required torques to negate gravity at current position
+    gravCompEfforts = armKin.getGravCompEfforts( fbk.position, gravityVec );
+             
+    %%%%%%%%%%%%%%%%%%%%%
+    % Impedance Control %
+    %%%%%%%%%%%%%%%%%%%%%
+    if controllerOn
+        % Get Updated Forward Kinematics and Jacobians
+        armTipFK = armKin.getFK('endeffector',fbk.position);
+        J_armTip = armKin.getJacobian('endeffector',fbk.position);
+
+        % Calculate Impedence Control Wrenches and Appropraite Joint Torque
+        springWrench = zeros(6,1);
+        damperWrench = zeros(6,1);
+
+        % Linear error is easy
+        xyzError = endEffectorXYZ - armTipFK(1:3,4);
+
+        % Rotational error involves calculating axis-angle from the
+        % resulting error in S03 and providing a torque around that axis.
+        errorRotMat = endEffectorRotMat * armTipFK(1:3,1:3)';
+        [axis, angle] = HebiUtils.rotMat2axAng( errorRotMat );
+        rotErrorVec = angle * axis;
+
+        if gainsInEndEffectorFrame
+            xyzError = armTipFK(1:3,1:3)' * xyzError;
+            rotErrorVec = armTipFK(1:3,1:3)' * rotErrorVec;
+        end
+
+        posError = [xyzError; rotErrorVec];
+        velError = J_armTip * (armCmdJointVels - fbk.velocity)';     
+
+        springWrench(1:3) = springGains(1:3) .* posError(1:3); % linear force
+        springWrench(4:6) = springGains(4:6) .* posError(4:6); % rotational torque
+
+        if gainsInEndEffectorFrame
+            springWrench(1:3) = armTipFK(1:3,1:3) * springWrench(1:3);
+            springWrench(4:6) = armTipFK(1:3,1:3) * springWrench(4:6);
+        end
+
+        damperWrench(1:3) = damperGains(1:3) .* velError(1:3); % linear damping
+        damperWrench(4:6) = damperGains(4:6) .* velError(4:6); % rotational damping
+
+        impedanceEfforts = J_armTip' * (springWrench + damperWrench);  
     else
-        % Add efforts from virtual spring to maintain position
-        driftError = idlePos - fbk.position;
-        holdingEffort = driftError .* stiffness;
-        cmd.effort = cmd.effort + holdingEffort;
+        impedanceEfforts = zeros(numDoF,1);
     end
     
+    % Add all the different torques together
+    cmd.effort = gravCompEfforts + impedanceEfforts' + effortOffset;
+
     % Send to robot
-    group.send(cmd);
+    armGroup.send(cmd);
+
+    % Check for new key presses on the keyboard
+    keys = read(kb);
+
+    % Toggle impedance
+    if keys.SPACE == 1 && prevKeys.SPACE == 0      
+        controllerOn = ~controllerOn;
+        
+        armTipFK = armKin.getFK('endeffector',fbk.position);
+        endEffectorXYZ = armTipFK(1:3,4);
+        endEffectorRotMat = armTipFK(1:3,1:3);
+        
+        if controllerOn
+            disp('Impedance Controller ENABLED.');
+        else
+            disp('Impedance Controller DISABLED.');
+        end
+    end
     
+    prevKeys = keys;
+end
+
+%%
+if enableLogging
+    
+   hebilog = armGroup.stopLogFull();
+   
+   % Plot tracking / error from the joints in the arm.  Note that there
+   % will not by any 'error' in tracking for position and velocity, since
+   % this example only commands effort.
+   HebiUtils.plotLogs(hebilog, 'position');
+   HebiUtils.plotLogs(hebilog, 'velocity');
+   HebiUtils.plotLogs(hebilog, 'effort');
+   
+   % Plot the end-effectory trajectory and error
+   kinematics_analysis( hebilog, armKin );
+   
+   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+   % Feel free to put more plotting code here %
+   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 end
