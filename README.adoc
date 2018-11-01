@@ -1,42 +1,16 @@
-# HEBI MATLAB API Examples
+# HEBI Arm Kit Examples - MATLAB API
 
-This repository contains examples to go with the http://docs.hebi.us/tools.html#matlab-api[online documentation] that help to get started with the HEBI Robotics APIs for MATLAB. 
-
+This folder contains examples to go with the arm kits
+TODO: Expand description and add links
 
 ## Setup
 
-All examples in this repository require the HEBI Robotics API for MATLAB in order to run. The API is included in this repository.  You can set it up using any of the `startup.m` scripts in the various example directories.
+All examples require the HEBI Robotics API for MATLAB in order to run. The API is included in this repository.  You can set it up using any of the `startup.m` script in this folder.
 
 
-## Basic Examples
+## Arm Kit Examples
 
-This folder contains examples that help you get started with the HEBI 
-Robotics APIs for MATLAB.  There are separate examples for each of our 
-different products.
-
-* X-Series Actuator
-* I/O Board
-* Mobile I/O
-
-The examples provided in each product work progressively through the following concepts:
-
-* Lookup / Groups
-* Feedback
-* Commands
-* Gains
-* Trajectories
-* Kinematics
-* Example - Robot Arm
-
-These API features and concepts are documented in more detail at:
-
-* http://docs.hebi.us/tools.html#matlab-api
-* http://docs.hebi.us/core_concepts.html
-
-
-## Kits
-
-This folder contains example code for various preconfigured kits. Additional documentation is available in the corresponding kit directories.
+This folder contains example code for various pre-configured arm kits. 
 
 :kits: link:kits
 
@@ -47,62 +21,6 @@ This folder contains example code for various preconfigured kits. Additional doc
 | {kits}/arms[Arms] |
 * A variety of arm configurations, from 4-DoF to 6-DoF.
 
-| {kits}/hexapod[Hexapod] |
-* A 6-legged, 18-DoF, legged mobile robot
-
-| {kits}/igor[Igor] |
-* A 2-wheel, 2-arm, dynamic balancing mobile robot
-
-| {kits}/edward[Edward] |
-* An 2-arm omni-drive mobile robot
-
-| {kits}/rosie[Rosie] |
-* A 6-DoF mobile manipulator that includes a gripper
-
 |====================
 
-
-## Advanced Examples
-
-This folder contains examples that show less commonly used concepts.
-
-:advanced: link:advanced
-
-[width="100%",options="header",cols="1a,3a"]
-|====================
-| File | Topics
-
-|{advanced}/ex1_custom_pid_1_controller.m[ex1_custom_pid_1_controller.m] +
-{advanced}/ex1_custom_pid_2_setter.m[ex1_custom_pid_2_setter.m] |
-* implementing custom P / PID controllers using direct PWM strategy
-* connecting multiple MATLAB instances
-* position step inputs from a second instance
-
-|====================
-
-
-## Demos
-
-The demos folder contains the source code for some of our https://www.youtube.com/hebirobotics[YouTube videos] as well as common demos.
-
-[width="100%",options="header",cols="1a,3a"]
-|====================
-| Video / Demo | Source Code
-
-|https://youtu.be/oHAddCWBobs[X-Series Industrial Smart Actuator]|
-:x5_teaser: link:demos/youtube/x5_teaser/x5_teaser_
-* {x5_teaser}demo2_stable_output.m[Demo2 - Output Stabilization]
-* {x5_teaser}demo3a_follow_imu.m[Demo3a - Follow IMU]
-* {x5_teaser}demo3b_zero_torque.m[Demo3b - Zero Torque]
-* {x5_teaser}demo3c_ping_pong.m[Demo3c - Torque Ping Pong]
-
-|https://youtu.be/zaPtxre4tFc[Teleop Taxi]|
-:teleop_taxi: link:demos/youtube/teleop_taxi/teleop_taxi_
-* {teleop_taxi}simple.m[Simplified] (without video)
-* {teleop_taxi}full.m[Full] (including video)
-
-|Hackathon (Japan Oct, 2017)|
-* link:demos/hackathon[Feeding arm demo]
-
-|====================
 
