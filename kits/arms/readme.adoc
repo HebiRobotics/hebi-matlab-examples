@@ -10,14 +10,7 @@ These examples make use of a variety of HEBI libraries. In order to load the lib
 
 ### Setup Robot
 
-In order to work with a robot arm, you need to establish communications, and create a matching kinematic model. If you are using a pre-configured link:http://docs.hebi.us/hardware.html#Kits[kit] with the default actuator types as well as default naming conventions, you can simply call `setupArm.m` as shown below.
-
-[source,matlab]
-----
-% Load arm kit w/ default configuration
-kit = '6dof';
-[ group, kin, effortOffset, gravityVec ] = setupArm(kit)
-----
+In order to work with a robot arm, you need to establish communications, and create a matching kinematic model. If you are using a pre-configured link:http://docs.hebi.us/hardware.html#Kits[kit] with the default actuator types as well as default naming conventions, you can simply call `setupArm.m` in the example.
 
 The `kit` variable needs to match your system. Currently the following kits are supported:
 
@@ -53,18 +46,6 @@ The `kit` variable needs to match your system. Currently the following kits are 
 
 If you are using different actuator types or non-default configurations, you will need to modify the model to match your system. You can find tutorials on defining custom kinematic structures on the online link:http://docs.hebi.us/tools.html#kinematics[kinematics documentation]. The `setupArm.m` function should provide a good starting point.
 
-### Set Gains
-
-Pre-assembled kits should already come with good gains. However, depending on the example you may want to change the control strategy or simply test different gains.  You can do this via the Scope GUI or programmatically using the following code. More information on gain tuning can be found on the online link:http://docs.hebi.us/core_concepts.html#motor_control[motion control documentation].
-
-[source,matlab]
-----
-% Change the control strategy of all modules in a group
-desiredStrategy = 4; % change as needed
-gains = GainStruct();
-gains.controlStrategy = ones(1,group.getNumModules) * desiredStrategy;
-group.send('gains', gains)
-----
 
 ## Examples
 
@@ -74,58 +55,39 @@ Examples that are dependent on the number of degrees of freedom follow a naming 
 
 :code: link:./
 
-[width="100%",options="header",cols="1a,3a,1a"]
+[width="100%",options="header",cols="2a,3a"]
 |====================
-| File | Topics | Recommended Control Strategy
+|  Example  |  Description 
 
-|{code}/ex_kinematics_visualization.m[ex_kinematics_visualization]|
-* passive visualization of robot configuration
-|N/A
+| {code}/ex_gravity_compensation.m[ex_gravity_compensation] + 
+  (link:https://youtu.be/sli8Tq8FAQs[video])
+| * Gravity compensation to allow an interactive weight-less mode
 
-|{code}/ex_grav_comp.m[ex_grav_comp] +
-(link:https://youtu.be/sli8Tq8FAQs[video])|
-* gravity compensation for weight-less mode
-|2/3/4 (identical for only torque)
+| {code}/ex_impedance_control.m[ex_impedance_control] 
+| * Controls the end of the arm with virtual springs and dampers in Cartesian (XYZ) space.
+  * Controller can be toggled on/off to allow repositioning.
 
-|{code}/ex_teach_repeat.m[ex_teach_repeat]|
-* record waypoints in gravity compensated mode
-* replay waypoints with blocking trajectories
-* logging and visualization
-* keyboard input
-|4
+| {code}/ex_kinematics_log_analysis.m[ex_kinematics_log_analysis] 
+| * Loads an example `.hebilog` and `.HRDF` file to plot arm end-effector tracking / error.
 
-|{code}/ex_target_chase.m[ex_target_chase] +
-(link:https://youtu.be/Ll20_6IsjnQ[video])|
-* non-blocking trajectories
-* continuous replaning to catch moving target
-* inverse kinematics
-* mouse input
-|4 (dynamics comp on) or 3 (dynamics comp off)
+| {code}/ex_kinematics_visualization.m[ex_kinematics_visualization] 
+| * Passive online visualization of the arm's configuration
 
-|{code}/ex_target_chase_joystick.m[ex_target_chase_joystick] +
-{code}/ex_target_chase_joystick_6dof.m[ex_target_chase_joystick_6dof] +
-(link:https://youtu.be/ITrrnRo-UAI[video])|
-* non-blocking trajectories
-* continuous replaning to catch moving target
-* inverse kinematics
-* joystick input
-|4 (dynamics comp on) or 3 (dynamics comp off)
+| {code}/ex_mobile_device_control.m[ex_mobile_device_control] 
+| * Remote control of the end-effector of an arm using a mobile device
+  * Requires AR-capable Android or iOS device running the HEBI Mobile I/O App.
+  * Requires a 6-DoF arm configuration.
+
+| {code}/ex_teach_repeat.m[ex_teach_repeat]
+| * Record waypoints in gravity compensated mode
+  * Replay waypoints using trajectories
+
+| {code}/ex_teach_repeat_w_gripper.m[ex_teach_repeat_w_gripper]
+| * Record waypoints in gravity compensated mode
+  * Waypoints include ability to toggle a gripper to open/close
+  * Replay waypoints using trajectories
 
 |====================
 
-## Experimenting with Gains
 
-We recommend that you try running the samples with various gains and control strategies so that you can get a feel for the differences. The easiest way for editing gains is to save the current gains to disk, edit the file, and then load it. This also lets you use diff-tools for comparison.
 
-[source,matlab]
-----
-fileName = './current-gains.xml';
-
-% Save current gains
-gains = group.getGains();
-HebiUtils.saveGains(gains, fileName);
-
-% Load gains from file
-gains = HebiUtils.loadGains(fileName);
-group.send('gains', gains);
-----
