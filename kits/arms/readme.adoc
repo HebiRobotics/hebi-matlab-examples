@@ -55,42 +55,37 @@ Examples that are dependent on the number of degrees of freedom follow a naming 
 
 :code: link:./
 
-[width="100%",options="header",cols="1a,3a,1a"]
+[width="100%",options="header",cols="2a,3a"]
 |====================
-| File | Topics | Recommended Control Strategy
+|  Example  |  Description 
 
-|{code}/ex_kinematics_visualization.m[ex_kinematics_visualization]|
-* passive visualization of robot configuration
-|N/A
+| {code}/ex_gravity_compensation.m[ex_gravity_compensation] + 
+  (link:https://youtu.be/sli8Tq8FAQs[video])
+| * Gravity compensation to allow an interactive weight-less mode
 
-|{code}/ex_grav_comp.m[ex_grav_comp] +
-(link:https://youtu.be/sli8Tq8FAQs[video])|
-* gravity compensation for weight-less mode
-|2/3/4 (identical for only torque)
+| {code}/ex_impedance_control.m[ex_impedance_control] 
+| * Controls the end of the arm with virtual springs and dampers in Cartesian (XYZ) space.
+  * Controller can be toggled on/off to allow repositioning.
 
-|{code}/ex_teach_repeat.m[ex_teach_repeat]|
-* record waypoints in gravity compensated mode
-* replay waypoints with blocking trajectories
-* logging and visualization
-* keyboard input
-|4
+| {code}/ex_kinematics_log_analysis.m[ex_kinematics_log_analysis] 
+| * Loads an example `.hebilog` and `.HRDF` file to plot arm end-effector tracking / error.
 
-|{code}/ex_target_chase.m[ex_target_chase] +
-(link:https://youtu.be/Ll20_6IsjnQ[video])|
-* non-blocking trajectories
-* continuous replaning to catch moving target
-* inverse kinematics
-* mouse input
-|4 (dynamics comp on) or 3 (dynamics comp off)
+| {code}/ex_kinematics_visualization.m[ex_kinematics_visualization] 
+| * Passive online visualization of the arm's configuration
 
-|{code}/ex_target_chase_joystick.m[ex_target_chase_joystick] +
-{code}/ex_target_chase_joystick_6dof.m[ex_target_chase_joystick_6dof] +
-(link:https://youtu.be/ITrrnRo-UAI[video])|
-* non-blocking trajectories
-* continuous replaning to catch moving target
-* inverse kinematics
-* joystick input
-|4 (dynamics comp on) or 3 (dynamics comp off)
+| {code}/ex_mobile_device_control.m[ex_mobile_device_control] 
+| * Remote control of the end-effector of an arm using a mobile device
+  * Requires AR-capable Android or iOS device running the HEBI Mobile I/O App.
+  * Requires a 6-DoF arm configuration.
+
+| {code}/ex_teach_repeat.m[ex_teach_repeat]
+| * Record waypoints in gravity compensated mode
+  * Replay waypoints using trajectories
+
+| {code}/ex_teach_repeat_w_gripper.m[ex_teach_repeat_w_gripper]
+| * Record waypoints in gravity compensated mode
+  * Waypoints include ability to toggle a gripper to open/close
+  * Replay waypoints using trajectories
 
 |====================
 
