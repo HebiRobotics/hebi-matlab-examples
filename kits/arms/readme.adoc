@@ -10,14 +10,7 @@ These examples make use of a variety of HEBI libraries. In order to load the lib
 
 ### Setup Robot
 
-In order to work with a robot arm, you need to establish communications, and create a matching kinematic model. If you are using a pre-configured link:http://docs.hebi.us/hardware.html#Kits[kit] with the default actuator types as well as default naming conventions, you can simply call `setupArm.m` as shown below.
-
-[source,matlab]
-----
-% Load arm kit w/ default configuration
-kit = '6dof';
-[ group, kin, effortOffset, gravityVec ] = setupArm(kit)
-----
+In order to work with a robot arm, you need to establish communications, and create a matching kinematic model. If you are using a pre-configured link:http://docs.hebi.us/hardware.html#Kits[kit] with the default actuator types as well as default naming conventions, you can simply call `setupArm.m` in the example.
 
 The `kit` variable needs to match your system. Currently the following kits are supported:
 
@@ -53,18 +46,6 @@ The `kit` variable needs to match your system. Currently the following kits are 
 
 If you are using different actuator types or non-default configurations, you will need to modify the model to match your system. You can find tutorials on defining custom kinematic structures on the online link:http://docs.hebi.us/tools.html#kinematics[kinematics documentation]. The `setupArm.m` function should provide a good starting point.
 
-### Set Gains
-
-Pre-assembled kits should already come with good gains. However, depending on the example you may want to change the control strategy or simply test different gains.  You can do this via the Scope GUI or programmatically using the following code. More information on gain tuning can be found on the online link:http://docs.hebi.us/core_concepts.html#motor_control[motion control documentation].
-
-[source,matlab]
-----
-% Change the control strategy of all modules in a group
-desiredStrategy = 4; % change as needed
-gains = GainStruct();
-gains.controlStrategy = ones(1,group.getNumModules) * desiredStrategy;
-group.send('gains', gains)
-----
 
 ## Examples
 
@@ -113,19 +94,5 @@ Examples that are dependent on the number of degrees of freedom follow a naming 
 
 |====================
 
-## Experimenting with Gains
 
-We recommend that you try running the samples with various gains and control strategies so that you can get a feel for the differences. The easiest way for editing gains is to save the current gains to disk, edit the file, and then load it. This also lets you use diff-tools for comparison.
 
-[source,matlab]
-----
-fileName = './current-gains.xml';
-
-% Save current gains
-gains = group.getGains();
-HebiUtils.saveGains(gains, fileName);
-
-% Load gains from file
-gains = HebiUtils.loadGains(fileName);
-group.send('gains', gains);
-----
