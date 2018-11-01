@@ -4,7 +4,8 @@
 %                while in a zero-force gravity-compensated mode, and an
 %                impedance controller can be turned on and off where the
 %                end-effector is controlled based on virtual springs and
-%                dampers in Cartesian space.
+%                dampers in Cartesian space.  Multiple spring/damper
+%                configurations are selectable in the code below.
 %
 % Requirements:  MATLAB 2013b or higher
 %
@@ -26,7 +27,18 @@ armName = '6-DoF + gripper';
 armFamily = 'Arm';
 
 [ armGroup, armKin, armParams ] = setupArm( armName, armFamily );
-armGroup.setFeedbackFrequency(200);
+
+% Increase feedback frequency since we're calculating velocities at the
+% high level for damping.  Going faster can help reduce a little bit of
+% jitter for fast motions, but going slower (100 Hz) also works just fine
+% for most applications.
+armGroup.setFeedbackFrequency(200); 
+
+% Double the effort gains from their default values, to make the arm more
+% sensitive for tracking force.
+gains = armGroup.getGains();
+gains.effortKp = 2 * gains.effortKp;
+armGroup.send('gains',gains);
 
 gravityVec = armParams.gravityVec;
 effortOffset = armParams.effortOffset;
@@ -61,7 +73,8 @@ disp('  ESC - Exits the demo.');
 % base frame or in the end effector frame.  See code below for
 % details.
 %
-% GAINS ARE IN THE END-EFFECTOR FRAME
+% UNCOMMENT THE GAINS YOU WANT TO USE FOR A GIVEN RUN, AND COMMENT OUT ALL
+% THE OTHER GAINS.
 
 %     % HOLD POSITION ONLY (Allow rotation around end-effector position)
 %     gainsInEndEffectorFrame = true;
@@ -73,15 +86,15 @@ disp('  ESC - Exits the demo.');
 %     damperGains = [0; 0; 0; .1; .1; .1;]; % (N/(m/sec)) or (Nm/(rad/sec))
 %     springGains = [0; 0; 0; 10; 10; 10];  % (N/m) or (Nm/rad)
  
-%     % HOLD POSITION AND ROTATION - ALLOW MOTION ALONG Z-AXIS
-%     gainsInEndEffectorFrame = true;
-%     damperGains = [5; 5; 0; .1; .1; .1;]; % (N/(m/sec)) or (Nm/(rad/sec))
-%     springGains = [500; 500; 0; 10; 10; 10];  % (N/m) or (Nm/rad)
+    % HOLD POSITION AND ROTATION - BUT ALLOW MOTION ALONG/AROUND Z-AXIS
+    gainsInEndEffectorFrame = true;
+    damperGains = [10; 10; 0; .1; .1; .1;]; % (N/(m/sec)) or (Nm/(rad/sec))
+    springGains = [500; 500; 0; 10; 10; 10];  % (N/m) or (Nm/rad)
     
-    % HOLD POSITION AND ROTATION - ALLOW MOTION IN XY-PLANE IN BASE FRAME
-    gainsInEndEffectorFrame = false;
-    damperGains = [0; 0; 5; .1; .1; .1;]; % (N/(m/sec)) or (Nm/(rad/sec))
-    springGains = [0; 0; 500; 10; 10; 10];  % (N/m) or (Nm/rad)
+%     % HOLD POSITION AND ROTATION - BUT ALLOW MOTION IN BASE FRAME XY-PLANE
+%     gainsInEndEffectorFrame = false;
+%     damperGains = [0; 0; 5; .1; .1; .1;]; % (N/(m/sec)) or (Nm/(rad/sec))
+%     springGains = [0; 0; 500; 10; 10; 10];  % (N/m) or (Nm/rad)
 
 % Get the current location of the end effector
 fbk = armGroup.getNextFeedback();
