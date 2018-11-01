@@ -21,12 +21,15 @@ close all;
 
 HebiLookup.initialize();
 
-localDir = fileparts(mfilename('fullpath'));
-
 armName = '6-DoF + gripper';
 armFamily = 'Arm';
+hasGasSpring = true;
 
-[ armGroup, armKin, armParams ] = setupArm( armName, armFamily );
+[ armGroup, armKin, armParams ] = setupArm( armName, armFamily, hasGasSpring );      
+
+gravityVec = armParams.gravityVec;
+effortOffset = armParams.effortOffset;
+localDir = armParams.localDir;
 
 % Increase feedback frequency since we're calculating velocities at the
 % high level for damping.  Going faster can help reduce a little bit of
@@ -39,9 +42,6 @@ armGroup.setFeedbackFrequency(200);
 gains = armGroup.getGains();
 gains.effortKp = 2 * gains.effortKp;
 armGroup.send('gains',gains);
-
-gravityVec = armParams.gravityVec;
-effortOffset = armParams.effortOffset;
 
 numDoF = armKin.getNumDoF;
 
@@ -84,17 +84,17 @@ disp('  ESC - Exits the demo.');
 %     % HOLD ROTATION ONLY
 %     gainsInEndEffectorFrame = true;
 %     damperGains = [0; 0; 0; .1; .1; .1;]; % (N/(m/sec)) or (Nm/(rad/sec))
-%     springGains = [0; 0; 0; 10; 10; 10];  % (N/m) or (Nm/rad)
+%     springGains = [0; 0; 0; 5; 5; 5];  % (N/m) or (Nm/rad)
  
     % HOLD POSITION AND ROTATION - BUT ALLOW MOTION ALONG/AROUND Z-AXIS
     gainsInEndEffectorFrame = true;
     damperGains = [10; 10; 0; .1; .1; .1;]; % (N/(m/sec)) or (Nm/(rad/sec))
-    springGains = [500; 500; 0; 10; 10; 10];  % (N/m) or (Nm/rad)
+    springGains = [500; 500; 0; 5; 5; 5];  % (N/m) or (Nm/rad)
     
 %     % HOLD POSITION AND ROTATION - BUT ALLOW MOTION IN BASE FRAME XY-PLANE
 %     gainsInEndEffectorFrame = false;
 %     damperGains = [0; 0; 5; .1; .1; .1;]; % (N/(m/sec)) or (Nm/(rad/sec))
-%     springGains = [0; 0; 500; 10; 10; 10];  % (N/m) or (Nm/rad)
+%     springGains = [0; 0; 500; 5; 5; 5];  % (N/m) or (Nm/rad)
 
 % Get the current location of the end effector
 fbk = armGroup.getNextFeedback();

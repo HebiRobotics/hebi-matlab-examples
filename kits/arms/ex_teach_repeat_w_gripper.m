@@ -20,19 +20,18 @@
 clear *;
 close all;
 
-localDir = fileparts(mfilename('fullpath'));
-
 armName = '6-DoF + gripper';
 armFamily = 'Arm';
+hasGasSpring = true;
 
-% Robot specific setup. Edit as needed.
-[ armGroup, armKin, armParams ] = setupArm( armName, armFamily );
+[ armGroup, armKin, armParams ] = setupArm( armName, armFamily, hasGasSpring );
 armGroup.setFeedbackFrequency(100);
 
 numDoF = armKin.getNumDoF();
 
 effortOffset = armParams.effortOffset;
 gravityVec = armParams.gravityVec;
+localDir = armParams.localDir;
 
 if armParams.hasGripper
     gripperGroup = HebiLookup.newGroupFromNames( armFamily, 'Spool' );
@@ -193,7 +192,7 @@ while (trajTime < trajectory.getDuration) && ~abortFlag
     end
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % If you want to do something with the lastest feedback to
+    % If you want to do something with the latest feedback to
     % change the commands, replan a trajectory, abort, or do 
     % anything else, this is a pretty good place to do it.    
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -301,7 +300,7 @@ while ~abortFlag
             end
 
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-            % If you want to do something with the lastest feedback to
+            % If you want to do something with the latest feedback to
             % change the commands, replan a trajectory, abort, or do 
             % anything else, this is a pretty good place to do it.    
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%              

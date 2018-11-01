@@ -1,4 +1,4 @@
-function [ group, kin, params ] = setupArm(kit, family)
+function [ group, kin, params ] = setupArm( kit, family, hasGasSpring )
 % SETUPARM creates models and loads parameters for controlling various 
 % pre-configured arm kits.
 %
@@ -28,7 +28,11 @@ function [ group, kin, params ] = setupArm(kit, family)
 %    '3-DoF'
 %
 % The 'family' argument specifies the family name of the modules that
-% should be selected. It is optional and defaults to 'Arm'.
+% should be selected.
+%
+% The 'hasGasSpring' argument specifies whether there is a gas spring
+% supporting the shoulder joint of the arm to provide extra payload.  If it
+% is not specified it defaults to 'false'.
 %
 % OUTPUTS:
 % 'group' is the HebiGroup object for the modules in the arm that is used
@@ -46,14 +50,21 @@ function [ group, kin, params ] = setupArm(kit, family)
 % HEBI Robotics
 % Jun 2018
 
-if nargin < 2
-   family = 'Arm'; 
+localDir = fileparts(mfilename('fullpath'));
+params.localDir = localDir;
+
+if nargin < 3
+   hasGasSpring = false;
 end
 
-localDir = fileparts(mfilename('fullpath'));
+if hasGasSpring
+    shoulderJointComp = -7; % Nm  <--- This should be around -7 Nm for most
+                            %          kits, but it may need to be tuned
+                            %          for your specific setup.
+else
+    shoulderJointComp = 0;
+end
 
-shoulderJointComp = -7; % Nm  <--- This should be around -7 Nm if you have
-                        %          a gas spring.  Otherwise it should be 0.           
 
 %% Setup kinematic models
 switch kit

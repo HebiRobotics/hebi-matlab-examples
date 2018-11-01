@@ -18,8 +18,6 @@ close all;
 
 HebiLookup.initialize();
 
-localDir = fileparts(mfilename('fullpath'));
-
 enableLogging = true;
 enableEffortComp = true;
 
@@ -59,12 +57,14 @@ end
 
 armName = '6-DoF + gripper';
 armFamily = 'Arm';
+hasGasSpring = true;
 
-[ armGroup, armKin, armParams ] = setupArm( armName, armFamily );
+[ armGroup, armKin, armParams ] = setupArm( armName, armFamily, hasGasSpring );
 
 ikSeedPos = armParams.ikSeedPos;
 armEffortOffset = armParams.effortOffset;
 gravityVec = armParams.gravityVec;
+localDir = armParams.localDir;
 
 if armParams.hasGripper
     gripperGroup = HebiLookup.newGroupFromNames( armFamily, 'Spool' );
@@ -163,7 +163,9 @@ while ~abortFlag
     
     % Grab initial pose
     fbkPhoneMobile = phoneGroup.getNextFeedback('view','mobile');
+    fbkPhoneIO = phoneGroup.getNextFeedback('view','io');
     latestPhoneMobile = fbkPhoneMobile;
+    latestPhoneIO = fbkPhoneIO;
 
     q = [ fbkPhoneMobile.arOrientationW ...
           fbkPhoneMobile.arOrientationX ...
@@ -246,8 +248,8 @@ while ~abortFlag
         
         % Parameter to limit XYZ Translation of the arm if a slider is
         % pulled down.  Pulling all the way down resets translation.
-        phoneControlScale = (fbkPhoneIO.(translationScaleSlider) + 1) / 2 ;
-        if phoneControlScale < .1
+        phoneControlScale = fbkPhoneIO.(translationScaleSlider);
+        if phoneControlScale < 0
             xyz_init = xyzPhoneNew;
         end
 

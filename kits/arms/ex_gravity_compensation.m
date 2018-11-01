@@ -17,14 +17,15 @@ close all;
 
 HebiLookup.initialize();
 
-localDir = fileparts(mfilename('fullpath'));
-
 armName = '6-DoF + gripper';
 armFamily = 'Arm';
+hasGasSpring = true;
 
-[ armGroup, armKin, armParams ] = setupArm( armName, armFamily );
+[ armGroup, armKin, armParams ] = setupArm( armName, armFamily, hasGasSpring );
+
 gravityVec = armParams.gravityVec;
 effortOffset = armParams.effortOffset;
+localDir = armParams.localDir;
 
 enableLogging = true;
 

@@ -16,20 +16,19 @@
 clear *;
 close all;
 
-localDir = fileparts(mfilename('fullpath'));
-
 HebiLookup.initialize();
 
 armName = '6-DoF + gripper';
 armFamily = 'Arm';
+hasGasSpring = true;
 
-[ armGroup, armKin, armParams ] = setupArm( armName, armFamily );
+[ armGroup, armKin, armParams ] = setupArm( armName, armFamily, hasGasSpring );
 
 % Select whether coordinate frames for static links should be drawn as well
-showLinkBodies = true;
+showLinkBodies = false;
 
 % Length of the drawn axes
-axisLength = 0.1; % [m]
+axisLength = 0.05; % [m]
 
 %% Passive Visualization
 selected = armKin.getBodyInfo().isDoF; 
