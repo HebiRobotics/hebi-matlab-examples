@@ -1,11 +1,21 @@
 function [ group, kin, params ] = setupArm(kit, family)
-% SETUPARM creates models for various pre-configured arm kits
+% SETUPARM creates models and loads parameters for controlling various 
+% pre-configured arm kits.
 %
 %   [ group, kin, params ] = setupArm( kit, family )
 %
-% NOTE: If you are using different types of actuators or links, you will
-% need to create a new custom script, or change this script accordingly.
+% OVERVIEW:
+%   - Creates a group to communicate to the actuators in an arm
+%   - Loads gains for the arm from an XML file and sends them
+%   - Loads the kinematic description from the arm from an HRDF file
+%   - Sets initial seed positions for doing inverse kinematics (IK)
+%   - Sets effort offsets if a gas spring is used to assist the shoulder
+%   - Sets up a group and gains for a gripper, specified
 %
+% If you are using different types of actuators or links, you will
+% need to create a new HRDF file with the appropriate kinematics, an XML
+% file with the appropriate gains, and modify this script to load those new
+% files and set any other application-specific parameters you may have.
 %
 % INPUTS:
 % The 'kit' argument currently supports the following names:
@@ -63,7 +73,6 @@ switch kit
         
         % Load and send arm gains
         params.gains = HebiUtils.loadGains([localDir '/gains/6-DoF_arm_gains']);     
-        group.send( 'gains', params.gains);
         
         % Settings / gains for the gripper spool to open-close the gripper
         params.hasGripper = true;
@@ -94,7 +103,6 @@ switch kit
         
         % Load and send arm gains
         params.gains = HebiUtils.loadGains([localDir '/gains/6-DoF_arm_gains']);     
-        group.send( 'gains', params.gains);
         
         % No Gripper
         params.hasGripper = false;
@@ -120,7 +128,6 @@ switch kit
         
         % Load and send arm gains
         params.gains = HebiUtils.loadGains([localDir 'gains/5-DoF_arm_gains']);     
-        group.send( 'gains', params.gains);
         
         % No Gripper
         params.hasGripper = false;
@@ -145,7 +152,6 @@ switch kit
         
         % Load and send arm gains
         params.gains = HebiUtils.loadGains([localDir 'gains/4-DoF_arm_gains']);     
-        group.send( 'gains', params.gains);
                 
         % No Gripper
         params.hasGripper = false;
@@ -170,7 +176,6 @@ switch kit
         
         % Load and send arm gains
         params.gains = HebiUtils.loadGains([localDir 'gains/5-DoF_arm_scara_gains']);     
-        group.send( 'gains', params.gains);
                 
         % No Gripper
         params.hasGripper = false;
@@ -193,7 +198,6 @@ switch kit
         
         % Load and send arm gains
         params.gains = HebiUtils.loadGains([localDir 'gains/3-DoF_arm_gains']);     
-        group.send( 'gains', params.gains);
                 
         % No Gripper
         params.hasGripper = false;
@@ -213,6 +217,14 @@ end
 
 
 %% Common Setup
+
+% Set the gains on the arm, set a bunch of times in a loop to make
+% absolutely sure they get set.
+numSends = 20;
+for i=1:numSends
+    fbk = group.getNextFeedback();
+    group.send('gains',params.gains);
+end
 
 % Determine initial gravity vector based on the internal pose filter of
 % the base module.
