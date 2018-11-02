@@ -54,7 +54,7 @@
     <output_lowpass>0.75 0.75 0.75 0.75</output_lowpass>
     <d_on_error>1 1 1 1</d_on_error>
   </velocity>
-  
+
   <effort>
     <kp>0.25 0.25 0.25 0.25</kp>
     <ki>0 0 0 0</ki>

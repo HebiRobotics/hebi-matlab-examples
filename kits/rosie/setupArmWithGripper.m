@@ -6,7 +6,7 @@ function [ params, armKin, trajGen ] = setupArmWithGripper( )
     % Arm Module Names and Gains
     params.armModuleNames = { 'Base', 'Shoulder', 'Elbow', ...
                               'Wrist1', 'Wrist2', 'Wrist3' };   
-    params.armGains = HebiUtils.loadGains('gains/6-DoF-arm-gains-rosie');
+    params.armGains = HebiUtils.loadGains('gains/6-dof-arm-gains-rosie');
     
     % Gripper Module Name and Gains
     params.gripperModuleNames = { 'Spool' };

@@ -48,7 +48,7 @@ while toc(timer) < duration
     % Position command
     cmdPosition = amp * sin( freq * t );
 
-    % Velocity command (time-derivate of position)
+    % Velocity command (time-derivative of position)
     cmdVelocity = freq * amp * cos( freq * t );
 
     % Acceleration command (time-derivative of velocity)

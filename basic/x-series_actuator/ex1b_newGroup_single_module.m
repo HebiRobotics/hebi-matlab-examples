@@ -1,5 +1,5 @@
 % Make a group consisting of a single module.  A 'module' can be an
-% actuator, and I/O board, or a mobile device running the Mobile I/O app.
+% actuator, an I/O board, or a mobile device running the Mobile I/O app.
 %
 % For more information type:
 %    help HebiGroup
@@ -21,7 +21,7 @@ HebiLookup.initialize();
 % Use Scope to change select a module and change the name and family to
 % match the names below.  Following examples will use the same names.
 familyName = 'Test Family';
-moduleNames = 'Test Actuator';
+moduleName = 'Test Actuator';
 
-group = HebiLookup.newGroupFromNames( familyName, moduleNames )
+group = HebiLookup.newGroupFromNames( familyName, moduleName )
 
