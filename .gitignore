@@ -1,5 +1,6 @@
-
+*.m~
 *.asv
 
 *.hebilog
 !**/exampleLog.hebilog
+

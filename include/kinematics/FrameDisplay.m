@@ -120,7 +120,7 @@ classdef FrameDisplay < handle
             
             % labels
             legend x y z
-            title('Frames');
+            title('Robot Coordinate Frames');
             xlabel('x (m)');
             ylabel('y (m)');
             zlabel('z (m)');

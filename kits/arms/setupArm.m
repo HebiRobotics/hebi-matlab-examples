@@ -1,19 +1,38 @@
-function [ group, kin, params ] = setupArm(kit, family)
-% SETUPARM creates models for various pre-configured arm kits
+function [ group, kin, params ] = setupArm( kit, family, hasGasSpring )
+% SETUPARM creates models and loads parameters for controlling various 
+% pre-configured arm kits.
 %
-%   [ group, kin, params ] = setupArm(kitName, family)
+%   [ group, kin, params ] = setupArm( kit, family )
 %
-% NOTE: If you are using different types of actuators or links, you will
-% need to create a new custom script, or change this script accordingly.
+% OVERVIEW:
+%   - Creates a group to communicate to the actuators in an arm
+%   - Loads gains for the arm from an XML file and sends them
+%   - Loads the kinematic description from the arm from an HRDF file
+%   - Sets initial seed positions for doing inverse kinematics (IK)
+%   - Sets effort offsets if a gas spring is used to assist the shoulder
+%   - Sets up a group and gains for a gripper, specified
 %
+% If you are using different types of actuators or links, you will
+% need to create a new HRDF file with the appropriate kinematics, an XML
+% file with the appropriate gains, and modify this script to load those new
+% files and set any other application-specific parameters you may have.
 %
 % INPUTS:
-% The 'kitName' argument currently supports the following names:
+% The 'kit' argument currently supports the following names:
 %
-%    '6dof_w_gripper', '6dof', '5dof', '4dof', '4dof-scara'
+%    '6-DoF + gripper', 
+%    '6-DoF'
+%    '5-DoF'
+%    '4-DoF
+%    '4-DoF SCARA'
+%    '3-DoF'
 %
 % The 'family' argument specifies the family name of the modules that
-% should be selected. It is optional and defaults to 'Arm'.
+% should be selected.
+%
+% The 'hasGasSpring' argument specifies whether there is a gas spring
+% supporting the shoulder joint of the arm to provide extra payload.  If it
+% is not specified it defaults to 'false'.
 %
 % OUTPUTS:
 % 'group' is the HebiGroup object for the modules in the arm that is used
@@ -31,16 +50,27 @@ function [ group, kin, params ] = setupArm(kit, family)
 % HEBI Robotics
 % Jun 2018
 
-if nargin < 2
-   family = 'Arm'; 
+localDir = fileparts(mfilename('fullpath'));
+params.localDir = localDir;
+
+if nargin < 3
+   hasGasSpring = false;
 end
+
+if hasGasSpring
+    shoulderJointComp = -7; % Nm  <--- This should be around -7 Nm for most
+                            %          kits, but it may need to be tuned
+                            %          for your specific setup.
+else
+    shoulderJointComp = 0;
+end
+
 
 %% Setup kinematic models
 switch kit
     
-    case '6dof_w_gripper' % A-2084-06
+    case '6-DoF + gripper'
         %%
-        % Create group for communications
         group = HebiLookup.newGroupFromNames(family, {
             'Base'
             'Shoulder'
@@ -49,52 +79,28 @@ switch kit
             'Wrist2'
             'Wrist3' });
         
-        % Approximate kinematics to the tip of the gripper, expressed in the
-        % output frame of the last module on the arm
-        gripperOutput = eye(4);
-        gripperOutput(1:3,4) = [0; 0; .075];
-
         % Kinematic Model
-        % 6-DoF Arm w/ Gripper
-        kin = HebiKinematics();
-        kin.addBody('X8-9');
-        kin.addBody('X5-HeavyBracket', 'mount', 'right-inside');
-        kin.addBody('X8-16'); 
-        kin.addBody('X5-Link', 'extension', 0.325, 'twist', pi, ...
-                        'mass', .500); % Added mass for the gripper spool
-        kin.addBody('X8-9');
-        kin.addBody('X5-Link', 'extension', 0.325, 'twist', pi);
-        kin.addBody('X5-4');
-        kin.addBody('X5-LightBracket', 'mount', 'right');
-        kin.addBody('X5-1');
-        kin.addBody('X5-LightBracket', 'mount', 'right');
-        kin.addBody('X5-1');
-        kin.addBody( 'GenericLink', 'CoM', [0 0 .025], ...
-                                    'Output', gripperOutput, ...
-                                    'Mass', .100 );
-
-        % Compensation to joint efforts due to a gas spring (if present)
-        shoulderJointComp = 0; % Nm  <--- Change this if you add a gas spring
-        params.effortOffset = [0 shoulderJointComp 0 0 0 0];
-
-        % Torques for the girpper spool to open-close the gripper
+        kin = HebiKinematics([localDir '/hrdf/6-DoF_arm_w_gripper']);
+        
+        % Load and send arm gains
+        params.gains = HebiUtils.loadGains([localDir '/gains/6-DoF_arm_gains']);     
+        
+        % Settings / gains for the gripper spool to open-close the gripper
+        params.hasGripper = true;
         params.gripperOpenEffort = 1;
         params.gripperCloseEffort = -5;
+        params.gripperGains = HebiUtils.loadGains( ...
+                                [localDir '/gains/gripper_spool_gains'] );
+        
+        % Compensation to joint efforts due to a gas spring (if present)
+        params.effortOffset = [0 shoulderJointComp 0 0 0 0];
 
         % Default seed positions for doing inverse kinematics
-        params.ikSeedPos = [0 1 2.5 1.5 -1.5 1];
+        params.ikSeedPos = [0.01 1.0 2.5 1.5 -1.5 0.01];
         
-        % Load and send the gains
-        gains = HebiUtils.loadGains('6-DoF-Arm-Gains');
-        
-        gains.positionKp = gains.positionKp / 2;
-        
-        group.send('gains',gains);
-        params.gains = gains;
   
-    case '6dof' % A-2084-06
+    case '6-DoF'
         %%
-        % Create group for communications
         group = HebiLookup.newGroupFromNames(family, {
             'Base'
             'Shoulder'
@@ -104,25 +110,23 @@ switch kit
             'Wrist3' });
         
         % Kinematic Model
-        kin = HebiKinematics();
-        kin.addBody('X8-9');
-        kin.addBody('X5-HeavyBracket', 'mount', 'right-outside');
-        kin.addBody('X8-9', 'PosLim', [-0.6 1.2]); % gas spring limits
-        kin.addBody('X5-Link', 'extension', 0.325, 'twist', pi);
-        kin.addBody('X5-9');
-        kin.addBody('X5-Link', 'extension', 0.325, 'twist', pi);
-        kin.addBody('X5-1');
-        kin.addBody('X5-LightBracket', 'mount', 'right');
-        kin.addBody('X5-1');
-        kin.addBody('X5-LightBracket', 'mount', 'right');
-        kin.addBody('X5-1');
+        kin = HebiKinematics([localDir '/hrdf/6-DoF_arm']);
         
-        % Account for external efforts due to the gas spring
-        params.effortOffset = [0 -9.8 0 0 0 0];
+        % Load and send arm gains
+        params.gains = HebiUtils.loadGains([localDir '/gains/6-DoF_arm_gains']);     
         
-    case '5dof' % A-2084-05
+        % No Gripper
+        params.hasGripper = false;
+        
+        % Compensation to joint efforts due to a gas spring (if present)
+        params.effortOffset = [0 shoulderJointComp 0 0 0 0];
+        
+        % Default seed positions for doing inverse kinematics
+        params.ikSeedPos = [0.01 1.0 2.5 1.5 -1.5 0.01];
+        
+        
+    case '5-DoF' 
         %%
-        % Create group for communications
         group = HebiLookup.newGroupFromNames(family, {
             'Base'
             'Shoulder'
@@ -131,23 +135,23 @@ switch kit
             'Wrist2' });
         
         % Kinematic Model
-        kin = HebiKinematics();
-        kin.addBody('X8-9');
-        kin.addBody('X5-HeavyBracket', 'mount', 'right-outside');
-        kin.addBody('X8-9', 'PosLim', [-0.6 1.2]); % gas spring limits
-        kin.addBody('X5-Link', 'extension', 0.325, 'twist', pi);
-        kin.addBody('X5-9');
-        kin.addBody('X5-Link', 'extension', 0.325, 'twist', pi);
-        kin.addBody('X5-1');
-        kin.addBody('X5-LightBracket', 'mount', 'right');
-        kin.addBody('X5-1');
+        kin = HebiKinematics([localDir 'hrdf/5-DoF_arm']);
+        
+        % Load and send arm gains
+        params.gains = HebiUtils.loadGains([localDir 'gains/5-DoF_arm_gains']);     
+        
+        % No Gripper
+        params.hasGripper = false;
         
         % Account for external efforts due to the gas spring
-        params.effortOffset = [0 -9.8 0 0 0];
+        params.effortOffset = [0 shoulderJointComp 0 0 0];
         
-    case '4dof' % A-2085-04
+        % Default seed positions for doing inverse kinematics
+        params.ikSeedPos = [0.01 1.0 2.5 1.5 -1.5];
+        
+        
+    case '4-DoF'
         %%
-        % Create group for communications
         group = HebiLookup.newGroupFromNames(family, {
             'Base'
             'Shoulder'
@@ -155,18 +159,23 @@ switch kit
             'Wrist1' });
         
         % Kinematic Model
-        kin = HebiKinematics();
-        kin.addBody('X5-4');
-        kin.addBody('X5-HeavyBracket', 'mount', 'right-outside');
-        kin.addBody('X5-9');
-        kin.addBody('X5-Link', 'extension', 0.325, 'twist', pi);
-        kin.addBody('X5-4');
-        kin.addBody('X5-Link', 'extension', 0.325, 'twist', pi);
-        kin.addBody('X5-1');
+        kin = HebiKinematics([localDir 'hrdf/4-DoF_arm']);
         
-    case '4dof-scara' % A-2084-01
+        % Load and send arm gains
+        params.gains = HebiUtils.loadGains([localDir 'gains/4-DoF_arm_gains']);     
+                
+        % No Gripper
+        params.hasGripper = false;
+        
+        % Account for external efforts due to the gas spring
+        params.effortOffset = [0 shoulderJointComp 0 0];
+        
+        % Default seed positions for doing inverse kinematics
+        params.ikSeedPos = [0.01 1.0 2.5 1.5];
+        
+        
+    case '4-DoF SCARA'
         %%
-        % Create group for communications
         group = HebiLookup.newGroupFromNames(family, {
             'Base'
             'Shoulder'
@@ -174,44 +183,68 @@ switch kit
             'Wrist1' });
         
         % Kinematic Model
-        kin = HebiKinematics();
-        kin.addBody('X5-4');
-        kin.addBody('X5-HeavyBracket', 'mount', 'right-outside');
-        kin.addBody('X5-9');
-        kin.addBody('X5-Link', 'extension', 0.325, 'twist', pi/2);
-        kin.addBody('X5-4');
-        kin.addBody('X5-Link', 'extension', 0.325, 'twist', 0);
-        kin.addBody('X5-1');
+        kin = HebiKinematics([localDir 'hrdf/4-DoF_arm_scara']);
         
+        % Load and send arm gains
+        params.gains = HebiUtils.loadGains([localDir 'gains/5-DoF_arm_scara_gains']);     
+                
+        % No Gripper
+        params.hasGripper = false;
+        
+        % Account for external efforts due to the gas spring
+        params.effortOffset = [0 shoulderJointComp 0 0];
+        
+        % Default seed positions for doing inverse kinematics
+        params.ikSeedPos = [0.01 1.0 2.5 1.5];
+        
+        
+    case '3-DoF'
+        %%
+        group = HebiLookup.newGroupFromNames(family, {
+            'Base'
+            'Shoulder'
+            'Elbow' } );
+        
+        kin = HebiKinematics([localDir '/hrdf/3-DoF_arm']);
+        
+        % Load and send arm gains
+        params.gains = HebiUtils.loadGains([localDir 'gains/3-DoF_arm_gains']);     
+                
+        % No Gripper
+        params.hasGripper = false;
+        
+        % Account for external efforts due to the gas spring
+        params.effortOffset = [0 shoulderJointComp 0];
+        
+        % Default seed positions for doing inverse kinematics
+        params.ikSeedPos = [0.01 1.0 2.5];
+        
+
     otherwise
+        
         error([kit ' is not a supported kit name']);
         
 end
 
 
 %% Common Setup
-% Use default effort offsets
-if ~exist('effortOffset', 'var') || isempty(effortOffset)
-    params.effortOffset = zeros(1, kin.getNumDoF);
+
+% Set the gains on the arm, set a bunch of times in a loop to make
+% absolutely sure they get set.
+numSends = 20;
+for i=1:numSends
+    fbk = group.getNextFeedback();
+    group.send('gains',params.gains);
 end
 
 % Determine initial gravity vector based on the internal pose filter of
-% the base module
+% the base module.
 fbk = group.getNextFeedbackFull();
-baseRotMat = HebiUtils.quat2rotMat( [ 
-    fbk.orientationW(1), ...
-    fbk.orientationX(1), ...
-    fbk.orientationY(1), ...
-    fbk.orientationZ(1) ] );
+baseRotMat = HebiUtils.quat2rotMat( [ fbk.orientationW(1), ...
+                                      fbk.orientationX(1), ...
+                                      fbk.orientationY(1), ...
+                                      fbk.orientationZ(1) ] );
 params.gravityVec = -baseRotMat(3,1:3);
-
-% If the base module does not report a quaternion (e.g. old firmware), then
-% fall back to using the accelerometer. This assumes that the base is idle
-% and that the accelerometers are reading only gravity.
-if any(isnan(params.gravityVec))
-    gravityVec = -[fbk.accelX(1) fbk.accelY(1) fbk.accelZ(1)];
-    params.gravityVec = gravityVec / norm(gravityVec);
-end
 
 end
 

@@ -1,12 +1,14 @@
-% 6-dof arm & gripper tele-op Demo
+% 6-DoF Arm (w/ Optional Gripper) Tele-Op Demo 
 %
-% Features:      iOS App input to control motions of arm and gripper
+% Features:      Mobile App input to control motions of arm and gripper
 %
 % Requirements:  MATLAB 2013b or higher
+%                Android or iOS device running HEBI Mobile I/O that
+%                supports ARCore / ARKit.
 %
 % Author:        Dave Rollinson
 %                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
-% Date:          June 2018
+% Date:          Oct 2018
 
 % Copyright 2017-2018 HEBI Robotics
 
@@ -14,10 +16,9 @@
 clear *;
 close all;
 
-% Optional step to limit the lookup to a set of interfaces or modules
-% HebiLookup.setLookupAddresses('10.10.10.255');
+HebiLookup.initialize();
 
-enableLogging = false;
+enableLogging = true;
 enableEffortComp = true;
 
 
@@ -26,7 +27,14 @@ enableEffortComp = true;
 % Mobile Device Setup %
 %%%%%%%%%%%%%%%%%%%%%%%
 phoneFamily = 'HEBI';
-phoneName = 'Mobile IO - Matt iPad';
+phoneName = 'Mobile IO';
+
+resetPoseButton = 'b1';
+quitDemoButton = 'b8';
+translationScaleSlider = 'a3';
+gripForceSlider = 'a6';
+
+abortFlag = false;
 
 while true  
     try
@@ -47,19 +55,32 @@ end
 % Arm Setup %
 %%%%%%%%%%%%%
 
-[ robotGroup, armKin, armParams ] = setupArm('6dof_w_gripper');
+armName = '6-DoF + gripper';
+armFamily = 'Arm';
+hasGasSpring = true;
+
+[ armGroup, armKin, armParams ] = setupArm( armName, armFamily, hasGasSpring );
 
 ikSeedPos = armParams.ikSeedPos;
 armEffortOffset = armParams.effortOffset;
-gravityVec = [0 0 -1];
+gravityVec = armParams.gravityVec;
+localDir = armParams.localDir;
+
+if armParams.hasGripper
+    gripperGroup = HebiLookup.newGroupFromNames( armFamily, 'Spool' );
+    gripperGroup.send( 'gains', armParams.gripperGains );
+    gripForceScale = 0.5 * (armParams.gripperOpenEffort - ...
+                            armParams.gripperCloseEffort); 
+    gripForceShift = mean( [ armParams.gripperOpenEffort, ...
+                             armParams.gripperCloseEffort ] ); 
+    gripperCmd = CommandStruct();
+end
+
 numArmDOFs = armKin.getNumDoF();
 
-gripperForceScale = abs(armParams.gripperCloseEffort); 
-
-numModules = robotGroup.getNumModules;
+numModules = armGroup.getNumModules;
 
 armDOFs = 1:numModules;
-gripperDOF = numModules + 1;
 
 % Trajectory
 armTrajGen = HebiTrajectoryGenerator(armKin);
@@ -67,12 +88,23 @@ armTrajGen.setMinDuration(1.0); % Min move time for 'small' movements
                              % (default is 1.0)
 armTrajGen.setSpeedFactor(1.0); % Slow down movements to a safer speed.
                              % (default is 1.0)
+                             
+disp('  ');
+disp('Arm end-effector is now following the mobile device pose.');
+disp('The control interface has the following commands:');
+disp('  B1 - Reset/re-align poses.');
+disp('       This takes the arm to home and aligns with mobile device.');
+disp('  A3 - Scale down the translation commands to the arm.');
+disp('       Sliding all the way down means the end-effector only rotates.');
+disp('  A6 - Control the gripper (if the arm has gripper).');
+disp('       Sliding down closes the gripper, sliding up opens.');
+disp('  B8 - Quits the demo.');
 
 
 %% Startup
-while true
-    fbk = robotGroup.getNextFeedbackFull();
-    fbkPhone = phoneGroup.getNextFeedback('view','debug');
+while ~abortFlag
+    fbk = armGroup.getNextFeedbackFull();
+    fbkPhoneMobile = phoneGroup.getNextFeedback('view','mobile');
     fbkPhoneIO = phoneGroup.getNextFeedback('view','io');
 
     cmd = CommandStruct();
@@ -80,41 +112,29 @@ while true
     cmd.velocity = nan(size(fbk.position));
     cmd.effort = nan(size(fbk.position));
 
-    xyzScale = [1 1 2];
+    xyzScale = [1 1 2]';
 
     % Start background logging
     if enableLogging
-        robotGroup.startLog();
-        phoneGroup.startLog();
+        armGroup.startLog('dir',[localDir '/logs']);
+        phoneGroup.startLog('dir',[localDir '/logs']);
     end
 
     % Move to current coordinates
-    xyzTarget_init = [0.3 0.0 0.2];
+    xyzTarget_init = [0.5 0.0 0.1]';
     rotMatTarget_init = R_y(pi);
-
-    q = [ fbkPhone.orientationW ...
-          fbkPhone.orientationX ...
-          fbkPhone.orientationY ...
-          fbkPhone.orientationZ ];     
-    R_coreMotion_init = HebiUtils.quat2rotMat( q );
-
-    q = [ fbk.orientationW( armDOFs(1) ) ...
-          fbk.orientationX( armDOFs(1) ) ...
-          fbk.orientationY( armDOFs(1) ) ...
-          fbk.orientationZ( armDOFs(1) ) ];     
-    R_base_init = HebiUtils.quat2rotMat( q );
-
 
     ikPosition = armKin.getIK( 'xyz', xyzTarget_init, ...
                                'so3', rotMatTarget_init, ...
                                'initial', ikSeedPos );
 
+    % Slow trajectories down for the initial move to home position                       
     armTrajGen.setSpeedFactor( 0.5 );   
-    %armTrajGen.setMinDuration( 1.0 );  
     
     armTraj = armTrajGen.newJointMove([fbk.position(armDOFs); ikPosition]);
     
-    armTrajGen.setSpeedFactor( 0.9 );   
+    % Set trajectories to normal speed for following mobile input
+    armTrajGen.setSpeedFactor( 1.0 );   
     armTrajGen.setMinDuration( 0.33 );  
 
     t0 = fbk.time;
@@ -122,7 +142,7 @@ while true
 
     while t < armTraj.getDuration()
 
-        fbk = robotGroup.getNextFeedbackFull();
+        fbk = armGroup.getNextFeedbackFull();
         t = min(fbk.time - t0,armTraj.getDuration);
 
         [pos,vel,accel] = armTraj.getState(t);
@@ -137,53 +157,61 @@ while true
             cmd.effort(armDOFs) = dynamicsComp + gravComp + armEffortOffset;
         end
 
-        robotGroup.send(cmd);
+        armGroup.send(cmd);
 
     end
     
-    fbkPhone = phoneGroup.getNextFeedback('view','debug');
-    
     % Grab initial pose
-    % CURRENTLY HACKED ON ALTERNATE FEEDBACK CHANNELS UNTIL API UPDATE.
-    R_arKit_init = [ fbkPhone.debug1 fbkPhone.debug2 fbkPhone.debug3;
-                     fbkPhone.debug4 fbkPhone.debug5 fbkPhone.debug6;
-                     fbkPhone.debug7 fbkPhone.debug8 fbkPhone.debug9 ];
+    fbkPhoneMobile = phoneGroup.getNextFeedback('view','mobile');
+    fbkPhoneIO = phoneGroup.getNextFeedback('view','io');
+    latestPhoneMobile = fbkPhoneMobile;
+    latestPhoneIO = fbkPhoneIO;
 
-    xyz_arKit_init = [ fbkPhone.position ...
-                       fbkPhone.velocity ...
-                       fbkPhone.effort ];
+    q = [ fbkPhoneMobile.arOrientationW ...
+          fbkPhoneMobile.arOrientationX ...
+          fbkPhoneMobile.arOrientationY ...
+          fbkPhoneMobile.arOrientationZ ];     
+    R_init = HebiUtils.quat2rotMat( q );
+
+    xyz_init = [ fbkPhoneMobile.arPositionX;
+                 fbkPhoneMobile.arPositionY; 
+                 fbkPhoneMobile.arPositionZ ];
+
+    xyzPhoneNew = xyz_init;
 
     endVelocities = zeros(1, numArmDOFs);
     endAccels = zeros(1, numArmDOFs);
 
     maxDemoTime = inf; % sec
-    demoTimer = tic;
+    phoneFbkTimer = tic;
 
     timeLast = t0;
     armTrajStartTime = t0;
 
     firstRun = true;
 
-    while true
+    while ~abortFlag
 
         %%%%%%%%%%%%%%%%%%%
         % Gather Feedback %
         %%%%%%%%%%%%%%%%%%%
         try
-            fbk = robotGroup.getNextFeedback( 'view', 'full' );
-            %fbkPhone = phoneGroup.getNextFeedback( 'view', 'debug' );
-            %fbkPhoneIO = phoneGroup.getNextFeedback( 'view', 'io' );
+            fbk = armGroup.getNextFeedback( 'view', 'full' );
         catch
             disp('Could not get robot feedback!');
             break;
         end
 
-        try
-            fbkPhone = phoneGroup.get( 'feedback', 'view', 'debug' );
-            fbkPhoneIO = phoneGroup.get( 'feedback', 'view', 'io' );
-        catch
-            disp('Could not get phone feedback!');
-            break;
+        % Get feedback with a timeout of 0, which means that they return
+        % instantly, but if there was no new feedback, they return empty.
+        % This is because the mobile device is on wireless and might drop
+        % out or be really delayed, in which case we would rather keep
+        % running with an old data instead of waiting here for new data.
+        tempFbk = phoneGroup.getNextFeedback( fbkPhoneIO, fbkPhoneMobile, ...
+                                              'timeout', 0 );
+        if ~isempty(tempFbk)
+            latestPhoneMobile = fbkPhoneMobile;
+            latestPhoneIO = fbkPhoneIO;
         end
 
         timeNow = fbk.time;
@@ -195,45 +223,49 @@ while true
         cmd.position = nan(1,numModules);
         cmd.velocity = nan(1,numModules);
 
-        % Update base orientation
-        q = [ fbk.orientationW(1) ...
-              fbk.orientationX(1) ...
-              fbk.orientationY(1) ...
-              fbk.orientationZ(1) ];
-        R_base = R_base_init' * HebiUtils.quat2rotMat( q );
-
 
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % Read/Map Joystick Inputs %
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%
         
         % Check for restart command
-        if fbkPhoneIO.b1
+        if fbkPhoneIO.(resetPoseButton)
             break;
         end
         
+        % Check for quit command
+        if fbkPhoneIO.(quitDemoButton)
+            abortFlag = true;
+            break;
+        end
+        
+        if armParams.hasGripper
+            gripperCmd.effort = gripForceScale * ...
+                                    latestPhoneIO.(gripForceSlider) + ...
+                                    gripForceShift;
+            gripperGroup.send(gripperCmd);
+        end
+        
         % Parameter to limit XYZ Translation of the arm if a slider is
-        % pulled down.
-        phoneControlScale = (fbkPhoneIO.a3 + 1) / 2 ;
-
-        % Pose Informatin for arm Control
-        % CURRENTLY HACKED ON ALTERNATE FEEDBACK CHANNELS UNTIL API UPDATE.
-        xyzPhoneNew = [ fbkPhone.position ...
-                        fbkPhone.velocity ...
-                        fbkPhone.effort ];
-                    
-        if phoneControlScale < .1
-            xyz_arKit_init = xyzPhoneNew;
+        % pulled down.  Pulling all the way down resets translation.
+        phoneControlScale = fbkPhoneIO.(translationScaleSlider);
+        if phoneControlScale < 0
+            xyz_init = xyzPhoneNew;
         end
 
+        % Pose Information for Arm Control
+        xyzPhoneNew = [ latestPhoneMobile.arPositionX; ...
+                        latestPhoneMobile.arPositionY; ...
+                        latestPhoneMobile.arPositionZ ];
+                    
         xyzTarget = xyzTarget_init + phoneControlScale * xyzScale .* ...
-                        (R_z(-pi/2) * R_arKit_init' * (xyzPhoneNew' - xyz_arKit_init'))';
+                            (R_init' * (xyzPhoneNew - xyz_init));
 
-        q = [ fbkPhone.orientationW ...
-              fbkPhone.orientationX ...
-              fbkPhone.orientationY ...
-              fbkPhone.orientationZ ];     
-        rotMatTarget = R_coreMotion_init' * HebiUtils.quat2rotMat( q ) * rotMatTarget_init;
+        q = [ latestPhoneMobile.arOrientationW ...
+              latestPhoneMobile.arOrientationX ...
+              latestPhoneMobile.arOrientationY ...
+              latestPhoneMobile.arOrientationZ ];     
+        rotMatTarget = R_init' * HebiUtils.quat2rotMat( q ) * rotMatTarget_init;
 
 
         %%%%%%%%%%%%%%%
@@ -271,41 +303,45 @@ while true
                                    'initial', seedPosIK, ...
                                    'MaxIter', 50 ); 
 
-        % Start new trajectory at the current state
-                
+        % Start new trajectory at the current state        
         phoneHz = 10;
         phonePeriod = 1 / phoneHz;
         
-        if toc(demoTimer) > phonePeriod
+        if toc(phoneFbkTimer) > phonePeriod
             armTrajStartTime = timeNow;
-            demoTimer = tic;
+            phoneFbkTimer = tic;
 
             armTraj = armTrajGen.newJointMove( [pos; ikPosition], ...
                         'Velocities', [vel; endVelocities], ...
                         'Accelerations', [accel; endAccels]);  
         end
-                    
-               
-        % Hold down button 8 to put the arm in a compliant grav-comp mode
-        if fbkPhoneIO.b8 == 1
-            cmd.position(armDOFs) = nan;
-            cmd.velocity(armDOFs) = nan;
-        end
-
-        %%%%%%%%%%%%%%%%%%%
-        % Gripper Control %
-        %%%%%%%%%%%%%%%%%%%
-        
-        % cmd.effort(gripperDOF) = gripperForceScale * fbkPhoneIO.a6;
-
 
         %%%%%%%%%%%%%%%%%
         % Send to robot %
         %%%%%%%%%%%%%%%%%
-        robotGroup.send(cmd);
+        armGroup.send(cmd);
 
     end
 
 end
 
+%%
+if enableLogging
+    
+   hebilog = armGroup.stopLogFull();
+   
+   % Plot tracking / error from the joints in the arm.  Note that there
+   % will not by any 'error' in tracking for position and velocity, since
+   % this example only commands effort.
+   HebiUtils.plotLogs(hebilog, 'position');
+   HebiUtils.plotLogs(hebilog, 'velocity');
+   HebiUtils.plotLogs(hebilog, 'effort');
+   
+   % Plot the end-effectory trajectory and error
+   kinematics_analysis( hebilog, armKin );
+   
+   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+   % Feel free to put more plotting code here %
+   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+end
 
