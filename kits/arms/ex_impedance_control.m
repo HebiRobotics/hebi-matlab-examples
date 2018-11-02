@@ -193,9 +193,14 @@ while ~keys.ESC
 end
 
 %%
-if enableLogging
-    
+% Stop Logging
+if enableLogging  
    hebilog = armGroup.stopLogFull();
+end
+
+%%
+% Plotting
+if enableLogging
    
    % Plot tracking / error from the joints in the arm.  Note that there
    % will not by any 'error' in tracking for position and velocity, since

@@ -53,6 +53,7 @@ kb = HebiKeyboard();
 % Select whether you want to log and visualize the replay movement
 enableLogging = true;
 
+
 %% 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Record waypoints in gravity compensated mode %
