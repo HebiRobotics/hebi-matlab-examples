@@ -127,15 +127,17 @@ runtime = 100; % [s]
 
 cmd = CommandStruct();
 t0 = tic();
+t1 = t0;
+direction = 1;
 group.startLog('dir', 'logs');
 traj = trajGen.newJointMove(direction .* [amplitude -amplitude]);
 while toc(t0) < runtime
     
-    t = toc(t0);
+    t = toc(t1);
     if t > interval
        direction = direction * -1;
        traj = trajGen.newJointMove(direction .* [amplitude -amplitude]);
-       t0 = tic();
+       t1 = tic();
        t = 0;
     end
     
