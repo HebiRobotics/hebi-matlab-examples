@@ -18,9 +18,9 @@
 clear *;
 close all;
 
-armName = '6-DoF + gripper';
-armFamily = 'Arm';
-hasGasSpring = true;
+armName = '2-DoF';
+armFamily = 'exampleArm';
+hasGasSpring = false;
 
 [ armGroup, armKin, armParams ] = setupArm( armName, armFamily, hasGasSpring );
 armGroup.setFeedbackFrequency(100);
@@ -42,7 +42,7 @@ kb = HebiKeyboard();
 
 % Select whether waypoints should be done as a single trajectory, or
 % multiple trajectories that stop in between.
-stopBetweenWaypoints = true;
+stopBetweenWaypoints = false;
 
 % Select whether you want to log and visualize the replay movement
 enableLogging = true;
@@ -66,7 +66,7 @@ cmd = CommandStruct();
 
 while keys.ESC == 0
     
-    % Do grav-comp while training waypoints
+    % Do grav-comp while training waypoints  
     fbk = armGroup.getNextFeedback();
     cmd.effort = armKin.getGravCompEfforts(fbk.position, gravityVec) ...
                                                         + effortOffset;
