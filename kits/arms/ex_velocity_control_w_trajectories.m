@@ -59,6 +59,10 @@ latestControllerMobile = fbkControllerMobile;
 % for most applications.
 armGroup.setFeedbackFrequency(200); 
 
+numArmDOFs = armKin.getNumDoF();
+endVelocities = zeros(1, numArmDOFs);
+endAccels = zeros(1, numArmDOFs);
+
 % Double the effort gains from their default values, to make the arm more
 % sensitive for tracking force.
 gains = armGroup.getGains();
@@ -67,6 +71,14 @@ gains = armGroup.getGains();
 armGroup.send('gains',gains);
 
 numDoF = armKin.getNumDoF;
+
+% Trajectory generator
+minTrajDuration = 0.1; % [sec]
+defaultSpeedFactor = 0.9;
+
+armTrajGen = HebiTrajectoryGenerator(armKin);
+armTrajGen.setMinDuration( minTrajDuration ); 
+armTrajGen.setSpeedFactor( defaultSpeedFactor );
 
 enableLogging = true;
 
@@ -101,8 +113,8 @@ disp('  ESC - Exits the demo.');
 
     % HOLD POSITION ONLY (Allow rotation around end-effector position)
     gainsInEndEffectorFrame = false;
-    damperGains = [20; 0; 20; .0; .0; .0;]; % (N/(m/sec)) or (Nm/(rad/sec))
-    springGains = [50; 0; 500; 0; 0; 0];  % (N/m) or (Nm/rad)
+    damperGains = [10; 0; 10; .0; .0; .0;]; % (N/(m/sec)) or (Nm/(rad/sec))
+    springGains = [300; 0; 300; 0; 0; 0];  % (N/m) or (Nm/rad)
 
 %     % HOLD ROTATION ONLY
 %     gainsInEndEffectorFrame = true;
@@ -134,6 +146,9 @@ armCmdJointVels = zeros(1,numDoF);
 armFbkFrequency = armGroup.getFeedbackFrequency();
 tStart = fbk.time;
 tLast = tStart;
+tTrajStart = tStart;
+
+firstRun = true;
 
 while ~keys.ESC   
     
@@ -153,7 +168,9 @@ while ~keys.ESC
     dt = max( dt, 0.5 * 1/armFbkFrequency );
     dt = min( dt, 2.0 * 1/armFbkFrequency );
     tLast = t;
-    
+      
+    tTraj = fbk.time - tTrajStart;
+      
     %%%%%%%%%%%%%%%%%%%%%%%%
     % Gravity Compensation %
     %%%%%%%%%%%%%%%%%%%%%%%%
@@ -161,13 +178,14 @@ while ~keys.ESC
     % Calculate required torques to negate gravity at current position
     gravCompEfforts = armKin.getGravCompEfforts( fbk.position, gravityVec );
     
+    % Get Updated Forward Kinematics and Jacobians
+    armTipFK = armKin.getFK('endeffector',fbk.position);
+    J_armTip = armKin.getJacobian('endeffector',fbk.position);
+        
     %%%%%%%%%%%%%%%%%%%%%
     % Impedance Control %
     %%%%%%%%%%%%%%%%%%%%%
     if controllerOn
-        % Get Updated Forward Kinematics and Jacobians
-        armTipFK = armKin.getFK('endeffector',fbk.position);
-        J_armTip = armKin.getJacobian('endeffector',fbk.position);
 
         % Calculate Impedence Control Wrenches and Appropraite Joint Torque
         springWrench = zeros(6,1);
@@ -205,7 +223,7 @@ while ~keys.ESC
     else
         impedanceEfforts = zeros(numDoF,1);
     end
-             
+           
     %%%%%%%%%%%%%%%%%%%%
     % Velocity Control %
     %%%%%%%%%%%%%%%%%%%%
@@ -216,20 +234,54 @@ while ~keys.ESC
     armTipVelCmd = [ velX; 
                      velZ ];
     
-    endEffectorXYZShift = dt * [ velX; 
-                                    0; 
-                                  velZ ];
-    endEffectorXYZ = endEffectorXYZ + endEffectorXYZShift;
-    
-    % Get Updated Forward Kinematics and Jacobians
-    armTipFK = armKin.getFK('endeffector',fbk.position);
-    J_armTip = armKin.getJacobian('endeffector',fbk.position);
+    xyzTargetShift = dt * [ velX; 
+                              0; 
+                            velZ ];
+                              
+    if firstRun
+        xyzTarget = armTipFK(1:3,4);
+    end
+                              
+                              
+    xyzTarget = xyzTarget + xyzTargetShift;
+    ikPosition = armKin.getIK( 'xyz', xyzTarget, ...
+                               'initial', armParams.ikSeedPos );
+                                  
+    if firstRun || ~controllerOn
+        pos = ikPosition;
+        vel = endVelocities;
+        accel = endAccels;
+        firstRun = false;
+    elseif exist('armTraj','var')
+        tTraj = min( tTraj, armTraj.getDuration() );
+        [pos,vel,accel] = armTraj.getState(tTraj);
+    else
+        pos = ikPosition;
+        vel = endVelocities;
+        accel = endAccels;
+    end
+    % cmd.position(armDOFs) = pos;
+    cmd.velocity = vel;
 
-    J = J_armTip([1,3],:);
+    dynamicsComp = armKin.getDynamicCompEfforts( ...
+                                    fbk.position, pos, vel, accel );
+
     
-    jointVelCmd = pinv_damped(J) * armTipVelCmd;
-    
-    cmd.velocity = jointVelCmd';
+    % Start new trajectory at the current state
+    if max(abs( armTipVelCmd )) > 0
+        tTrajStart = fbk.time;
+        armTraj = armTrajGen.newJointMove( [pos; ikPosition], ...
+                                     'Velocities', [vel; endVelocities], ...
+                                     'Accelerations', [accel; endAccels]);        
+    end
+%     J = J_armTip([1,3],:); 
+%     jointVelCmd = pinv_damped(J) * armTipVelCmd;
+%     
+%     cmd.velocity = jointVelCmd';
+
+    armTipFK = armKin.getFK('endeffector',pos);
+    endEffectorXYZ = armTipFK(1:3,4);
+    endEffectorRotMat = armTipFK(1:3,1:3);
     
     % Add all the different torques together
     cmd.effort = gravCompEfforts + impedanceEfforts' + effortOffset;
@@ -247,6 +299,8 @@ while ~keys.ESC
         armTipFK = armKin.getFK('endeffector',fbk.position);
         endEffectorXYZ = armTipFK(1:3,4);
         endEffectorRotMat = armTipFK(1:3,1:3);
+        
+        firstRun = true;
         
         if controllerOn
             disp('Impedance Controller ENABLED.');
