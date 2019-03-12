@@ -2,11 +2,12 @@
  
     if size(J,1) > size(J,2)
         w = det(J'*J);
+        I = eye(size(J'*J));
     else
         w = det(J*J');
+        I = eye(size(J*J'));
     end
         
-    I = eye(size(J*J'));
     
     % Damping Terms
     % Based on Manipulability, in 'Prior Work' of above paper
