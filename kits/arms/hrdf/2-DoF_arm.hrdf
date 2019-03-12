@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 2-DoF Arm -->
+<robot version="1.1.0">
+    
+  <bracket type="X5HeavyRightOutside"/>
+  <actuator type="X8-16"/>
+  <link type="X5" extension="0.325" twist="pi"/>
+  <actuator type="X8-9"/>
+  <link type="X5" extension="0.325" twist="0"/>
+  
+  <!-- Add mass for a module that's sitting at the end of the arm, but we're not controlling-->
+  <rigid-body mass="0.500"/>
+    
+</robot>

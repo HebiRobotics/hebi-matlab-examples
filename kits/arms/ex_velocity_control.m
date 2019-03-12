@@ -31,6 +31,28 @@ gravityVec = armParams.gravityVec;
 effortOffset = armParams.effortOffset;
 localDir = armParams.localDir;
 
+% Set up Mobile I/O Controller
+retryDelayTime = 2.0;
+robotName = 'exampleArm';
+controllerName = 'mobilePhone';
+while true
+    try
+        controllerGroup = ...
+            HebiLookup.newGroupFromNames( robotName, controllerName );
+        break;
+    catch
+        disp(['  Did not find controller: ' robotName '|' controllerName]);
+        pause( retryDelayTime );
+    end
+end
+
+% Get the initial feedback objects that we'll reuse later for the
+% controller group.
+fbkControllerIO = controllerGroup.getNextFeedbackIO();
+fbkControllerMobile = controllerGroup.getNextFeedbackMobile();
+latestControllerIO = fbkControllerIO;
+latestControllerMobile = fbkControllerMobile;
+
 % Increase feedback frequency since we're calculating velocities at the
 % high level for damping.  Going faster can help reduce a little bit of
 % jitter for fast motions, but going slower (100 Hz) also works just fine
@@ -40,7 +62,7 @@ armGroup.setFeedbackFrequency(200);
 % Double the effort gains from their default values, to make the arm more
 % sensitive for tracking force.
 gains = armGroup.getGains();
-gains.effortKp = 2 * gains.effortKp;
+% gains.effortKp = 1 * gains.effortKp;
 % gains.effortKd = 2 * gains.effortKd;
 armGroup.send('gains',gains);
 
@@ -80,7 +102,7 @@ disp('  ESC - Exits the demo.');
     % HOLD POSITION ONLY (Allow rotation around end-effector position)
     gainsInEndEffectorFrame = false;
     damperGains = [20; 0; 20; .0; .0; .0;]; % (N/(m/sec)) or (Nm/(rad/sec))
-    springGains = [500; 0; 500; 0; 0; 0];  % (N/m) or (Nm/rad)
+    springGains = [50; 0; 500; 0; 0; 0];  % (N/m) or (Nm/rad)
 
 %     % HOLD ROTATION ONLY
 %     gainsInEndEffectorFrame = true;
@@ -109,10 +131,28 @@ controllerOn = false;
 armCmdJointAngs = fbk.position;
 armCmdJointVels = zeros(1,numDoF);
 
+armFbkFrequency = armGroup.getFeedbackFrequency();
+tStart = fbk.time;
+tLast = tStart;
+
 while ~keys.ESC   
     
     % Gather sensor data from the arm
     fbk = armGroup.getNextFeedback();
+    
+    tempFbk = controllerGroup.getNextFeedback( ...
+                    fbkControllerIO, fbkControllerMobile, 'timeout', 0 );
+    if ~isempty(tempFbk)
+        latestControllerMobile = fbkControllerMobile;
+        latestControllerIO = fbkControllerIO;
+    end
+    
+    % Timekeeping
+    t = fbk.time - tStart;
+    dt = t - tLast;
+    dt = max( dt, 0.5 * 1/armFbkFrequency );
+    dt = min( dt, 2.0 * 1/armFbkFrequency );
+    tLast = t;
     
     %%%%%%%%%%%%%%%%%%%%%%%%
     % Gravity Compensation %
@@ -120,7 +160,7 @@ while ~keys.ESC
     
     % Calculate required torques to negate gravity at current position
     gravCompEfforts = armKin.getGravCompEfforts( fbk.position, gravityVec );
-             
+    
     %%%%%%%%%%%%%%%%%%%%%
     % Impedance Control %
     %%%%%%%%%%%%%%%%%%%%%
@@ -165,6 +205,31 @@ while ~keys.ESC
     else
         impedanceEfforts = zeros(numDoF,1);
     end
+             
+    %%%%%%%%%%%%%%%%%%%%
+    % Velocity Control %
+    %%%%%%%%%%%%%%%%%%%%
+    velScale = 0.2;
+    velX = velScale * latestControllerIO.a1;
+    velZ = velScale * latestControllerIO.a2;
+    
+    armTipVelCmd = [ velX; 
+                     velZ ];
+    
+    endEffectorXYZShift = dt * [ velX; 
+                                    0; 
+                                  velZ ];
+    endEffectorXYZ = endEffectorXYZ + endEffectorXYZShift;
+    
+    % Get Updated Forward Kinematics and Jacobians
+    armTipFK = armKin.getFK('endeffector',fbk.position);
+    J_armTip = armKin.getJacobian('endeffector',fbk.position);
+
+    J = J_armTip([1,3],:);
+    
+    jointVelCmd = pinv_damped(J) * armTipVelCmd;
+    
+    cmd.velocity = jointVelCmd';
     
     % Add all the different torques together
     cmd.effort = gravCompEfforts + impedanceEfforts' + effortOffset;
@@ -174,7 +239,7 @@ while ~keys.ESC
 
     % Check for new key presses on the keyboard
     keys = read(kb);
-
+    
     % Toggle impedance
     if keys.SPACE == 1 && prevKeys.SPACE == 0      
         controllerOn = ~controllerOn;

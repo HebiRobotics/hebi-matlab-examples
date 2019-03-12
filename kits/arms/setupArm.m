@@ -219,6 +219,27 @@ switch kit
         % Default seed positions for doing inverse kinematics
         params.ikSeedPos = [0.01 1.0 2.5];
         
+    case '2-DoF'
+        %%
+        group = HebiLookup.newGroupFromNames(family, {
+            'Shoulder'
+            'Elbow' } );
+        
+        kin = HebiKinematics([localDir '/hrdf/2-DoF_arm']);
+        
+        % Load and send arm gains
+        params.gains = HebiUtils.loadGains([localDir '/gains/2-DoF_arm_gains']);     
+                
+        % No Gripper
+        params.hasGripper = false;
+        
+        % Account for external efforts due to the gas spring
+        params.effortOffset = [0 0];
+        
+        % Default seed positions for doing inverse kinematics
+        params.ikSeedPos = [-pi/4 -pi/2];
+        
+        
 
     otherwise
         
@@ -237,14 +258,16 @@ for i=1:numSends
     group.send('gains',params.gains);
 end
 
-% Determine initial gravity vector based on the internal pose filter of
-% the base module.
-fbk = group.getNextFeedbackFull();
-baseRotMat = HebiUtils.quat2rotMat( [ fbk.orientationW(1), ...
-                                      fbk.orientationX(1), ...
-                                      fbk.orientationY(1), ...
-                                      fbk.orientationZ(1) ] );
-params.gravityVec = -baseRotMat(3,1:3);
+% % Determine initial gravity vector based on the internal pose filter of
+% % the base module.
+% fbk = group.getNextFeedbackFull();
+% baseRotMat = HebiUtils.quat2rotMat( [ fbk.orientationW(1), ...
+%                                       fbk.orientationX(1), ...
+%                                       fbk.orientationY(1), ...
+%                                       fbk.orientationZ(1) ] );
+% params.gravityVec = -baseRotMat(3,1:3);
+
+params.gravityVec = [0 0 -1];
 
 end
 

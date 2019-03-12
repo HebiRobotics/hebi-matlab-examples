@@ -17,9 +17,9 @@ close all;
 
 HebiLookup.initialize();
 
-armName = '6-DoF + gripper';
-armFamily = 'Arm';
-hasGasSpring = true;
+armName = '2-DoF';
+armFamily = 'ExampleArm';
+hasGasSpring = false;
 
 [ armGroup, armKin, armParams ] = setupArm( armName, armFamily, hasGasSpring );
 
