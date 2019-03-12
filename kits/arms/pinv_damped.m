@@ -1,6 +1,11 @@
  function [ pinv_J_damp ] = pinv_damped( J )
  
-    w = det(J*J');
+    if size(J,1) > size(J,2)
+        w = det(J'*J);
+    else
+        w = det(J*J');
+    end
+        
     I = eye(size(J*J'));
     
     % Damping Terms
@@ -16,6 +21,11 @@
         damping = 0;
     end
     
-    pinv_J_damp = J' / (J * J' + damping*I);
+    
+    if size(J,1) > size(J,2)
+        pinv_J_damp = (J'*J +  + damping*I) \ J';
+    else
+        pinv_J_damp = J' / (J*J' + damping*I);
+    end
  
  end
