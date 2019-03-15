@@ -15,8 +15,8 @@ If you are running code on the computer inside the robot, there are instructions
   - where `'mobileBaseType'` is: `'diff-drive'`, `'omni'`, or `'mecanum'`
 
 The demo will start up looking for the actuators in the robot, followed by the mobile device for input. 
-* You will need to change the *Family* of the device running Mobile IO to *Rosie*.  This can be done the in the app settings on the mobile device, or through [Scope](http://docs.hebi.us/tools.html#scope-gui)
-* If the mobile device is not found, check to make sure it is on the same network as the robot.
+* You will need to change the **Family** of the device running Mobile IO to **Rosie**.  This can be done the in the app settings on the mobile device, or through [Scope](http://docs.hebi.us/tools.html#scope-gui).
+* If the mobile device is not found, check to **make sure it is on the same network as the robot**.
 
 ## Coordinate frame convention
 
@@ -30,10 +30,10 @@ The demo will start up looking for the actuators in the robot, followed by the m
 | ----------------- | ----------------- | ----------- |
 | Right Joystick (`A8` and `A7`)  | Base X-Y Velocity |  |
 | Left Joystick (`A1`) | Base Theta Velocity |  |
-| Slider (`A6`) | Gipper force | Drag down to close. Drag up to open |
-| Phone Pose | Arm end-effector pose |  |
+| Slider (`A6`) | Gipper force | Drag down to close the gripper with increasing force. Drag up to open the gripper. |
+| Phone Pose | Arm end-effector pose | Move the mobile device up-down, left-right to control the position of the end-effector.  Rotate the mobile device around to control the orientation of the end-effector. |
 | Slider (`A3`) | Scale of end-effector translation  | Should normally be all the way up. Drag this to all the way down, to reset the pose and hold it place. |
-| Button (`B1`) | Reset Pose of the gripper| When you press this, make sure the phone is oriented face down, matching the gripper. |
+| Button (`B1`) | Reset Pose of the end-effector | When you press this, make sure the phone is oriented face down, matching the gripper. |
 
 ## Automatic startup instructions for Linux
 
@@ -46,7 +46,7 @@ To install:
 * Make sure that the `install.sh` script has execute permissions: `chmod +x install.sh`
 * Run `install.sh`: `./install.sh`
 
-If you would like to have the script start on boot, add the `rosieStart` command under `Startup Applications` if using Ubuntu or use another standard method for automatically launching the program.
+If you would like to have the script start on boot, add the `rosieStart` command under `Startup Applications` if using Ubuntu or use another standard method for automatically launching the program.  You can find `Startup Applications` with the system search function.
 
 Note that if you move the location of `rosieStart.sh` you will have to delete the symbolic link from `/usr/bin` and run `install.sh` again.    You can do this by typing: `sudo rm /usr/bin/rosieStart.sh` and then `./install.sh` again.
 
