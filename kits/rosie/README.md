@@ -30,10 +30,10 @@ The demo will start up looking for the actuators in the robot, followed by the m
 | ----------------- | ----------------- | ----------- |
 | Right Joystick (`A8` and `A7`)  | Base X-Y Velocity |  |
 | Left Joystick (`A1`) | Base Theta Velocity |  |
-| Slider (`A6`) | Gipper force | Drag down to close. Drag up to open |
-| Phone Pose | Arm end-effector pose |  |
+| Slider (`A6`) | Gipper force | Drag down to close the gripper with increasing force. Drag up to open the gripper. |
+| Phone Pose | Arm end-effector pose | Move the mobile device up-down, left-right to control the position of the end-effector.  Rotate the mobile device around to control the orientation of the end-effector. |
 | Slider (`A3`) | Scale of end-effector translation  | Should normally be all the way up. Drag this to all the way down, to reset the pose and hold it place. |
-| Button (`B1`) | Reset Pose of the gripper| When you press this, make sure the phone is oriented face down, matching the gripper. |
+| Button (`B1`) | Reset Pose of the end-effector | When you press this, make sure the phone is oriented face down, matching the gripper. |
 
 ## Automatic startup instructions for Linux
 
