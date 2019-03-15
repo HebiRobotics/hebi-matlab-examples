@@ -6,7 +6,7 @@ function [ params, trajGen ] = setupOmniBase()
 % ORIGIN = MID-POINT OF THE CHASSIS WHERE ALL 3 WHEEL AXES INTERSECT
 % +X-AXIS = FORWARD
 % +Y-AXIS = LEFT
-% +Z-AXIS = UP
+% +Z-AXIS = UP (+THETA COUNTER-CLOCKWISE)
 
 wheelRadius = .150 / 2;  % [m]
 wheelBase = .470;   % [m] (diameter of circumscribing circle of the wheels)
@@ -50,12 +50,12 @@ wheelBaseFrames(1:3,1:3,3) = R_z(a3) * R_y(pi/2);
 
 params.wheelBaseFrames = wheelBaseFrames;
 
-% Maps XYZ chassis velocities to wheel velocities
+% Maps X-Y-THETA chassis velocities to wheel velocities
 wheelTransform = [ sin(a1) -cos(a1)  (wheelBase/2);   % Front Right (_Wheel1)
                    sin(a2) -cos(a2)  (wheelBase/2);   % Front Left (_Wheel2)
                    sin(a3) -cos(a3)  (wheelBase/2) ]; % Rear (_Wheel3)
 
-params.wheelVelocityMatrix = wheelTransform ./ wheelRadius;
+params.wheelVelocityMatrix = wheelTransform / wheelRadius;
 params.wheelEffortMatrix = wheelTransform * wheelRadius;                          
 
 % Trajectory generator

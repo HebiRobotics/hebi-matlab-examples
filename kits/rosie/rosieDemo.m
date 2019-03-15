@@ -41,7 +41,7 @@ function rosieDemo( mobileBaseType )
     
     chassisMassMatrix = diag( [chassisMass; chassisMass; chassisInertiaZZ] );
 
-    % Maps XYZ chassis velocities to wheel velocities
+    % Maps X-Y-THETA chassis velocities to wheel velocities
     chassisToWheelVelocities = chassisParams.wheelVelocityMatrix;
     chassisEffortsToWheelEfforts = chassisParams.wheelEffortMatrix;
 
