@@ -3,6 +3,8 @@
 This folder contains everything needed to run the Rosie mobile manipulator kit.  It assumes that you have:
 * Rosie Kit (Diff-drive, Omni-drive, or Mecanum-drive)
 * iOS device capable of running ARKit (iPhone 6S or later, iPad 2017 or later, iPad Pro)
+   or
+* Android device capable of running ARCore (Google Pixel or recent Samsung Galaxy phones)
 
 ## To get started:
 * Download this folder
