@@ -355,12 +355,6 @@ function rosieDemo( mobileBaseType )
             cmd.velocity(wheelDOFs) = wheelCmd.vel;
             cmd.effort(wheelDOFs) = wheelCmd.effort;   
 
-            % Hold down button 8 to put the arm in a compliant grav-comp mode
-            if latestPhoneIO.b8 == 1
-                cmd.position(armDOFs) = nan;
-                cmd.velocity(armDOFs) = nan;
-            end
-
             % Send to robot
             robotGroup.send(cmd);
 
