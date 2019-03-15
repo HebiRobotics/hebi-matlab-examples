@@ -15,8 +15,8 @@ If you are running code on the computer inside the robot, there are instructions
   - where `'mobileBaseType'` is: `'diff-drive'`, `'omni'`, or `'mecanum'`
 
 The demo will start up looking for the actuators in the robot, followed by the mobile device for input. 
-* You will need to change the *Family* of the device running Mobile IO to *Rosie*.  This can be done the in the app settings on the mobile device, or through [Scope](http://docs.hebi.us/tools.html#scope-gui)
-* If the mobile device is not found, check to *make sure it is on the same network as the robot*.
+* You will need to change the **Family** of the device running Mobile IO to **Rosie**.  This can be done the in the app settings on the mobile device, or through [Scope](http://docs.hebi.us/tools.html#scope-gui)
+* If the mobile device is not found, check to **make sure it is on the same network as the robot**.
 
 ## Coordinate frame convention
 
