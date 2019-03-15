@@ -105,8 +105,8 @@ function rosieDemo( mobileBaseType )
     %%%%%%%%%%%%%%%%%%%%%%%%%%
     % Setup Mobile I/O Group %
     %%%%%%%%%%%%%%%%%%%%%%%%%%
-    phoneFamily = 'HEBI';
-    phoneName = 'Virtual IO';
+    phoneFamily = robotFamily;
+    phoneName = 'Mobile IO';
 
     while true        
         try
