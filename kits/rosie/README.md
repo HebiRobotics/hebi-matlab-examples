@@ -46,7 +46,7 @@ To install:
 * Make sure that the `install.sh` script has execute permissions: `chmod +x install.sh`
 * Run `install.sh`: `./install.sh`
 
-If you would like to have the script start on boot, add the `rosieStart` command under `Startup Applications` if using Ubuntu or use another standard method for automatically launching the program.
+If you would like to have the script start on boot, add the `rosieStart` command under `Startup Applications` if using Ubuntu or use another standard method for automatically launching the program.  You can find `Startup Applications` with the system search function.
 
 Note that if you move the location of `rosieStart.sh` you will have to delete the symbolic link from `/usr/bin` and run `install.sh` again.    You can do this by typing: `sudo rm /usr/bin/rosieStart.sh` and then `./install.sh` again.
 
