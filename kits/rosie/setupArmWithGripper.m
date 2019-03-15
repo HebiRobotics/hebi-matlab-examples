@@ -1,16 +1,20 @@
 function [ params, armKin, trajGen ] = setupArmWithGripper( )
 
+    % Get path to this file, so all the relative folders work right
+    localDir = fileparts(mfilename('fullpath'));
+    params.localDir = localDir;
+
     % Kinematic Model
-    armKin = HebiKinematics('hrdf/6-DoF_arm_w_gripper');
+    armKin = HebiKinematics([localDir '/hrdf/6-DoF_arm_w_gripper']);
     
     % Arm Module Names and Gains
     params.armModuleNames = { 'Base', 'Shoulder', 'Elbow', ...
                               'Wrist1', 'Wrist2', 'Wrist3' };   
-    params.armGains = HebiUtils.loadGains('gains/6-dof-arm-gains-rosie');
+    params.armGains = HebiUtils.loadGains([localDir '/gains/6-dof-arm-gains-rosie']);
     
     % Gripper Module Name and Gains
     params.gripperModuleNames = { 'Spool' };
-    params.gripperGains = HebiUtils.loadGains('gains/gripper-gains');
+    params.gripperGains = HebiUtils.loadGains([localDir '/gains/gripper-gains']);
 
     % Compensation to joint efforts due to a gas spring (if present)
     shoulderJointComp = 0; % Nm  <--- Change this if you add a gas spring

@@ -8,6 +8,10 @@ function [ params, trajGen ] = setupOmniBase()
 % +Y-AXIS = LEFT
 % +Z-AXIS = UP (+THETA COUNTER-CLOCKWISE)
 
+% Get path to this file, so all the relative folders work right
+localDir = fileparts(mfilename('fullpath'));
+params.localDir = localDir;
+
 wheelRadius = .150 / 2;  % [m]
 wheelBase = .470;   % [m] (diameter of circumscribing circle of the wheels)
 
@@ -28,7 +32,7 @@ params.wheelModuleNames = { '_Wheel1', ...
 params.numWheels = 3;
 
 % Load the gains for the wheels
-params.wheelGains = HebiUtils.loadGains('gains/omni-drive-wheel-gains');
+params.wheelGains = HebiUtils.loadGains([localDir '/gains/omni-drive-wheel-gains']);
 
 % Setup the transforms from the origin of the chassis to each wheel,
 % starting with the angles that the output axes point out at

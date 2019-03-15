@@ -8,6 +8,10 @@ function [ params, trajGen ] = setupDiffDriveBase()
 % +Y-AXIS = LEFT
 % +Z-AXIS = UP (+THETA COUNTER-CLOCKWISE)
 
+% Get path to this file, so all the relative folders work right
+localDir = fileparts(mfilename('fullpath'));
+params.localDir = localDir;
+
 wheelDiameter = .200; % [m]
 wheelBase = .430; % [m]
 
@@ -31,7 +35,7 @@ params.wheelModuleNames = { '_LeftWheel', ...
 params.numWheels = 2;
 
 % Load the gains for the wheels
-params.wheelGains = HebiUtils.loadGains('gains/diff-drive-wheel-gains');
+params.wheelGains = HebiUtils.loadGains([localDir '/gains/diff-drive-wheel-gains']);
 
 % Transform from the origin of the chassis to the Left Wheel
 wheelBaseFrames(:,:,1) = eye(4); 
