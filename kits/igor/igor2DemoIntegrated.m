@@ -620,7 +620,8 @@ while true
         % This is because the mobile device is on wireless and might drop
         % out or be really delayed, in which case we would rather keep
         % running with an old data instead of waiting here for new data.
-        tempFbk = phoneGroup.getNextFeedback( fbkPhoneIO, 'timeout', 0.001 );
+        tempFbk = phoneGroup.getNextFeedback( fbkPhoneIO, 'timeout', 0 );
+        
         if ~isempty(tempFbk)
             latestPhoneIO = fbkPhoneIO;
         end

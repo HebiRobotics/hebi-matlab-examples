@@ -13,17 +13,19 @@ classdef (Sealed) HebiGroup < handle
     %   getCommandLifetime   - gets the command lifetime
     %
     %   HebiGroup Methods (common):
-    %   send                 - sends synchronized commands, as well as a
-    %                          number of other settings and parameters
-    %   getNextFeedback      - returns the next new 'simple' feedback
-    %   getNextFeedbackFull  - returns the next new 'full' feedback  
-    %   getNextFeedbackIO    - returns the next new I/O board feedback 
-    %   getInfo              - returns meta information such as names
-    %   getGains             - returns the current gains
-    %   startLog             - starts background logging to disk
-    %   stopLog              - stops logging and returns a readable format
-    %   stopLogFull          - same as above, returning full feedback
-    %   stopLogIO            - same as above, returning I/O feedback
+    %   send                  - sends synchronized commands, as well as a
+    %                           number of other settings and parameters
+    %   getNextFeedback       - returns the next new 'simple' feedback
+    %   getNextFeedbackFull   - returns the next new 'full' feedback  
+    %   getNextFeedbackIO     - returns the next new 'I/O' board feedback 
+    %   getNextFeedbackMobile - returns the next new 'mobile' feedback 
+    %   getInfo               - returns meta information such as names
+    %   getGains              - returns the current gains
+    %   startLog              - starts background logging to disk
+    %   stopLog               - stops logging and returns a readable format
+    %   stopLogFull           - same as above, returning full feedback
+    %   stopLogIO             - same as above, returning I/O feedback
+    %   stopLogMobile         - same as above, returning mobile feedback
     %
     %   Example
     %      % 200 Hz loop commanding of the current position
@@ -166,8 +168,8 @@ classdef (Sealed) HebiGroup < handle
             %   conflicting targets from, e.g., the GUI, or any other groups
             %   running in Matlab or from any other APIs.
             %
-            %   This feature can be disabled by setting zero or the empty
-            %   matrix []. When disabled, the hardware will continue to
+            %   This feature can be disabled by setting 'inf' or the empty
+            %   matrix '[]'. When disabled, the hardware will continue to
             %   execute the last sent command. Note that this can result in
             %   unexpected behavior when sending efforts and velocities.
             %
@@ -182,7 +184,7 @@ classdef (Sealed) HebiGroup < handle
             setCommandLifetime(this.obj, varargin{:});
         end
         
-        function [] = send(this, varargin)
+        function out = send(this, varargin)
             %send sends commands and settings to modules.
             %
             %   This method provides a variety of selectors to send commands, gains,
@@ -269,22 +271,42 @@ classdef (Sealed) HebiGroup < handle
             %   'PositionLimit' ('PosLim') sets safety limits for position.
             %   Safety limits act as a virtual hard stop and are independent of gains.
             %
+            %   'VelocityLimit' ('VelLim') sets safety limits for velocity.
+            %   Safety limits act as a virtual hard stop and are independent of gains.
+            %
+            %   'EffortLimit' ('EffLim') sets safety limits for effort.
+            %   Safety limits act as a virtual hard stop and are independent of gains.
+            %
             %   'ReferencePosition' sets the current position (feedback) by adjusting
             %   the user-settable reference point for the zero position. This persists
             %   automatically. This is the same as setting the reference point for
             %   Position in the 'Device' tab of the Scope GUI.
             %
-            %   'ReferenceEffort' sets the current effort (feedback) by adjusting
-            %   the user-settable reference point for zero effort. This persists
-            %   automatically.  This is the same as setting the reference point
-            %   for Effort in the 'Device' tab of the Scope GUI.
+            %   'OffsetReferencePosition' offsets the current position (feedback) by
+            %   offsetting the user-settable reference point for the zero position.
+            %   
+            %   'ZeroReferenceDeflection' sets the deflection of the internal spring
+            %   to zero. Note that this will also cause the effort (feedback) to also be
+            %   zero. Only do this when the actuator is unloaded.
+            %
+            %   'OffsetReferenceDeflection' adjusts the internal spring deflection. Note
+            %   that this will cause a jump in the effort feedback that depends on the
+            %   spring constant (may or may not be linear).
             %
             %   'SpringConstant' sets the internal stiffness parameter for an actuator
             %   that is used to turn its sensed spring deflection into an estimated 
             %   effort (torque). This is a linear spring constant, units are Nm/rad. 
             %   The current spring constant can be determined by getting a 'full' 
-            %   feedback and dividing the -torque by the measured deflection 
-            %   (-1 * fbk.torque ./ fbk.deflection).
+            %   feedback and dividing the negative effort by the measured deflection 
+            %   (-fbk.effort ./ fbk.deflection).
+            %
+            %   'RequestAck' ('Ack') requests message acknowledgements from each 
+            %   device. This method will return true if acknowledgements have been
+            %   received from all devices within this group and within the specified
+            %   timeout.
+            %   
+            %   'Timeout' [s] the deadline for receiving acknowledgements before
+            %   this method aborts and returns false. (Default 0.5s)
             %
             %   Note that all options can be combined as required. Options that get set
             %   in the same function call will be packed into the same outgoing packet.
@@ -294,7 +316,7 @@ classdef (Sealed) HebiGroup < handle
             %      group.send('family', 'MyRobot', 'led', 'r');
             %
             %   See also HebiGroup, CommandStruct, GainStruct
-            send(this.obj, varargin{:});
+            out = send(this.obj, varargin{:});
         end
               
         function out = get(this, varargin)
@@ -311,6 +333,7 @@ classdef (Sealed) HebiGroup < handle
             %      getNextFeedback
             %      getNextFeedbackFull
             %      getNextFeedbackIO
+            %      getNextFeedbackMobile
             %
             %   If a struct returns empty or full of NaN, make sure that the
             %   appropriate polling rate has been set.
@@ -333,6 +356,10 @@ classdef (Sealed) HebiGroup < handle
             %      'Full'     returns all available feedback. This is appropriate
             %                 for advanced users that care about additional
             %                 timestamps and less common sensors.
+            %      'IO'       returns feedback fields specific to I/O devices,
+            %                 such as analog and digital pins
+            %      'Mobile'   returns feedback fields specific to mobile devices,
+            %                 such as GPS and ARKit/ARCore estimates.
             %
             %   See also HebiGroup
             out = get(this.obj, varargin{:});
@@ -388,7 +415,7 @@ classdef (Sealed) HebiGroup < handle
             %      end
             %
             %   See also HebiGroup, getFeedbackFrequency, getNextFeedbackFull,
-            %   getNextFeedbackIO.
+            %   getNextFeedbackIO., getNextFeedbackMobile
             out = getNextFeedback(this.obj, varargin{:});
         end
         
@@ -424,6 +451,24 @@ classdef (Sealed) HebiGroup < handle
             %
             %   See also HebiGroup, getNextFeedback.
             out = getNextFeedbackIO(this.obj, varargin{:});
+        end
+        
+        function out = getNextFeedbackMobile(this, varargin)
+            %getNextFeedbackMobile is a convenience wrapper for getNextFeedback
+            %
+            %   This method is a convenience wrapper with the same behavior as
+            %   calling getNextFeedback('View', 'Mobile'). The 'Mobile' view 
+            %   provides access to data from mobile devices such as phones
+            %   or tablets. This includes fields such as GPS data, and 
+            %   ARCore/ARKit estimates.
+            %
+            %   Example
+            %      % Read the current battery level (in %)
+            %      fbk = group.getNextFeedbackMobile()
+            %      value = fbk.batteryLevel;
+            %
+            %   See also HebiGroup, getNextFeedback.
+            out = getNextFeedbackMobile(this.obj, varargin{:});
         end
         
         function out = getGains(this, varargin)
@@ -531,7 +576,7 @@ classdef (Sealed) HebiGroup < handle
             %       plot(log.time, log.position);
             %
             %   See also HebiGroup, stopLog, stopLogFull, stopLogIO,
-            %   HebiUtils.convertGroupLog.
+            %   stopLogMobile, HebiUtils.convertGroupLog.
             out = startLog(this.obj, varargin{:});
         end
         
@@ -564,6 +609,10 @@ classdef (Sealed) HebiGroup < handle
             %      'Full'   converts all available feedback. This is appropriate
             %               for advanced users that need additional timestamps
             %               or data from less common sensors.
+            %      'IO'     converts feedback related to input/output
+            %               devices.
+            %      'Mobile' converts feedback related to mobile devices
+            %               such as phones or tablets.
             %
             %   Example
             %       % Log into .mat file and load into MATLAB
@@ -624,6 +673,26 @@ classdef (Sealed) HebiGroup < handle
             %
             %   See also HebiGroup, stopLog.
             out = stopLogIO(this.obj, varargin{:});
+
+            % stop log should only be called in non-time critical sections,
+            % so it may make sense to do some automated cleanup.
+            if HebiGroup.config.triggerStopLogGC
+                java.lang.System.gc();
+            end
+
+        end
+        
+         function out = stopLogMobile(this, varargin)
+            %stopLogMobile is a convenience wrapper for stopLog
+            %
+            %   This method is a convenience wrapper with the same behavior
+            %   as calling stopLog('View', 'Mobile'). The 'Mobile' view 
+            %   provides access to data from mobile devices such as phones
+            %   or tablets. This includes fields such as GPS data, and 
+            %   ARCore/ARKit estimates.
+            %
+            %   See also HebiGroup, stopLog.
+            out = stopLogMobile(this.obj, varargin{:});
 
             % stop log should only be called in non-time critical sections,
             % so it may make sense to do some automated cleanup.

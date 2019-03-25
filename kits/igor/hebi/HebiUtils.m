@@ -6,21 +6,23 @@ classdef (Sealed) HebiUtils
     %   now                - returns the current timestamp [s]
     %
     %   saveGains          - saves group gains to disk (XML)
-    %
     %   loadGains          - loads group gains from disk (XML)
     %
     %   newGroupFromLog    - generates a group from a .hebilog file that
     %                        you can use play back data using getNextFeedback.
     %
-    %   loadGroupLog       - loads a binary .hebilog file into memory
+    %   newImitationGroup  - creates an imitation group for testing
     %
-    %   loadGroupLogUI     - shows a UI dialog to load one or more logs.
+    %   loadGroupLog       - loads a binary .hebilog file into memory
+    %   loadGroupLogsUI    - shows a UI dialog to load one or more logs.
+    %
+    %   readGroupLogInfo   - reads the first info and gains struct from
+    %                        a .hebilog file
     %
     %   convertGroupLog    - converts a binary .hebilog file into a readable
     %                        format, either in memory or files like CSV or MAT.
-    %
-    %   convertGroupLogsUI - shows a UI dialog to chose one or more
-    %                        .hebilog files to convert.
+    %   convertGroupLogsUI - shows a UI dialog to chose one or more log
+    %                        files to convert.
     %
     %   plotLogs           - visualizes feedback data from one or more log
     %                        files in a formatted and labeled plot.
@@ -186,6 +188,50 @@ classdef (Sealed) HebiUtils
             group = HebiGroup(javaMethod('newGroupFromLog', HebiUtils.className,  varargin{:}));
         end
         
+        function group = newImitationGroup(varargin)
+            % NEWIMITATIONGROUP creates an imitation group for testing
+            %
+            %   An imitation group behaves mostl the same way as a group
+            %   created by HebiLookup, without the requirement to have
+            %   physically connected devices on the network.
+            %
+            %   The main differences are as follows
+            %
+            %   * Commands immediately set the corresponding feedback without
+            %     veryfing physical feasibility. Values will be visible in
+            %     the next feedback.
+            %
+            %   * Imitation devices do not update setting fields (e.g. name)
+            %
+            %   * There is no feedback for physical sensors such as IMU data
+            %
+            %   Example:
+            %     % Create an imitation group
+            %     numModules = 1;
+            %     group = HebiUtils.newImitationGroup(numModules);
+            % 
+            %     % Generate log data
+            %     cmd = CommandStruct();
+            %     logFile = group.startLog();
+            %     t0 = group.getNextFeedback().time;
+            %     t = 0;
+            %     while t < 5
+            %         fbk = group.getNextFeedback();
+            %         t = fbk.time - t0;
+            %         cmd.position = sin(2*pi*t);
+            %         group.send(cmd);
+            %     end
+            %     logStruct = group.stopLog();
+            % 
+            %     % Visualize commands
+            %     plot(logStruct.time, logStruct.position);
+            %     hold on;
+            %     plot(logStruct.time, logStruct.positionCmd, ':');
+            %
+            %   See also HebiUtils, HebiLookup, HebiGroup
+            group = HebiGroup(javaMethod('newImitationGroup', HebiUtils.className,  varargin{:}));
+        end
+        
         function out = saveGains(varargin)
             % SAVEGAINS saves gains for group to disk (xml)
             %
@@ -227,6 +273,38 @@ classdef (Sealed) HebiUtils
             %
             %   See also HebiUtils, saveGains, GainStruct.
             out = javaMethod('loadGains', HebiUtils.className,  varargin{:});
+        end
+        
+        function [info, gains] = readGroupLogInfo(hebiLogFile)
+            % readGroupLogInfo reads the first info and gains struct
+            % from a binary .hebilog file
+            %
+            %   This method will return empty if the log does not contain
+            %   any info or log data.
+            %
+            %   Example:
+            %       [info, gains] = HebiUtils.readGroupLogInfo(path);
+            %
+            %   Example:
+            %       % Get info for all logs selected via a GUI
+            %       fileNames = HebiUtils.convertGroupLogsUI('format','raw');
+            %       [infos, gains] = cellfun(@HebiUtils.readGroupLogInfo, ...
+            %           fileNames, 'UniformOutput', false);
+            
+            % Read log file
+            group = HebiUtils.newGroupFromLog(hebiLogFile);
+            
+            % Step through log until there is enough data to populate info,
+            % or we reach the end of the file
+            fbk = group.getNextFeedback();
+            while isempty(group.getInfo()) && ~isempty(fbk)
+                fbk = group.getNextFeedback(fbk);
+            end
+            
+            % Read info/gains
+            info  = group.getInfo();
+            gains = group.getGains();
+            
         end
         
         function [ varargout ] = loadGroupLogsUI( varargin )
@@ -317,16 +395,31 @@ classdef (Sealed) HebiUtils
             %
             % See also HebiGroup.stopLog, convertGroupLog, loadGroupLogsUI.
             
+            % Remember last file location
+            persistent lastDir; 
+            
+            % Use current location if not set yet
+            if isempty(lastDir)
+                openFilePath = pwd;
+            else
+                openFilePath = lastDir;
+            end
+
             % Show selector dialog
             [fileName,pathName] = uigetfile( '*.hebilog', ...
-                '.hebilog Files (*.hebilog)', ...
+                '.hebilog Files (*.hebilog)', openFilePath,...
                 'MultiSelect', 'on' );
             
+            % Update current location if something was actually selected.
+            if pathName ~= 0
+                lastDir = pathName;
+            end
+
             % Convert to cell array
             if ~iscell(fileName) && ~ischar(fileName)
                 % No selection
                 disp('No files chosen.');
-                hebiLogs = {};
+                varargout = {{}};
                 return;
             elseif ~iscell( fileName )
                 % Single-select
@@ -377,9 +470,9 @@ classdef (Sealed) HebiUtils
             %
             %       'InputLogs' is a single hebiLog object or a cell array 
             %       of log objects. Logs can come from logging modules 
-            %       online with HEBIGROUP.STOPLOG, loaded from a saved file  
-            %       using HEBIUTILS.CONVERTGROUPLOG. Or selected manually 
-            %       from a UI dialog using HEBIUTILS.CONVERTGROUPLOGSUI.
+            %       online with HebiGroup.stopLog(), loaded from a saved file  
+            %       using HebiUtils.loadGroupLog(). Or selected manually 
+            %       from a UI dialog using HebiUtils.loadGroupLogsUI().
             % 
             %       'FeedbackField' is a string corresponding to a feedback
             %       field in the log object. If the field is 'position',
@@ -412,7 +505,7 @@ classdef (Sealed) HebiUtils
             %           'Modules', 1:2, ...
             %           'FigNum', 100);
             %
-            % See also CONVERTGROUPLOGS, CONVERTGROUPLOGSUI.
+            % See also LOADGROUPLOG, LOADGROUPLOGSUI.
             
             if nargin < 1 || isempty(hebiLogs)
                 disp('Please specify a log file and feedback field to plot.');
@@ -446,10 +539,13 @@ classdef (Sealed) HebiUtils
             for i=1:length(hebiLogs)
                 
                 % Assign the mask for plotting only some modules from a
-                % group.
+                % group.  If its empty figure out the size based on the
+                % number of entries in the second field (the first is the
+                % master 'time' vector that always has one).
                 plotMask = p.Modules;
                 if isempty(plotMask)
-                    plotMask = 1:size(hebiLogs{i}.position,2);
+                    logFields = fields(hebiLogs{i});                 
+                    plotMask = 1:size(hebiLogs{i}.(logFields{2}),2);
                 end
                 
                 % Assign figure number, or count up from the user-defined
@@ -477,7 +573,7 @@ classdef (Sealed) HebiUtils
                 plot(ax, hebiLogs{i}.time, hebiLogs{i}.(feedbackField)(:,plotMask) );
                 
                 xlabel('time (sec)');
-                ylabel([feedbackField ' (' HebiUtils.feedbackUnits(feedbackField) ')']);
+                ylabel([feedbackField ' (' HebiUtils.getFeedbackUnits(feedbackField) ')']);
                 title( [feedbackField ' - Log ' ...
                     num2str(i) ' of ' num2str(numLogs)] );
                 xlim([0 hebiLogs{i}.time(end)]);
@@ -498,7 +594,7 @@ classdef (Sealed) HebiUtils
                         hebiLogs{i}.([feedbackField 'Cmd'])(:,plotMask) );
                     
                     xlabel('time (sec)');
-                    ylabel(['error (' HebiUtils.feedbackUnits(feedbackField) ')']);
+                    ylabel(['error (' HebiUtils.getFeedbackUnits(feedbackField) ')']);
                     title( [feedbackField ' error'] );
                     xlim([0 hebiLogs{i}.time(end)]);
                     grid on;
@@ -688,34 +784,11 @@ classdef (Sealed) HebiUtils
     % the public API at some point or may be removed without notice.
     methods(Access = public, Static, Hidden = true)
         
-        function [info, gains] = readGroupLogInfo(hebiLogFile)
-            % readGroupLogInfo reads the first info and gains struct 
-            % from a binary .hebilog file
-            %
-            %   Example:
-            %       fileNames = HebiUtils.loadGroupLogsUI('format','raw');
-            %       [infos, gains] = cellfun(@HebiUtils.readGroupLogInfo, ...
-            %           fileNames, 'UniformOutput', false);
-            
-            % Read log file
-            group = HebiUtils.newGroupFromLog(hebiLogFile);
-            
-            % Step through log until there is enough data to populate info,
-            % or we reach the end of the file
-            fbk = group.getNextFeedback();
-            while isempty(group.getInfo()) && ~isempty(fbk)
-                fbk = group.getNextFeedback(fbk);
-            end
-            
-            % Read info/gains
-            info  = group.getInfo();
-            gains = group.getGains();
-            
-        end
-        
-        function [ feedbackUnits ] = feedbackUnits( feedbackField )
+        function [ feedbackUnits ] = getFeedbackUnits( feedbackField )
             %FEEDBACKUNITS Return units of a given feedback type in a log file
             switch feedbackField
+                
+                % Actuator Feedback
                 case {'position','positionCmd','motorPosition','deflection'}
                     feedbackUnits = 'rad';
                     
@@ -749,6 +822,25 @@ classdef (Sealed) HebiUtils
                     
                 case {'ledR','ledRG','ledB'}
                     feedbackUnits = '0-1';
+                
+                % Mobile Feedback
+                case {'gpsTimestamp'}
+                    feedbackUnits = 'sec';
+                    
+                case {'magnetometerX','magnetometerY','magnetometerZ'}
+                    feedbackUnits = 'T';
+                    
+                case {'gpsLatitude','gpsLongitude','gpsHeading'}
+                    feedbackUnits = 'deg';    
+               
+                case {'altitude','gpsAltitude','gpsHorizontalAccuracy','gpsVerticalAccuracy'}
+                    feedbackUnits = 'm';
+                    
+                case {'arPositionX','arPositionY','arPositionZ'}
+                    feedbackUnits = 'm';    
+                    
+                case {'batteryLevel'}
+                    feedbackUnits = '%';
                     
                 otherwise
                     feedbackUnits = '';
