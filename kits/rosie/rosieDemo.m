@@ -244,7 +244,7 @@ function rosieDemo( mobileBaseType )
             % out or be really delayed, in which case we would rather keep
             % running with an old data instead of waiting here for new data.
             tempFbk = phoneGroup.getNextFeedback( fbkPhoneIO, fbkPhoneMobile, ...
-                                                  'timeout', 0 );
+                                                  'timeout', 0.001 );
             if ~isempty(tempFbk)
                 latestPhoneMobile = fbkPhoneMobile;
                 latestPhoneIO = fbkPhoneIO;
