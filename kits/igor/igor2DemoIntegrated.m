@@ -121,7 +121,7 @@ while true
     end
     
     robotGroup.send('led','w');
-    pause(0.1);
+    pause(0.5);
     robotGroup.send('led','m');
     pause(0.1);
 end
@@ -150,10 +150,10 @@ while true
         catch
             pause(1.0);
         end
-        pause(0.1);
+        robotGroup.send('led','w');
+        pause(0.5);
         robotGroup.send('led','m');
         pause(0.1);
-        robotGroup.send('led','w');
     end
     
     while(latestPhoneIO.b3 == 0)
@@ -167,10 +167,14 @@ while true
                 phoneGroup = HebiLookup.newGroupFromNames( ...
                     phoneFamily, phoneName );
                 disp('Phone Found.  Starting up');
-                break;
             catch
                 pause(1.0);
             end
+            
+            robotGroup.send('led','w');
+            pause(0.5);
+            robotGroup.send('led','m');
+            pause(0.1);
         end
         
         pause(0.1);
