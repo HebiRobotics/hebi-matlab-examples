@@ -178,9 +178,9 @@ while true
         end
         
         pause(0.1);
-        robotGroup.send('led','m');
-        pause(0.1);
         robotGroup.send('led','g');
+        pause(0.1);
+        robotGroup.send('led','m');
         
         if(latestPhoneIO.b1)
             robotGroup.send('led',[]);
@@ -620,11 +620,19 @@ while true
             latestPhoneIO = fbkPhoneIO;
         catch
             disp('Controller Error');
-            latestPhoneIO.a1 = 0;
-            latestPhoneIO.a2 = 0;
-            latestPhoneIO.a7 = 0;
-            latestPhoneIO.a8 = 0;
-            kneeVelJoy = 0;
+            try
+                fprintf('Searching for phone Controller...\n');
+                phoneGroup = HebiLookup.newGroupFromNames( ...
+                    phoneFamily, phoneName );
+                disp('Phone Found.  Starting up');
+            catch
+                pause(1.0);
+            end
+            
+            robotGroup.send('led','w');
+            pause(0.5);
+            robotGroup.send('led','m');
+            pause(0.1);
         end
         
         % Toggle Balance Controller (Button B2 - Hold Button)
