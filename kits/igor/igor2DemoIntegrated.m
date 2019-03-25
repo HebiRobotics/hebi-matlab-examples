@@ -130,13 +130,11 @@ end
 fbkPhoneIO = phoneGroup.getNextFeedbackIO();
 latestPhoneIO = fbkPhoneIO;
 
-fbkPhoneMobile = phoneGroup.getNextFeedbackMobile();
-
 %%
 
 % Wait to start
 while true
-    fprintf('Paused. Click B1 button to start, B5 button to quit matlab...\n');  
+    fprintf('Paused. Click B3 button to start, B1 button to quit matlab...\n');  
 
     try
         fbkPhoneIO = phoneGroup.getNextFeedbackIO();
@@ -152,6 +150,10 @@ while true
         catch
             pause(1.0);
         end
+        pause(0.1);
+        robotGroup.send('led','m');
+        pause(0.1);
+        robotGroup.send('led','w');
     end
     
     while(latestPhoneIO.b3 == 0)
@@ -171,18 +173,19 @@ while true
             end
         end
         
-        if(latestPhoneIO.b1)
-            robotGroup.send('led',[]);
-            quit force
-        end
         pause(0.1);
         robotGroup.send('led','m');
         pause(0.1);
         robotGroup.send('led','g');
         
+        if(latestPhoneIO.b1)
+            robotGroup.send('led',[]);
+            quit force
+        end
+        
     end
       
-    fprintf('Running. Click left stick to stop...\n');
+    fprintf('Running. Hold Button B4 for soft shutdown...\n');
     
     %Get initial feedback
     try
@@ -628,7 +631,7 @@ while true
         end
         
         % Chassis Fwd / Back Vel (Axis A8 - Right Stick Y)
-        joyScale = -.5;
+        joyScale = .5;
         joyDeadZone = .06;
         if abs(latestPhoneIO.a8) > joyDeadZone
             cmdVelJoy = joyScale * (latestPhoneIO.a8 - joyDeadZone*sign(latestPhoneIO.a8));
@@ -639,7 +642,7 @@ while true
         % Chassis Yaw Vel (Axis A7 - Right Stick X)
         if abs(latestPhoneIO.a7) > joyDeadZone
             rotDiffJoy = 25 * wheelRadius * direction(1) / wheelBase * ...
-                            (latestPhoneIO.a7) - joyDeadZone*sign(latestPhoneIO.a7));
+                            (latestPhoneIO.a7) - joyDeadZone*sign(latestPhoneIO.a7);
         else
             rotDiffJoy = 0;
         end
@@ -659,7 +662,6 @@ while true
         else
             rotComp = 0;
         end
-        %rotDiffJoy =  rotDiffJoy + rotComp;
         
         % Stance Height (Button B4 Soft Shutdown / Slider A3 Up & Down)
         sliderDeadZone = .20;
@@ -673,7 +675,7 @@ while true
         else
             % Normal Stance Height control
             if abs(latestPhoneIO.a3) > sliderDeadZone  
-                kneeVelJoy = .5 * (latestPhoneIO.a3);
+                kneeVelJoy = -.5 * (latestPhoneIO.a3);
             else
                 kneeVelJoy = 0;
             end
@@ -688,7 +690,7 @@ while true
 
         % Arm X-Axis (Axis A2 - Left Stick Y)
         if abs(latestPhoneIO.a2) > joyDeadZone
-            gripVelCmd(1) = -.4 * latestPhoneIO.a2;
+            gripVelCmd(1) = .4 * latestPhoneIO.a2;
         else
             gripVelCmd(1) = 0;
         end
@@ -705,9 +707,9 @@ while true
         % Wrist Rotation (Slider A6)
         sliderLowPass = .95;
         if latestPhoneIO.a6 < (-1*sliderDeadZone) 
-            wristVel = sliderLowPass*wristVel - (1-sliderLowPass)*2.5;
-        elseif latestPhoneIO.a6 > sliderDeadZone
             wristVel = sliderLowPass*wristVel + (1-sliderLowPass)*2.5;
+        elseif latestPhoneIO.a6 > sliderDeadZone
+            wristVel = sliderLowPass*wristVel - (1-sliderLowPass)*2.5;
         else
             wristVel = sliderLowPass*wristVel;
         end
@@ -783,20 +785,9 @@ while true
         
         gripVel(2,2) = -gripVel(2,2);
 
-    %     % Used if keeping arms stationary in world frame
-    %     if armVelComp
-    %         gripVel(1,:) = gripVel(1,:) + fbkChassisVel;
-    %     end
-
-        %gripVel = R_y(fbkLeanAngle) * gripVel;
-
         oldGripPos = gripPos;
-        if leftArmCompliant
-            newGripPos(:,1) = armTipFK{1}(1:3,4);
-            newGripPos(:,2) = gripPos(:,2);
-        else
-            newGripPos = gripPos + gripVel*dt;
-        end
+        newGripPos = gripPos + gripVel*dt;
+            
         gripWidthLim = .00;
         if newGripPos(2,1) < gripWidthLim
             newGripPos(2,:) = [gripWidthLim, -gripWidthLim];
