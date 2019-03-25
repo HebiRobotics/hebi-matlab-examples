@@ -129,6 +129,8 @@ end
 % Get the initial feedback objects that we'll reuse later
 fbkPhoneIO = phoneGroup.getNextFeedbackIO();
 latestPhoneIO = fbkPhoneIO;
+    
+fbkPhoneMobile = phoneGroup.getNextFeedbackMobile();
 
 %%
 
@@ -615,11 +617,14 @@ while true
         % Joystick Input %
         %%%%%%%%%%%%%%%%%%
 
-        try
-            fbkPhoneIO = phoneGroup.getNextFeedbackIO();
+        % Get feedback with a timeout of 0, which means that they return
+        % instantly, but if there was no new feedback, they return empty.
+        % This is because the mobile device is on wireless and might drop
+        % out or be really delayed, in which case we would rather keep
+        % running with an old data instead of waiting here for new data.
+        tempFbk = phoneGroup.getNextFeedback( fbkPhoneIO, 'timeout', 0 );
+        if ~isempty(tempFbk)
             latestPhoneIO = fbkPhoneIO;
-        catch
-            disp('Controller Error');
         end
         
         % Toggle Balance Controller (Button B2 - Hold Button)
