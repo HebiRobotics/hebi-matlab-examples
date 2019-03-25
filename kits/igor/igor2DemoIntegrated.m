@@ -129,8 +129,6 @@ end
 % Get the initial feedback objects that we'll reuse later
 fbkPhoneIO = phoneGroup.getNextFeedbackIO();
 latestPhoneIO = fbkPhoneIO;
-    
-fbkPhoneMobile = phoneGroup.getNextFeedbackMobile();
 
 %%
 
