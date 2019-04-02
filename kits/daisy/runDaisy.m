@@ -5,17 +5,22 @@
 
 clear *;
 close all;
-HebiLookup.clearModuleList();
+HebiLookup.initialize();
 
-simulate = true;
+localDir = fileparts( mfilename('fullpath') );
 
-kin = makeHexapodKinematics();
+% Optional flags
+visualizeOn = false;
+simulate = false;
+logging = true;
 
-for leg=1:length(kin)
-    trajGen{leg} = HebiTrajectoryGenerator(kin{leg}); 
-    trajGen{leg}.setAlgorithm('UnconstrainedQP');
+[legKin, chassisKin] = makeDaisyKinematics();
+
+for leg=1:length(legKin)
+    trajGen{leg} = HebiTrajectoryGenerator(legKin{leg}); 
 end
 
+robotName = 'Daisy';
 moduleNames = { 'base1', 'shoulder1', 'elbow1', ...
                 'base2', 'shoulder2', 'elbow2', ...
                 'base3', 'shoulder3', 'elbow3', ...
@@ -23,51 +28,57 @@ moduleNames = { 'base1', 'shoulder1', 'elbow1', ...
                 'base5', 'shoulder5', 'elbow5', ...
                 'base6', 'shoulder6', 'elbow6' };
 
-if ~simulate
-    group = HebiLookup.newGroupFromNames('xMonster',moduleNames);
-    group.setFeedbackFrequency(200);
-    pause(.2);
-    fbk = group.getNextFeedback();
+setDaisyParams;
 
-    poseFilter = HebiPoseFilter();
-    poseFilter.setMaxAccelWeight( 0.05 );
-    poseFilter.setMaxAccelNormDev( .5 );
-
-    % Start the filter with 'clean' data to ensure it initializes well
-    accel = [0.01; 0.01; 9.81];
-    gyro = [0.01; 0.01; 0.01];
-    poseFilter.update( accel, gyro, fbk.time );
-end
-
-setHexapodParams;
-
-if ~simulate
-    gainStruct = setHexapodGains( group, jointInds );
-end
+% Approx home leg positions 
+seedAngles = repmat( [-0.1 -0.3 -1.9], numLegs, 1 );
+seedAngles([2 4 6],:) = -seedAngles([2 4 6],:);
 
 if simulate
-    fbk.position = zeros(1,3*numLegs);
+    tempAngles = seedAngles';
+    fbk.position = tempAngles(:)';
+else
+    legsGroup = HebiLookup.newGroupFromNames( robotName, moduleNames );
+    legsGroup.setFeedbackFrequency(200);
+    pause(0.2);
+    fbk = legsGroup.getNextFeedback();
+
+    % Load gains for the legs and replicate them 6X to set for the whole robot
+    legGains = HebiUtils.loadGains( [localDir '/gains/daisyLeg-Gains.xml'] );
+    gainFields = fields( legGains );
+    for i=1:length(gainFields)                    
+        legGains.(gainFields{i}) = repmat( legGains.(gainFields{i}), [1 6] );
+    end
+    
+    % Set the gains, using acknowledgements.
+    numSends = 0;
+    maxSends = 20;
+    ack = false;
+    while ~ack
+        ack = legsGroup.send( 'gains', legGains, 'ack', true );
+        numSends = numSends + 1;
+        if numSends > maxSends
+            error('Could not receive acknowledgement from at least 1 module');
+        end
+    end
 end
 
 % Feedback for initial stance position
 for leg=1:numLegs
-    legEndPointFrame = kin{leg}.getFK( 'endeffector', ...
+    legEndPointFrame = legKin{leg}.getFK( 'endeffector', ...
                            fbk.position(jointInds(leg,:)) ); 
     fbkStanceXYZ(:,leg) = legEndPointFrame(1:3,4); 
-    seedAngles(:,leg) = fbk.position(jointInds(leg,:));
 end
 stanceXYZ = fbkStanceXYZ;
 
-% PLOTTING FLAG
-plotting = false;
 
-animStruct.fig = figure(101);
-animStruct2.fig = figure(102);
-isFirstDraw = true;
-axisLen = [.1 .1 .1];
 
-% Approx home leg positions 
-seedAngles = repmat( [.2 -.3 -1.9], numLegs, 1 );
+if visualizeOn
+    xyzFrameLimits = [ -0.75  0.75;
+                       -0.75  0.75;
+                       -0.75  0.25 ];
+    framesDisplay = FrameDisplay( [], [], xyzFrameLimits );
+end
 
 timeHist = nan(0,1);
 angHist = nan(0,3*numLegs);
@@ -93,16 +104,29 @@ cmd.position = nan(1,3*numLegs);
 cmd.velocity = nan(1,3*numLegs);
 cmd.effort = nan(1,3*numLegs);
 
-joy = HebiJoystick(1);
-%joyMSI = HebiLookup.newGroupFromNames('*',{'MSI_IO_BOARD'});
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% SETUP THE MOBILE I/O CONTROLLER %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+controllerName = '_controller';
+controllerGroup = setupDaisyController( robotName, controllerName );
 
-%group.startLog();
+% Get the initial feedback objects that we'll reuse later for the
+% controller group.
+fbkControllerIO = controllerGroup.getNextFeedbackIO();
+fbkControllerMobile = controllerGroup.getNextFeedbackMobile();
+latestControllerIO = fbkControllerIO;
+latestControllerMobile = fbkControllerMobile;
+
+if logging 
+    legsGroup.startLog();
+end
+
 mainTime = tic;
 tocLast = toc(mainTime);
 while true
     
     if ~simulate
-        fbk = group.getNextFeedback();
+        fbk = legsGroup.getNextFeedback();
     end
     
     % Timekeeping
@@ -110,49 +134,64 @@ while true
     dt = tocNow - tocLast;
     tocLast = tocNow;
     
-    % Update Commanded Chassis Pose
-    [xyzVel, rotVel, auxCmd] = getJoyCommands(joy);
-    %[xyzVel, rotVel, auxCmd] = getMSIJoyCommands(joyMSI);
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % FEEDBACK FROM CONTROLLER INPUT %
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
+    % Get feedback with a timeout of 0, which means that it returns
+    % instantly, but if there was no new feedback, it returns empty.
+    % This is because a mobile device on wireless and may drop out or be 
+    % significantly delayed, in which case we would rather keep running 
+    % with old feedback instead of waiting for new feedback.
+    tempFbk = controllerGroup.getNextFeedback( ...
+                    fbkControllerIO, fbkControllerMobile, 'timeout', 0 );
+    if ~isempty(tempFbk)
+        latestontrollerMobile = fbkControllerMobile;
+        latestControllerIO = fbkControllerIO;
+    end
+    [xyzVel, rotVel, auxCmd] = getJoyCommands( latestControllerIO );
+    
     
         
     if ~simulate
-        % Update Feedback Chassis Orientation
-        accelsModuleFrame = [ fbk.accelX(jointInds(:,1)); 
-                              fbk.accelY(jointInds(:,1)); 
-                              fbk.accelZ(jointInds(:,1)) ];
-        gyrosModuleFrame = [ fbk.gyroX(jointInds(:,1)); 
-                             fbk.gyroY(jointInds(:,1)); 
-                             fbk.gyroZ(jointInds(:,1)) ];    
-
-        for leg=[1 2]
-            baseFrame = kin{leg}.getBaseFrame();
-            accelsBodyFrame(:,leg) = baseFrame(1:3,1:3) * accelsModuleFrame(:,leg);
-            gyrosBodyFrame(:,leg) = baseFrame(1:3,1:3) * gyrosModuleFrame(:,leg);
-        end
-
-        poseFilter.update( mean(accelsBodyFrame,2), mean(gyrosBodyFrame,2), fbk.time );
-        T = poseFilter.getPose();
+        T = eye(4);
+%         % Update Feedback Chassis Orientation
+%         accelsModuleFrame = [ fbk.accelX(jointInds(:,1)); 
+%                               fbk.accelY(jointInds(:,1)); 
+%                               fbk.accelZ(jointInds(:,1)) ];
+%         gyrosModuleFrame = [ fbk.gyroX(jointInds(:,1)); 
+%                              fbk.gyroY(jointInds(:,1)); 
+%                              fbk.gyroZ(jointInds(:,1)) ];    
+% 
+%         for leg=[1 2]
+%             baseFrame = legKin{leg}.getBaseFrame();
+%             accelsBodyFrame(:,leg) = baseFrame(1:3,1:3) * accelsModuleFrame(:,leg);
+%             gyrosBodyFrame(:,leg) = baseFrame(1:3,1:3) * gyrosModuleFrame(:,leg);
+%         end
+% 
+%         poseFilter.update( mean(accelsBodyFrame,2), mean(gyrosBodyFrame,2), fbk.time );
+%         T = poseFilter.getPose();
     else
         T = eye(4);
     end
     
-%     animStruct2 = drawAxes( animStruct2, T, axisLen );
-%     drawnow;
-% 
-%     if isFirstDraw
-%         isFirstDraw = false;
-%         axis equal;
-%         grid on;
-%         view(3);
-%         plotLims = [-.11 .11];
-%         xlim(plotLims);
-%         ylim(plotLims);
-%         zlim(plotLims);  
-%     end
-
-    
     if ~isempty(auxCmd) && auxCmd.quit
-        disp('Quitting.');
+          
+        % Set the button configs, using acknowledgements.
+        numSends = 0;
+        maxSends = 2;
+        ack = false;
+        fprintf('Quitting.\n');
+        while ~ack
+            ack = controllerGroup.send( 'led', [], ...
+                                        'ack', true );
+            numSends = numSends + 1;
+            if numSends > maxSends
+                % disp('Did not receive acknowledgement from controller.');
+                break;
+            end
+        end
+        
         break;
     end
     
@@ -183,14 +222,14 @@ while true
     
     % Feedback stance position
     for leg=1:numLegs
-        legEndPointFrame = kin{leg}.getFK( 'endeffector', ...
+        legEndPointFrame = legKin{leg}.getFK( 'endeffector', ...
                                fbk.position(jointInds(leg,:)) ); 
         fbkStanceXYZ(:,leg) = legEndPointFrame(1:3,4); 
     end
     
     % Make the home stance match the current Z-height
     levelHomeStanceXYZ(3,:) = levelHomeStanceXYZ(3,:) + xyzVel(3)*dt;
-    homeStanceXYZ = R_x(.2*xyzVel(2)) * R_y(-.2*xyzVel(1)) * levelHomeStanceXYZ;
+    homeStanceXYZ = levelHomeStanceXYZ;
     
     % Calculate the difference between center-of-feet in 
     % current position and chassis center. 
@@ -298,11 +337,17 @@ while true
     % CALCULATE LEG JOINT ANGLES
     for leg=1:numLegs
         
+        if rem(leg,2)==1
+            legSign = -1;
+        else
+            legSign = 1;
+        end
+        
         %seedAngles(leg,:) = legAngles(leg,:);   % Last commands
         seedAngles(leg,:) = fbk.position(jointInds(leg,:)); % Latest feedback
 
         if isStance(leg)
-            legAngles(leg,:) = kin{leg}.getIK( 'xyz', stanceXYZ(:,leg), ...
+            legAngles(leg,:) = legKin{leg}.getIK( 'xyz', stanceXYZ(:,leg), ...
                                      'initial', seedAngles(leg,:) );
             dynamicCompEffort = zeros(1,3);                  
         else
@@ -312,7 +357,7 @@ while true
                                    touchDownXYZ(:,leg)' ];
                                
             for j=1:size(stepWaypoints{leg},1)             
-                stepAngles{leg}(j,:) = kin{leg}.getIK( ...
+                stepAngles{leg}(j,:) = legKin{leg}.getIK( ...
                                      'xyz', stepWaypoints{leg}(j,:), ...
                                      'initial', seedAngles(leg,:) );
             end
@@ -320,7 +365,7 @@ while true
             if tocSwing==0
                 % Starting Step Vel/Accel based on liftOff Velocity
                 stepAngVels{leg} = nan(size(stepAngles{leg}));
-                J = kin{leg}.getJacobianEndEffector( stepAngles{leg}(1,:) );           
+                J = legKin{leg}.getJacobianEndEffector( stepAngles{leg}(1,:) );           
                 stepAngVels{leg}(1,:) = J(1:3,:) \ liftOffVelXYZ(:,leg); 
                 
                 stepAngAccels{leg} = nan(size(stepAngles{leg}));
@@ -328,7 +373,7 @@ while true
             end
             
             % Ending Step Vel\Accel for Trajectory
-            J = kin{leg}.getJacobianEndEffector( stepAngles{leg}(end,:) );
+            J = legKin{leg}.getJacobianEndEffector( stepAngles{leg}(end,:) );
             stepAngVels{leg}(end,:) = J(1:3,:) \ stanceVelXYZ(:,leg);
             stepAngAccels{leg}(end,:) = 0;
             
@@ -340,11 +385,11 @@ while true
             [pos,vel,acc] = swingTraj{leg}.getState(tocSwing);
             legAngles(leg,:) = pos;
             
-            dynamicCompEffort = kin{leg}.getDynamicCompEfforts( ...
+            dynamicCompEffort = legKin{leg}.getDynamicCompEfforts( ...
                                     pos, pos, vel, acc ); 
         end              
           
-        J = kin{leg}.getJacobian('endeffector',legAngles(leg,:)); 
+        J = legKin{leg}.getJacobian('endeffector',legAngles(leg,:)); 
         J_xyz = J(1:3,:);
         
         if isStance(leg)
@@ -354,16 +399,16 @@ while true
         end 
         
         frames(:,:,frameIndex(:,leg)) = ...
-                    kin{leg}.getFK('output',legAngles(leg,:));
+                    legKin{leg}.getFK('output',legAngles(leg,:));
 
-        gravCompEffort = kin{leg}.getGravCompEfforts( legAngles(leg,:), gravityVec );
+        gravCompEffort = legKin{leg}.getGravCompEfforts( legAngles(leg,:), gravityVec );
         
-        springShift = -2.5; %N-m
+        springShift = 5.0; %N-m
         dragShift = 1.5; % N-m / (rad/sec)
         springEffort = [0 springShift 0] + [0 dragShift 0] .* legAngVels(leg,:);
         stanceEffort = J_xyz' * cmdFootForce(:,leg);
         legEfforts(leg,:) = gravCompEffort + stanceEffort' + ...
-                            dynamicCompEffort + springEffort;
+                            dynamicCompEffort + legSign*springEffort;
           
         if isCommandLeg(leg)
             cmd.position(jointInds(leg,:)) = legAngles(leg,:);
@@ -376,7 +421,7 @@ while true
 %         isFirstStepTime = false;
 %     end
     if ~simulate
-        group.set(cmd);
+        legsGroup.set(cmd);
     end
     
     % STATE HISTORY
@@ -387,119 +432,69 @@ while true
 
       
     % ANIMATION
-    if plotting
-        animStruct = drawAxes( animStruct, frames, axisLen );
-        if isFirstDraw
-            title('Hexapod Kinematics');
-            view(3);
-            xlabel('x (m)');
-            ylabel('y (m)');
-            zlabel('z (m)');
-            axisLims = [-.6 .6];
-            axis equal;
-            xlim(axisLims);
-            ylim(axisLims);
-            zlim(axisLims);
-            isFirstDraw = false;
-        end
+    if visualizeOn
+        framesDisplay.setFrames( frames );
         drawnow;
     end        
 end
 
-log = group.stopLogFull();
-
-%% PLOTTING COMMAND HISTORY - SPACE BAR TO ADVANCE THRU LEGS
-figure(42);
-
-for plotLeg=1:numLegs
-    % Position
-    ax = subplot(3,1,1);
-    plot(timeHist,angHist(:,jointInds(plotLeg,:)),'--');
-    set(ax,'colorOrderIndex',1);
-    if isCommandLeg(plotLeg)
-        hold on;
-        plot(log.time,log.position(:,jointInds(plotLeg,:)));
-        hold off;
-    end
-    title(['Joint Angles - Leg: ' num2str(plotLeg)]);
-    xlabel('time (sec)');
-    ylabel('angles (rad)');
-    xlim([timeHist(1) timeHist(end)]);
-    ylim([-3.5 3.5]);
-    grid on;
-    
-    % Velocity
-    ax = subplot(3,1,2);
-    plot(timeHist,angVelHist(:,jointInds(plotLeg,:)),'--');
-    set(ax,'colorOrderIndex',1);
-    if isCommandLeg(plotLeg)
-        hold on;
-        plot(log.time,log.velocity(:,jointInds(plotLeg,:)));
-        hold off;
-    end
-    title(['Joint Velocities - Leg: ' num2str(plotLeg)]);
-    xlabel('time (sec)');
-    ylabel('velocity (rad/sec)');
-    xlim([timeHist(1) timeHist(end)]);
-    ylim([-4 4]);
-    grid on;
-    
-    % Effort
-    ax = subplot(3,1,3);
-    plot(timeHist,effortHist(:,jointInds(plotLeg,:)),'--');
-    set(ax,'colorOrderIndex',1);
-    if isCommandLeg(plotLeg)
-        hold on;
-        plot(log.time,log.effort(:,jointInds(plotLeg,:)));
-        hold off;
-    end
-    title(['Joint Efforts - Leg: ' num2str(plotLeg)]);
-    xlabel('time (sec)');
-    ylabel('effort (N-m)');
-    xlim([timeHist(1) timeHist(end)]); 
-    ylim([-10 15]);
-    grid on;
-  
-    pause;
+if logging
+    log = legsGroup.stopLogFull();
 end
 
-%% SIMULATE MOTOR POWER DISSIPATION
-
-gearRatios = [762.22 1742.22 762.22];
-gearRatios = repmat(gearRatios,1,numLegs);
-motorTorqueConst = .00626 * gearRatios * .75;  % (Nm/A) Maxon * Ratio * Eff
-motorResistance = 12; % (Ohm) Maxon
-
-jointCurrent = effortHist ./ motorTorqueConst;
-jointPowerTheory = jointCurrent.^2 * motorResistance;
-jointPowerTheory(abs(jointPowerTheory)>500) = nan;
-jointPowerActual = log.motorCurrent .* log.voltage;
-jointPowerActual(abs(jointPowerActual)>500) = nan;
-
-figure(43);
-subplot(2,1,1);
-plot(timeHist,jointPowerTheory);
-title('Joint Power Draw');
-xlabel('time (sec)');
-ylabel('power (W)');
-ylim([0 300]);
-
-
-subplot(2,1,2);
-hold off;
-plot(timeHist,sum(jointPowerTheory,2));
-hold on;
-plot(log.time,smooth(sum(jointPowerActual,2)));
-xlabel('time (sec)');
-ylabel('power (W)');
-ylim([0 300]);
-legend('predicted','actual');
-
-
-% %% COMPARE COMMANDED / ACTUAL VELOCITIES
-% figure(456);
-% plotModule = 6;
-% plot(log.time(2:end),smooth(diff(log.positionCmd(:,plotModule)))./smooth(diff(log.time)))
-% hold on;
-% plot(log.time,log.velocityCmd(:,plotModule))
-% hold off;
+%% PLOTTING COMMAND HISTORY - SPACE BAR TO ADVANCE THRU LEGS
+% if logging
+%     figure(42);
+% 
+%     for plotLeg=1:numLegs
+%         % Position
+%         ax = subplot(3,1,1);
+%         plot(timeHist,angHist(:,jointInds(plotLeg,:)),'--');
+%         set(ax,'colorOrderIndex',1);
+%         if isCommandLeg(plotLeg)
+%             hold on;
+%             plot(log.time,log.position(:,jointInds(plotLeg,:)));
+%             hold off;
+%         end
+%         title(['Joint Angles - Leg: ' num2str(plotLeg)]);
+%         xlabel('time (sec)');
+%         ylabel('angles (rad)');
+%         xlim([timeHist(1) timeHist(end)]);
+%         ylim([-3.5 3.5]);
+%         grid on;
+% 
+%         % Velocity
+%         ax = subplot(3,1,2);
+%         plot(timeHist,angVelHist(:,jointInds(plotLeg,:)),'--');
+%         set(ax,'colorOrderIndex',1);
+%         if isCommandLeg(plotLeg)
+%             hold on;
+%             plot(log.time,log.velocity(:,jointInds(plotLeg,:)));
+%             hold off;
+%         end
+%         title(['Joint Velocities - Leg: ' num2str(plotLeg)]);
+%         xlabel('time (sec)');
+%         ylabel('velocity (rad/sec)');
+%         xlim([timeHist(1) timeHist(end)]);
+%         ylim([-4 4]);
+%         grid on;
+% 
+%         % Effort
+%         ax = subplot(3,1,3);
+%         plot(timeHist,effortHist(:,jointInds(plotLeg,:)),'--');
+%         set(ax,'colorOrderIndex',1);
+%         if isCommandLeg(plotLeg)
+%             hold on;
+%             plot(log.time,log.effort(:,jointInds(plotLeg,:)));
+%             hold off;
+%         end
+%         title(['Joint Efforts - Leg: ' num2str(plotLeg)]);
+%         xlabel('time (sec)');
+%         ylabel('effort (N-m)');
+%         xlim([timeHist(1) timeHist(end)]); 
+%         ylim([-10 15]);
+%         grid on;
+% 
+%         pause;
+%     end
+% end

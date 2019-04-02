@@ -98,7 +98,7 @@ classdef (Sealed) HebiLookup
             %      };
             %      HebiLookup.setLookupAddresses(addresses);
             %
-            %   See also HebiLookup
+            %   See also HebiLookup, hebi_config
             javaMethod('setLookupAddresses', HebiLookup.className,  varargin{:});
             this = HebiLookup.wrapper;
         end
@@ -125,7 +125,7 @@ classdef (Sealed) HebiLookup
             %
             %   The default behavior can be changed in the <a href="matlab:open('hebi_config')">config script</a>.
             %
-            %   See also HebiLookup
+            %   See also HebiLookup, hebi_config
             javaMethod('setLookupFrequency', HebiLookup.className,  varargin{:});
             this = HebiLookup.wrapper;
         end
@@ -147,7 +147,7 @@ classdef (Sealed) HebiLookup
             %
             %   The default behavior can be changed in the <a href="matlab:open('hebi_config')">config script</a>.
             %
-            %   See also HebiLookup, HebiGroup.setFeedbackFrequency
+            %   See also HebiLookup, HebiGroup.setFeedbackFrequency, hebi_config
             javaMethod('setInitialGroupFeedbackFrequency', HebiLookup.className,  varargin{:});
             this = HebiLookup.wrapper;
         end
@@ -161,7 +161,7 @@ classdef (Sealed) HebiLookup
             %
             %   The default behavior can be changed in the <a href="matlab:open('hebi_config')">config script</a>.
             %
-            %   See also HebiLookup, HebiGroup.setCommandLifetime
+            %   See also HebiLookup, HebiGroup.setCommandLifetime, hebi_config
             javaMethod('setInitialGroupCommandLifetime', HebiLookup.className,  varargin{:});
             this = HebiLookup.wrapper;
         end
