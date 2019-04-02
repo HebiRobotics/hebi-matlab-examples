@@ -57,9 +57,13 @@ The demo will start up looking for the actuators in the robot, followed by the m
 | ----------------- | ----------------- | ----------- |
 | Right Joystick (`A8` and `A7`)  | Base X-Y Velocity (forward/back, left/right) |  |
 | Left Joystick (`A1`) | Base Theta Velocity (turning) |  |
-| Slider (`A3`) | Chassis Z Velocity (up and down) |  | 
+| Slider (`A3`) | Chassis Z Velocity (body height up and down) |  | 
 | Button (`B1`) | Toggle Stance Mode / Step Mode | When in stance mode the robot chassis will shift around due to the joystick velocity commands, but the feet will not move.  The button is blue when in stance mode. |
 | Button (`B8`) | Exit the demo. | The border of the the HEBI Mobile I/O app will no longer be highlighted green after exiting. |
+
+![Controller Image](controller.png)
+
+Note that even though the image above notes 'Pitch', the Matlab demo does not currently control pitch.
 
 
 ## Automatic startup instructions for Linux
