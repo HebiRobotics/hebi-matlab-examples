@@ -15,6 +15,7 @@ simulate = false;
 logging = true;
 
 [legKin, chassisKin] = makeDaisyKinematics();
+safetyParams = makeDaisySafetyLimits();
 
 for leg=1:length(legKin)
     trajGen{leg} = HebiTrajectoryGenerator(legKin{leg}); 
@@ -65,7 +66,9 @@ else
     maxSends = 20;
     ack = false;
     while ~ack
-        ack = legsGroup.send( 'gains', legGains, 'ack', true );
+        ack = legsGroup.send( 'gains', legGains, ...
+                              'safetyParams', safetyParams, ...
+                              'ack', true );
         numSends = numSends + 1;
         if numSends > maxSends
             error('Could not receive acknowledgement from at least 1 module');
@@ -80,8 +83,6 @@ for leg=1:numLegs
     fbkStanceXYZ(:,leg) = legEndPointFrame(1:3,4); 
 end
 stanceXYZ = fbkStanceXYZ;
-
-
 
 if visualizeOn
     xyzFrameLimits = [ -0.75  0.75;
@@ -465,7 +466,6 @@ while true
     angHist(end+1,:) = reshape(legAngles',1,[]);
     angVelHist(end+1,:) = reshape(legAngVels',1,[]);
     effortHist(end+1,:) = reshape(legEfforts',1,[]);
-
       
     % ANIMATION
     if visualizeOn
