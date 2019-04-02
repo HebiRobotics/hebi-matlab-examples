@@ -118,7 +118,7 @@ latestControllerIO = fbkControllerIO;
 latestControllerMobile = fbkControllerMobile;
 
 if logging 
-    legsGroup.startLog();
+    legsGroup.startLog('dir',[localDir '/logs']);
 end
 
 mainTime = tic;
@@ -195,9 +195,8 @@ while true
         break;
     end
     
-    if ~isempty(auxCmd) && auxCmd.toggleStepping
-        stepMode = ~stepMode;
-        pause(.1);  % Debounce
+    if stepMode ~= auxCmd.steppingMode
+        stepMode = auxCmd.steppingMode;
         if stepMode
             disp('Stepping Mode');
         else

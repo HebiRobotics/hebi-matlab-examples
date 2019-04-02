@@ -7,7 +7,7 @@ function [xyzVel, rotVel, auxCmd] = getJoyCommands( fbkIO )
     auxCmd = struct();
 
     QUIT_BUTTON = 'b8';
-    STEP_TOGGLE = 'b1';
+    STANCE_MODE = 'b1';
 
     % PRESS DOWN B8 TO QUIT
     if fbkIO.(QUIT_BUTTON)
@@ -17,10 +17,10 @@ function [xyzVel, rotVel, auxCmd] = getJoyCommands( fbkIO )
     end
     
     % PRESS A TO TOGGLE STEPPING ON AND OFF
-    if fbkIO.(STEP_TOGGLE)
-        auxCmd.toggleStepping = true;
+    if fbkIO.(STANCE_MODE)
+        auxCmd.steppingMode = false;    
     else
-        auxCmd.toggleStepping = false;
+        auxCmd.steppingMode = true;
     end
     
     joyXYZScale = .3;
