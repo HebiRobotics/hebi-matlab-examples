@@ -43,12 +43,22 @@ else
     pause(0.2);
     fbk = legsGroup.getNextFeedback();
 
-    % Load gains for the legs and replicate them 6X to set for the whole robot
+    % Load gains for the legs and replicate them 6X to set for the whole
+    % robot.  Make a second gain struct for changing the gains online, and
+    % keeping the original default gains around for reference.  When we're
+    % done, remove the control strategy from the cmdGains so that the
+    % controllers don't reset every time we send them.
     legGains = HebiUtils.loadGains( [localDir '/gains/daisyLeg-Gains.xml'] );
+    cmdGains = HebiUtils.loadGains( [localDir '/gains/daisyLeg-Gains.xml'] );
+    gainsWarmupTime = 3.0;  % [sec]
+    
     gainFields = fields( legGains );
-    for i=1:length(gainFields)                    
-        legGains.(gainFields{i}) = repmat( legGains.(gainFields{i}), [1 6] );
+    for i=1:length(gainFields)        
+        fullLegGains = repmat( legGains.(gainFields{i}), [1 6] );
+        legGains.(gainFields{i}) = fullLegGains;
+        cmdGains.(gainFields{i}) = fullLegGains;
     end
+    cmdGains.controlStrategy = [];
     
     % Set the gains, using acknowledgements.
     numSends = 0;
@@ -122,7 +132,7 @@ if logging
 end
 
 mainTime = tic;
-tocLast = toc(mainTime);
+tLast = toc(mainTime);
 while true
     
     if ~simulate
@@ -130,9 +140,9 @@ while true
     end
     
     % Timekeeping
-    tocNow = toc(mainTime);
-    dt = tocNow - tocLast;
-    tocLast = tocNow;
+    t = toc(mainTime);
+    dt = t - tLast;
+    tLast = t;
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % FEEDBACK FROM CONTROLLER INPUT %
@@ -310,7 +320,7 @@ while true
         legStepState = rem(legStepState+1,2);
         
         % Step Phase and Stepping Foot Logical Masks
-        tocLift = tocNow;
+        tocLift = t;
         
         isStance(allLegs) = true;
         isStance(stepLegs) = false;
@@ -342,7 +352,7 @@ while true
         midStepXYZ(3,:) = midStepXYZ(3,:) + stepHeight;
         
         tocSwingLast = tocSwing;
-        tocSwing = tocNow - tocLift;
+        tocSwing = t - tocLift;
         
         if tocSwing > stepPeriod
             stepping = false;
@@ -361,9 +371,6 @@ while true
         else
             legSign = 1;
         end
-        
-        %seedAngles(leg,:) = legAngles(leg,:);   % Last commands
-        seedAngles(leg,:) = fbk.position(jointInds(leg,:)); % Latest feedback
 
         if isStance(leg)
             legAngles(leg,:) = legKin{leg}.getIK( 'xyz', stanceXYZ(:,leg), ...
@@ -435,16 +442,26 @@ while true
             cmd.effort(jointInds(leg,:)) = legEfforts(leg,:);
         end
     end
-    
-%     if exist('isFirstStepTime','var') && isFirstStepTime
-%         isFirstStepTime = false;
-%     end
+
     if ~simulate
-        legsGroup.set(cmd);
+        % Scale the gains
+        if t < gainsWarmupTime
+            gainScale = (t / gainsWarmupTime)^2;
+        else
+            gainScale = 1.0;
+        end
+        
+        cmdGains.positionKp = 0.5 * gainScale * legGains.positionKp; 
+        cmdGains.velocityKp = 1.0 * gainScale * legGains.velocityKp;
+        cmdGains.velocityFF = gainScale * legGains.velocityFF;
+        cmdGains.effortKp = gainScale * legGains.effortKp;
+        cmdGains.effortFF = gainScale * legGains.effortFF;
+        
+        legsGroup.send(cmd, 'gains', cmdGains);
     end
     
     % STATE HISTORY
-    timeHist(end+1) = tocNow;
+    timeHist(end+1) = t;
     angHist(end+1,:) = reshape(legAngles',1,[]);
     angVelHist(end+1,:) = reshape(legAngVels',1,[]);
     effortHist(end+1,:) = reshape(legEfforts',1,[]);
