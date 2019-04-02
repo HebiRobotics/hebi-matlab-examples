@@ -126,7 +126,7 @@ tocLast = toc(mainTime);
 while true
     
     if ~simulate
-        fbk = legsGroup.getNextFeedback();
+        fbk = legsGroup.getNextFeedbackFull();
     end
     
     % Timekeeping
@@ -152,25 +152,45 @@ while true
     [xyzVel, rotVel, auxCmd] = getJoyCommands( latestControllerIO );
     
     
-        
+    % Use the 6 IMUs around the base to get the orientation.  Rotate them
+    % into the body frame, convert to euler angles, and then average the
+    % pitch and roll to remove the drifting yaw component.
+    imuModules = 1:3:18;
+    T = eye(4);
+    
+    Q = [ fbk.orientationW;
+          fbk.orientationX;
+          fbk.orientationY;
+          fbk.orientationZ ];
+    
     if ~simulate
-        T = eye(4);
-%         % Update Feedback Chassis Orientation
-%         accelsModuleFrame = [ fbk.accelX(jointInds(:,1)); 
-%                               fbk.accelY(jointInds(:,1)); 
-%                               fbk.accelZ(jointInds(:,1)) ];
-%         gyrosModuleFrame = [ fbk.gyroX(jointInds(:,1)); 
-%                              fbk.gyroY(jointInds(:,1)); 
-%                              fbk.gyroZ(jointInds(:,1)) ];    
-% 
-%         for leg=[1 2]
-%             baseFrame = legKin{leg}.getBaseFrame();
-%             accelsBodyFrame(:,leg) = baseFrame(1:3,1:3) * accelsModuleFrame(:,leg);
-%             gyrosBodyFrame(:,leg) = baseFrame(1:3,1:3) * gyrosModuleFrame(:,leg);
-%         end
-% 
-%         poseFilter.update( mean(accelsBodyFrame,2), mean(gyrosBodyFrame,2), fbk.time );
-%         T = poseFilter.getPose();
+        
+        for i=1:length(imuModules)
+            j = imuModules(i);
+            imuFrame = legKin{i}.getBaseFrame();
+            
+            DCM_module = HebiUtils.quat2rotMat(Q(:,j)');
+            DCM_module = DCM_module * imuFrame(1:3,1:3)';
+            try
+                RPY = SpinCalc('DCMtoEA123',DCM_module,1E-9,0);
+            catch
+                % fprintf('Module %d is near singularity.\n', i);
+                % keyboard
+                RPY = [nan nan nan];
+            end
+            
+            RPY(RPY>180) =  RPY(RPY>180) - 360;           
+            RPY_module(i,:) = -RPY;
+        end
+
+        rollAngle = mean(RPY_module(:,1),'omitnan');
+        pitchAngle = mean(RPY_module(:,2),'omitnan');
+        
+        rollR = R_x(deg2rad(rollAngle));
+        pitchR = R_y(deg2rad(pitchAngle));
+        
+        T(1:3,1:3) = pitchR * rollR;
+        % T = eye(4);
     else
         T = eye(4);
     end
