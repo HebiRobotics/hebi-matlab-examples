@@ -1,9 +1,18 @@
+% Robot-Specific Parameters
+% This is called in runHexapod.m.  In the future it would be good to
+% combine all the setup into a function, setupDaisy.m, like we do with the
+% Rosie and Florence kits.
+%
+% Dave Rollinson
+% Apr 2019
 
-
-% Robot Parameters
-robotMass = 10;  % kg
+% Masses / Weights.  Assume all the legs weigh the same
+legMass = sum( legKin{1}.getBodyMasses() );
+chassisMass = chassisKin.getBodyMasses();
+robotMass = chassisMass + 6*legMass;  % kg
 robotWeight = 9.8 * robotMass;
-numLegs = length(kin);
+
+numLegs = length(legKin);
 allLegs = 1:numLegs;
 
 % Leg Indices
@@ -11,12 +20,11 @@ jointInds = 1:(3*numLegs);
 jointInds = reshape(jointInds,3,6)';
 
 % Stance Parameters
-bodyHeight = .12; % meters
-stanceRadius = .43;  % Stance Compliance parameters acts as a position gain
-
+bodyHeight = .21; % meters
+stanceRadius = .55;  % Stance Compliance parameters acts as a position gain
 
 for leg=1:numLegs
-    baseFrame = kin{leg}.getBaseFrame();
+    baseFrame = legKin{leg}.getBaseFrame();
     homeStanceXYZ(:,leg) = baseFrame(1:3,1:3) * ...
                         [stanceRadius; 0; -bodyHeight];
 end
@@ -25,7 +33,7 @@ levelHomeStanceXYZ = homeStanceXYZ;
 
 % Step Parameters
 stepHeight = .040; % meters (.040 default)
-stepOverShoot = .3; % factor of step to overshoot 
+stepOverShoot = 0.35; % factor of step to overshoot 
 stepPeriod = 0.7;  % seconds (.7 default)
 stepPhase = [0 .5 1];
 

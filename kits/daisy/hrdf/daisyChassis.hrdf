@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Daisy - Hexapod Kit -->
+<!-- Chassis Kinematics          -->
+<robot version="1.1.0">
+
+  <!-- Add a single body to account for the chassis -->
+  <rigid-body mass="5.00" 
+              com_trans="0.050 0.000 0.075" 
+              output_trans="0.000 0.000 0.075"/>
+    
+</robot>

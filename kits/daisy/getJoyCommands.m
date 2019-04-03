@@ -1,46 +1,44 @@
-function [xyzVel, rotVel, auxCmd] = getJoyCommands( joy )
+function [xyzVel, rotVel, auxCmd] = getJoyCommands( fbkIO )
 
-    % Assumes 'DUALSHOCK®4 USB Wireless Adapto'
+    % Assumes you're using the HEBI Mobile I/O App
 
     xyzVel = zeros(3,1);
     rotVel = zeros(3,1);
     auxCmd = struct();
 
-    [axes, buttons, povs] = read(joy);
+    QUIT_BUTTON = 'b8';
+    STANCE_MODE = 'b1';
 
-    QUIT_BUTTON = 11;
-    STEP_TOGGLE = 12;
-
-    % PRESS DOWN LEFT JOYSTICK TO QUIT
-    if buttons(QUIT_BUTTON)
+    % PRESS DOWN B8 TO QUIT
+    if fbkIO.(QUIT_BUTTON)
         auxCmd.quit = true;
     else
         auxCmd.quit = false;
     end
     
     % PRESS A TO TOGGLE STEPPING ON AND OFF
-    if buttons(STEP_TOGGLE)
-        auxCmd.toggleStepping = true;
+    if fbkIO.(STANCE_MODE)
+        auxCmd.steppingMode = false;    
     else
-        auxCmd.toggleStepping = false;
+        auxCmd.steppingMode = true;
     end
     
     joyXYZScale = .3;
     joyRotScale = .6;
-    joyAxisDeadZone = .06;
+    joyAxisDeadZone = .05;
 
     % LINEAR VELOCITIES
     % X-Axis
-    if abs(axes(6)) > joyAxisDeadZone
-        xyzVel(1) = joyXYZScale * axes(6);
+    if abs(fbkIO.a8) > joyAxisDeadZone
+        xyzVel(1) = -joyXYZScale * fbkIO.a8;
     end
     % Y-Axis
-    if abs(axes(3)) > joyAxisDeadZone
-        xyzVel(2) = joyXYZScale * axes(3);
+    if abs(fbkIO.a7) > joyAxisDeadZone
+        xyzVel(2) = joyXYZScale * fbkIO.a7;
     end
     % Z-Axis
-    if abs(axes(4)-axes(5)) > joyAxisDeadZone
-        xyzVel(3) = joyXYZScale * (axes(4)-axes(5));
+    if abs(fbkIO.a3) > joyAxisDeadZone
+        xyzVel(3) = -joyXYZScale * fbkIO.a3;
     end
     
     % Make sure max velocity magnitude is maintained (L2-Norm)
@@ -57,8 +55,8 @@ function [xyzVel, rotVel, auxCmd] = getJoyCommands( joy )
 %     end
     
     % Z-Axis Rotation
-    if abs(axes(1)) > joyAxisDeadZone
-        rotVel(3) = joyRotScale * axes(1);
+    if abs(fbkIO.a1) > joyAxisDeadZone
+        rotVel(3) = joyRotScale * fbkIO.a1;
     end
 
         

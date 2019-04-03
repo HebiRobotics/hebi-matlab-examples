@@ -21,6 +21,7 @@ classdef (Sealed) HebiGroup < handle
     %   getNextFeedbackMobile - returns the next new 'mobile' feedback 
     %   getInfo               - returns meta information such as names
     %   getGains              - returns the current gains
+    %   getSafetyParams       - returns safety parameters such as limits
     %   startLog              - starts background logging to disk
     %   stopLog               - stops logging and returns a readable format
     %   stopLogFull           - same as above, returning full feedback
@@ -184,7 +185,7 @@ classdef (Sealed) HebiGroup < handle
             setCommandLifetime(this.obj, varargin{:});
         end
         
-        function [] = send(this, varargin)
+        function out = send(this, varargin)
             %send sends commands and settings to modules.
             %
             %   This method provides a variety of selectors to send commands, gains,
@@ -241,6 +242,18 @@ classdef (Sealed) HebiGroup < handle
             %      gains.effortMinOutput = ones(1,n) * -limit;
             %      group.send('gains', gains);
             %
+            %   'SafetyParams' sets safety related parameters such as joint
+            %   limits. If you need to reset parameters, you can simply
+            %   reboot the device to restore previously persisted
+            %   parameters.
+            %
+            %   Example
+            %      % remove position limits
+            %      limits = SafetyParamsStruct();
+            %      limits.positionMinLimit = ones(1,n) * -inf;
+            %      limits.positionMaxLimit = ones(1,n) * +inf;
+            %      group.send('SafetyParams', limits);
+            %
             %   'LED' sets the led color. This is often useful when synchronizing video
             %   to feedback and for timing analysis in combination with a high-speed
             %   camera. Colors can be set identically for all modules, or individually
@@ -271,22 +284,42 @@ classdef (Sealed) HebiGroup < handle
             %   'PositionLimit' ('PosLim') sets safety limits for position.
             %   Safety limits act as a virtual hard stop and are independent of gains.
             %
+            %   'VelocityLimit' ('VelLim') sets safety limits for velocity.
+            %   Safety limits act as a virtual hard stop and are independent of gains.
+            %
+            %   'EffortLimit' ('EffLim') sets safety limits for effort.
+            %   Safety limits act as a virtual hard stop and are independent of gains.
+            %
             %   'ReferencePosition' sets the current position (feedback) by adjusting
             %   the user-settable reference point for the zero position. This persists
             %   automatically. This is the same as setting the reference point for
             %   Position in the 'Device' tab of the Scope GUI.
             %
-            %   'ReferenceEffort' sets the current effort (feedback) by adjusting
-            %   the user-settable reference point for zero effort. This persists
-            %   automatically.  This is the same as setting the reference point
-            %   for Effort in the 'Device' tab of the Scope GUI.
+            %   'OffsetReferencePosition' offsets the current position (feedback) by
+            %   offsetting the user-settable reference point for the zero position.
+            %   
+            %   'ZeroReferenceDeflection' sets the deflection of the internal spring
+            %   to zero. Note that this will also cause the effort (feedback) to also be
+            %   zero. Only do this when the actuator is unloaded.
+            %
+            %   'OffsetReferenceDeflection' adjusts the internal spring deflection. Note
+            %   that this will cause a jump in the effort feedback that depends on the
+            %   spring constant (may or may not be linear).
             %
             %   'SpringConstant' sets the internal stiffness parameter for an actuator
             %   that is used to turn its sensed spring deflection into an estimated 
             %   effort (torque). This is a linear spring constant, units are Nm/rad. 
             %   The current spring constant can be determined by getting a 'full' 
-            %   feedback and dividing the -torque by the measured deflection 
-            %   (-1 * fbk.torque ./ fbk.deflection).
+            %   feedback and dividing the negative effort by the measured deflection 
+            %   (-fbk.effort ./ fbk.deflection).
+            %
+            %   'RequestAck' ('Ack') requests message acknowledgements from each 
+            %   device. This method will return true if acknowledgements have been
+            %   received from all devices within this group and within the specified
+            %   timeout.
+            %   
+            %   'Timeout' [s] the deadline for receiving acknowledgements before
+            %   this method aborts and returns false. (Default 0.5s)
             %
             %   Note that all options can be combined as required. Options that get set
             %   in the same function call will be packed into the same outgoing packet.
@@ -296,7 +329,7 @@ classdef (Sealed) HebiGroup < handle
             %      group.send('family', 'MyRobot', 'led', 'r');
             %
             %   See also HebiGroup, CommandStruct, GainStruct
-            send(this.obj, varargin{:});
+            out = send(this.obj, varargin{:});
         end
               
         function out = get(this, varargin)
@@ -310,6 +343,7 @@ classdef (Sealed) HebiGroup < handle
             %   See also
             %      getInfo
             %      getGains
+            %      getSafetyParams
             %      getNextFeedback
             %      getNextFeedbackFull
             %      getNextFeedbackIO
@@ -324,11 +358,12 @@ classdef (Sealed) HebiGroup < handle
             %      group.setFeedbackFrequency(100);
             %
             %   DataType argument
-            %      'Info'     returns meta information about the module, such
-            %                 as versions, addresses, names, etc.
-            %      'Gains'    returns the gains for the active control strategy.
-            %                 Gains that are disabled, are set to NaN.
-            %      'Feedback' returns aggregated sensor feedback
+            %      'Info'         returns meta information about the module, such
+            %                     as versions, addresses, names, etc.
+            %      'Gains'        returns the gains for the active control strategy.
+            %                     Gains that are disabled, are set to NaN.
+            %      'SafetyParams' returns safety parameters such as limits
+            %      'Feedback'     returns aggregated sensor feedback
             %
             %   'View' Parameter ('Feedback' only)
             %      'Simple'   returns basic feedback. This is appropriate for most
@@ -476,6 +511,13 @@ classdef (Sealed) HebiGroup < handle
             %
             %   See also HebiGroup, HebiLookup.setLookupFrequency.
             out = getGains(this.obj, varargin{:});
+        end
+        
+        function out = getSafetyParams(this, varargin)
+            %getSafetyParams returns safety parameters such as limits
+            %           
+            %   See also HebiGroup, HebiLookup.setLookupFrequency.
+            out = getSafetyParams(this.obj, varargin{:});
         end
         
         function out = getInfo(this, varargin)
