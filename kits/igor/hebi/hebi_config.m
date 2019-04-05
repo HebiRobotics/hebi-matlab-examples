@@ -7,7 +7,7 @@ switch simpleName
     case 'hebi_load'
         % Path to the binary library file. By default, it is assumed that
         % the library is placed in the same folder as this file.
-        config.libraryVersion = 'hebi-matlab-1.3-rev2169';
+        config.libraryVersion = 'hebi-matlab-1.5.1';
         config.libraryPath = fileparts(mfilename('fullpath'));
         
     case 'HebiLookup'
@@ -31,7 +31,7 @@ switch simpleName
         % active. If supporting hardware does not receive further commands
         % within the specified time frame, all local controllers get
         % deactivated. This is a safety feature to mitigate the risk of 
-        % accidents on unexpected program interruptions. Set to zero or the
+        % accidents on unexpected program interruptions. Set to inf or the
         % empty matrix [] to deactivate.
         config.defaultInitialGroupCommandLifetime = 0.25; % [s]
         

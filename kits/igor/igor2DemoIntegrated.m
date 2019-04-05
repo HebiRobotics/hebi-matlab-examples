@@ -7,7 +7,7 @@
 % Apr 2017
 
 function igor2DemoIntegrated( cam_module )
-    
+
 localDir = fileparts(mfilename('fullpath'));
 
 addpath(fullfile(localDir));
@@ -16,9 +16,6 @@ addpath(fullfile(localDir, 'tools'));
 addpath(fullfile(localDir, 'tools', 'gains'));
 addpath(fullfile(localDir, 'tools', 'input'));
 addpath(fullfile(localDir, 'tools', 'kinematics'));
-
-HebiJoystick.loadLibs();
-HebiKeyboard.loadLibs();
 
 % % This is optional, use it to only use the local network.
 % HebiLookup.setLookupAddresses('10.10.1.255');
@@ -76,12 +73,6 @@ while true
     pause(1);
 end
 
-robotGroup.setFeedbackFrequency(100);
-pause(1);
-
-fbk = robotGroup.getNextFeedbackFull();
-timeLast = fbk.time;
-
 % Load the gains for all the modules
 gains = HebiUtils.loadGains([localDir '/igorGains.xml']);
 
@@ -109,158 +100,96 @@ pause(1);
 fbk = robotGroup.getNextFeedbackFull();
 timeLast = fbk.time;
 
-animStruct = struct();
+% animStruct = struct();
 
 %%
-%joystick setup
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Setup Mobile I/O Group %
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+phoneFamily = 'HEBI';
+phoneName = 'Virtual IO';
 
-while true        
+while true
     try
-        fprintf('Searching for joystick...\n');
-        joy = HebiJoystick(1)
-        
-        while joy.Buttons == 0
-            pause(1);
-            joy = HebiJoystick(1)
-        end
-        
-        [axes, buttons, povs] = read(joy);
+        fprintf('Searching for phone Controller...\n');
+        phoneGroup = HebiLookup.newGroupFromNames( ...
+            phoneFamily, phoneName );
+        disp('Phone Found.  Starting up');
         break;
     catch
-        %do nothing
+        pause(1.0);
     end
     
     robotGroup.send('led','w');
-    pause(0.1);
+    pause(0.5);
     robotGroup.send('led','m');
     pause(0.1);
 end
 
-fprintf('Found.\n');
-    
-[axes, buttons, povs] = read(joy);
-
-LEFT_STICK_X = 1;
-LEFT_STICK_Y = 2;
-OPTIONS_BUTTON = 10;
-LEFT_TRIGGER_BUTTON = 5;
-RIGHT_TRIGGER_BUTTON = 6;
-SHARE_BUTTON = 9;
-  
-if isunix
-    SQUARE_BUTTON = 4;
-    CIRCLE_BUTTON = 2;
-    TRIANGLE_BUTTON = 3;
-    X_BUTTON = 1;
-    LEFT_STICK_CLICK = 12;
-    RIGHT_STICK_CLICK = 13;
-    TOUCHPAD_BUTTON = 11;
-    LEFT_TRIGGER = 3;
-    RIGHT_TRIGGER = 6;
-    RIGHT_STICK_X = 4;
-    RIGHT_STICK_Y = 5;
-else
-    SQUARE_BUTTON = 1;
-    CIRCLE_BUTTON = 3;
-    TRIANGLE_BUTTON = 4;
-    X_BUTTON = 2;
-    LEFT_STICK_CLICK = 11;
-    RIGHT_STICK_CLICK = 12;
-    TOUCHPAD_BUTTON = 14;
-    LEFT_TRIGGER = 4;
-    RIGHT_TRIGGER = 5;
-    RIGHT_STICK_X = 3;
-    RIGHT_STICK_Y = 6;
-end
+% Get the initial feedback objects that we'll reuse later
+fbkPhoneIO = phoneGroup.getNextFeedbackIO();
+latestPhoneIO = fbkPhoneIO;
 
 %%
-%Workaround for bug that makes the triggers not work correctly until they
-%are both pushed down fully for the first time. Also checks for a bug where
-%all of the axes are initialized to -1 in linux.
 
-if isunix
-    while(axes(LEFT_TRIGGER)~=-1.000 || axes(RIGHT_TRIGGER)~=-1.000 || ...
-          axes(RIGHT_STICK_X)~= 0 || axes(RIGHT_STICK_Y)~= 0 || ...
-          axes(LEFT_STICK_X)~= 0 || axes(LEFT_STICK_Y)~= 0)
-        [axes, buttons, povs] = read(joy);
-        axes
-        robotGroup.send('led','b');
-        pause(0.1);
-        robotGroup.send('led','m');
-        pause(0.1)
-    end
-else
-    while(axes(LEFT_TRIGGER)~=-1.000 || axes(RIGHT_TRIGGER)~=-1.000)
-        [axes, buttons, povs] = read(joy);
-        robotGroup.send('led','b');
-        pause(0.1);
-        robotGroup.send('led','m');
-        pause(0.1)
-    end
-end
-
-%wait to start
+% Wait to start
 while true
-    fprintf('Paused. Click left stick to start, share to quit matlab...\n');  
+    fprintf('Paused. Click B3 button to start, B1 button to quit matlab...\n');  
 
     try
-        [axes, buttons, povs] = read(joy);
+        fbkPhoneIO = phoneGroup.getNextFeedbackIO();
+        latestPhoneIO = fbkPhoneIO;
     catch
-        fprintf('joystick error \n'); 
+        fprintf('Controller Error \n');
         try
-            fprintf('Searching for joystick...\n');
-            joy = HebiJoystick(1)
-
-            if joy.Buttons == 0
-                joy = HebiJoystick(2)
-            end
-
-            [axes, buttons, povs] = read(joy);
+            fprintf('Searching for phone Controller...\n');
+            phoneGroup = HebiLookup.newGroupFromNames( ...
+                phoneFamily, phoneName );
+            disp('Phone Found.  Starting up');
+            break;
         catch
-            %do nothing
+            pause(1.0);
         end
+        robotGroup.send('led','w');
+        pause(0.5);
+        robotGroup.send('led','m');
+        pause(0.1);
     end
     
-    while(buttons(LEFT_STICK_CLICK) == 0)
+    while(latestPhoneIO.b3 == 0)
         try
-            [axes, buttons, povs] = read(joy);
+            fbkPhoneIO = phoneGroup.getNextFeedbackIO();
+            latestPhoneIO = fbkPhoneIO;
         catch
-            fprintf('joystick error \n');
+            fprintf('Controller Error \n');
             try
-                fprintf('Searching for joystick...\n');
-                joy = HebiJoystick(1)
-
-                if joy.Buttons == 0
-                    joy = HebiJoystick(2)
-                end
-
-                [axes, buttons, povs] = read(joy);
+                fprintf('Searching for phone Controller...\n');
+                phoneGroup = HebiLookup.newGroupFromNames( ...
+                    phoneFamily, phoneName );
+                disp('Phone Found.  Starting up');
             catch
-            %do nothing
+                pause(1.0);
             end
+            
+            robotGroup.send('led','w');
+            pause(0.5);
+            robotGroup.send('led','m');
+            pause(0.1);
         end
         
-        if(buttons(SHARE_BUTTON))
+        pause(0.1);
+        robotGroup.send('led','g');
+        pause(0.1);
+        robotGroup.send('led','m');
+        
+        if(latestPhoneIO.b1)
             robotGroup.send('led',[]);
             quit force
         end
-        pause(0.1);
-        robotGroup.send('led','m');
-        pause(0.1);
-        robotGroup.send('led','g');
         
     end
-    
-    axes(LEFT_STICK_X) = 0;
-    axes(LEFT_STICK_Y) = 0;
-    axes(RIGHT_STICK_X) = 0;
-    axes(RIGHT_STICK_Y) = 0;
-    axes(LEFT_TRIGGER) = -1;
-    axes(RIGHT_TRIGGER) = -1;
-            
-    axesLast = axes;
       
-    fprintf('Running. Click left stick to stop...\n');
+    fprintf('Running. Hold Button B4 for soft shutdown...\n');
     
     %Get initial feedback
     try
@@ -686,46 +615,37 @@ while true
         % Joystick Input %
         %%%%%%%%%%%%%%%%%%
 
-        try
-            [axes, buttons, povs] = read(joy);
-        catch
-            disp('Joystick Error');
-            axes(LEFT_STICK_X) = 0;
-            axes(LEFT_STICK_Y) = 0;
-            axes(RIGHT_STICK_X) = 0;
-            axes(RIGHT_STICK_Y) = 0;
-            axes(LEFT_TRIGGER) = -1;
-            axes(RIGHT_TRIGGER) = -1;
+        % Get feedback with a timeout of 0, which means that they return
+        % instantly, but if there was no new feedback, they return empty.
+        % This is because the mobile device is on wireless and might drop
+        % out or be really delayed, in which case we would rather keep
+        % running with an old data instead of waiting here for new data.
+        tempFbk = phoneGroup.getNextFeedback( fbkPhoneIO, 'timeout', 0 );
+        
+        if ~isempty(tempFbk)
+            latestPhoneIO = fbkPhoneIO;
         end
         
-        joyLowPass = .95;
-%         axes = joyLowPass * axesLast + ...
-%                         (1-joyLowPass) * axes;
-%         axesLast = axes;  
-
-        if buttons(RIGHT_STICK_CLICK)
-            break;
-        end
-
-        if buttons(TOUCHPAD_BUTTON)
+        % Toggle Balance Controller (Button B2 - Hold Button)
+        if latestPhoneIO.b2
             balanceOn = false;
         else
             balanceOn = true;
         end
         
-        % Chassis Fwd / Back Vel
-        joyScale = -.5;
+        % Chassis Fwd / Back Vel (Axis A8 - Right Stick Y)
+        joyScale = .5;
         joyDeadZone = .06;
-        if abs(axes(RIGHT_STICK_Y)) > joyDeadZone
-            cmdVelJoy = joyScale * (axes(RIGHT_STICK_Y) - joyDeadZone*sign(axes(RIGHT_STICK_Y)));
+        if abs(latestPhoneIO.a8) > joyDeadZone
+            cmdVelJoy = joyScale * (latestPhoneIO.a8 - joyDeadZone*sign(latestPhoneIO.a8));
         else
             cmdVelJoy = 0;
         end
 
-        % Chassis Yaw Vel
-        if abs(axes(RIGHT_STICK_X)) > joyDeadZone
+        % Chassis Yaw Vel (Axis A7 - Right Stick X)
+        if abs(latestPhoneIO.a7) > joyDeadZone
             rotDiffJoy = 25 * wheelRadius * direction(1) / wheelBase * ...
-                            (axes(RIGHT_STICK_X) - joyDeadZone*sign(axes(RIGHT_STICK_X)));
+                            (latestPhoneIO.a7) - joyDeadZone*sign(latestPhoneIO.a7);
         else
             rotDiffJoy = 0;
         end
@@ -745,77 +665,66 @@ while true
         else
             rotComp = 0;
         end
-        %rotDiffJoy =  rotDiffJoy + rotComp;
         
-        % Stance Height
-        if (buttons(OPTIONS_BUTTON))
-            %Use button 2 for a soft shutdown procedure
+        % Stance Height (Button B4 Soft Shutdown / Slider A3 Up & Down)
+        sliderDeadZone = .20;
+        if (latestPhoneIO.b4)
+            %Use Button 4 for a soft shutdown procedure
             kneeVelJoy = 1.0;
-            %hipVelocity = kneeVelJoy/2;
             %Lower robot until kneeAngle threshold before exiting
             if(kneeAngle > 2.5)
                 break;
             end
         else
             % Normal Stance Height control
-            if abs(axes(LEFT_TRIGGER)-axes(RIGHT_TRIGGER)) > joyDeadZone  
-                kneeVelJoy = .5 * (axes(LEFT_TRIGGER)-axes(RIGHT_TRIGGER));
-                %hipVelocity = kneeVelJoy/2;
+            if abs(latestPhoneIO.a3) > sliderDeadZone  
+                kneeVelJoy = -.5 * (latestPhoneIO.a3);
             else
                 kneeVelJoy = 0;
-                %hipVelocity = 0;
             end
         end
 
-        % Arm Y-Axis
-        if abs(axes(LEFT_STICK_X)) > joyDeadZone*3
-            gripVelCmd(2) = -.4 * axes(LEFT_STICK_X);
+        % Arm Y-Axis (Axis A1 - Left Stick X)
+        if abs(latestPhoneIO.a1) > joyDeadZone*3
+            gripVelCmd(2) = -.4 * latestPhoneIO.a1;
         else
             gripVelCmd(2) = 0;
         end
 
-        % Arm X-Axis
-        if abs(axes(LEFT_STICK_Y)) > joyDeadZone
-            gripVelCmd(1) = -.4 * axes(LEFT_STICK_Y);
+        % Arm X-Axis (Axis A2 - Left Stick Y)
+        if abs(latestPhoneIO.a2) > joyDeadZone
+            gripVelCmd(1) = .4 * latestPhoneIO.a2;
         else
             gripVelCmd(1) = 0;
         end
 
-        % Arm Z-Axis
-        if buttons(RIGHT_TRIGGER_BUTTON)
+        % Arm Z-Axis (Buttons B6 Up / B8 Down)
+        if latestPhoneIO.b6
             gripVelCmd(3) = .2;
-        elseif buttons(LEFT_TRIGGER_BUTTON)
+        elseif latestPhoneIO.b8
             gripVelCmd(3) = -.2;
         else
             gripVelCmd(3) = 0;
         end
 
-        % Wrist Rotation
-        if povs == 0
-            wristVel = joyLowPass*wristVel - (1-joyLowPass)*2.5;
-        elseif povs == 180
-            wristVel = joyLowPass*wristVel + (1-joyLowPass)*2.5;
+        % Wrist Rotation (Slider A6)
+        sliderLowPass = .95;
+        if latestPhoneIO.a6 < (-1*sliderDeadZone) 
+            wristVel = sliderLowPass*wristVel + (1-sliderLowPass)*2.5;
+        elseif latestPhoneIO.a6 > sliderDeadZone
+            wristVel = sliderLowPass*wristVel - (1-sliderLowPass)*2.5;
         else
-            wristVel = joyLowPass*wristVel;
+            wristVel = sliderLowPass*wristVel;
         end
 
-        % Make the left arm temporarily compliant
-        if povs == 90
-            leftArmCompliant = true;
-        else
-            leftArmCompliant = false;
-        end
-
-        %Camera Tilt
-        if buttons(CIRCLE_BUTTON)
-            camTiltPos = 1.4;
-        elseif buttons(SQUARE_BUTTON)   
+        %Camera Tilt (Button B5 - Home Camera // Slider A5 - Tilt Camera)
+        if latestPhoneIO.b5
             camTiltPos = 0;
         else
             camTiltPos = nan;
-            if buttons(TRIANGLE_BUTTON)
+            if latestPhoneIO.a5 < (-1*sliderDeadZone)
                 camTiltVel = -0.6;
-            elseif buttons(X_BUTTON)
+            elseif latestPhoneIO.a5 > sliderDeadZone
                 camTiltVel = 0.6;
             else
                 camTiltVel = 0;
@@ -879,20 +788,9 @@ while true
         
         gripVel(2,2) = -gripVel(2,2);
 
-    %     % Used if keeping arms stationary in world frame
-    %     if armVelComp
-    %         gripVel(1,:) = gripVel(1,:) + fbkChassisVel;
-    %     end
-
-        %gripVel = R_y(fbkLeanAngle) * gripVel;
-
         oldGripPos = gripPos;
-        if leftArmCompliant
-            newGripPos(:,1) = armTipFK{1}(1:3,4);
-            newGripPos(:,2) = gripPos(:,2);
-        else
-            newGripPos = gripPos + gripVel*dt;
-        end
+        newGripPos = gripPos + gripVel*dt;
+            
         gripWidthLim = .00;
         if newGripPos(2,1) < gripWidthLim
             newGripPos(2,:) = [gripWidthLim, -gripWidthLim];

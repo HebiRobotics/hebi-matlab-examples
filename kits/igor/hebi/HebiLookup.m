@@ -11,6 +11,7 @@ classdef (Sealed) HebiLookup
     %   default behavior in the <a href="matlab:open('hebi_config')">config script</a>.
     %
     %   HebiLookup Methods (configuration):
+    %   initialize                        - starts or resets the lookup process
     %   setLookupAddresses                - sets the lookup target address [ipv4]
     %   getLookupAddresses                - gets the lookup target address [ipv4]
     %   setLookupFrequency                - sets the lookup request rate [Hz]
@@ -24,14 +25,10 @@ classdef (Sealed) HebiLookup
     %   newGroupFromFamily                - groups by family and sorts by name
     %   newGroupFromSerialNumbers         - groups by hardware serial numbers
     %   newGroupFromMacs                  - groups by hardware mac addresses
-    %   newConnectedGroupFromName         - groups by connectivity
-    %   newConnectedGroupFromSerialNumber - groups by connectivity
-    %   newConnectedGroupFromMac          - groups by connectivity
     %
     %   Generally there are two ways to address modules, either by their
-    %   user-configurable name, or by their hardware defined mac address or
-    %   serial number. Some modules (e.g. 'Fieldable' types) have knowledge 
-    %   of their neighbors, which enables grouping based on their connectivity.
+    %   user-configurable names, or by their hardware identifiers such
+    %   as mac address or serial number.
     %
     %   Example
     %      % Show devices on the network
@@ -54,17 +51,33 @@ classdef (Sealed) HebiLookup
     %      macs = {'08:00:7F:9B:67:09'; '08:00:7F:50:BF:45'};
     %      group = HebiLookup.newGroupFromMacs(macs);
     %
-    %      % Create a group of connected modules sorted by connectivity
-    %      group = HebiLookup.newConnectedGroupFromName('Arm', 'Base');
-    %      group = HebiLookup.newConnectedGroupFromSerialNumber('SA023');
-    %      group = HebiLookup.newConnectedGroupFromMac('08:00:7F:9B:67:09');
-    %
     %   See also HebiGroup
     
     %   Copyright 2014-2018 HEBI Robotics, Inc.
     
     % Static API
     methods(Static)
+        
+        function this = initialize(varargin)
+            %initialize starts or resets the lookup process
+            %
+            %   The lookup process gets initialized automatically the first
+            %   time any method gets called, so it's not strictly required 
+            %   for this method to be called manually.
+            %
+            %   However, this also serves as a way to reset the lookup
+            %   configuration to its default parameters, which is useful in
+            %   case the network setup has changed (e.g. plugged in an
+            %   Ethernet cable to a new  network).
+            %
+            %   The default behavior can be modified in the <a href="matlab:open('hebi_config')">config script</a>
+            %
+            %   See also HebiLookup, setLookupAddresses,
+            %   setLookupFrequency, setInitialGroupFeedbackFrequency,
+            %   setInitialGroupCommandLifetime, clearModuleList
+            HebiLookup.initOnce();
+            this = HebiLookup.wrapper;
+        end
         
         function this = setLookupAddresses(varargin)
             %setLookupAddresses sets the lookup target address [ipv4]
@@ -85,7 +98,7 @@ classdef (Sealed) HebiLookup
             %      };
             %      HebiLookup.setLookupAddresses(addresses);
             %
-            %   See also HebiLookup
+            %   See also HebiLookup, hebi_config
             javaMethod('setLookupAddresses', HebiLookup.className,  varargin{:});
             this = HebiLookup.wrapper;
         end
@@ -112,7 +125,7 @@ classdef (Sealed) HebiLookup
             %
             %   The default behavior can be changed in the <a href="matlab:open('hebi_config')">config script</a>.
             %
-            %   See also HebiLookup
+            %   See also HebiLookup, hebi_config
             javaMethod('setLookupFrequency', HebiLookup.className,  varargin{:});
             this = HebiLookup.wrapper;
         end
@@ -134,7 +147,7 @@ classdef (Sealed) HebiLookup
             %
             %   The default behavior can be changed in the <a href="matlab:open('hebi_config')">config script</a>.
             %
-            %   See also HebiLookup, HebiGroup.setFeedbackFrequency
+            %   See also HebiLookup, HebiGroup.setFeedbackFrequency, hebi_config
             javaMethod('setInitialGroupFeedbackFrequency', HebiLookup.className,  varargin{:});
             this = HebiLookup.wrapper;
         end
@@ -148,7 +161,7 @@ classdef (Sealed) HebiLookup
             %
             %   The default behavior can be changed in the <a href="matlab:open('hebi_config')">config script</a>.
             %
-            %   See also HebiLookup, HebiGroup.setCommandLifetime
+            %   See also HebiLookup, HebiGroup.setCommandLifetime, hebi_config
             javaMethod('setInitialGroupCommandLifetime', HebiLookup.className,  varargin{:});
             this = HebiLookup.wrapper;
         end
@@ -267,6 +280,40 @@ classdef (Sealed) HebiLookup
             %   See also HebiLookup, HebiGroup
             group = HebiGroup(javaMethod('newGroupFromMacs', HebiLookup.className,  varargin{:}));
         end
+
+    end
+    
+    % Static objects for delegation
+    properties(Constant, Access = private, Hidden = true)
+        className = HebiLookup.initOnce();
+        wrapper = HebiLookup();
+    end
+    
+    % Internal methods and deprecated API calls
+    methods(Access = public, Static, Hidden = true)
+        
+        function fullName = initOnce()
+            % Load library and config
+            fullName = hebi_load('HebiLookup');
+            config = hebi_config('HebiLookup');
+            
+            % Set up lookup parameters
+            javaMethod('setLookupAddresses', fullName,  ...
+                config.defaultLookupAddresses);
+            javaMethod('setLookupFrequency', fullName,  ...
+                config.defaultLookupFrequency);
+            javaMethod('setInitialGroupFeedbackFrequency', fullName,  ...
+                config.defaultInitialGroupFeedbackFrequency);
+            javaMethod('setInitialGroupCommandLifetime', fullName,  ...
+                config.defaultInitialGroupCommandLifetime);
+            
+            % Make sure all stale modules are cleared
+            javaMethod('clearModuleList', fullName);
+            
+            % Add a pause on first call so that the lookup has some
+            % time to find modules
+            pause(config.initialNetworkLookupPause);
+        end
         
         function group = newConnectedGroupFromName(varargin)
             % newConnectedGroupFromName groups by connectivity
@@ -320,34 +367,6 @@ classdef (Sealed) HebiLookup
             group = HebiGroup(javaMethod('newConnectedGroupFromMac', HebiLookup.className,  varargin{:}));
         end
         
-    end
-    
-    % Static objects for delegation
-    properties(Constant, Access = private, Hidden = true)
-        className = HebiLookup.initOnce();
-        wrapper = HebiLookup();
-    end
-    
-    methods(Access = public, Static, Hidden = true)
-        function fullName = initOnce()
-            % Load library and config
-            fullName = hebi_load('HebiLookup');
-            config = hebi_config('HebiLookup');
-            
-            % Set up lookup parameters
-            javaMethod('setLookupAddresses', fullName,  ...
-                config.defaultLookupAddresses);
-            javaMethod('setLookupFrequency', fullName,  ...
-                config.defaultLookupFrequency);
-            javaMethod('setInitialGroupFeedbackFrequency', fullName,  ...
-                config.defaultInitialGroupFeedbackFrequency);
-            javaMethod('setInitialGroupCommandLifetime', fullName,  ...
-                config.defaultInitialGroupCommandLifetime);
-            
-            % Add a pause on first call so that the lookup has some
-            % time to find modules
-            pause(config.initialNetworkLookupPause);
-        end
     end
     
     % Non-API Methods for MATLAB compliance
