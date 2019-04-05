@@ -1,4 +1,4 @@
-# Daisy Demo Code
+# Daisy Robot Kit
 
 This folder contains everything needed to run the Daisy hexapod kit.  It assumes that you have:
 * Daisy Robot Kit (fully assembled)
@@ -16,10 +16,24 @@ Included in the case is:
 
 The gas springs and WiFi antennas will need to be attached to the robot after unpacking.  
 
-## Starting Daisy
+
+## Assembling / Setting Up Daisy
+If you are assembling Daisy, you can follow the assembly instructions found at:
+http://docs.hebi.us/resources/kits/assyInstructions/X-Series_Hexapod.pdf
+
+![Daisy Module Names](images/daisy_labeled.png)
+
+The actuators in each leg will need to be named `base#`, `shoulder#`, `elbow#`, with the numbering convention for the legs matching the image above.  The Family for all of the actuators in the robot needs to be set to `Daisy`.   You can set the Family/Name of the actuators using [Scope](http://docs.hebi.us/tools.html#scope-gui).
+
+Gains, control parameters, and kinematic information are all set automatically in the demo code.  If you want to view or change these parameters you can refer to the files below.  
+- Individual actuator gains are the same for each leg, and can be found in [daisyLeg-Gains.xml](gains/daisyLeg-Gains.xml).
+- The HRDF files that define the kinematics of the robot can be found in the [hrdf/](hrdf/) folder.
+
+
+## Starting Daisy Demo Code
 
 #### Powering up the robot:
-- Mount and plug in at least 1 of the batteries (preferably both).  
+- Mount and plug in at least 1 of the batteries (preferably both).  When both batteries are plugged in they will share the load equally between batteries.  You can also plug the battery charger in while running for tethered operation.
 - [Turn on the batteries](https://www.ebikes.ca/product-info/ligo-batteries.html) by pressing and holding the button on the batteries until the lights flash green.
 - After the batteries turn on, you will hear 2 beeps, followed by 2 double-beeps as the router in the robot powers up.
 - Press and hold the button labeled 'Modules'.  When the power to the modules turns on the button will turn blue.
@@ -46,6 +60,8 @@ The demo will start up looking for the actuators in the robot, followed by the m
 
 ## Coordinate frame convention
 
+![Coordinate Convention](images/daisy_coordinates_small.png)
+
 * `X` = forward (from driver's perspective)
 * `Y` = left (from driver's perspective)
 * `Theta` = counter-clockwise rotation
@@ -61,7 +77,7 @@ The demo will start up looking for the actuators in the robot, followed by the m
 | Button (`B1`) | Toggle Stance Mode / Step Mode | When in stance mode the robot chassis will shift around due to the joystick velocity commands, but the feet will not move.  The button is blue when in stance mode. |
 | Button (`B8`) | Exit the demo. | The border of the the HEBI Mobile I/O app will no longer be highlighted green after exiting. |
 
-![Controller Image](controller.png)
+![Controller Image](images/controller.png)
 
 Note that even though the image above notes 'Pitch', the Matlab demo does not currently control pitch.
 
