@@ -16,6 +16,16 @@ Included in the case is:
 
 The gas springs and WiFi antennas will need to be attached to the robot after unpacking.  
 
+## Assembling / Setting Up Daisy
+If you are assembling Daisy, you can follow the assembly instructions found at:
+http://docs.hebi.us/resources/kits/assyInstructions/X-Series_Hexapod.pdf
+
+![Daisy Module Names](images/daisy_labeled.png)
+
+The actuators in each leg will need to be named `base#`, `shoulder#`, `elbow#`, with the numbering convention for the legs matching the image above.  The family name for all of the actuators in the robot needs to be set to `Daisy`.   You can set the Family/Name of the actuators using [Scope](http://docs.hebi.us/tools.html#scope-gui).
+
+
+
 ## Starting Daisy
 
 #### Powering up the robot:
@@ -46,6 +56,8 @@ The demo will start up looking for the actuators in the robot, followed by the m
 
 ## Coordinate frame convention
 
+![Coordinate Convention](images/daisy_coordinates_small.png)
+
 * `X` = forward (from driver's perspective)
 * `Y` = left (from driver's perspective)
 * `Theta` = counter-clockwise rotation
@@ -61,7 +73,7 @@ The demo will start up looking for the actuators in the robot, followed by the m
 | Button (`B1`) | Toggle Stance Mode / Step Mode | When in stance mode the robot chassis will shift around due to the joystick velocity commands, but the feet will not move.  The button is blue when in stance mode. |
 | Button (`B8`) | Exit the demo. | The border of the the HEBI Mobile I/O app will no longer be highlighted green after exiting. |
 
-![Controller Image](controller.png)
+![Controller Image](images/controller.png)
 
 Note that even though the image above notes 'Pitch', the Matlab demo does not currently control pitch.
 
