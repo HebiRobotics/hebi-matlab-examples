@@ -1,4 +1,4 @@
-# Daisy Demo Code
+# Daisy Robot Kit
 
 This folder contains everything needed to run the Daisy hexapod kit.  It assumes that you have:
 * Daisy Robot Kit (fully assembled)
@@ -16,6 +16,7 @@ Included in the case is:
 
 The gas springs and WiFi antennas will need to be attached to the robot after unpacking.  
 
+
 ## Assembling / Setting Up Daisy
 If you are assembling Daisy, you can follow the assembly instructions found at:
 http://docs.hebi.us/resources/kits/assyInstructions/X-Series_Hexapod.pdf
@@ -24,9 +25,12 @@ http://docs.hebi.us/resources/kits/assyInstructions/X-Series_Hexapod.pdf
 
 The actuators in each leg will need to be named `base#`, `shoulder#`, `elbow#`, with the numbering convention for the legs matching the image above.  The Family for all of the actuators in the robot needs to be set to `Daisy`.   You can set the Family/Name of the actuators using [Scope](http://docs.hebi.us/tools.html#scope-gui).
 
+Gains, control parameters, and kinematic information are all set automatically in the demo code below.  
+- Individual actuator gains are the same for each leg, and can be found in [daisyLeg-Gains.xml](gains/daisyLeg-Gains.xml).
+- The HRDF files taht define the kinematics of the robot can be found in the [hrdf/](hrdf/) folder.
 
 
-## Starting Daisy
+## Starting Daisy Demo Code
 
 #### Powering up the robot:
 - Mount and plug in at least 1 of the batteries (preferably both).  When both batteries are plugged in they will share the load equally between batteries.  You can also plug the battery charger in while running for tethered operation.
