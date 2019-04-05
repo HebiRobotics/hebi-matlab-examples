@@ -22,14 +22,14 @@ http://docs.hebi.us/resources/kits/assyInstructions/X-Series_Hexapod.pdf
 
 ![Daisy Module Names](images/daisy_labeled.png)
 
-The actuators in each leg will need to be named `base#`, `shoulder#`, `elbow#`, with the numbering convention for the legs matching the image above.  The family name for all of the actuators in the robot needs to be set to `Daisy`.   You can set the Family/Name of the actuators using [Scope](http://docs.hebi.us/tools.html#scope-gui).
+The actuators in each leg will need to be named `base#`, `shoulder#`, `elbow#`, with the numbering convention for the legs matching the image above.  The Family for all of the actuators in the robot needs to be set to `Daisy`.   You can set the Family/Name of the actuators using [Scope](http://docs.hebi.us/tools.html#scope-gui).
 
 
 
 ## Starting Daisy
 
 #### Powering up the robot:
-- Mount and plug in at least 1 of the batteries (preferably both).  
+- Mount and plug in at least 1 of the batteries (preferably both).  When both batteries are plugged in they will share the load equally between batteries.  You can also plug the battery charger in while running for tethered operation.
 - [Turn on the batteries](https://www.ebikes.ca/product-info/ligo-batteries.html) by pressing and holding the button on the batteries until the lights flash green.
 - After the batteries turn on, you will hear 2 beeps, followed by 2 double-beeps as the router in the robot powers up.
 - Press and hold the button labeled 'Modules'.  When the power to the modules turns on the button will turn blue.
