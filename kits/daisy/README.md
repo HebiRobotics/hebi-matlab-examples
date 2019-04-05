@@ -25,9 +25,9 @@ http://docs.hebi.us/resources/kits/assyInstructions/X-Series_Hexapod.pdf
 
 The actuators in each leg will need to be named `base#`, `shoulder#`, `elbow#`, with the numbering convention for the legs matching the image above.  The Family for all of the actuators in the robot needs to be set to `Daisy`.   You can set the Family/Name of the actuators using [Scope](http://docs.hebi.us/tools.html#scope-gui).
 
-Gains, control parameters, and kinematic information are all set automatically in the demo code below.  
+Gains, control parameters, and kinematic information are all set automatically in the demo code.  If you want to view or change these parameters you can refer to the files below.  
 - Individual actuator gains are the same for each leg, and can be found in [daisyLeg-Gains.xml](gains/daisyLeg-Gains.xml).
-- The HRDF files taht define the kinematics of the robot can be found in the [hrdf/](hrdf/) folder.
+- The HRDF files that define the kinematics of the robot can be found in the [hrdf/](hrdf/) folder.
 
 
 ## Starting Daisy Demo Code
