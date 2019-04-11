@@ -372,7 +372,8 @@ classdef (Sealed) HebiGroup < handle
             %                 for advanced users that care about additional
             %                 timestamps and less common sensors.
             %      'IO'       returns feedback fields specific to I/O devices,
-            %                 such as analog and digital pins
+            %                 such as analog and digital pins, or the button and
+            %                 slider states of the HEBI Mobile I/O app.
             %      'Mobile'   returns feedback fields specific to mobile devices,
             %                 such as GPS and ARKit/ARCore estimates.
             %
@@ -402,10 +403,14 @@ classdef (Sealed) HebiGroup < handle
             %      'Full'     returns all available feedback. This is appropriate
             %                 for advanced users that care about additional
             %                 timestamps and less common sensors.
-            %      'IO'       returns the state of pins on an IO board.
+            %      'IO'       returns feedback fields specific to I/O devices,
+            %                 such as analog and digital pins, or the button and
+            %                 slider states of the HEBI Mobile I/O app.
+            %      'Mobile'   returns feedback fields specific to mobile devices,
+            %                 such as GPS and ARKit/ARCore estimates.
             %
             %   Example
-            %      % retrieve feedback from group
+            %      % Retrieve feedback from group
             %      group = HebiLookup.newGroupFromFamily('*');
             %      group.setFeedbackFrequency(100);
             %      simpleFbk = group.getNextFeedback();
@@ -413,14 +418,25 @@ classdef (Sealed) HebiGroup < handle
             %
             %   Note that creating a feedback struct can be expensive in some time
             %   critical applications. For such cases, there is a way to reuse
-            %   existing structs.
+            %   existing structs.  This way also lets you request two different
+            %   feedback views at the same time.
             %
-            %   Example
+            %   Advanced Usage
             %      % Reuse struct using standard syntax
-            %      reuseStruct = group.getFeedbackFull(); % create once
+            %      reuseFbk = group.getNextFeedbackFull(); % create once
             %      while true % reuse in loop
-            %          fbk = group.getNextFeedback(reuseStruct);
+            %          fbk = group.getNextFeedback(reuseFbk);
             %          display(fbk.position);
+            %      end
+            %
+            %      % Requesting feedback of two different views at once. This 
+            %      % is useful for getting both the button/slider states and
+            %      % mobile feedback from the HEBI Mobile I/O app.
+            %      fbkIO = group.getNextFeedbackIO(); 
+            %      fbkMobile = group.getNextFeedbackMobile(); 
+            %      while true 
+            %          group.getNextFeedback(fbkIO, fbkMobile);
+            %          display([ fbkIO.a1 fbkMobile.batteryLevel]);
             %      end
             %
             %      % More optimized syntax
@@ -456,8 +472,8 @@ classdef (Sealed) HebiGroup < handle
             %
             %   This method is a convenience wrapper with the same behavior as
             %   calling getNextFeedback('View', 'IO'). The 'IO' view provides
-            %   access to the state of pins on an I/O board, as well as
-            %   hardware timestamps.
+            %   access to the state of pins on an I/O board, the button and slider
+            %   states from the HEBI Mobile I/O app, as well as hardware timestamps.
             %
             %   Example
             %      % Read the value of pin A1

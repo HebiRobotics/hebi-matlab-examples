@@ -1,10 +1,10 @@
 classdef (Sealed) HebiPoseFilter
-    %HebiPoseFilter is a simple filter that uses accel and gyro measurements to estimate the pose
+    %HebiPoseFilter DEPRECATED pose filter for fusing IMU feedback.
     %
     %   THIS API IS DEPRECATED AND WILL BE REMOVED IN A FUTURE RELEASE. The
     %   primary purpose of this API was to provide an orientation estimate
     %   of a module based on its IMU. This estimate is now done on each
-    %   module in firmware.
+    %   module in firmware and is returned as a quaternion orientation.
     %
     %   HebiPoseFilter Methods:
     %      setMaxAccelNormDev - max deviation from the norm
@@ -12,7 +12,6 @@ classdef (Sealed) HebiPoseFilter
     %      setYaw             - sets dead-reackoned yaw [rad] (rotation about z in world)
     %      update             - input: 3x accel [g], 3x gyro [rad/s], abs time [s]
     %      getPose            - out: 4x4 transform matrix
-    %
     %
     %   Example
     %      % Continuously find pose of a module
