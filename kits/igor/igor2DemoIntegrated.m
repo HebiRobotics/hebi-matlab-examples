@@ -1,10 +1,9 @@
-% Testing out balancing robot control.
+% Balancing Robot Demo
 %
-% Assumes using a Sony PS4 Gamepad:
-% Model CUH-ZCT2U Wireless Controller
+% Assumes using an iOS/Android device with HEBI Mobile I/O App.
 %
-% Dave Rollinson
-% Apr 2017
+% HEBI Robotics
+% Apr 2017-2019
 
 function igor2DemoIntegrated( cam_module )
 
@@ -100,6 +99,8 @@ pause(1);
 fbk = robotGroup.getNextFeedbackFull();
 timeLast = fbk.time;
 
+cmdIO = IoCommandStruct();
+
 % animStruct = struct();
 
 %%
@@ -107,7 +108,7 @@ timeLast = fbk.time;
 % Setup Mobile I/O Group %
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 phoneFamily = 'HEBI';
-phoneName = 'Virtual IO';
+phoneName = 'Mobile IO';
 
 while true
     try
@@ -117,9 +118,10 @@ while true
         disp('Phone Found.  Starting up');
         break;
     catch
+
         pause(1.0);
     end
-    
+
     robotGroup.send('led','w');
     pause(0.5);
     robotGroup.send('led','m');
@@ -135,6 +137,28 @@ latestPhoneIO = fbkPhoneIO;
 % Wait to start
 while true
     fprintf('Paused. Click B3 button to start, B1 button to quit matlab...\n');  
+    % Set the state of the controller
+    cmdIO.a3 = 0;  % Set to snap
+    cmdIO.a6 = 0;  % Set to snap
+    cmdIO.e3 = 1;  % Highlight start button
+    cmdIO.e4 = 0;  % Don't highlight stop button
+    cmdIO.f5 = -1;  % Gains slider all the way down
+    controllerColor = 'b';
+    
+    numSends = 0;
+    maxSends = 10;
+    ack = false;
+    fprintf('Setting up to controller...');
+    while ~ack
+        ack = phoneGroup.send( cmdIO, ...
+                              'led', controllerColor, ...
+                              'ack', true );
+        numSends = numSends + 1;
+        if numSends > maxSends
+            disp('Did not get ack from mobile controller.');
+            break;
+         end
+    end
 
     try
         fbkPhoneIO = phoneGroup.getNextFeedbackIO();
@@ -166,6 +190,7 @@ while true
                 fprintf('Searching for phone Controller...\n');
                 phoneGroup = HebiLookup.newGroupFromNames( ...
                     phoneFamily, phoneName );
+                
                 disp('Phone Found.  Starting up');
             catch
                 pause(1.0);
@@ -184,12 +209,33 @@ while true
         
         if(latestPhoneIO.b1)
             robotGroup.send('led',[]);
-            quit force
+            quit force;
         end
         
     end
-      
+     
+    % Set the state of the controller
+    cmdIO.e3 = 0;  % Make button 'b3' not highlight
+    cmdIO.e4 = 1;   % Make button 'b4' highlight, so we know it quits.
+    cmdIO.f5 = -1;  % gains slider all the way down
+    controllerColor = 'g';
+    
+    numSends = 0;
+    maxSends = 10;
+    ack = false;
+    fprintf('Setting up to controller...');
+    while ~ack
+        ack = phoneGroup.send( cmdIO, ...
+                              'led', controllerColor, ...
+                              'ack', true );
+        numSends = numSends + 1;
+        if numSends > maxSends
+            disp('Did not get ack from mobile controller.');
+            break;
+         end
+    end
     fprintf('Running. Hold Button B4 for soft shutdown...\n');
+    
     
     %Get initial feedback
     try
@@ -200,7 +246,7 @@ while true
     end
 
     balanceOn = true;
-    logging = true;   % Flag to turn logging on and off.  If logging is on you 
+    logging = false;   % Flag to turn logging on and off.  If logging is on you 
                       % you can view a bunch of debug plots after quitting.
 
     cmd = CommandStruct();
@@ -831,9 +877,9 @@ while true
         cmdChassisVel = cmdVel;
 
         % PID Controller that set a desired lean angle
-        velP = 5 / .33;
-        velI = 3 / 30;
-        velD = .3 / 1;
+        velP = 20;
+        velI = 3 * (latestPhoneIO.a5+1);  % Scale I term with joystick
+        velD = 0.5;
 
         fbkChassisVel = wheelRadius * mean(direction.*fbk.velocity(1:2)) + ...
                          heightCoM*leanAngleVel;
@@ -843,7 +889,7 @@ while true
         chassisVelErrorCum = chassisVelErrorCum + chassisVelError*dt;
 
         % chassisVelErrorCum = softStart * chassisVelErrorCum;
-        chassisVelErrorCum = min(abs(chassisVelErrorCum),5/velI) * ...
+        chassisVelErrorCum = min(abs(chassisVelErrorCum),velI) * ...
                                         sign(chassisVelErrorCum);
 
         cmdChassisAccel = (cmdChassisVel - cmdChassisVelLast) / dt;
@@ -886,7 +932,7 @@ while true
         if balanceOn         
             % PID Controller to servo to a desired lean angle
             leanP = 1.0;
-            leanI = 20;
+            leanI = 0;
             leanD = 10;
 
             cmd.effort(wheelDOFs) = direction*leanP*leanAngleError + ...
