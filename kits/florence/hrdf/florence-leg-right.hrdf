@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Florence - Biped Walker Kit -->
+<!-- Right Leg Kinematics        -->
+<robot version="1.1.0">
+    
+  <!-- Add an extra body at the beginning to have the base frame show -->
+  <!-- up in the kinematic chain -->
+  <rigid-body mass = "0.00"/>
+  
+  <!-- Turn 30-deg on the 6-way mount -->
+  <rigid-body mass = "0.00"
+              output_rot = "Rz(-pi/6)" /> 
+  <rigid-body mass = "0.20" 
+              com_trans = "0.150 0.00 0.00" 
+              output_rot = "Rx(pi)" 
+              output_trans = "0.2125 0.000 -0.038"/> 
+    
+  <actuator type="X8-9"/>
+  <bracket type="X5HeavyLeftOutside"/>
+  <actuator type="X8-16"/>
+  <bracket type="X5HeavyLeftOutside"/> 
+  
+  <!-- HACK TO GET A FRAME IN THE JACOBIAN FOR THE MOUNTING POINT OF THE GAS SPRING --> 
+  <!-- Make a translation to the pointing point, then translate back --> 
+  <rigid-body mass = "0.00" 
+              com_trans = "0.00 0.00 0.00" 
+              output_trans = "0.025 -0.040 -0.025"/> 
+  <rigid-body mass = "0.00" 
+              com_trans = "0.00 0.00 0.00" 
+              output_trans = "-0.025 0.040 0.025"/>   
+  <!-- END OF HACK --> 
+  
+  <actuator type="X8-16"/>  <!-- THIS DOF IS DOUBLED UP IN PARALLEL -->
+  <link type="X5" 
+        extension="0.325" 
+        twist="pi"
+        mass_offset = "1.75"  
+        com_trans_offset = "0.00 0.00 -0.10"/> <!-- ADDED MASS FOR DOUBLED UP LINK + ACTUATORS -->
+  <actuator type="X8-16"/>  <!-- THIS DOF IS DOUBLED UP IN PARALLEL -->
+  
+  <!-- HACK TO GET A FRAME IN THE JACOBIAN FOR THE MOUNTING POINT OF THE GAS SPRING --> 
+  <!-- Make a translation to the mounting point, then translate back --> 
+  <rigid-body mass = "0.00" 
+              com_trans = "0.00 0.00 0.00" 
+              output_trans = "0.082 0.008 0.000"/> 
+  <rigid-body mass = "0.00" 
+              com_trans = "0.00 0.00 0.00" 
+              output_trans = "-0.082 -0.008 0.000"/>  
+  <!-- END OF HACK --> 
+              
+  <rigid-body mass = "0.00" 
+              com_trans = "0.00 0.00 0.00" 
+              output_trans = "0.00 0.00 0.0175"/> <!-- OFFSET FOR CUSTOM KNEE JOINT -->    
+  <link type="X5" extension="0.325" twist="pi"/>
+  <actuator type="X8-9"/>
+  <bracket type="X5HeavyLeftInside"/>
+  <actuator type="X8-9"/>
+
+  <!-- Add an extra body at the end for the foot -->
+  <!-- HEBI Feet -->
+  <rigid-body mass = "0.300" 
+              com_trans = "0.100 0.00 -0.050" 
+              output_rot = "Rx(pi) * Ry(-pi/2)"
+              output_trans = "0.100 0.00 -0.050"/>
+    
+</robot>
