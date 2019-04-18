@@ -8,6 +8,9 @@ classdef (Sealed) HebiUtils
     %   saveGains          - saves group gains to disk (XML)
     %   loadGains          - loads group gains from disk (XML)
     %
+    %   saveSafetyParams   - saves group safety parameters to disk (XML)
+    %   loadSafetyParams   - loads group safety parameters from disk (XML)
+    %
     %   newGroupFromLog    - generates a group from a .hebilog file that
     %                        you can use play back data using getNextFeedback.
     %
@@ -66,12 +69,17 @@ classdef (Sealed) HebiUtils
             %      Absolute or relative path to the binary log file.
             %
             %   'View' Parameter (optional)
-            %      'Simple' converts only simple feedback. This is appropriate
-            %               for most users and results in much smaller log
-            %               files. (default)
-            %      'Full'   converts all available feedback. This is appropriate
-            %               for advanced users that need additional timestamps
-            %               or data from less common sensors.
+            %      'Simple'  loads only simple feedback. This is appropriate
+            %                for most users and results in much smaller log
+            %                files. (default)
+            %      'Full'    loads all available feedback. This is appropriate
+            %                for advanced users that need additional timestamps
+            %                or data from less common sensors.
+            %      'IO'      loads feedback fields specific to I/O devices,
+            %                such as analog and digital pins, or the button and
+            %                slider states of the HEBI Mobile I/O app.
+            %      'Mobile'  loads feedback fields specific to mobile devices,
+            %                such as GPS and ARKit/ARCore estimates.
             %
             %   Additionally, this method returns info and gains if the
             %   corresponding data is contained within the log. For
@@ -115,15 +123,20 @@ classdef (Sealed) HebiUtils
             %               result in out-of-memory errors. (default)
             %      'Csv'    converts data to a CSV file
             %      'Mat'    converts data to a MAT file
-            %      'Raw'    returns the input path
+            %      'Raw'    returns the full file path to 'InputFile'
             %
             %   'View' Parameter  (optional)
-            %      'Simple' converts only simple feedback. This is appropriate
-            %               for most users and results in much smaller log
-            %               files. (default)
-            %      'Full'   converts all available feedback. This is appropriate
-            %               for advanced users that need additional timestamps
-            %               or data from less common sensors.
+            %      'Simple'  converts only simple feedback. This is appropriate
+            %                for most users and results in much smaller log
+            %                files. (default)
+            %      'Full'    converts all available feedback. This is appropriate
+            %                for advanced users that need additional timestamps
+            %                or data from less common sensors.
+            %      'IO'      converts feedback fields specific to I/O devices,
+            %                such as analog and digital pins, or the button and
+            %                slider states of the HEBI Mobile I/O app.
+            %      'Mobile'  converts feedback fields specific to mobile devices,
+            %                such as GPS and ARKit/ARCore estimates.
             %
             %   Additionally, this method returns info and gains if the
             %   corresponding data is contained within the log. For
@@ -233,12 +246,20 @@ classdef (Sealed) HebiUtils
         end
         
         function out = saveGains(varargin)
-            % SAVEGAINS saves gains for group to disk (xml)
+            % SAVEGAINS saves gains for group to disk (XML)
             %
             %   This method saves gains from a GainStruct in a human
-            %   readable format on disk. Note that this includes only the
-            %   control strategy and the corresponding gains, and may
-            %   exclude some fields such as 'time' or 'mStopStrategy'.
+            %   readable format on disk.  This allows safety parameters to
+            %   be saved, revisioned, and shared across different APIs.
+            %
+            %   This format is the preferred way of storing and loading parameters 
+            %   for different demos / applications.  More information on the gains 
+            %   XML format can be found at:
+            %   https://github.com/HebiRobotics/hebi-xml/blob/master/GAINS.md
+            %
+            %   Note that this includes only the control strategy and the 
+            %   corresponding gains, and may exclude some fields such as 'time' or
+            %   'mStopStrategy'.
             %
             %   Examples:
             %      % Make a new set of gains and save to XML
@@ -257,7 +278,10 @@ classdef (Sealed) HebiUtils
         end
         
         function out = loadGains(varargin)
-            % LOADGAINS loads gains for group from disk (xml)
+            % LOADGAINS loads gains for group from disk (XML)
+            %
+            %   More information on the gains XML format can be found at:
+            %   https://github.com/HebiRobotics/hebi-xml/blob/master/GAINS.md
             %
             %   This method loads gains from a human readable file into a
             %   GainStruct. Note that this includes only the control
@@ -265,14 +289,63 @@ classdef (Sealed) HebiUtils
             %   fields such as 'time' (set to now) or 'mStopStrategy'.
             %
             %   Example
-            %      % create dummy file
+            %      % Create a test XML file with empty gains
             %      gainFile = HebiUtils.saveGains(GainStruct(), 'MyGains');
             %
-            %      % load gains from xml w/ dummy data
+            %      % Load those gains back from the XML file
             %      gains = HebiUtils.loadGains(gainFile);
             %
             %   See also HebiUtils, saveGains, GainStruct.
             out = javaMethod('loadGains', HebiUtils.className,  varargin{:});
+        end
+        
+        function out = saveSafetyParams(varargin)
+            % SAVESAFETYPARAMS saves safety parameters for a group to disk (XML)
+            %
+            %   This method saves data from a SafetyParamsStruct in a human
+            %   readable XML format on disk.  This allows safety parameters to
+            %   be saved, revisioned, and shared across different APIs.
+            %
+            %   This format is the preferred way of storing and loading parameters 
+            %   for different demos / applications.  More information on the safety
+            %   parameters XML format can be found at:
+            %   https://github.com/HebiRobotics/hebi-xml/blob/master/SAFETY.md
+            %
+            %   Examples:
+            %      % Make a new set of safety parameters and save to XML
+            %      safetyParams = SafetyParamsStruct();
+            %      safetyParams.positionMinLimit = [-pi -pi -pi -pi];
+            %      safetyParams.positionMaxLimit = [+pi +pi +pi +pi];
+            %      xmlFile = HebiUtils.saveSafetyParams(safetyParams, 'MySafetyParams');
+            %      display(xmlFile);
+            %
+            %      % Save the safety parameters that are currently set for a group
+            %      safetyParams = group.getSafetyParams();
+            %      xmlFile = HebiUtils.saveSafetyParams(safetyParams, 'MySafetyParams');
+            %      display(xmlFile);
+            %
+            %   See also HebiUtils, loadSafetyParams, SafetyParamsStruct.
+            out = javaMethod('saveSafetyParams', HebiUtils.className,  varargin{:});
+        end
+        
+        function out = loadSafetyParams(varargin)
+            % LOADSAFETYPARAMS loads safety parameters for a group from disk (XML)
+            %
+            %   More information on the safety parameter XML format can be found at:
+            %   https://github.com/HebiRobotics/hebi-xml/blob/master/SAFETY.md
+            %
+            %   This method loads parameters from a human readable file into a
+            %   SafetyParamsStruct.
+            %
+            %   Example
+            %      % Create a test XML file with empty safety parameters
+            %      xmlFile = HebiUtils.saveSafetyParams(SafetyParamsStruct(), 'MySafetyParams');
+            %
+            %      % Load those safety parameters back from the XML file
+            %      safetyParams = HebiUtils.loadSafetyParams(xmlFile);
+            %
+            %   See also HebiUtils, saveSafetyParams, SafetyParamsStruct.
+            out = javaMethod('loadSafetyParams', HebiUtils.className,  varargin{:});
         end
         
         function [info, gains, safetyParams] = readGroupLogInfo(hebiLogFile)
@@ -320,12 +393,17 @@ classdef (Sealed) HebiUtils
             %   The optional parameters are the same as LOADGROUPLOG.
             %
             %   'View' Parameter (optional)
-            %      'Simple' converts only simple feedback. This is appropriate
-            %               for most users and results in much smaller log
-            %               files. (default)
-            %      'Full'   converts all available feedback. This is appropriate
-            %               for advanced users that need additional timestamps
-            %               or data from less common sensors.
+            %      'Simple'  loads only simple feedback. This is appropriate
+            %                for most users and results in much smaller log
+            %                files. (default)
+            %      'Full'    loads all available feedback. This is appropriate
+            %                for advanced users that need additional timestamps
+            %                or data from less common sensors.
+            %      'IO'      loads feedback fields specific to I/O devices,
+            %                such as analog and digital pins, or the button and
+            %                slider states of the HEBI Mobile I/O app.
+            %      'Mobile'  loads feedback fields specific to mobile devices,
+            %                such as GPS and ARKit/ARCore estimates.
             %
             %    Example:
             %       % Load selected files and plot position feedback
@@ -361,15 +439,20 @@ classdef (Sealed) HebiUtils
             %               result in out-of-memory errors. (default)
             %      'Csv'    converts data to a CSV file
             %      'Mat'    converts data to a MAT file
-            %      'Raw'    returns the input path
+            %      'Raw'    returns the full path to the selected log files.
             %
             %   'View' Parameter
-            %      'Simple' converts only simple feedback. This is appropriate
-            %               for most users and results in much smaller log
-            %               files. (default)
-            %      'Full'   converts all available feedback. This is appropriate
-            %               for advanced users that need additional timestamps
-            %               or data from less common sensors.
+            %      'Simple'  converts only simple feedback. This is appropriate
+            %                for most users and results in much smaller log
+            %                files. (default)
+            %      'Full'    converts all available feedback. This is appropriate
+            %                for advanced users that need additional timestamps
+            %                or data from less common sensors.
+            %      'IO'      converts feedback fields specific to I/O devices,
+            %                such as analog and digital pins, or the button and
+            %                slider states of the HEBI Mobile I/O app.
+            %      'Mobile'  converts feedback fields specific to mobile devices,
+            %                such as GPS and ARKit/ARCore estimates.
             %
             %    Example:
             %       % Load selected files and plot position feedback

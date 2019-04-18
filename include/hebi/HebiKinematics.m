@@ -471,14 +471,14 @@ classdef (Sealed) HebiKinematics
             %
             %   'FrameType' Argument
             %       'OutputFrame'      calculates the transforms to the output
-            %                          of each body ('out')
+            %                          of each body (also: 'out', 'output')
             %
             %       'CoMFrame'         calculates the transforms to the center
-            %                          of mass of each body
+            %                          of mass of each body (also: 'com')
             %
             %       'EndEffectorFrame' calculates the transform to only the
             %                          output frame of the last body, e.g.,
-            %                          a gripper
+            %                          a gripper (also: 'endeffector')
             %
             %   'Position' Argument
             %       A [1 x numDoF] vector that specifies the position
@@ -486,10 +486,30 @@ classdef (Sealed) HebiKinematics
             %       specified in [rad].  Translational positions are
             %       specified in [m].
             %
-            %    Example
+            %   'FixedFrame' Argument
+            %       A number that specifies which rigid body of the Jacobian is 
+            %       assumed to be fixed, and returns the Jacobian in this frame.  
+            %       This parameter is optional, and the default if not specified is 
+            %       the world frame, which would be the same as ['fixedframe', 0]. 
+            %
+            %       This parameter uses negative indexing to specify the end-effector
+            %       as -1 regardless of the number of links in kinenamitic chain.  
+            %       Note that if you want the frame at the usual origin of the chain
+            %       to be returned in the Jacobian, you will need to add a body there 
+            %       in the HRDF file or kinematic definition code, as the base frame 
+            %       of the chain is normally omitted from forward kinematics and 
+            %       Jacobian calculations.
+            %
+            %    Examples
             %       % End-Effector Jacobian using group feedback
             %       fbk = group.getNextFeedback();
             %       J = kin.getJacobian('endEffector', fbk.position);
+            %
+            %       % Jacobian assuming the end-effector is fixed, using group 
+            %       % feedback. For example, if the kinematic chain were a
+            %       % leg and the end-effector (the foot) is fixed to the ground.
+            %       fbk = group.getNextFeedback();
+            %       J = kin.getJacobian('output', fbk.position, 'fixedframe', -1);
             %
             %   See also HebiKinematics
             out = getJacobian(this.obj, varargin{:});
