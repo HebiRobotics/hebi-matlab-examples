@@ -13,7 +13,11 @@ The demo can be run using the Mobile IO app connected to the robot's wireless ne
 * Mobile IO (Requires HEBI's Mobile IO app on an Android or iOS device)
 
 ### Software Requirements 
-* [HEBI MATLAB API](http://docs.hebi.us/tools.html#matlab-api)
+* http://docs.hebi.us/tools.html#matlab-api[HEBI MATLAB API]
+
+### Firmware
+
+The demo is tuned to run using actuators that have http://docs.hebi.us/downloads_changelogs.html#firmware-changelog[firmware version] 15.2.0 or greater.  You can update actuators to the most recent version of firmware using http://docs.hebi.us/tools.html#scope-gui[Scope].
 
 ## Running
 
