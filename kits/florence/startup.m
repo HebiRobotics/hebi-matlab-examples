@@ -6,17 +6,11 @@ function [] = startup()
 
 localDir = fileparts(mfilename('fullpath'));
 
+% Run the include script from the top level of the examples
+includeScript = fullfile(localDir, '..', '..', 'include', 'include.m');
+run(includeScript);
+
 % Add this folder and all its subfolders
 addpath(genpath(localDir));
-
-% Load the main API
-hebi_load();
-
-% Joystick / Keyboard 
-% Load Libraries before making any other objects so that these tools 
-% will work.  Libraries can no longer be loaded after Java objects of 
-% any type have been instantiated during a Matlab session.
-HebiJoystick.loadLibs();
-HebiKeyboard.loadLibs();
 
 end
