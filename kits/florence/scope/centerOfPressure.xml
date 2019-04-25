@@ -1,0 +1,20 @@
+<chart title="Center of Pressure" 
+       min_range="-100" 
+       max_range="+100">
+  
+    <trace label="Y Axis Center of Pressure [mm]" 
+           units="millimeters [mm]" 
+           color="green" 
+           style="solid" 
+           value="  -52 * (- (fbk.a7-0.5)/4*100 - (fbk.a8-0.5)/4*100 + (fbk.a5-0.5)/4*100 + (fbk.a6-0.5)/4*100) / 
+           ((fbk.a5-0.5)/4*100 + (fbk.a8-0.5)/4*100 + (fbk.a6-0.5)/4*100 + (fbk.a7-0.5)/4*100)
+           "/>
+           
+    <trace label="X Axis Center of Pressure [mm]" 
+           units="millimeters [mm]" 
+           color="red" 
+           style="solid" 
+           value="  46 * ( (fbk.a7-0.5)/4*100 - (fbk.a8-0.5)/4*100 - (fbk.a5-0.5)/4*100 + (fbk.a6-0.5)/4*100) / 
+           ((fbk.a5-0.5)/4*100 + (fbk.a8-0.5)/4*100 + (fbk.a6-0.5)/4*100 + (fbk.a7-0.5)/4*100)
+           "/>
+</chart>

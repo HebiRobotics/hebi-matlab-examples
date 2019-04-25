@@ -1,0 +1,10 @@
+<chart title="Total Force" 
+       min_range="-200" 
+       max_range="+200">
+  
+    <trace label="Total Force [N]" 
+           units="Newtons [N]" 
+           color="black" 
+           style="solid" 
+           value="(fbk.a5-0.5)/4*100*4.45 + (fbk.a8-0.5)/4*100*4.45 + (fbk.a6-0.5)/4*100*4.45 + (fbk.a7-0.5)/4*100*4.45"/>
+</chart>
