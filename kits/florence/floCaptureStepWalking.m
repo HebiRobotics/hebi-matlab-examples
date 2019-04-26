@@ -15,7 +15,7 @@ close all;
 kb = HebiKeyboard();
 
 visualizeOn = false;
-simulate = true;
+simulate = false;
 logging = true;
 
 if visualizeOn
@@ -96,7 +96,7 @@ Zy_lim = stepParams.halfFootWidth;
 minStepTime = stepParams.minStepTime;  % used if we need to step 'immediately'.
 T_min = minStepTime;
 
-ankleGain = 0.75;  % Ratio of full ZMP to apply as ankle torque. Setting to 
+ankleGain = 1.0;  % Ratio of full ZMP to apply as ankle torque. Setting to 
                   % less than 1 make the robot more 'stumbly', and
                   % probably more realistic :-)
 
@@ -118,6 +118,8 @@ F_stance = zeros(1,2);
 F_stanceLast = F_stance;
 
 xi = delta + abs(V_y) * (omega - delta);
+
+newStep = true;
 
 damping = -0.01; % stability parameter for simulation
 c = [  0.00;    % c_x [m]      (CoM x position) 
@@ -223,6 +225,7 @@ while true
         lambda = -lambda;
         c(1) = -F(1);  % c_x
         c(4) = -F(2);  % c_y
+        newStep = true;
 
         % Reset nominal step time
         T_bar = 2*tau;
@@ -363,7 +366,7 @@ while true
         fbk = legsGroup.getNextFeedbackFull();
     end
     
-    footZ = -1.5 * h_CoM;
+    footZ = -1.4 * h_CoM;
     
     if lambda == 1
         swingLeg = 1;
@@ -383,7 +386,7 @@ while true
                                 'initial', homeAngles(stanceLeg,:) );
     % Get stance leg velocities
     stanceVelXYZ = [-cc_x; -cc_y; 0];
-    J = kin.leg{swingLeg}.getJacobianEndEffector( stanceAngles );
+    J = kin.leg{stanceLeg}.getJacobianEndEffector( stanceAngles );
     stanceAngVels = pinv_damped(J(1:3,:)) * stanceVelXYZ; 
 
     % Swing time runs 'backwards', so set up trajectory accordingly
@@ -405,7 +408,6 @@ while true
     
     % Get velocity at liftoff
     swingTrajAngVels = zeros(size(swingTrajAngles));
-    swingTrajAngVels(2,:) = nan;
     
     % Get target velocity at touchdown
     swingVelXYZ = [ccPrime_x; ccPrime_y; 0];
@@ -413,21 +415,70 @@ while true
     swingTrajAngVels(1,:) = pinv_damped(J(1:3,:)) * swingVelXYZ; 
     swingTrajAngVels(2,:) = nan;
     
+    % Get target velocity at lift-off
+    swingLiftOffVelXYZ = -stanceVelXYZ;
+    % swingLiftOffVelXYZ(2) = -swingLiftOffVelXYZ(2);
+    
+    J = kin.leg{swingLeg}.getJacobianEndEffector( swingTrajAngles(3,:) );
+    swingTrajAngVels(3,:) = pinv_damped(J(1:3,:)) * swingLiftOffVelXYZ; 
+    
     swingTrajAngAccels = zeros(size(swingTrajAngles));
     swingTrajAngAccels(2,:) = nan;
     
-    minReplanTime = 0.1;
-    if T > minReplanTime
-        swingTraj = trajGen.newJointMove( swingTrajAngles, ...
-                                        'time', swingTiming, ...
-                                        'velocities', swingTrajAngVels, ...
-                                        'accelerations', swingTrajAngAccels ); 
-    end
-                             
-    [swingAngles,swingAngVels,swingAngAccels] = swingTraj.getState( T );
+    T_traj = T_bar;
+    T_traj = max(T_traj,0);
     
+    minReplanTime = 0.1;
+    
+
+    if newStep
+        % Full trajectory if we're taking a new step
+        disp('New Step');
+        newStep = false;
+        swingTraj = trajGen.newJointMove( swingTrajAngles, ...
+                                'time', swingTiming, ...
+                                'velocities', swingTrajAngVels, ...
+                                'accelerations', swingTrajAngAccels );
+        [swingAngles,swingAngVels,swingAngAccels] = swingTraj.getState( T_traj );
+    elseif T_traj > swingTiming(2) + minReplanTime
+        % If we're already swinging, replace the first waypoing with where
+        % we are now.
+        [swingAngles,swingAngVels,swingAngAccels] = swingTraj.getState( T_traj );
+        swingTrajAngles(3,:) = swingAngles;
+        swingTrajAngVels(3,:) = swingAngVels;
+        swingTrajAngAccels(3,:) = swingAngAccels;
+        swingTiming(3) = T_traj;
+        
+        swingTraj = trajGen.newJointMove( swingTrajAngles, ...
+                                'time', swingTiming, ...
+                                'velocities', swingTrajAngVels, ...
+                                'accelerations', swingTrajAngAccels );
+    elseif T_traj > swingTiming(1) + minReplanTime
+        % If we're already swinging, replace the first waypoing with where
+        % we are now.
+        [swingAngles,swingAngVels,swingAngAccels] = swingTraj.getState( T_traj );
+        swingTrajAngles(3,:) = [];
+        swingTrajAngVels(3,:) = [];
+        swingTrajAngAccels(3,:) = [];
+        swingTiming(3) = [];
+        
+        swingTrajAngles(2,:) = swingAngles;
+        swingTrajAngVels(2,:) = swingAngVels;
+        swingTrajAngAccels(2,:) = swingAngAccels;
+        swingTiming(2) = T_traj;
+        
+        swingTraj = trajGen.newJointMove( swingTrajAngles, ...
+                                'time', swingTiming, ...
+                                'velocities', swingTrajAngVels, ...
+                                'accelerations', swingTrajAngAccels ); 
+    else                         
+        [swingAngles,swingAngVels,swingAngAccels] = swingTraj.getState( T_traj );
+    end
+    
+    % Switch the sign on velocity and acceleration because time runs
+    % 'backwards'.
     swingAngVels = -swingAngVels;
-    swingAngAccels = -swingAngAccels;
+    swingAngAccels = swingAngAccels;
     
     dynamicCompEffort = kin.leg{swingLeg}.getDynamicCompEfforts( ...
                   swingAngles, swingAngles, swingAngVels, swingAngAccels );
@@ -438,20 +489,22 @@ while true
         gravityVec = [0 0 -1];
     end
 
-    gravCompEffort = kin.leg{swingLeg}.getGravCompEfforts( ...
+    gravCompEffortSwing = kin.leg{swingLeg}.getGravCompEfforts( ...
                                             swingAngles, gravityVec );
+    gravCompEffortStance = kin.leg{stanceLeg}.getGravCompEfforts( ...
+                                            stanceAngles, gravityVec );                                    
     
     if ~simulate
-        fbk = legsGroup.getNextFeedbackFull();
-        
         legCmdAngles(swingLeg,:) = swingAngles;
         legCmdAngles(stanceLeg,:) = stanceAngles;
         
         legCmdAngVels(swingLeg,:) = swingAngVels;
         legCmdAngVels(stanceLeg,:) = stanceAngVels;
+%         legCmdAngVels = zeros(size(legCmdAngles));
         
-        legCmdEfforts(swingLeg,:) = gravCompEffort + dynamicCompEffort;
-        legCmdEfforts(stanceLeg,:) = nan;                        
+        legCmdEfforts(swingLeg,:) = gravCompEffortSwing + dynamicCompEffort;
+        legCmdEfforts(stanceLeg,:) = gravCompEffortStance; 
+%         legCmdEfforts = zeros(size(legCmdAngles));
                                 
         cmd = makeLegCmds( cmd, params.legIndex, ...
                            legCmdAngles, legCmdAngVels', legCmdEfforts' );
@@ -463,11 +516,15 @@ while true
             gainScale = 1.0;
         end
         
-        cmdGains.positionKp = 5.0 * gainScale * legGains.positionKp;
-        cmdGains.velocityKp = 1.0 * gainScale * legGains.velocityKp;
-        cmdGains.velocityFF = gainScale * legGains.velocityFF;
+        cmdGains.positionKp = 1.0 * gainScale * legGains.positionKp;
+        cmdGains.velocityKp = 2.0 * gainScale * legGains.velocityKp;
+        cmdGains.velocityFF = 1.0 * gainScale * legGains.velocityFF;
         cmdGains.effortKp = gainScale * legGains.effortKp;
         cmdGains.effortFF = gainScale * legGains.effortFF;
+        
+%         swingAnkleIndex = params.legIndex{swingLeg}(5:6);
+%         cmdGains.positionKp(swingAnkleIndex) = ...
+%                         0.25 * cmdGains.positionKp(swingAnkleIndex);
         
         legsGroup.send(cmd, 'gains', cmdGains);
     end
@@ -583,7 +640,7 @@ while true
                     'ylim', [CoM_y-visBuffer CoM_y+visBuffer] );
     end
     
-    drawnow;
+ %    drawnow;
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % CHECK TO SEE IF WE FELL OVER %
@@ -629,8 +686,8 @@ if logging && ~simulate
     log = legsGroup.stopLogFull();
     feetLog = feetGroup.stopLogFull();
 end
-        
 
+        
 %%
 %%%%%%%%%%%%
 % PLOTTING %
@@ -718,3 +775,11 @@ xlabel('time (sec)');
 ylabel('Orbital Energy (J/kg) (I think...)');
 xlim([0 t_hist(end)]);
 grid on;
+
+
+floKinematicsAnalysis( log, kin, params.legIndex );
+
+
+if logging
+    floPlotting;
+end
