@@ -10,7 +10,7 @@
 clear *;
 close all;
 HebiLookup.initialize();
-group = HebiLookup.newGroupFromNames( 'HEBI', 'Virtual IO' );
+group = HebiLookup.newGroupFromNames( 'HEBI', 'Mobile IO' );
 
 %% Gather data w/ visualization
 disp('  Drag the sliders on the app screen and move the device...');

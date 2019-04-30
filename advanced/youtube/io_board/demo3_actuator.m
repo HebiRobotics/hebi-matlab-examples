@@ -16,6 +16,6 @@ while true
     % Map analog sensor feedback to position command
     fbk = ioBoard.getNextFeedback(tmpFbk);
     cmd.position = fbk.(potentiometer) * positionCmdScale;
-    actuator.set(cmd);
+    actuator.send(cmd);
 
 end

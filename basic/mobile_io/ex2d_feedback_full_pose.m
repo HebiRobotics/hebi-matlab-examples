@@ -12,8 +12,8 @@ HebiLookup.initialize();
 
 % Use Scope to change select a module and change the name and family to
 % match the names below.  Following examples will use the same names.
-familyName = 'Android';
-moduleNames = 'Phone';
+familyName = 'HEBI';
+moduleNames = 'Mobile IO';
 group = HebiLookup.newGroupFromNames( familyName, moduleNames );
 
 group.startLog('dir','logs');

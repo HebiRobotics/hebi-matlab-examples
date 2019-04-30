@@ -17,7 +17,7 @@ blinkPeriod = 0.1;
 
 while toc(t) < 5
     cmd.(led_r) = ~cmd.(led_r);
-    ioBoard.set(cmd);
+    ioBoard.send(cmd);
     pause(blinkPeriod); 
 end
 
