@@ -1,6 +1,33 @@
 classdef HebiArm
     %HEBIARM Summary of this class goes here
     %   Detailed explanation goes here
+    %
+    % Expected Usage:
+    %
+    % kin = HebiKinematics('myArm.hrdf');
+    % arm = HebiArm(kin);
+    % arm.setSpringGains([500; 500; 0; 5; 5; 5]);  % (N/m) or (Nm/rad)
+    % arm.setDamperGains([10; 10; 0; .1; .1; .1;]); % (N/(m/sec)) or (Nm/(rad/sec))
+    % % ... other setup ...
+    %
+    % group = HebiLookup.newGroupFromNames(...)
+    % cmd = CommandStruct();
+    % while true
+    %
+    %    % Execute trajectory to specified wapoint
+    %    fbk = group.getNextFeedbackFull();
+    %    isFinished = arm.update(fbk, cmd);
+    %    group.send(cmd); % User still has access to change pos/vel/effort
+    %
+    %    % Replan immediately or add next waypoint once arm has arrived
+    %    if(isFinished)
+    %       % Go to next waypoint
+    %       target = kin.getIK(... whatever desired target ...)
+    %       arm.moveLinearTo(target, time);
+    %    end
+    %
+    % end 
+    %
     
     properties
         kin HebiKinematics;
@@ -10,7 +37,8 @@ classdef HebiArm
         enableGravComp = true;
         enableDynamicsComp = true;
         % TODO: speed factor?
-        % TODO: initialization?
+        % TODO: initialization to first starting waypoint?
+        % TODO: add a mask to allow selecting a subset of feedback (e.g. hexapod)
     end
     
     methods
@@ -92,6 +120,11 @@ classdef HebiArm
             cmd.effort = cmdEffort; % TODO: remove if zeros? Strat 3 issues?
             
             isFinished = (t >= this.traj.getDuration());
+            
+            % TODO: Maybe in addition to the boolean value, maybe return a
+            % relative time? e.g. trajectory 50% completed. This may be
+            % useful for doing things with the gripper or additional
+            % torques (e.g. wiggle-fit).
             
         end
         
