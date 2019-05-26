@@ -28,6 +28,9 @@ classdef HebiArm
     %
     % end 
     %
+    %
+    % TODO: what would be a good way to switch to grav-comp zero-torque
+    % mode?
     
     properties
         kin HebiKinematics;
