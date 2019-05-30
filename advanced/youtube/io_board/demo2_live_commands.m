@@ -26,6 +26,6 @@ while true
     cmd.(led_b) = fbk.(potentiometer) > potentiometerVoltageThreshold;
 
     % Send commands
-    ioBoard.set(cmd);
+    ioBoard.send(cmd);
 
 end
