@@ -8,11 +8,14 @@ function [ pinv_J_damp ] = pinv_damped( J )
         I = eye(size(J*J'));
     end
         
+    % DAMPING TERMS
+    % Based on manipulability, roughly following the methods of:
+    % "Robust Inverse Kinematics Using Damped Least Squares 
+    %  with Dynamic Weighting" - Schinstock et al, NASA 1994
     
-    % Damping Terms
-    % Based on Manipulability, in 'Prior Work' of above paper
-    a0 = .01 / 2;    % Max damping factor (no damping = 0)
-    w0 = .001 / 2;     % Manipulability threshold for when to start damping
+    % These defaults seem to work well.  Tune them if needed.
+    a0 = .01;    % Max damping factor (no damping = 0)
+    w0 = .001;   % Manipulability threshold for when to start damping
     
     if w < w0
         % If manipulability is less than some threshold, ramp up damping
