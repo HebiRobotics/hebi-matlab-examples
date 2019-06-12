@@ -57,7 +57,8 @@ end
 
 armName = '6-DoF + gripper';
 armFamily = 'Arm';
-hasGasSpring = true;
+hasGasSpring = false;  % If you attach a gas spring to the shoulder for
+                       % extra payload, set this to TRUE.
 
 [ armGroup, armKin, armParams ] = setupArm( armName, armFamily, hasGasSpring );
 

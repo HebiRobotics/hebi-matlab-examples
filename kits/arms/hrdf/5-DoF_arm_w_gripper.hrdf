@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 6-DoF Arm and Gripper -->
+<robot version="1.1.0">
+    
+  <actuator type="X8-9"/>
+  <bracket type="X5HeavyRightOutside"/>
+  <actuator type="X8-16"/>
+  <!-- Add an extra mass to link to account for weight of the spool actuator -->
+  <link type="X5" extension="0.325" twist="pi" mass_offset="0.500"/>
+  <actuator type="X8-9"/>
+  <link type="X5" extension="0.325" twist="pi"/>
+  <actuator type="X5-1"/>
+  <bracket type="X5LightRight"/>
+  <actuator type="X5-1"/>
+  
+  <!-- Add an extra body at the end of the arm for the gripper -->
+  <rigid-body mass="0.300" com_trans="0.0 0.0 0.025" output_trans="0.0 0.0 0.075"/>
+    
+</robot>

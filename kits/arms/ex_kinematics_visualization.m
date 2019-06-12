@@ -20,9 +20,8 @@ HebiLookup.initialize();
 
 armName = '6-DoF + gripper';
 armFamily = 'Arm';
-hasGasSpring = true;
 
-[ armGroup, armKin, armParams ] = setupArm( armName, armFamily, hasGasSpring );
+[ armGroup, armKin, armParams ] = setupArm( armName, armFamily );
 
 % Select whether coordinate frames for static links should be drawn as well
 showLinkBodies = false;
