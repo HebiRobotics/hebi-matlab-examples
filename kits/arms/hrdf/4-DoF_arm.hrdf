@@ -7,7 +7,7 @@
   <actuator type="X5-9"/>
   <link type="X5" extension="0.325" twist="pi"/>
   <actuator type="X5-4"/>
-  <link type="X5" extension="0.325" twist="0"/>
+  <link type="X5" extension="0.325" twist="pi"/>
   <actuator type="X5-1"/>  
     
 </robot>
