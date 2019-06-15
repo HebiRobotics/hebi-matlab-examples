@@ -664,7 +664,7 @@ end
         
 % Set the button configs, using acknowledgements.
 numSends = 0;
-maxSends = 1;  % Increase when ack is fixed
+maxSends = 20;  % Increase when ack is fixed
 ack = false;
 
 while ~ack
@@ -677,9 +677,10 @@ while ~ack
                                 'ack', true );
     numSends = numSends + 1;
     if numSends > maxSends
-        % disp('Did not receive acknowledgement from controller.');
+        disp('Did not receive acknowledgement from controller.');
         break;
     end
+    pause(0.1);
 end
 
 if logging && ~simulate
