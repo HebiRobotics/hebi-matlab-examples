@@ -17,8 +17,8 @@ close all;
 
 HebiLookup.initialize();
 
-armName = '6-DoF + gripper';
-armFamily = 'Arm';
+armName = '6-DoF R-Arm';
+armFamily = 'R-Arm';
 hasGasSpring = false;  % If you attach a gas spring to the shoulder for
                        % extra payload, set this to TRUE.;
 

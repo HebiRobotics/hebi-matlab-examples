@@ -18,8 +18,8 @@ close all;
 
 HebiLookup.initialize();
 
-armName = '6-DoF + gripper';
-armFamily = 'Arm';
+armName = '6-DoF R-Arm';
+armFamily = 'R-Arm';
 
 [ armGroup, armKin, armParams ] = setupArm( armName, armFamily );
 
