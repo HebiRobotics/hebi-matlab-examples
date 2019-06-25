@@ -327,9 +327,9 @@ while ~abortFlag
         % Spin extra module %
         %%%%%%%%%%%%%%%%%
         if fbkPhoneIO.(spinSlider) > 0.25
-            spinVel = 1.5;
+            spinVel = 3.5;
         elseif fbkPhoneIO.(spinSlider) < -0.25
-            spinVel = -1.5;
+            spinVel = -3.5;
         else
             spinVel = 0;
         end

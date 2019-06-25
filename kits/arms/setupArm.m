@@ -169,7 +169,7 @@ switch kit
         % Settings / gains for the gripper spool to open-close the gripper
         params.hasGripper = true;
         params.gripperOpenEffort = 1;
-        params.gripperCloseEffort = -8;
+        params.gripperCloseEffort = -15;
         params.gripperGains = HebiUtils.loadGains( ...
                                 [localDir '/gains/gripper_spool_gains'] );
                             
