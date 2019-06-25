@@ -202,8 +202,8 @@ while ~abortFlag
             break;
         end
 
-        % Get feedback with a timeout of 0, which means that they return
-        % instantly, but if there was no new feedback, they return empty.
+        % Get feedback with a timeout of 0, which means that it returns
+        % instantly, but if there is no new feedback, it returns empty.
         % This is because the mobile device is on wireless and might drop
         % out or be really delayed, in which case we would rather keep
         % running with an old data instead of waiting here for new data.
