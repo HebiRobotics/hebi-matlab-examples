@@ -55,7 +55,7 @@ end
 % Arm Setup %
 %%%%%%%%%%%%%
 
-armName = '6-DoF R-Arm';
+armName = '6-DoF R-Arm + gripper';
 armFamily = 'R-Arm';
 hasGasSpring = false;  % If you attach a gas spring to the shoulder for
                        % extra payload, set this to TRUE.
