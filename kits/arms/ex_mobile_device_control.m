@@ -18,7 +18,7 @@ close all;
 
 HebiLookup.initialize();
 
-enableLogging = true;
+enableLogging = false;
 enableEffortComp = true;
 
 
@@ -33,6 +33,7 @@ resetPoseButton = 'b1';
 quitDemoButton = 'b8';
 translationScaleSlider = 'a3';
 gripForceSlider = 'a6';
+spinSlider = 'a5';
 
 abortFlag = false;
 
@@ -99,8 +100,12 @@ disp('  A3 - Scale down the translation commands to the arm.');
 disp('       Sliding all the way down means the end-effector only rotates.');
 disp('  A6 - Control the gripper (if the arm has gripper).');
 disp('       Sliding down closes the gripper, sliding up opens.');
+disp('  A5 - Spins the extra module.');
 disp('  B8 - Quits the demo.');
 
+
+% Spin extra module
+spinGroup = HebiLookup.newGroupFromFamily('Willig');
 
 %% Startup
 while ~abortFlag
@@ -317,6 +322,24 @@ while ~abortFlag
                         'Accelerations', [accel; endAccels]);  
         end
 
+        
+        %%%%%%%%%%%%%%%%%
+        % Spin extra module %
+        %%%%%%%%%%%%%%%%%
+        if fbkPhoneIO.(spinSlider) > 0.25
+            spinVel = 1.5;
+        elseif fbkPhoneIO.(spinSlider) < -0.25
+            spinVel = -1.5;
+        else
+            spinVel = 0;
+        end
+        
+        spinCMD = CommandStruct();
+        spinCMD.effort = nan(1,1);
+        spinCMD.position = nan(1,1);
+        spinCMD.velocity = spinVel;
+        spinGroup.send(spinCMD);
+        
         %%%%%%%%%%%%%%%%%
         % Send to robot %
         %%%%%%%%%%%%%%%%%

@@ -31,6 +31,7 @@ phoneName = 'Mobile IO';
 B1_Button = 'b1';
 B8_Button = 'b8';
 trajectorySpeedSlider = 'a3';
+spinSlider = 'a5';
 
 abortFlag = false;
 
@@ -59,6 +60,8 @@ hasGasSpring = false;  % If you attach a gas spring to the shoulder for
 
 [ armGroup, armKin, armParams ] = setupArm( armName, armFamily, hasGasSpring );
 armGroup.setFeedbackFrequency(100);
+
+spinGroup = 
 
 numDoF = armKin.getNumDoF();
 
