@@ -28,6 +28,8 @@ hasGasSpring = false;  % If you attach a gas spring to the shoulder for
 [ armGroup, armKin, armParams ] = setupArm( armName, armFamily, hasGasSpring );
 armGroup.setFeedbackFrequency(100);
 
+arm = ;% ...
+
 numDoF = armKin.getNumDoF();
 
 effortOffset = armParams.effortOffset;
@@ -76,43 +78,48 @@ prevKeys = keys;
 
 cmd = CommandStruct();
 
+% TODO: we need to do an arm initialize() or arm.moveHome() w/ gain
+% ramp-up/soft-start
+% arm.setEnableGravComp(true); % defaults to true
+arm.setActiveCommands(false); % disables position / velocities / accel-comp-efforts
 while keys.ESC == 0
     
     % Do grav-comp while training waypoints
-    fbk = armGroup.getNextFeedback();
-    cmd.effort = armKin.getGravCompEfforts(fbk.position, gravityVec) ...
-                                                        + effortOffset;
-    armGroup.send(cmd);
-    
-    % Command the gripper to the most recent state
-    if gripStates(end,1)==1
-        gripperCmd.effort = gripperCloseEffort;
-    else
-        gripperCmd.effort = gripperOpenEffort;
-    end
-    gripperGroup.send(gripperCmd);
-    
+    cmd = arm.update(); % ... internal getNextFeedback, pre-calculate Jacobians, 
+                        % end effector positions/velocities, etc.
+    cmd.effort = cmd.effort + effortOffset;    
+
     % Add new waypoints 
     keys = read(kb);
     
     % Add 'Move' waypoint on ALT key press
     if keys.ALT == 1 && prevKeys.ALT == 0      
-        waypoints(end+1,:) = fbk.position;
-        gripStates(end+1,1) = gripStates(end,1); % Keep gripper state the same
+        waypoints(end+1,:) = arm.fbk.position;
+        gripStates(end+1,1) = arm.gripper.state; % Keep gripper state the same
         disp('Waypoint added.');
     end
     
     % Add 'Gripper' waypoint on CTRL key press
     if keys.CTRL == 1 && prevKeys.CTRL == 0      
-        waypoints(end+1,:) = fbk.position;
-        gripStates(end+1,1) = ~gripStates(end,1); % Keep gripper state the same
+        arm.gripper.toggle();
+        waypoints(end+1,:) = arm.fbk.position;
+        gripStates(end+1,1) = arm.gripper.state; % Keep gripper state the same
         disp('Waypoint added.  Toggling Gripper.');
     end
+    
+%     arm.kin.getIK(arm.fbk.position, varargin{:}); % wrapper that forwards seed angles?
     
     % Keep track of last key presses for diffing
     prevKeys = keys;
     
+    % internally: arm.group.send(varargin{:}), gripper.set(gripperState)
+    arm.send(cmd); % punting on gripper stuff for now % needs to be ramped up? scale gains?
+    
 end
+
+% wpts = HebiWaypoints();
+% wpts.add(fbk.position, aux.state);
+% List<struct<armState, auxState>> waypoints;
 
 numWaypoints = size(waypoints,1);
 
@@ -145,10 +152,9 @@ disp( 'Press SPACE to move to first waypoint.' );
 % Stay in grav-comp mode to prevent sudden movements from effort commands 
 % turning on and off.
 while keys.SPACE == 0
-    fbk = armGroup.getNextFeedback();
-    cmd.effort = armKin.getGravCompEfforts(fbk.position, gravityVec) ...
-                                                        + effortOffset;
-    armGroup.send(cmd);
+    cmd = arm.update();
+    cmd.effort = cmd.effort + effortOffset;
+    arm.send(cmd);
     keys = read(kb);
 end
 
@@ -161,30 +167,29 @@ abortFlag = false;
 
 % Start background logging 
 if enableLogging
-   logFile = armGroup.startLog( 'dir', [localDir '/logs'] ); 
+   logFile = arm.armGroup.startLog( 'dir', [localDir '/logs'] ); 
 end
 
 % Move from current position to first waypoint
-% This uses the blocking API, which means you can't easily look at 
-% feedback while it is exectuting.
-startPosition = armGroup.getNextFeedback().position;
-endPosition = waypoints(1,:);
-movePositions = [ startPosition;
-                  endPosition ];
-              
-% Make a new point-to-point trajectory and update the offset
-% for timing the trajectory.  This uses the non-blocking
-% trajectory API so that we can easily look at feedback from
-% from the arm while it is running.
-trajectory = trajGen.newJointMove( movePositions );
-trajStartTime = fbk.time;
-trajTime = 0;
+arm.setEnableCommands(true); % TODO: warm startup! go to current feedback
+%arm.setGoal('positions', pos, 'velocities', vel, 'accelerations', accel, 'time', time); % Calculates trajectory from current pos (fbk) to target
+% same as newJointMove, but includes current state? [cmdPos pos] => traj
+% generator (or fbkPos)
+arm.setGoal('positions', waypoints(1,:), 'aux', auxWaypoints(1,:));
 
 % Execute the trajectory to the first waypoint
-while (trajTime < trajectory.getDuration) && ~abortFlag
+% arm.setEnableDynamicsComp(true); % defaults to true
 
-    fbk = armGroup.getNextFeedback();
+disp('  '); 
+disp('Ready to begin playback.');
+disp('Press SPACE again to begin.');
 
+while true
+
+    cmd = arm.update();
+    cmd.effort = cmd.effort + effortOffset;
+    arm.send(cmd);
+   
     % Check for keyboard input and break out of the main loop
     % if the ESC key is pressed.  
     keys = read(kb);    
@@ -192,58 +197,12 @@ while (trajTime < trajectory.getDuration) && ~abortFlag
         abortFlag = true;
         break;
     end
-
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % If you want to do something with the latest feedback to
-    % change the commands, replan a trajectory, abort, or do 
-    % anything else, this is a pretty good place to do it.    
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-    % Get commanded positions, velocities, and accelerations
-    % from the new trajectory state at the current time
-    trajTime = fbk.time - trajStartTime;
-    [pos, vel, accel] = trajectory.getState(trajTime);
-
-    % Compensate for gravity
-    gravCompEffort = armKin.getGravCompEfforts( ...
-                                fbk.position, gravityVec );
-
-    % Compensate for dynamics based on the new commands
-    accelCompEffort = armKin.getDynamicCompEfforts(...
-        fbk.position, ... % Used for calculating jacobian
-        pos, vel, accel);
-
-    % Send to hardware
-    cmd.position = pos;
-    cmd.velocity = vel;
-    cmd.effort = gravCompEffort + accelCompEffort + ...
-                                            effortOffset;
-    armGroup.send(cmd);
-end
-
-% Hang out at the first waypoint until we press SPACE
-disp('  '); 
-disp('Ready to begin playback.');
-disp('Press SPACE again to begin.');
-
-while keys.SPACE == 0
     
-    fbk = armGroup.getNextFeedback();
-    
-    cmd.position = fbk.positionCmd;
-    cmd.velocity = fbk.velocityCmd;
-    cmd.effort = fbk.effortCmd;
-    armGroup.send(cmd);
-
-    % Command the gripper to the most recent state
-    if gripStates(1,1)==1
-        gripperCmd.effort = gripperCloseEffort;
-    else
-        gripperCmd.effort = gripperOpenEffort;
+    % ... text ... press space bar to continue
+    if arm.isAtGoal() && keys.SPACE == 1
+       break; 
     end
-    gripperGroup.send(gripperCmd);
     
-    keys = read(kb);
 end
 
 % Hang out at the first waypoint until we press SPACE
@@ -255,110 +214,22 @@ disp('Press ESC to stop.');
 %%%%%%%%%%%%%%%%%%%%%%%%
 while ~abortFlag
     
-    % Split waypoints into individual movements
-    numMoves = size(waypoints,1);
-    for i = 2:numMoves
-
-        if abortFlag
+    % TODO: remove duplicate waypoints from auto-timing
+    arm.setGoal('position', waypoints, 'velocities', zeros(size(waypoints))); 
+    while arm.getProgress() < 1 % and abort flag
+        cmd = arm.update();
+        
+        efforts = springCompensation.getEfforts(arm);
+        
+        cmd.effort = cmd.effort + effortOffset;
+        arm.send(cmd);
+        
+        [keys diffKeys] = read(kb);
+        if keys.ESC == 1
+            abortFlag = true;
             break;
         end
-
-        fbk = armGroup.getNextFeedback();
-
-        % Select the appropriate start and end positions
-        startPosition = waypoints(i-1,:);
-        endPosition = waypoints(i,:);
-
-        moveWaypoints = [ startPosition;
-                          endPosition ];
-
-        % Make a new point-to-point trajectory and update the offset
-        % for timing the trajectory.  This uses the non-blocking
-        % trajectory API so that we can easily look at feedback from
-        % from the arm while it is running.
-        trajectory = trajGen.newJointMove( moveWaypoints );
-        trajStartTime = fbk.time;
-        trajTime = 0;
-
-        % Update the gripper command for this waypoint, after reaching
-        % the waypoint.  The actual gripper command gets set in the loop
-        % below that executes the trajectory.
-        if gripStates(i,1)==1
-            gripperCmd.effort = gripperCloseEffort;
-        else
-            gripperCmd.effort = gripperOpenEffort;
-        end
-
-        while (trajTime < trajectory.getDuration) && ~abortFlag
-
-            fbk = armGroup.getNextFeedback();
-
-            % Check for keyboard input and break out of the main loop
-            % if the ESC key is pressed.  
-            keys = read(kb);    
-            if keys.ESC == 1
-                abortFlag = true;
-                break;
-            end
-
-            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-            % If you want to do something with the latest feedback to
-            % change the commands, replan a trajectory, abort, or do 
-            % anything else, this is a pretty good place to do it.    
-            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%              
-
-            % Get commanded positions, velocities, and accelerations
-            % from the new trajectory state at the current time
-            trajTime = fbk.time - trajStartTime;
-            [pos, vel, accel] = trajectory.getState(trajTime);
-
-            % Compensate for gravity
-            gravCompEffort = armKin.getGravCompEfforts( ...
-                                        fbk.position, gravityVec );
-
-            % Compensate for dynamics based on the new commands
-            accelCompEffort = armKin.getDynamicCompEfforts(...
-                fbk.position, ... % Used for calculating jacobian
-                pos, vel, accel);
-
-            % Send to hardware
-            cmd.position = pos;
-            cmd.velocity = vel;
-            cmd.effort = gravCompEffort + accelCompEffort + ...
-                                                    effortOffset;
-            armGroup.send(cmd);
-            gripperGroup.send(gripperCmd);
-        end
-        
     end
-        
-    % Break main loop if we're here because we aborted
-    if abortFlag
-        break;
-    end
-    
-    % Otherwise go back to home position and repeat.
-    % This uses the blocking API, which means you can't easily look at 
-    % feedback while it is exectuting.
-    startPosition = waypoints(end,:);
-    endPosition = waypoints(1,:);
-    
-    movePositions = [ startPosition;
-                      endPosition ];
-              
-    trajectory = trajGen.newJointMove( movePositions );
-    trajGen.executeTrajectory( armGroup, trajectory, ...
-                              'EnableDynamicsComp', true, ...
-                              'GravityVec', gravityVec, ...
-                              'EffortOffset', effortOffset);
-                          
-    % Command the gripper back to the initial state
-    if gripStates(1,1)==1
-        gripperCmd.effort = gripperCloseEffort;
-    else
-        gripperCmd.effort = gripperOpenEffort;
-    end
-    gripperGroup.send(gripperCmd);
 
 end
 
@@ -371,7 +242,7 @@ disp('Plotting logged feedback.');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 % Stop background logging and visualize %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-if enableLogging
+if arm.group.isLogging() % add to API
     
    hebilog = armGroup.stopLogFull();
    
