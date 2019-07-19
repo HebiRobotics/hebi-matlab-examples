@@ -32,59 +32,67 @@ classdef HebiArm
     % TODO: what would be a good way to switch to grav-comp zero-torque
     % mode?
     
-    properties
+    properties(Access = public)
+        enableCommands logical = true; % position / velocities / dynamics comp
+        enableDynamicsComp logical = true; % efforts to compensate for joint accelerations
+        enableGravComp logical = true; % efforts to compensate for gravitational accelerations
+    end
+    
+    properties(SetAccess = private)
+        armGroup HebiGroup;
         kin HebiKinematics;
-        trajStartTime double;
-        traj HebiTrajectory;
-        prevState struct;
-        enableGravComp = true;
-        enableDynamicsComp = true;
+        trajectory HebiTrajectory;
+        aux = []; % auxiliary device like gripper
+        
         % TODO: speed factor?
         % TODO: initialization to first starting waypoint?
         % TODO: add a mask to allow selecting a subset of feedback (e.g. hexapod)
     end
     
+    properties(Access = private)
+        trajStartTime double;
+        prevState struct;
+        trajGen HebiTrajectoryGenerator;
+    end
+    
     methods
         
-        function [] = moveLinearTo(this, position, duration)
-            %MOVELINEARTO Summary
-            %   Moves from the previously commanded state to the desired
-            %   target state in a straight line in carthesian space. End
-            %   conditions of zero accel and vel.
-            %
-            % The goal is specified in joint angles to avoid issues with
-            % degrees of freedom that are not within the workspace.
-            % Interpolating between two valid joint positions should always
-            % result in something mathematically possible (right?). No
-            % collision checks.
-            
-            % TODO: calculate carthesian coordinates of previous state,
-            % then linearly interpolate, and back out joint angles.
-            
-            % TODO: then call moveJointTo with the specified waypoints
+        function this = HebiArm(varargin)
             
         end
         
-        function [] = moveJointTo(this, position, duration)
-            %MOVEJOINTTO Summary
-            %   Moves from the previously commanded state to the desired
-            %   target state in joint-space. End conditions of zero accel
-            %   and vel.
-            
-            % TODO: replan trajectory from previous state to desired joint
-            % angles within given duration (or auto-duration if not
-            % specified)
-            
-            % TODO: support multi-waypoints
-            this.trajStartTime = this.prevState.time;
-
+        function [] = initialize(this)
+           % Initializes with soft-start to current feedback 
+           % maybe also a moveHome()? setHome()?
         end
         
-        function isFinished = update(this, fbk, cmd)
+        function [progress isFinished] = getProgress(this)
+           % returns 0-1 of where trajectory is
+            
+        end
+        
+        function [] = setGoal(this)
+           % lets users set pos/vel/accel waypoints. forwards to trajGen
+           % starting from the last commanded state
+        end
+        
+        function [cmd state] = update(this)
+           % reads feedback, updates state, calculates commands
+            
+           % Read feedback
+            state = struct();
+            state.fbk = this.armGroup.getNextFeedbackFull();
             
             % Evaluate trajectory state
-            t = fbk.time - this.trajStartTime;
-            [cmdPos, cmdVel, cmdAccel] = this.traj.getState(t);
+            t = min(state.fbk.time - this.trajStartTime, this.trajectory.getDuration());
+            [state.cmdPos, state.cmdVel, state.cmdAccel] = this.trajectory.getState(t);
+            
+            
+            
+            
+            this.prevState = state;
+            
+            
             this.prevState.time = fbk.time;
             this.prevState.pos = cmdPos;
             this.prevState.vel = cmdVel;
@@ -128,9 +136,47 @@ classdef HebiArm
             % relative time? e.g. trajectory 50% completed. This may be
             % useful for doing things with the gripper or additional
             % torques (e.g. wiggle-fit).
+           
+        end
+        
+    end
+    
+    methods(Access = private)
+        
+        function [] = moveLinearTo(this, position, duration)
+            %MOVELINEARTO Summary
+            %   Moves from the previously commanded state to the desired
+            %   target state in a straight line in carthesian space. End
+            %   conditions of zero accel and vel.
+            %
+            % The goal is specified in joint angles to avoid issues with
+            % degrees of freedom that are not within the workspace.
+            % Interpolating between two valid joint positions should always
+            % result in something mathematically possible (right?). No
+            % collision checks.
+            
+            % TODO: calculate carthesian coordinates of previous state,
+            % then linearly interpolate, and back out joint angles.
+            
+            % TODO: then call moveJointTo with the specified waypoints
             
         end
         
+        function [] = moveJointTo(this, position, duration)
+            %MOVEJOINTTO Summary
+            %   Moves from the previously commanded state to the desired
+            %   target state in joint-space. End conditions of zero accel
+            %   and vel.
+            
+            % TODO: replan trajectory from previous state to desired joint
+            % angles within given duration (or auto-duration if not
+            % specified)
+            
+            % TODO: support multi-waypoints
+            this.trajStartTime = this.prevState.time;
+
+        end
+   
         function gravCompEfforts = getGravCompEfforts(this, fbk)
            
             % Find gravity vector by looking at orientation of first joint
