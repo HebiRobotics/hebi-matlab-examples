@@ -2,35 +2,16 @@ classdef HebiArm < handle
     %HEBIARM Summary of this class goes here
     %   Detailed explanation goes here
     %
-    % Expected Usage:
     %
-    % kin = HebiKinematics('myArm.hrdf');
-    % arm = HebiArm(kin);
-    % arm.setSpringGains([500; 500; 0; 5; 5; 5]);  % (N/m) or (Nm/rad)
-    % arm.setDamperGains([10; 10; 0; .1; .1; .1;]); % (N/(m/sec)) or (Nm/(rad/sec))
-    % % ... other setup ...
-    %
-    % group = HebiLookup.newGroupFromNames(...)
-    % cmd = CommandStruct();
-    % while true
-    %
-    %    % Execute trajectory to specified wapoint
-    %    fbk = group.getNextFeedbackFull();
-    %    isFinished = arm.update(fbk, cmd);
-    %    group.send(cmd); % User still has access to change pos/vel/effort
-    %
-    %    % Replan immediately or add next waypoint once arm has arrived
-    %    if(isFinished)
-    %       % Go to next waypoint
-    %       target = kin.getIK(... whatever desired target ...)
-    %       arm.moveLinearTo(target, time);
-    %    end
-    %
-    % end
-    %
-    %
-    % TODO: what would be a good way to switch to grav-comp zero-torque
-    % mode?
+    % % TODO:
+    % * add arm.initialize() or arm.moveHome()?
+    % * we need to ramp-up/soft-start. Scale gains?
+    % * remove duplicate waypoints from auto-timing
+    % * add a data type to store waypoints, e.g., a list-like structure
+    %     wpts = HebiWaypoints();
+    %     wpts.add(fbk.position, aux.state);
+    %     List<struct<armState, auxState>> waypoints;
+    % * speed factor? auto-timing?
     
     properties(Access = public)
         enableCommands logical = true; % position / velocities / dynamics comp
@@ -44,10 +25,6 @@ classdef HebiArm < handle
         kin HebiKinematics;
         trajGen HebiTrajectoryGenerator;
         traj HebiTrajectory;
-        
-        % TODO: speed factor?
-        % TODO: initialization to first starting waypoint?
-        % TODO: add a mask to allow selecting a subset of feedback (e.g. hexapod)
     end
     
     properties(Access = private)

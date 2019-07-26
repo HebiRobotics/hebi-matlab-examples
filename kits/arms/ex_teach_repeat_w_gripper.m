@@ -14,15 +14,6 @@
 
 % Copyright 2017-2018 HEBI Robotics
 
-% TODO:
-% * add arm.initialize() or arm.moveHome()?
-% * we need to ramp-up/soft-start. Scale gains?
-% * remove duplicate waypoints from auto-timing
-% * add a data type to store waypoints, e.g., a list-like structure
-%     wpts = HebiWaypoints();
-%     wpts.add(fbk.position, aux.state);
-%     List<struct<armState, auxState>> waypoints;
-
 %% Setup
 
 % Reset the workspace
