@@ -1,4 +1,4 @@
-function [ group, kin, params ] = setupArm( kit, family, hasGasSpring )
+function [ arm, params ] = setupArm( kit, family, hasGasSpring )
 % SETUPARM creates models and loads parameters for controlling various 
 % pre-configured arm kits.
 %
@@ -417,22 +417,24 @@ end
 
 %% Common Setup
 
-% Set the gains on the arm, set a bunch of times in a loop to make
-% absolutely sure they get set.
-numSends = 20;
-for i=1:numSends
-    fbk = group.getNextFeedback();
-    group.send('gains',params.gains);
+% Make sure that the gains are set
+while ~group.send('gains', params.gains, 'RequestAck', true)
 end
+arm = HebiArm(group, kin);
 
-% Determine initial gravity vector based on the internal pose filter of
-% the base module.
-fbk = group.getNextFeedbackFull();
-baseRotMat = HebiUtils.quat2rotMat( [ fbk.orientationW(1), ...
-                                      fbk.orientationX(1), ...
-                                      fbk.orientationY(1), ...
-                                      fbk.orientationZ(1) ] );
-params.gravityVec = -baseRotMat(3,1:3);
+% Setup gripper
+if params.hasGripper
+    
+    gripperGroup = HebiLookup.newGroupFromNames( family, 'Spool' );
+    while ~gripperGroup.send('gains', params.gripperGains, 'RequestAck', true)
+    end
+    
+    gripper = HebiGripper(gripperGroup);
+    gripper.openEffort = params.gripperOpenEffort;
+    gripper.closeEffort = params.gripperCloseEffort;
+    arm.gripper = gripper;
+    
+end
 
 end
 
