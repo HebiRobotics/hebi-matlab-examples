@@ -51,6 +51,8 @@ classdef (Sealed) HebiKeyboard < handle
     
     properties (Access = private)
         obj
+        prevKeys;
+        fnames;
     end
     
     methods (Static, Access = public)
@@ -85,9 +87,27 @@ classdef (Sealed) HebiKeyboard < handle
             
         end
         
-        function out = read(this)
+        function [keys, diffKeys] = read(this)
             % reads the current key state of the keyboard
-            out = struct(read(this.obj));
+            keys = struct(read(this.obj));
+            
+            % Initialize delta state
+            if isempty(this.prevKeys)
+               this.prevKeys = keys; 
+               this.fnames = fieldnames(keys);
+            end
+            
+            % Calculate delta to previous state
+            if nargout > 1
+                diffKeys = struct();
+                for i = 1:numel(this.fnames)
+                    fname = this.fnames{i};
+                    diffKeys.(fname) = keys.(fname) - this.prevKeys.(fname);
+                end
+            end
+            
+            this.prevKeys = keys;
+            
         end
         
         function [] = close(this)
