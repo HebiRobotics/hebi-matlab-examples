@@ -2,22 +2,26 @@
 <!-- 6-DoF R-Series Arm -->
 <robot version="1.1.0">
     
-  <actuator type="X8-9" mass="0.715"/>
+  <actuator type="X8-16" mass="0.715"/>
   <rigid-body mass="0.0" output_trans="0 0 0.006"/>
   <bracket type="X5HeavyRightOutside"/>
   <actuator type="X8-16" mass="0.715"/>
   <rigid-body mass="0.0" output_trans="0 0 0.006"/>
-  <link type="X5" extension="0.327" twist="pi"/>
+  <!-- Add an extra mass to link to account for weight of the spool actuator -->
+  <link type="X5" extension="0.325" twist="pi" mass_offset="0.00"/>
   <actuator type="X8-16" mass="0.715"/>
   <rigid-body mass="0.0" output_trans="0 0 0.006"/>
-  <link type="X5" extension="0.327" twist="pi"/>
+  <link type="X5" extension="0.325" twist="pi"/>
   <actuator type="X8-3" mass="0.670"/>
   <rigid-body mass="0.0" output_trans="0 0 0.006"/>
   <bracket type="X5LightRight"/>
   <actuator type="X8-3" mass="0.670"/>
   <rigid-body mass="0.0" output_trans="0 0 0.006"/>
   <bracket type="X5LightRight"/>
-  <actuator type="X8-3" mass="0.670"/>
+  <actuator type="X8-3" mass="0.0"/>
   <rigid-body mass="0.0" output_trans="0 0 0.006"/>
     
+  <!-- Add an extra body at the end of the arm for the gripper -->
+  <rigid-body mass="0.000" com_trans="0.0 0.0 0.025" output_trans="0.0 0.0 0.075"/>
+
 </robot>

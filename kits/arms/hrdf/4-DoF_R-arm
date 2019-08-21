@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 4-DoF R-Series Arm -->
+<robot version="1.1.0">
+    
+  <actuator type="X8-16" mass="0.715"/>
+  <rigid-body mass="0.0" output_trans="0 0 0.006"/>
+  <bracket type="X5HeavyRightOutside"/>
+  <actuator type="X8-16" mass="0.715"/>
+  <rigid-body mass="0.0" output_trans="0 0 0.006"/>
+  <link type="X5" extension="0.325" twist="pi"/>
+  <actuator type="X8-16" mass="0.715"/>
+  <rigid-body mass="0.0" output_trans="0 0 0.006"/>
+  <link type="X5" extension="0.325" twist="pi"/>
+  <actuator type="X8-3" mass="0.670"/>
+
+</robot>

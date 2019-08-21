@@ -161,7 +161,7 @@ switch kit
             'Wrist3' });
         
         % Kinematic Model
-        kin = HebiKinematics([localDir '/hrdf/6-DoF_R-arm']);
+        kin = HebiKinematics([localDir '/hrdf/6-DoF_R-arm_w_gripper']);
         
         % Load and send arm gains
         params.gains = HebiUtils.loadGains([localDir '/gains/6-DoF_R-arm_gains']);
