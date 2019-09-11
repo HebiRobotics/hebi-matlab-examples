@@ -14,7 +14,7 @@ classdef HebiArm < handle
     % * speed factor? auto-timing?
     
     properties(Access = public)
-        enableCommands logical = true; % position / velocities / dynamics comp
+        enableCommands logical = true; % position / velocities / dynamics comp %TODO: disabling should clear active trajectory
         enableDynamicsComp logical = true; % efforts to compensate for joint accelerations
         enableGravComp logical = true; % efforts to compensate for gravitational accelerations
         gripper HebiGripper = HebiGripper(HebiUtils.newImitationGroup(1)); % auxiliary device
@@ -47,6 +47,10 @@ classdef HebiArm < handle
         end
         
         function [] = initialize(this)
+            % TODO: soft-start, maybe soft-start to goal, within some time,
+            % gains, etc. -> soft-start pos/vel (waypoints) and maybe also
+            % effort (pre grav-comp / dynamics-comp)
+            %
             % Initializes with soft-start to current feedback
             % maybe also a moveHome()? setHome()?
             
@@ -89,6 +93,8 @@ classdef HebiArm < handle
             
             % Create trajectory starting from last known state 
             % (TODO: timing / duration?)
+            % TODO: Time starts always at zero. Passing in zero time would throw
+            % a warning unless start is exactly the same (to some epsilon)
             this.traj = this.trajGen.newJointMove(...
                 [this.prevState.cmdPos; goal.Positions], ...
                 'Velocities', [this.prevState.cmdVel; goal.Velocities], ...
