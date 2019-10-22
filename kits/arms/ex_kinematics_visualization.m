@@ -18,13 +18,8 @@ close all;
 
 HebiLookup.initialize();
 
-<<<<<<< Updated upstream
-armName = '6-DoF R-Arm';
+armName = '5-DoF R-Arm';
 armFamily = 'R-Arm';
-=======
-armName = 'Luxembourg-Config1';
-armFamily = 'Willig-Arm';
->>>>>>> Stashed changes
 
 [ armGroup, armKin, armParams ] = setupArm( armName, armFamily );
 

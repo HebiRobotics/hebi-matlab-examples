@@ -232,6 +232,32 @@ switch kit
         % Default seed positions for doing inverse kinematics
         params.ikSeedPos = [0.01 1.0 2.5 1.5 -1.5];
         
+                
+    case '5-DoF R-Arm' 
+        %%
+        group = HebiLookup.newGroupFromNames(family, {
+            'Base'
+            'Shoulder'
+            'Elbow'
+            'Wrist1'
+            'Wrist2' });
+        
+        % Kinematic Model
+        kin = HebiKinematics([localDir '/hrdf/5-DoF_R-arm']);
+        
+        % Load and send arm gains
+        params.gains = HebiUtils.loadGains([localDir '/gains/5-DoF_R-arm_gains']);     
+        
+        % No Gripper
+        params.hasGripper = false;
+        
+        % Account for external efforts due to the gas spring
+        params.effortOffset = [0 shoulderJointComp 0 0 0];
+        
+        % Default seed positions for doing inverse kinematics
+        params.ikSeedPos = [0.01 1.0 2.5 1.5 -1.5];
+        
+        
         
     case '4-DoF'
         %%

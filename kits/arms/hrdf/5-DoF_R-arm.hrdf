@@ -2,14 +2,27 @@
 <!-- 5-DoF R-Series Arm -->
 <robot version="1.1.0">
     
-  <actuator type="R8-16"/>
-  <bracket type="R8HeavyRightOutside"/>
-  <actuator type="R8-16"/>
-  <link type="R8" extension="0.325" twist="pi"/>
-  <actuator type="R8-16"/>
-  <link type="R8" extension="0.325" twist="pi"/>
-  <actuator type="R8-3"/>
-  <bracket type="R8LightRight"/>
-  <actuator type="R8-3"/>
-    
+  <actuator type="X8-16" mass="0.725"/>
+  <rigid-body mass="0.0" output_trans="0 0 0.006"/>
+
+  <bracket type="X5HeavyRightOutside"/>
+
+  <actuator type="X8-16" mass="0.725"/>
+  <rigid-body mass="0.0" output_trans="0 0 0.006"/>
+
+  <link type="X5" extension="0.325" twist="pi"/>
+  
+  <actuator type="X8-16" mass="0.725"/>
+  <rigid-body mass="0.0" output_trans="0 0 0.006"/>
+
+  <link type="X5" extension="0.325" twist="pi"/>
+  
+  <actuator type="X8-3" mass="0.725"/>
+  <rigid-body mass="0.0" output_trans="0 0 0.006"/>
+
+  <bracket type="X5LightRight"/>
+  
+  <actuator type="X8-3" mass="0.725"/>
+  <rigid-body mass="0.0" output_trans="0 0 0.006"/>
+  
 </robot>
