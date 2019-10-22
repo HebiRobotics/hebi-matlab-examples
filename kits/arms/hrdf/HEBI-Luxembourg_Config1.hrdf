@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Luxembourg Config 1 -->
+<robot version="1.1.0">
+  <rigid-body mass="0.225" output_rot="Ry(-pi/2)" output_trans="0.020 0 .175" />
+  <actuator type="X8-16" />
+  <link type="X5" twist="pi" extension="0.325000" />
+  <actuator type="X8-16" />
+  <link type="X5" twist="pi" extension="0.325000" />
+  <actuator type="X8-9" />
+  <rigid-body mass="0.225" output_rot="Ry(pi/2)" output_trans="0.090 0 -0.065" />
+  <actuator type="X5-9" />
+</robot>

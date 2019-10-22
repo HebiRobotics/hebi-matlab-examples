@@ -18,8 +18,13 @@
 clear *;
 close all;
 
+<<<<<<< Updated upstream
 armName = '6-DoF R-Arm';
 armFamily = 'R-Arm';
+=======
+armName = 'Luxembourg-Config2';
+armFamily = 'Willig-Arm';
+>>>>>>> Stashed changes
 hasGasSpring = false;  % If you attach a gas spring to the shoulder for
                        % extra payload, set this to TRUE.
 

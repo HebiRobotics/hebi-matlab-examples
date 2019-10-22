@@ -302,7 +302,53 @@ switch kit
         % Default seed positions for doing inverse kinematics
         params.ikSeedPos = [0.01 1.0 2.5];
         
-
+    case 'Luxembourg-Config1'
+        %%
+        group = HebiLookup.newGroupFromNames(family, {
+            'Base'
+            'Shoulder'
+            'Elbow1'
+            'Elbow2' });
+        
+        % Kinematic Model
+        kin = HebiKinematics([localDir '/hrdf/HEBI-Luxembourg_Config1']);
+        
+        % Load and send arm gains
+        params.gains = HebiUtils.loadGains([localDir '/gains/HEBI-Luxembourg_Config2']);     
+                
+        % No Gripper
+        params.hasGripper = false;
+        
+        % Account for external efforts due to the gas spring
+        params.effortOffset = [0 shoulderJointComp 0 0];
+        
+        % Default seed positions for doing inverse kinematics
+        params.ikSeedPos = [0.01 1.0 2.5 1.5];
+        
+   
+    case 'Luxembourg-Config2'
+        %%
+        group = HebiLookup.newGroupFromNames(family, {
+            'Base'
+            'Shoulder'
+            'Elbow1'
+            'Elbow2' });
+        
+        % Kinematic Model
+        kin = HebiKinematics([localDir '/hrdf/HEBI-Luxembourg_Config2']);
+        
+        % Load and send arm gains
+        params.gains = HebiUtils.loadGains([localDir '/gains/HEBI-Luxembourg_Config2']);     
+                
+        % No Gripper
+        params.hasGripper = false;
+        
+        % Account for external efforts due to the gas spring
+        params.effortOffset = [0 shoulderJointComp 0 0];
+        
+        % Default seed positions for doing inverse kinematics
+        params.ikSeedPos = [0.01 1.0 2.5 1.5];
+        
     otherwise
         
         error([kit ' is not a supported kit name']);
