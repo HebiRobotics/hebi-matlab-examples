@@ -1,4 +1,4 @@
-function [ group, kin, params ] = setupArm( kit, family, hasGasSpring )
+function [ group, kin, params ] = setupArm( kit, family, series, hasGasSpring )
 % SETUPARM creates models and loads parameters for controlling various 
 % pre-configured arm kits.
 %
@@ -54,7 +54,9 @@ function [ group, kin, params ] = setupArm( kit, family, hasGasSpring )
 localDir = fileparts(mfilename('fullpath'));
 params.localDir = localDir;
 
-if nargin < 3
+series = lower( series );
+
+if nargin < 4 || isempty(hasGasSpring)
    hasGasSpring = false;
 end
 
@@ -73,18 +75,18 @@ switch kit
     case '6-DoF + gripper'
         %%
         group = HebiLookup.newGroupFromNames(family, {
-            'Base'
-            'Shoulder'
-            'Elbow'
-            'Wrist1'
-            'Wrist2'
-            'Wrist3' });
+            'base'
+            'shoulder'
+            'elbow'
+            'wrist1'
+            'wrist2'
+            'wrist3' });
         
         % Kinematic Model
-        kin = HebiKinematics([localDir '/hrdf/6-DoF_arm_w_gripper']);
+        kin = HebiKinematics([localDir '/hrdf/' series '/6-DoF_arm_w_gripper']);
         
         % Load and send arm gains
-        params.gains = HebiUtils.loadGains([localDir '/gains/6-DoF_arm_gains']);     
+        params.gains = HebiUtils.loadGains([localDir '/gains/' series '/6-DoF_arm_gains']);     
         
         % Settings / gains for the gripper spool to open-close the gripper
         params.hasGripper = true;
@@ -103,18 +105,18 @@ switch kit
     case '6-DoF'
         %%
         group = HebiLookup.newGroupFromNames(family, {
-            'Base'
-            'Shoulder'
-            'Elbow'
-            'Wrist1'
-            'Wrist2'
-            'Wrist3' });
+            'base'
+            'shoulder'
+            'elbow'
+            'wrist1'
+            'wrist2'
+            'wrist3' });
         
         % Kinematic Model
-        kin = HebiKinematics([localDir '/hrdf/6-DoF_arm']);
+        kin = HebiKinematics([localDir '/hrdf/' series '/6-DoF_arm']);
         
         % Load and send arm gains
-        params.gains = HebiUtils.loadGains([localDir '/gains/6-DoF_arm_gains']);     
+        params.gains = HebiUtils.loadGains([localDir '/gains/' series '/6-DoF_arm_gains']);     
         
         % No Gripper
         params.hasGripper = false;
@@ -128,17 +130,17 @@ switch kit
     case '5-DoF + gripper'
         %%
         group = HebiLookup.newGroupFromNames(family, {
-            'Base'
-            'Shoulder'
-            'Elbow'
-            'Wrist1'
-            'Wrist2' });
+            'base'
+            'shoulder'
+            'elbow'
+            'wrist1'
+            'wrist2' });
         
         % Kinematic Model
-        kin = HebiKinematics([localDir '/hrdf/5-DoF_arm_w_gripper']);
+        kin = HebiKinematics([localDir '/hrdf/' series '/5-DoF_arm_w_gripper']);
         
         % Load and send arm gains
-        params.gains = HebiUtils.loadGains([localDir '/gains/5-DoF_arm_gains']);     
+        params.gains = HebiUtils.loadGains([localDir '/gains/' series '/5-DoF_arm_gains']);     
         
         % Settings / gains for the gripper spool to open-close the gripper
         params.hasGripper = true;
@@ -157,17 +159,17 @@ switch kit
     case '5-DoF' 
         %%
         group = HebiLookup.newGroupFromNames(family, {
-            'Base'
-            'Shoulder'
-            'Elbow'
-            'Wrist1'
-            'Wrist2' });
+            'base'
+            'shoulder'
+            'elbow'
+            'wrist1'
+            'wrist2' });
         
         % Kinematic Model
-        kin = HebiKinematics([localDir '/hrdf/5-DoF_arm']);
+        kin = HebiKinematics([localDir '/hrdf/' series '/5-DoF_arm']);
         
         % Load and send arm gains
-        params.gains = HebiUtils.loadGains([localDir '/gains/5-DoF_arm_gains']);     
+        params.gains = HebiUtils.loadGains([localDir '/gains/' series '/5-DoF_arm_gains']);     
         
         % No Gripper
         params.hasGripper = false;
@@ -182,16 +184,16 @@ switch kit
     case '4-DoF'
         %%
         group = HebiLookup.newGroupFromNames(family, {
-            'Base'
-            'Shoulder'
-            'Elbow'
-            'Wrist1' });
+            'base'
+            'shoulder'
+            'elbow'
+            'wrist1' });
         
         % Kinematic Model
-        kin = HebiKinematics([localDir '/hrdf/4-DoF_arm']);
+        kin = HebiKinematics([localDir '/hrdf/' series '/4-DoF_arm']);
         
         % Load and send arm gains
-        params.gains = HebiUtils.loadGains([localDir '/gains/4-DoF_arm_gains']);     
+        params.gains = HebiUtils.loadGains([localDir '/gains/' series '/4-DoF_arm_gains']);     
                 
         % No Gripper
         params.hasGripper = false;
@@ -206,16 +208,16 @@ switch kit
     case '4-DoF SCARA'
         %%
         group = HebiLookup.newGroupFromNames(family, {
-            'Base'
-            'Shoulder'
-            'Elbow'
-            'Wrist1' });
+            'base'
+            'shoulder'
+            'elbow'
+            'wrist1' });
         
         % Kinematic Model
-        kin = HebiKinematics([localDir '/hrdf/4-DoF_arm_scara']);
+        kin = HebiKinematics([localDir '/hrdf/' series '/4-DoF_arm_scara']);
         
         % Load and send arm gains
-        params.gains = HebiUtils.loadGains([localDir '/gains/5-DoF_arm_scara_gains']);     
+        params.gains = HebiUtils.loadGains([localDir '/gains/' series '/5-DoF_arm_scara_gains']);     
                 
         % No Gripper
         params.hasGripper = false;
@@ -230,14 +232,14 @@ switch kit
     case '3-DoF'
         %%
         group = HebiLookup.newGroupFromNames(family, {
-            'Base'
-            'Shoulder'
-            'Elbow' } );
+            'base'
+            'shoulder'
+            'elbow' } );
         
-        kin = HebiKinematics([localDir '/hrdf/3-DoF_arm']);
+        kin = HebiKinematics([localDir '/hrdf/' series '/3-DoF_arm']);
         
         % Load and send arm gains
-        params.gains = HebiUtils.loadGains([localDir '/gains/3-DoF_arm_gains']);     
+        params.gains = HebiUtils.loadGains([localDir '/gains/' series '/3-DoF_arm_gains']);     
                 
         % No Gripper
         params.hasGripper = false;

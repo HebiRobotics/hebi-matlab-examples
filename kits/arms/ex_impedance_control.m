@@ -21,12 +21,14 @@ close all;
 
 HebiLookup.initialize();
 
-armName = '6-DoF + gripper';
-armFamily = 'Arm';
-hasGasSpring = false;  % If you attach a gas spring to the shoulder for
+armName = '5-DoF';
+armFamily = 'R-Arm-1';
+actuatorSeries = 'R-Series';
+hasGasSpring = true;  % If you attach a gas spring to the shoulder for
                        % extra payload, set this to TRUE.
 
-[ armGroup, armKin, armParams ] = setupArm( armName, armFamily, hasGasSpring );      
+[ armGroup, armKin, armParams ] = setupArm( armName, armFamily, ...
+                                            actuatorSeries, hasGasSpring );     
 
 gravityVec = armParams.gravityVec;
 effortOffset = armParams.effortOffset;
@@ -86,16 +88,16 @@ disp('  ESC - Exits the demo.');
 %     gainsInEndEffectorFrame = true;
 %     damperGains = [0; 0; 0; .1; .1; .1;]; % (N/(m/sec)) or (Nm/(rad/sec))
 %     springGains = [0; 0; 0; 5; 5; 5];  % (N/m) or (Nm/rad)
- 
-    % HOLD POSITION AND ROTATION - BUT ALLOW MOTION ALONG/AROUND Z-AXIS
-    gainsInEndEffectorFrame = true;
-    damperGains = [10; 10; 0; .1; .1; .1;]; % (N/(m/sec)) or (Nm/(rad/sec))
-    springGains = [500; 500; 0; 5; 5; 5];  % (N/m) or (Nm/rad)
+  
+%     % HOLD POSITION AND ROTATION - BUT ALLOW MOTION ALONG/AROUND Z-AXIS
+%     gainsInEndEffectorFrame = true;
+%     damperGains = [10; 10; 0; .1; .1; .1;]; % (N/(m/sec)) or (Nm/(rad/sec))
+%     springGains = [500; 500; 0; 5; 5; 5];  % (N/m) or (Nm/rad)
     
-%     % HOLD POSITION AND ROTATION - BUT ALLOW MOTION IN BASE FRAME XY-PLANE
-%     gainsInEndEffectorFrame = false;
-%     damperGains = [0; 0; 5; .1; .1; .1;]; % (N/(m/sec)) or (Nm/(rad/sec))
-%     springGains = [0; 0; 500; 5; 5; 5];  % (N/m) or (Nm/rad)
+    % HOLD POSITION AND ROTATION - BUT ALLOW MOTION IN BASE FRAME XY-PLANE
+    gainsInEndEffectorFrame = false;
+    damperGains = [0; 0; 5; .1; .1; .1;]; % (N/(m/sec)) or (Nm/(rad/sec))
+    springGains = [0; 0; 500; 5; 5; 5];  % (N/m) or (Nm/rad)
 
 % Get the current location of the end effector
 fbk = armGroup.getNextFeedback();
@@ -192,6 +194,8 @@ while ~keys.ESC
     
     prevKeys = keys;
 end
+
+disp('Stopping Demo...')
 
 %%
 % Stop Logging

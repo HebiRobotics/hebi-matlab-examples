@@ -17,12 +17,14 @@ close all;
 
 HebiLookup.initialize();
 
-armName = '6-DoF + gripper';
+armName = '5-DoF';
 armFamily = 'Arm';
-hasGasSpring = false;  % If you attach a gas spring to the shoulder for
-                       % extra payload, set this to TRUE.;
+actuatorSeries = 'R-Series';
+hasGasSpring = true;  % If you attach a gas spring to the shoulder for
+                       % extra payload, set this to TRUE.
 
-[ armGroup, armKin, armParams ] = setupArm( armName, armFamily, hasGasSpring );
+[ armGroup, armKin, armParams ] = setupArm( armName, armFamily, ...
+                                            actuatorSeries, hasGasSpring );
 
 gravityVec = armParams.gravityVec;
 effortOffset = armParams.effortOffset;
