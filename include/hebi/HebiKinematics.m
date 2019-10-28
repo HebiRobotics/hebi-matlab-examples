@@ -101,6 +101,9 @@ classdef (Sealed) HebiKinematics
             %       'X5-Link'               (Extension, Twist)
             %       'X5-LightBracket'       (Mounting)
             %       'X5-HeavyBracket'       (Mounting)
+            %       'R8-3'
+            %       'R8-9'
+            %       'R8-16'
             %
             %     Custom Types
             %       'GenericJoint'          (Axis)

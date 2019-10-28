@@ -33,22 +33,12 @@ function struct = SafetyParamsStruct()
 %       group.send('SafetyParams', limits);
 %
 %   The 'mStopStrategy' and 'positionLimitStrategy' fields represent
-%   enumerated values with the meaning below:
+%   enumerated values. You can find the available values in 
 %
-%   'mStopStrategy'
-%       NaN = Unknown
-%        0  = Disabled
-%        1  = Motor Off
-%        2  = Motor Hold
+%       HebiEnum
+%       HebiEnum
 %
-%   'positionLimitStrategy'
-%       NaN = Unknown
-%        0  = Disabled
-%        1  = Motor Off
-%        2  = Hold Position
-%        3  = Damped Spring
-%
-%   See also HebiGroup, HebiUtils.saveSafetyParams, HebiUtils.loadSafetyParams
+%   See also HebiGroup, HebiEnum, HebiUtils.saveSafetyParams, HebiUtils.loadSafetyParams
 
 %   Copyright 2014-2019 HEBI Robotics, Inc.
 struct = javaObject(hebi_load('SafetyParamsStruct'));
