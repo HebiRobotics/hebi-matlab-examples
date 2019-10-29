@@ -56,7 +56,7 @@ end
 %%%%%%%%%%%%%
 
 armName = '5-DoF';
-armFamily = 'R-Arm-1';
+armFamily = 'Arm';
 actuatorSeries = 'R-Series';
 hasGasSpring = true;  % If you attach a gas spring to the shoulder for
                        % extra payload, set this to TRUE.
