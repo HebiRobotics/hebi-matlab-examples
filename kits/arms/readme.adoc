@@ -16,7 +16,7 @@ The `kit` variable needs to match your system. Currently the following kits are 
 
 :assembly: link:http://docs.hebi.us/resources/kits/assyInstructions
 :kitimg: image:http://docs.hebi.us/resources/kits/images
-:imgsize: width=300px
+:imgsize: width=200px
 
 [width="100%",options="header",cols="^.^1a,^.^1a,^.^1a,^.^2a,^.^1a"]
 |====================
