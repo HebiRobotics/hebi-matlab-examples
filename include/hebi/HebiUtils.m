@@ -161,7 +161,7 @@ classdef (Sealed) HebiUtils
             %       [hebiLog, info, gains] = HebiUtils.convertGroupLog(logFile)
             %
             %   See also HebiGroup.startLog, HebiGroup.stopLog,
-            %   convertGroupLogsUI, loadGroupLog.
+            %   convertGroupLogsUI, loadGroupLog, FeedbackStruct.
             varargout = {javaMethod('convertGroupLog', HebiUtils.className,  varargin{:})};
             if nargout > 1
                 inputFile = varargin{1};
@@ -959,29 +959,21 @@ classdef (Sealed) HebiUtils
             %ROTMAT2AXANG Convert an rotation matrix (SO3) to axis-angle
             %representation.  AXIS is a unit vector, and ANGLE is between +/- pi
             %radians.  R is a 3X3 S03 rotation matrix.
-            %
-            %   Based on StackExchange question:
-            %   https://math.stackexchange.com/questions/2217654/interpolation-in-so3-different-approaches
             
-            [eigVec,eigDiag] = eig(R);
-            eigVal = diag(eigDiag);
-            
-            [~,maxIdx] = max(real(eigVal));
-            
-            angle = acos((trace(R)-1)/2);
-            axis = real(eigVec(:,maxIdx));
-            
-            R_check = HebiUtils.axAng2rotMat(axis,angle);
-            
-            checkTolerance = 1E-6;
-            if max(max( abs(R_check*R'-eye(3)) )) > checkTolerance
-                angle = -angle;
-            end
+            % Based on Wikipedia
+            % https://en.wikipedia.org/wiki/Rotation_matrix#Axis_and_angle
+            x = R(3,2) - R(2,3);
+            y = R(1,3) - R(3,1);
+            z = R(2,1) - R(1,2);
+            r = sqrt(x^2 + y^2 + z^2);
+            t = R(1,1) + R(2,2) + R(3,3);
+            angle = atan2(r,t-1);
+            axis = [x; y; z] / r;
             
             % Keep angle between +/- pi
             if abs(angle) > pi
                 angle = sign(angle)*(abs(angle) - 2*pi);
-            end            
+            end
         end
         
     end

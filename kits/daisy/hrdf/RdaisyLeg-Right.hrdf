@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<robot version="1.1.0">
-  <actuator type="X8-9" mass="0.685"/>
-  <bracket type="X5HeavyRightInside"/>
-  <actuator type="X8-16" mass="0.715"/>
-  <link type="X5" extension="0.325" twist="pi"/>
-  <actuator type="X8-9" mass="0.685"/>
-  <link type="X5" extension="0.325" twist="0"/>
+<robot version="1.2.0">
+  <actuator type="R8-9"/>
+  <bracket type="R8HeavyRightInside"/>
+  <actuator type="R8-16"/>
+  <link type="R8" extension="0.325" twist="pi"/>
+  <actuator type="R8-9"/>
+  <link type="R8" extension="0.315" twist="0"/>
 </robot>

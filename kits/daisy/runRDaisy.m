@@ -49,8 +49,8 @@ else
     % keeping the original default gains around for reference.  When we're
     % done, remove the control strategy from the cmdGains so that the
     % controllers don't reset every time we send them.
-    legGains = HebiUtils.loadGains( [localDir '/gains/daisyLeg-Gains.xml'] );
-    cmdGains = HebiUtils.loadGains( [localDir '/gains/daisyLeg-Gains.xml'] );
+    legGains = HebiUtils.loadGains( [localDir '/gains/RdaisyLeg-Gains.xml'] );
+    cmdGains = HebiUtils.loadGains( [localDir '/gains/RdaisyLeg-Gains.xml'] );
     gainsWarmupTime = 3.0;  % [sec]
     
     gainFields = fields( legGains );
@@ -425,8 +425,8 @@ while true
             legAngVels(leg,:) = vel;
         end 
         
-        frames(:,:,frameIndex(:,leg)) = ...
-                    legKin{leg}.getFK('output',legAngles(leg,:));
+%         frames(:,:,frameIndex(:,leg)) = ...
+%                     legKin{leg}.getFK('output',legAngles(leg,:));
 
         gravCompEffort = legKin{leg}.getGravCompEfforts( legAngles(leg,:), gravityVec );
         
@@ -453,7 +453,7 @@ while true
             gainScale = 1.0;
         end
         
-        cmdGains.positionKp = 0.5 * gainScale * legGains.positionKp; 
+        cmdGains.positionKp = 1.0 * gainScale * legGains.positionKp; 
         cmdGains.velocityKp = 1.0 * gainScale * legGains.velocityKp;
         cmdGains.velocityFF = gainScale * legGains.velocityFF;
         cmdGains.effortKp = gainScale * legGains.effortKp;
@@ -469,10 +469,10 @@ while true
     effortHist(end+1,:) = reshape(legEfforts',1,[]);
       
     % ANIMATION
-    if visualizeOn
-        framesDisplay.setFrames( frames );
-        drawnow;
-    end        
+%     if visualizeOn
+%         framesDisplay.setFrames( frames );
+%         drawnow;
+%     end        
 end
 
 if logging

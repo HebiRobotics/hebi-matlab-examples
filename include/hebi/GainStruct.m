@@ -2,7 +2,54 @@ function struct = GainStruct()
 % GainStruct can be used to set gains of groups
 %
 %   The struct created by this function can be used to set a variety of
-%   gains and control parameters on a group of modules.
+%   gains and control parameters on a group of modules. A list of all 
+%   currently available gains is below:
+%
+%                          time [s]
+%               controlStrategy [HebiEnum]
+%                 mStopStrategy [HebiEnum]
+%                    positionKp
+%                    positionKi
+%                    positionKd
+%                    positionFF
+%              positionDeadZone
+%                positionIClamp
+%                 positionPunch
+%             positionMinTarget
+%             positionMaxTarget
+%             positionMinOutput
+%             positionMaxOutput
+%     positionTargetLowpassGain
+%     positionOutputLowpassGain
+%              positionDOnError
+%                    velocityKp
+%                    velocityKi
+%                    velocityKd
+%                    velocityFF
+%              velocityDeadZone
+%                velocityIClamp
+%                 velocityPunch
+%             velocityMinTarget
+%             velocityMaxTarget
+%             velocityMinOutput
+%             velocityMaxOutput
+%     velocityTargetLowpassGain
+%     velocityOutputLowpassGain
+%              velocityDOnError
+%                      effortKp
+%                      effortKi
+%                      effortKd
+%                      effortFF
+%                effortDeadZone
+%                  effortIClamp
+%                   effortPunch
+%               effortMinTarget
+%               effortMaxTarget
+%               effortMinOutput
+%               effortMaxOutput
+%       effortTargetLowpassGain
+%       effortOutputLowpassGain
+%                effortDOnError
 %
 %   The online documentation provides more information about the 
 %   individual gain settings and control parameters:
@@ -31,8 +78,8 @@ function struct = GainStruct()
 %       gains.controlStrategy = [4 4];
 %       group.send('gains', gains);
 %
-%   See also HebiGroup, HebiUtils.loadGains, HebiUtils.saveGains
+%   See also HebiGroup, HebiEnum, HebiUtils.loadGains, HebiUtils.saveGains
 
-%   Copyright 2014-2018 HEBI Robotics, Inc.
+%   Copyright 2014-2019 HEBI Robotics, Inc.
 struct = javaObject(hebi_load('GainStruct'));
 end
