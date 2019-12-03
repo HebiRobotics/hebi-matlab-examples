@@ -6,4 +6,5 @@
   <link type="R8" extension="0.325" twist="pi"/>
   <actuator type="R8-9"/>
   <link type="R8" extension="0.315" twist="0"/>
+  <end-effector type="Custom" mass="0.060"/>
 </robot>

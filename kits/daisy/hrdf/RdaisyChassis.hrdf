@@ -5,7 +5,6 @@
 
   <!-- Add a single body to account for the chassis -->
   <rigid-body mass="15.00" 
-              com_trans="0.025 0.000 0.025" 
+              com_trans="0.000 0.000 0.025" 
               output_trans="0.000 0.000 0.075"/>
-    
 </robot>

@@ -29,7 +29,7 @@ moduleNames = { 'L1_J1_base', 'L1_J2_shoulder', 'L1_J3_elbow', ...
                 'L5_J1_base', 'L5_J2_shoulder', 'L5_J3_elbow', ...
                 'L6_J1_base', 'L6_J2_shoulder', 'L6_J3_elbow' };
 
-setDaisyParams;
+setRDaisyParams;
 
 % Approx home leg positions 
 seedAngles = repmat( [-0.1 -0.3 -1.9], numLegs, 1 );
@@ -98,8 +98,8 @@ effortHist = nan(0,3*numLegs);
 xyzVelHist = nan(0,3);
 rotVelHist = nan(0,3);
 
-frames = nan(4,4,6*6);
-frameIndex = reshape(1:36,6,6);
+frames = nan(4,4,6*7);
+frameIndex = reshape(1:42,7,6);
 
 legEfforts = nan(6,3);    
 stanceLegs = 1:numLegs;
@@ -425,14 +425,14 @@ while true
             legAngVels(leg,:) = vel;
         end 
         
-%         frames(:,:,frameIndex(:,leg)) = ...
-%                     legKin{leg}.getFK('output',legAngles(leg,:));
+        frames(:,:,frameIndex(:,leg)) = ...
+                    legKin{leg}.getFK('output',legAngles(leg,:));
 
         gravCompEffort = legKin{leg}.getGravCompEfforts( legAngles(leg,:), gravityVec );
         
         % COMPENSATION WITH GAS SPRINGS
         springShift = 0.0; %N-m
-        dragShift = 1.5; % N-m / (rad/sec)
+        dragShift = 0.0; % N-m / (rad/sec)
         springEffort = [0 springShift 0] + [0 dragShift 0] .* legAngVels(leg,:);
         stanceEffort = J_xyz' * cmdFootForce(:,leg);
         legEfforts(leg,:) = gravCompEffort + stanceEffort' + ...
@@ -469,10 +469,10 @@ while true
     effortHist(end+1,:) = reshape(legEfforts',1,[]);
       
     % ANIMATION
-%     if visualizeOn
-%         framesDisplay.setFrames( frames );
-%         drawnow;
-%     end        
+    if visualizeOn
+        framesDisplay.setFrames( frames );
+        drawnow;
+    end        
 end
 
 if logging

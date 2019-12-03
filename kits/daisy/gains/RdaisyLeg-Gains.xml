@@ -2,7 +2,7 @@
 <group_gains>
    <control_strategy>4 4 4</control_strategy>
    <position>
-      <kp>15 30 15</kp>
+      <kp>45 90 45</kp>
       <ki>0 0 0</ki>
       <kd>0 0 0</kd>
       <i_clamp>0 0 0</i_clamp>
@@ -18,7 +18,7 @@
       <d_on_error>1 1 1</d_on_error>
    </position>
    <velocity>
-      <kp>0.05 0.1 0.05</kp>
+      <kp>0.1 0.2 0.1</kp>
       <ki>0 0 0</ki>
       <kd>0 0 0</kd>
       <i_clamp>0 0 0</i_clamp>
