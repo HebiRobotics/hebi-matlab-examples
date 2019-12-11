@@ -431,8 +431,8 @@ while true
         gravCompEffort = legKin{leg}.getGravCompEfforts( legAngles(leg,:), gravityVec );
         
         % COMPENSATION WITH GAS SPRINGS
-        springShift = 0.0; %N-m
-        dragShift = 0.0; % N-m / (rad/sec)
+        springShift = 5.0; %N-m
+        dragShift = 1.5; % N-m / (rad/sec)
         springEffort = [0 springShift 0] + [0 dragShift 0] .* legAngVels(leg,:);
         stanceEffort = J_xyz' * cmdFootForce(:,leg);
         legEfforts(leg,:) = gravCompEffort + stanceEffort' + ...
