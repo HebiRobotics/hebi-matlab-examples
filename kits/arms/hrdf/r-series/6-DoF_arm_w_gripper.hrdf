@@ -8,9 +8,11 @@
   <link type="R8" extension="0.325" twist="pi"/>
   <actuator type="R8-16"/>
   <link type="R8" extension="0.325" twist="pi"/>
+  <actuator type="R8-9"/>
+  <bracket type="R8LightRight"/>
   <actuator type="R8-3"/>
   <bracket type="R8LightRight"/>
   <actuator type="R8-3"/>
-  <end-effector />
+  <end-effector type="R8Parallel"/>
   
 </robot>

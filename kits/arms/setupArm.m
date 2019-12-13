@@ -75,12 +75,12 @@ switch kit
     case '6-DoF + gripper'
         %%
         group = HebiLookup.newGroupFromNames(family, {
-            'base'
-            'shoulder'
-            'elbow'
-            'wrist1'
-            'wrist2'
-            'wrist3' });
+            'J1_base'
+            'J2_shoulder'
+            'J3_elbow'
+            'J4_wrist1'
+            'J5_wrist2'
+            'J6_wrist3' });
         
         % Kinematic Model
         kin = HebiKinematics([localDir '/hrdf/' series '/6-DoF_arm_w_gripper']);
@@ -105,12 +105,12 @@ switch kit
     case '6-DoF'
         %%
         group = HebiLookup.newGroupFromNames(family, {
-            'base'
-            'shoulder'
-            'elbow'
-            'wrist1'
-            'wrist2'
-            'wrist3' });
+            'J1_base'
+            'J2_shoulder'
+            'J3_elbow'
+            'J4_wrist1'
+            'J5_wrist2'
+            'J6_wrist3' });
         
         % Kinematic Model
         kin = HebiKinematics([localDir '/hrdf/' series '/6-DoF_arm']);
@@ -130,11 +130,11 @@ switch kit
     case '5-DoF + gripper'
         %%
         group = HebiLookup.newGroupFromNames(family, {
-            'base'
-            'shoulder'
-            'elbow'
-            'wrist1'
-            'wrist2' });
+            'J1_base'
+            'J2_shoulder'
+            'J3_elbow'
+            'J4_wrist1'
+            'J5_wrist2' });
         
         % Kinematic Model
         kin = HebiKinematics([localDir '/hrdf/' series '/5-DoF_arm_w_gripper']);
@@ -159,11 +159,11 @@ switch kit
     case '5-DoF' 
         %%
         group = HebiLookup.newGroupFromNames(family, {
-            'base'
-            'shoulder'
-            'elbow'
-            'wrist1'
-            'wrist2' });
+            'J1_base'
+            'J2_shoulder'
+            'J3_elbow'
+            'J4_wrist1'
+            'J5_wrist2' });
         
         % Kinematic Model
         kin = HebiKinematics([localDir '/hrdf/' series '/5-DoF_arm']);
@@ -184,10 +184,10 @@ switch kit
     case '4-DoF'
         %%
         group = HebiLookup.newGroupFromNames(family, {
-            'base'
-            'shoulder'
-            'elbow'
-            'wrist1' });
+            'J1_base'
+            'J2_shoulder'
+            'J3_elbow'
+            'J4_wrist1' });
         
         % Kinematic Model
         kin = HebiKinematics([localDir '/hrdf/' series '/4-DoF_arm']);
@@ -208,10 +208,10 @@ switch kit
     case '4-DoF SCARA'
         %%
         group = HebiLookup.newGroupFromNames(family, {
-            'base'
-            'shoulder'
-            'elbow'
-            'wrist1' });
+            'J1_base'
+            'J2_shoulder'
+            'J3_elbow'
+            'J4_wrist1' });
         
         % Kinematic Model
         kin = HebiKinematics([localDir '/hrdf/' series '/4-DoF_arm_scara']);
@@ -232,9 +232,9 @@ switch kit
     case '3-DoF'
         %%
         group = HebiLookup.newGroupFromNames(family, {
-            'base'
-            'shoulder'
-            'elbow' } );
+            'J1_base'
+            'J2_shoulder'
+            'J3_elbow' });
         
         kin = HebiKinematics([localDir '/hrdf/' series '/3-DoF_arm']);
         

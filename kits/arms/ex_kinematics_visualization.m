@@ -18,10 +18,10 @@ close all;
 
 HebiLookup.initialize();
 
-armName = '6-DoF + gripper';
+armName = '6-DoF';
 armFamily = 'Arm';
-actuatorSeries = 'R-Series';
-hasGasSpring = [];
+actuatorSeries = 'X-Series';
+hasGasSpring = true;
 
 [ armGroup, armKin, armParams ] = setupArm( armName, armFamily, ...
                                             actuatorSeries, hasGasSpring );

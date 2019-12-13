@@ -18,10 +18,10 @@
 clear *;
 close all;
 
-armName = '5-DoF';
+armName = '6-DoF';
 armFamily = 'Arm';
-actuatorSeries = 'R-Series';
-hasGasSpring = true;  % If you attach a gas spring to the shoulder for
+actuatorSeries = 'X-Series';
+hasGasSpring = false;  % If you attach a gas spring to the shoulder for
                        % extra payload, set this to TRUE.
 
 [ armGroup, armKin, armParams ] = setupArm( armName, armFamily, ...
@@ -170,6 +170,9 @@ while (trajTime < trajectory.getDuration) && ~abortFlag
     % Get commanded positions, velocities, and accelerations
     % from the new trajectory state at the current time
     trajTime = fbk.time - trajStartTime;
+    if trajTime > trajectory.getDuration
+        trajTime = trajectory.getDuration;
+    end
     [pos, vel, accel] = trajectory.getState(trajTime);
 
     % Compensate for gravity
@@ -261,6 +264,10 @@ while ~abortFlag
                 % Get commanded positions, velocities, and accelerations
                 % from the new trajectory state at the current time
                 trajTime = fbk.time - trajStartTime;
+                
+                if trajTime > trajectory.getDuration
+                    trajTime = trajectory.getDuration;
+                end
                 [pos, vel, accel] = trajectory.getState(trajTime);
 
                 % Compensate for gravity
@@ -321,6 +328,9 @@ while ~abortFlag
             % Get commanded positions, velocities, and accelerations
             % from the new trajectory state at the current time
             trajTime = fbk.time - trajStartTime;
+            if trajTime > trajectory.getDuration
+                trajTime = trajectory.getDuration;
+            end
             [pos, vel, accel] = trajectory.getState(trajTime);
 
             % Compensate for gravity

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 6-DoF Arm and Gripper -->
-<robot version="1.1.0">
+<robot version="1.2.0">
     
   <actuator type="X8-9"/>
   <bracket type="X5HeavyRightOutside"/>
@@ -12,8 +12,6 @@
   <actuator type="X5-1"/>
   <bracket type="X5LightRight"/>
   <actuator type="X5-1"/>
-  
-  <!-- Add an extra body at the end of the arm for the gripper -->
-  <rigid-body mass="0.300" com_trans="0.0 0.0 0.025" output_trans="0.0 0.0 0.075"/>
+  <end-effector type="X5Parallel"/>
     
 </robot>
