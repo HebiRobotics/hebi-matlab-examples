@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- R-Series Arm - 5-DoF -->
+<!-- R-Series Arm - 6-DoF -->
 <group_gains>
     
   <control_strategy>4 4 4 4 4 4</control_strategy>
   
   <position>
-    <kp>50 100 50 20 10 10</kp>
+    <kp>75 100 50 20 10 10</kp>
     <ki>0 0 0 0 0 0</ki>
     <kd>0 0 0 0 0 0</kd>
     <feed_forward>0 0 0 0 0 0</feed_forward>
@@ -22,7 +22,7 @@
   </position>
   
   <velocity>
-    <kp>0.2 0.2 0.2 0.1 0.05 0.05</kp>
+    <kp>0.1 0.2 0.1 0.1 0.05 0.05</kp>
     <ki>0 0 0 0 0 0</ki>
     <kd>0 0 0 0 0 0</kd>
     <feed_forward>1 1 1 1 1 1</feed_forward>
@@ -39,7 +39,7 @@
   </velocity>
   
   <effort>
-    <kp>0.1 0.1 0.1 0.1 0.25 0.25</kp>
+    <kp>0.05 0.05 0.05 0.1 0.20 0.20</kp>
     <ki>0 0 0 0 0 0</ki>
     <kd>0.0001 0.0001 0.0001 0.001 0.001 0.001</kd>
     <feed_forward>1 1 1 1 1 1</feed_forward>

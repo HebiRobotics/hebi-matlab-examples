@@ -1,20 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- 5-DoF Arm - R-Series -->
+<!-- 4-DoF Arm - R-Series -->
 <robot version="1.2.0">
     
   <actuator type="R8-16"/>
-  
-  <!-- update this bracket based on Outside/Inside -->
   <bracket type="R8HeavyRightOutside"/>
-  
   <actuator type="R8-16"/>
   <link type="R8" extension="0.325" twist="pi"/>
   <actuator type="R8-16"/>
   <link type="R8" extension="0.325" twist="pi"/>
-  <actuator type="R8-9"/>
-  <bracket type="R8LightRight"/>
-  <actuator type="R8-3"/>
-  <bracket type="R8LightRight"/>
   <actuator type="R8-3"/>
   <end-effector />
   
