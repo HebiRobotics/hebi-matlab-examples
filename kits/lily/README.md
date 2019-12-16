@@ -12,10 +12,7 @@ Included in the case is:
 - Gas Springs (6x)
 - Batteries (4x)
 - Chargers (2x)
-- WiFi Antennas (2x)
-
-The gas springs and WiFi antennas will need to be attached to the robot after unpacking.  
-
+- WiFi Antenna
 
 ## Assembling / Setting Up Lily
 If you are assembling Lily, you can follow the assembly instructions found at:
@@ -29,15 +26,14 @@ Gains, control parameters, and kinematic information are all set automatically i
 - Individual actuator gains are the same for each leg, and can be found in [lilyLeg-Gains.xml](gains/lilyLeg-Gains.xml).
 - The HRDF files that define the kinematics of the robot can be found in the [hrdf/](hrdf/) folder.
 
-
 ## Starting Lily Demo Code
 
 #### Powering up the robot:
-- Mount and plug in at least 1 of the batteries (preferably both).  When both batteries are plugged in they will share the load equally between batteries.  You can also plug the battery charger in while running for tethered operation.
-- [Turn on the batteries](https://www.ebikes.ca/product-info/ligo-batteries.html) by pressing and holding the button on the batteries until the lights flash green.
+- There are 2 batteries that fit into the sealed chassis of the robot.  When both batteries are plugged in they will share the load equally.  You can also plug the battery charger in while running for tethered operation.
+- [Turn on the batteries](https://www.ebikes.ca/product-info/ligo-batteries.html) by pressing and holding the 'Battery On/Off' buttons until the lights flash green.
 - After the batteries turn on, you will hear 2 beeps, followed by 2 double-beeps as the router in the robot powers up.
-- Press and hold the button labeled 'Modules'.  When the power to the modules turns on the button will turn blue.
-- Turn on the power to the onboard computer.  When the power to the computer turns on the button will turn white.  *The computer does not need to be on for the modules in the robot to be seen on the network.*
+- Press and hold the green button labeled 'Actuator On/Off'.  When the power to the actuators turns on the button will turn green.
+- Turn on the power to the onboard computer with the red button labeled 'Computer On/Off'.  When the power to the computer turns on the button will turn red.  *The computer does not need to be on for the modules in the robot to be seen on the network.*
 - Make sure the M-Stop button is off (not pressed in).
 
 #### Getting the robot ready to run:
@@ -48,7 +44,6 @@ Gains, control parameters, and kinematic information are all set automatically i
 #### Connecting a Mobile Device for Control:
 - The code to control the robot assumes that a mobile device is on the network running the [HEBI Mobile I/O App](http://docs.hebi.us/tools.html#mobile-io).  The device will need to be on the same network as the robot (usually connected to the robot's WiFi network), and it will need to be set to the Family `Lily` and the Name `_Controller`.  You can set the Family/Name of the mobile device in [Scope](http://docs.hebi.us/tools.html#scope-gui), or in the settings for the app on the mobile device.
 
-
 ## To get started:
 * Download this folder
 * Start Matlab (2013b or later)
@@ -56,7 +51,6 @@ Gains, control parameters, and kinematic information are all set automatically i
 * run `lilyDemo.m`
 
 The demo will start up looking for the actuators in the robot, followed by the mobile device for input.  The border of the HEBI Mobile I/O app will hightlight green when it is connected and the demo starts.
-
 
 ## Coordinate frame convention
 
@@ -81,7 +75,6 @@ The demo will start up looking for the actuators in the robot, followed by the m
 
 Note that even though the image above notes 'Pitch', the Matlab demo does not currently control pitch.
 
-
 ## Automatic startup instructions for Linux
 
 This process was tested using Ubuntu 16.04.
@@ -96,4 +89,3 @@ To install:
 If you would like to have the script start on boot, add the `lilyStart` command under `Startup Applications` if using Ubuntu or use another standard method for automatically launching the program.
 
 Note that if you move the location of `lilyStart.sh` you will have to delete the symbolic link from `/usr/bin` and run `install.sh` again.
-
