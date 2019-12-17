@@ -23,14 +23,19 @@ The `kit` variable needs to match your system. Currently the following kits are 
 | Kit Name | Series | Part Number | Description and Info | Image
 
 |`'6dof'`|`'R-Series'`|A-2084-06|
-6 - DoF R-Series Arm Kit|
+6 - DoF R-Series Arm Kit +
+{assembly}/R-Series_6-DoF_Arm.pdf[Assembly Instructions]|
 {kitimg}/R-6-DoF_Arm.png[{imgsize}]
 
 |`'5dof'`|`'R-Series'`|A-2084-05|
-5 - DoF R-Series Arm Kit|
+5 - DoF R-Series Arm Kit +
+{assembly}/R-Series_5-DoF_Arm.pdf[Assembly Instructions]|
+{kitimg}/R-5-DoF_Arm.png[{imgsize}]
 
 |`'4dof'`|`'R-Series'`|A-2084-04|
-4 - DoF R-Series Arm Kit|
+4 - DoF R-Series Arm Kit +
+{assembly}/R-Series_4-DoF_Arm.pdf[Assembly Instructions]|
+{kitimg}/R-4-DoF_Arm.png[{imgsize}]
 
 |`'6dof'`|`'X-Series'`|A-2084-06|
 6 - DoF Arm Kit +
