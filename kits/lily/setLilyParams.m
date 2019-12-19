@@ -3,7 +3,7 @@
 % combine all the setup into a function, setupLily.m, like we do with the
 % Rosie and Florence kits.
 %
-% David Willig
+% Andrew Willig
 % Dec 2019
 
 % Masses / Weights.  Assume all the legs weigh the same
