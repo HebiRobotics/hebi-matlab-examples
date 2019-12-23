@@ -80,9 +80,9 @@ disp('  ESC - Exits the demo.');
 % THE OTHER GAINS.
 
 %     % HOLD POSITION ONLY (Allow rotation around end-effector position)
-%     gainsInEndEffectorFrame = true;
-%     damperGains = [5; 5; 5; .0; .0; .0;]; % (N/(m/sec)) or (Nm/(rad/sec))
-%     springGains = [500; 500; 500; 0; 0; 0];  % (N/m) or (Nm/rad)
+    gainsInEndEffectorFrame = true;
+    damperGains = [5; 5; 5; .0; .0; .0;]; % (N/(m/sec)) or (Nm/(rad/sec))
+    springGains = [500; 500; 500; 0; 0; 0];  % (N/m) or (Nm/rad)
 
 %     % HOLD ROTATION ONLY
 %     gainsInEndEffectorFrame = true;
@@ -95,9 +95,9 @@ disp('  ESC - Exits the demo.');
 %     springGains = [500; 500; 0; 5; 5; 5];  % (N/m) or (Nm/rad)
     
     % HOLD POSITION AND ROTATION - BUT ALLOW MOTION IN BASE FRAME XY-PLANE
-    gainsInEndEffectorFrame = false;
-    damperGains = [0; 0; 5; .1; .1; .1;]; % (N/(m/sec)) or (Nm/(rad/sec))
-    springGains = [0; 0; 500; 5; 5; 5];  % (N/m) or (Nm/rad)
+%     gainsInEndEffectorFrame = false;
+%     damperGains = [0; 0; 5; .1; .1; .1;]; % (N/(m/sec)) or (Nm/(rad/sec))
+%     springGains = [0; 0; 500; 5; 5; 5];  % (N/m) or (Nm/rad)
 
 % Get the current location of the end effector
 fbk = armGroup.getNextFeedback();
