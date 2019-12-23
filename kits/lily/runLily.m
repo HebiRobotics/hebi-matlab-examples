@@ -1,7 +1,10 @@
-% Prototype Hexapod Kinematics
+% R-Series Hexapod Demo Running Script
 %
-% Dave Rollinson
+% X-Series version by: Dave Rollinson
 % Feb 2017
+%
+% Adapted for R-Series by: Andrew Willig
+% Dec 2019
 
 clear *;
 close all;
@@ -14,14 +17,14 @@ visualizeOn = false;
 simulate = false;
 logging = true;
 
-[legKin, chassisKin] = makeDaisyKinematics();
-safetyParams = makeDaisySafetyLimits();
+[legKin, chassisKin] = makeLilyKinematics();
+safetyParams = makeLilySafetyLimits();
 
 for leg=1:length(legKin)
     trajGen{leg} = HebiTrajectoryGenerator(legKin{leg}); 
 end
 
-robotName = 'Daisy';
+robotName = 'Lily';
 moduleNames = { 'L1_J1_base', 'L1_J2_shoulder', 'L1_J3_elbow', ...
                 'L2_J1_base', 'L2_J2_shoulder', 'L2_J3_elbow', ...
                 'L3_J1_base', 'L3_J2_shoulder', 'L3_J3_elbow', ...
@@ -29,7 +32,7 @@ moduleNames = { 'L1_J1_base', 'L1_J2_shoulder', 'L1_J3_elbow', ...
                 'L5_J1_base', 'L5_J2_shoulder', 'L5_J3_elbow', ...
                 'L6_J1_base', 'L6_J2_shoulder', 'L6_J3_elbow' };
 
-setDaisyParams;
+setLilyParams;
 
 % Approx home leg positions 
 seedAngles = repmat( [-0.1 -0.3 -1.9], numLegs, 1 );
@@ -49,8 +52,8 @@ else
     % keeping the original default gains around for reference.  When we're
     % done, remove the control strategy from the cmdGains so that the
     % controllers don't reset every time we send them.
-    legGains = HebiUtils.loadGains( [localDir '/gains/daisyLeg-Gains.xml'] );
-    cmdGains = HebiUtils.loadGains( [localDir '/gains/daisyLeg-Gains.xml'] );
+    legGains = HebiUtils.loadGains( [localDir '/gains/lilyLeg-Gains.xml'] );
+    cmdGains = HebiUtils.loadGains( [localDir '/gains/lilyLeg-Gains.xml'] );
     gainsWarmupTime = 3.0;  % [sec]
     
     gainFields = fields( legGains );
@@ -119,7 +122,7 @@ cmd.effort = nan(1,3*numLegs);
 % SETUP THE MOBILE I/O CONTROLLER %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 controllerName = '_Controller';
-controllerGroup = setupDaisyController( robotName, controllerName );
+controllerGroup = setupLilyController( robotName, controllerName );
 
 % Get the initial feedback objects that we'll reuse later for the
 % controller group.
@@ -430,6 +433,7 @@ while true
 
         gravCompEffort = legKin{leg}.getGravCompEfforts( legAngles(leg,:), gravityVec );
         
+        % COMPENSATION WITH GAS SPRINGS
         springShift = 5.0; %N-m
         dragShift = 1.5; % N-m / (rad/sec)
         springEffort = [0 springShift 0] + [0 dragShift 0] .* legAngVels(leg,:);
@@ -452,7 +456,7 @@ while true
             gainScale = 1.0;
         end
         
-        cmdGains.positionKp = 0.5 * gainScale * legGains.positionKp; 
+        cmdGains.positionKp = 1.0 * gainScale * legGains.positionKp; 
         cmdGains.velocityKp = 1.0 * gainScale * legGains.velocityKp;
         cmdGains.velocityFF = gainScale * legGains.velocityFF;
         cmdGains.effortKp = gainScale * legGains.effortKp;

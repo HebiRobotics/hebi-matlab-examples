@@ -1,10 +1,10 @@
 % Robot-Specific Parameters
 % This is called in runHexapod.m.  In the future it would be good to
-% combine all the setup into a function, setupDaisy.m, like we do with the
+% combine all the setup into a function, setupLily.m, like we do with the
 % Rosie and Florence kits.
 %
-% Dave Rollinson
-% Apr 2019
+% Andrew Willig
+% Dec 2019
 
 % Masses / Weights.  Assume all the legs weigh the same
 legMass = sum( legKin{1}.getBodyMasses() );
@@ -21,7 +21,7 @@ jointInds = reshape(jointInds,3,6)';
 
 % Stance Parameters
 bodyHeight = .21; % meters
-stanceRadius = .55;  % meters
+stanceRadius = .60;  % meters
 for leg=1:numLegs
     baseFrame = legKin{leg}.getBaseFrame();
     homeStanceXYZ(:,leg) = baseFrame(1:3,1:3) * ...
@@ -33,7 +33,7 @@ levelHomeStanceXYZ = homeStanceXYZ;
 % Step Parameters
 stepHeight = .040; % meters (.040 default)
 stepOverShoot = 0.35; % factor of step to overshoot 
-stepPeriod = 0.7;  % seconds (.7 default)
+stepPeriod = 1.0;  % seconds (.7 default)
 stepPhase = [0 .5 1];
 
 isStance = ones(1,6)==true;  % Boolean mask to determine stance feet
