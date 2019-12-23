@@ -688,6 +688,9 @@ classdef (Sealed) HebiTrajectoryGenerator
                 jacobianPosition = fbk.position;
                 
                 t = toc(t0);
+                if t > duration
+                    t = duration;
+                end
                 [pos, vel, accel] = traj.getState(t);
                 
                 % Convert accelerations to efforts

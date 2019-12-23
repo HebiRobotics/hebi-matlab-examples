@@ -23,6 +23,7 @@ classdef (Sealed) HebiGroup < handle
     %   getGains              - returns the current gains
     %   getSafetyParams       - returns safety parameters such as limits
     %   startLog              - starts background logging to disk
+    %   isLogging             - returns whether logging is currently active
     %   stopLog               - stops logging and returns a readable format
     %   stopLogFull           - same as above, returning full feedback
     %   stopLogIO             - same as above, returning I/O feedback
@@ -467,7 +468,7 @@ classdef (Sealed) HebiGroup < handle
             %      end
             %
             %   See also HebiGroup, getFeedbackFrequency, getNextFeedbackFull,
-            %   getNextFeedbackIO., getNextFeedbackMobile
+            %   getNextFeedbackIO, getNextFeedbackMobile, FeedbackStruct.
             out = getNextFeedback(this.obj, varargin{:});
         end
         
@@ -484,7 +485,7 @@ classdef (Sealed) HebiGroup < handle
             %      fbk = group.getNextFeedbackFull()
             %      roundTripTime = fbk.pcRxTime - fbk.pcTxTime;
             %
-            %   See also HebiGroup, getNextFeedback.
+            %   See also HebiGroup, getNextFeedback, FeedbackStruct.
             out = getNextFeedbackFull(this.obj, varargin{:});
         end
 
@@ -501,7 +502,7 @@ classdef (Sealed) HebiGroup < handle
             %      fbk = group.getNextFeedbackIO()
             %      value = fbk.a1;
             %
-            %   See also HebiGroup, getNextFeedback.
+            %   See also HebiGroup, getNextFeedback, FeedbackStruct.
             out = getNextFeedbackIO(this.obj, varargin{:});
         end
         
@@ -519,7 +520,7 @@ classdef (Sealed) HebiGroup < handle
             %      fbk = group.getNextFeedbackMobile()
             %      value = fbk.batteryLevel;
             %
-            %   See also HebiGroup, getNextFeedback.
+            %   See also HebiGroup, getNextFeedback, FeedbackStruct.
             out = getNextFeedbackMobile(this.obj, varargin{:});
         end
         
@@ -637,6 +638,13 @@ classdef (Sealed) HebiGroup < handle
             %   See also HebiGroup, stopLog, stopLogFull, stopLogIO,
             %   stopLogMobile, HebiUtils.convertGroupLog.
             out = startLog(this.obj, varargin{:});
+        end
+        
+        function out = isLogging(this, varargin)
+            %isLogging returns whether logging is currently active
+            %
+            %   See also startLog, stopLog, stopLogFull
+            out = isLogging(this.obj, varargin{:});
         end
         
         function out = stopLog(this, varargin)
