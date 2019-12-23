@@ -55,12 +55,14 @@ end
 % Arm Setup %
 %%%%%%%%%%%%%
 
-armName = '6-DoF + gripper';
+armName = '6-DoF';
 armFamily = 'Arm';
-hasGasSpring = false;  % If you attach a gas spring to the shoulder for
+actuatorSeries = 'X-Series';
+hasGasSpring = true;  % If you attach a gas spring to the shoulder for
                        % extra payload, set this to TRUE.
 
-[ armGroup, armKin, armParams ] = setupArm( armName, armFamily, hasGasSpring );
+[ armGroup, armKin, armParams ] = setupArm( armName, armFamily, ...
+                                            actuatorSeries, hasGasSpring );
 
 ikSeedPos = armParams.ikSeedPos;
 armEffortOffset = armParams.effortOffset;

@@ -16,28 +16,43 @@ The `kit` variable needs to match your system. Currently the following kits are 
 
 :assembly: link:http://docs.hebi.us/resources/kits/assyInstructions
 :kitimg: image:http://docs.hebi.us/resources/kits/images
-:imgsize: width=300px
+:imgsize: width=200px
 
-[width="100%",options="header",cols="1a,1a,2a,1a"]
+[width="100%",options="header",cols="^.^1a,^.^1a,^.^1a,^.^2a,^.^1a"]
 |====================
-| Kit Name | Part Number | Description and Info | Image
+| Kit Name | Series | Part Number | Description and Info | Image
 
-|`'6dof'`|A-2084-06|
+|`'6dof'`|`'R-Series'`|A-2084-06|
+6 - DoF R-Series Arm Kit +
+{assembly}/R-Series_6-DoF_Arm.pdf[Assembly Instructions]|
+{kitimg}/R-6-DoF_Arm.png[{imgsize}]
+
+|`'5dof'`|`'R-Series'`|A-2084-05|
+5 - DoF R-Series Arm Kit +
+{assembly}/R-Series_5-DoF_Arm.pdf[Assembly Instructions]|
+{kitimg}/R-5-DoF_Arm.png[{imgsize}]
+
+|`'4dof'`|`'R-Series'`|A-2084-04|
+4 - DoF R-Series Arm Kit +
+{assembly}/R-Series_4-DoF_Arm.pdf[Assembly Instructions]|
+{kitimg}/R-4-DoF_Arm.png[{imgsize}]
+
+|`'6dof'`|`'X-Series'`|A-2084-06|
 6 - DoF Arm Kit +
 {assembly}/6-DoF_Arm.pdf[Assembly Instructions]|
 {kitimg}/6-DoF_Arm.PNG[{imgsize}]
 
-|`'5dof'`|A-2084-05|
+|`'5dof'`|`'X-Series'`|A-2084-05|
 5 - DoF Arm Kit +
 {assembly}/5-DoF_Arm.pdf[Assembly Instructions]|
 {kitimg}/5-DoF_Arm.PNG[{imgsize}]
 
-|`'4dof'`|A-2085-04|
+|`'4dof'`|`'X-Series'`|A-2085-04|
 4 - DoF Arm Kit +
 {assembly}/4-DoF_Arm.pdf[Assembly Instructions]|
 {kitimg}/4-DoF_Arm.PNG[{imgsize}]
 
-|`'4dof-scara'`|A-2084-01|
+|`'4dof-scara'`|`'X-Series'`|A-2084-01|
 4 - DoF SCARA Style Arm Kit +
 {assembly}/4-DoF_SCARA-ish_Arm.pdf[Assembly Instructions]|
 {kitimg}/4-DoF_SCARA.JPG[{imgsize}]
