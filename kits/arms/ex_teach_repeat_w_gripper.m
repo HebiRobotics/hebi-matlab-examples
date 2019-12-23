@@ -22,7 +22,7 @@ close all;
 
 armName = '6-DoF + gripper';
 armFamily = 'Arm';
-actuatorSeries = 'R-Series';
+actuatorSeries = 'X-Series';
 hasGasSpring = false;  % If you attach a gas spring to the shoulder for
                        % extra payload, set this to TRUE.
 
