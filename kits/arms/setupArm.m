@@ -1,4 +1,4 @@
-function [ group, kin, params ] = setupArm( kit, family, series, hasGasSpring )
+function [ group, kin, params ] = setupArm( kit, family, hasGasSpring )
 % SETUPARM creates models and loads parameters for controlling various 
 % pre-configured arm kits.
 %
@@ -79,7 +79,7 @@ end
 switch kit
     
     case 'A-2085-06G'
-        %%
+        %% X-Series 6-DoF Arm with Gripper
         group = HebiLookup.newGroupFromNames(family, {
             'J1_base'
             'J2_shoulder'
@@ -95,6 +95,7 @@ switch kit
         params.gains = HebiUtils.loadGains([localDir '/gains/A-2085-06']);     
         
         % Settings / gains for the gripper spool to open-close the gripper
+        % X-Series Gripper Spool Assembly Part Number = A-2080-01
         params.hasGripper = true;
         params.gripperOpenEffort = 1;
         params.gripperCloseEffort = -5;
@@ -109,7 +110,7 @@ switch kit
         
   
     case 'A-2085-06'
-        %%
+        %% X-Series 6-DoF Arm
         group = HebiLookup.newGroupFromNames(family, {
             'J1_base'
             'J2_shoulder'
@@ -134,7 +135,7 @@ switch kit
         params.ikSeedPos = [0.01 1.0 2.5 1.5 -1.5 0.01];
         
     case 'A-2085-05G'
-        %%
+        %% X-Series 5-DoF Arm with Gripper
         group = HebiLookup.newGroupFromNames(family, {
             'J1_base'
             'J2_shoulder'
@@ -149,6 +150,7 @@ switch kit
         params.gains = HebiUtils.loadGains([localDir '/gains/A-2085-05']);     
         
         % Settings / gains for the gripper spool to open-close the gripper
+        % X-Series Gripper Spool Assembly Part Number = A-2080-01
         params.hasGripper = true;
         params.gripperOpenEffort = 1;
         params.gripperCloseEffort = -5;
@@ -163,7 +165,7 @@ switch kit
         
         
     case 'A-2085-05' 
-        %%
+        %% X-Series 5-DoF Arm
         group = HebiLookup.newGroupFromNames(family, {
             'J1_base'
             'J2_shoulder'
@@ -188,7 +190,7 @@ switch kit
         
         
     case 'A-2085-04'
-        %%
+        %% X-Series 4-DoF Arm
         group = HebiLookup.newGroupFromNames(family, {
             'J1_base'
             'J2_shoulder'
@@ -212,7 +214,7 @@ switch kit
         
         
     case 'A-2084-01'
-        %%
+        %% X-Series 4-DoF SCARA Arm
         group = HebiLookup.newGroupFromNames(family, {
             'J1_base'
             'J2_shoulder'
@@ -236,7 +238,7 @@ switch kit
         
         
     case 'A-2085-03'
-        %%
+        %% X-Series 3-DoF Arm
         group = HebiLookup.newGroupFromNames(family, {
             'J1_base'
             'J2_shoulder'
@@ -257,7 +259,7 @@ switch kit
         params.ikSeedPos = [0.01 1.0 2.5];
         
     case 'A-2240-06G'
-        %%
+        %%  R-Series 6-DoF Arm with Gripper
         group = HebiLookup.newGroupFromNames(family, {
             'J1_base'
             'J2_shoulder'
@@ -273,6 +275,7 @@ switch kit
         params.gains = HebiUtils.loadGains([localDir '/gains/A-2240-06']);     
         
         % Settings / gains for the gripper spool to open-close the gripper
+        % R-Series Gripper Spool Assembly Part Number = A-2255-01
         params.hasGripper = true;
         params.gripperOpenEffort = 1;
         params.gripperCloseEffort = -5;
@@ -287,7 +290,7 @@ switch kit
         
   
     case 'A-2240-06'
-        %%
+        %% R-Series 6-DoF Arm
         group = HebiLookup.newGroupFromNames(family, {
             'J1_base'
             'J2_shoulder'
@@ -312,7 +315,7 @@ switch kit
         params.ikSeedPos = [0.01 1.0 2.5 1.5 -1.5 0.01];
         
     case 'A-2240-05G'
-        %%
+        %% R-Series 5-DoF Arm with Gripper
         group = HebiLookup.newGroupFromNames(family, {
             'J1_base'
             'J2_shoulder'
@@ -327,6 +330,7 @@ switch kit
         params.gains = HebiUtils.loadGains([localDir '/gains/A-2240-05']);     
         
         % Settings / gains for the gripper spool to open-close the gripper
+        % R-Series Gripper Spool Assembly Part Number = A-2255-01
         params.hasGripper = true;
         params.gripperOpenEffort = 1;
         params.gripperCloseEffort = -5;
@@ -341,7 +345,7 @@ switch kit
         
         
     case 'A-2240-05' 
-        %%
+        %% R-Series 5-DoF Arm
         group = HebiLookup.newGroupFromNames(family, {
             'J1_base'
             'J2_shoulder'
@@ -366,7 +370,7 @@ switch kit
         
         
     case 'A-2240-04'
-        %%
+        %% R-Series 4-DoF Arm
         group = HebiLookup.newGroupFromNames(family, {
             'J1_base'
             'J2_shoulder'
