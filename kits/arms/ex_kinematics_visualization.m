@@ -18,13 +18,11 @@ close all;
 
 HebiLookup.initialize();
 
-armName = '6-DoF';
+armName = 'A-2085-06';
 armFamily = 'Arm';
-actuatorSeries = 'X-Series';
 hasGasSpring = true;
 
-[ armGroup, armKin, armParams ] = setupArm( armName, armFamily, ...
-                                            actuatorSeries, hasGasSpring );
+[ armGroup, armKin, armParams ] = setupArm( armName, armFamily, hasGasSpring );
 
 % Select whether coordinate frames for static links should be drawn as well
 showLinkBodies = false;

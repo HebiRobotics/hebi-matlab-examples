@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- For documentation on the HEBI Robot Configuration please visit: -->
+<!-- https://github.com/HebiRobotics/hebi-hrdf/blob/master/FORMAT.md -->
+
+<!-- X-Series Arm (4-DoF) -->
+<robot version="1.2.0">
+  <actuator type="X5-4"/>
+  <bracket type="X5HeavyRightOutside"/>
+  <actuator type="X5-9"/>
+  <link type="X5" extension="0.325" twist="pi"/>
+  <actuator type="X5-4"/>
+  <link type="X5" extension="0.325" twist="pi"/>
+  <actuator type="X5-1"/>
+  
+  <!-- For custom end-effector parameters and formatting please visit: -->
+  <!-- https://github.com/HebiRobotics/hebi-hrdf/blob/master/FORMAT.md#end-effector -->
+  <end-effector />
+  
+</robot>

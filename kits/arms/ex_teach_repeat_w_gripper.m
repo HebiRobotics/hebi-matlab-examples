@@ -20,14 +20,12 @@
 clear *;
 close all;
 
-armName = '6-DoF + gripper';
+armName = 'A-2085-06G';
 armFamily = 'Arm';
-actuatorSeries = 'X-Series';
 hasGasSpring = false;  % If you attach a gas spring to the shoulder for
                        % extra payload, set this to TRUE.
 
-[ armGroup, armKin, armParams ] = setupArm( armName, armFamily, ...
-                                            actuatorSeries, hasGasSpring );
+[ armGroup, armKin, armParams ] = setupArm( armName, armFamily, hasGasSpring );
 armGroup.setFeedbackFrequency(100);
 
 numDoF = armKin.getNumDoF();
