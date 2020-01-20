@@ -27,7 +27,7 @@ enableEffortComp = true;
 % Mobile Device Setup %
 %%%%%%%%%%%%%%%%%%%%%%%
 phoneFamily = 'HEBI';
-phoneName = 'Mobile IO';
+phoneName = 'mobileIO';
 
 resetPoseButton = 'b1';
 quitDemoButton = 'b8';
@@ -55,14 +55,12 @@ end
 % Arm Setup %
 %%%%%%%%%%%%%
 
-armName = '6-DoF';
+armName = 'A-2085-06';
 armFamily = 'Arm';
-actuatorSeries = 'X-Series';
 hasGasSpring = true;  % If you attach a gas spring to the shoulder for
                        % extra payload, set this to TRUE.
 
-[ armGroup, armKin, armParams ] = setupArm( armName, armFamily, ...
-                                            actuatorSeries, hasGasSpring );
+[ armGroup, armKin, armParams ] = setupArm( armName, armFamily, hasGasSpring );
 
 ikSeedPos = armParams.ikSeedPos;
 armEffortOffset = armParams.effortOffset;
@@ -138,7 +136,7 @@ while ~abortFlag
     
     % Set trajectories to normal speed for following mobile input
     armTrajGen.setSpeedFactor( 1.0 );   
-    armTrajGen.setMinDuration( 0.33 );  
+    armTrajGen.setMinDuration( 0.5 );  
 
     t0 = fbk.time;
     t = 0;

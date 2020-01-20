@@ -27,8 +27,8 @@ end
 % Load example log file and kinematics.  You can replace these with data
 % from your own arm.  You want to make sure that the HRDF file matches the
 % arm that used in the logged data :-).
-hebilog = HebiUtils.loadGroupLog( [localDir '/logs/3-DoF_arm_example_log'] );
-kin = HebiKinematics( [localDir '/hrdf/3-DoF_arm'] );
+hebilog = HebiUtils.loadGroupLog( [localDir '/logs/A-2085-03_example_log'] );
+kin = HebiKinematics( [localDir '/hrdf/A-2085-03'] );
 
 kinematics_analysis( hebilog, kin ); 
 

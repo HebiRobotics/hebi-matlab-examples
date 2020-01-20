@@ -21,14 +21,12 @@ close all;
 
 HebiLookup.initialize();
 
-armName = '6-DoF';
+armName = 'A-2085-06';
 armFamily = 'Arm';
-actuatorSeries = 'X-Series';
 hasGasSpring = true;  % If you attach a gas spring to the shoulder for
                        % extra payload, set this to TRUE.
 
-[ armGroup, armKin, armParams ] = setupArm( armName, armFamily, ...
-                                            actuatorSeries, hasGasSpring );     
+[ armGroup, armKin, armParams ] = setupArm( armName, armFamily, hasGasSpring );     
 
 gravityVec = armParams.gravityVec;
 effortOffset = armParams.effortOffset;

@@ -1,6 +1,6 @@
 # HEBI Robotics Kits - Arms
 
-This folder contains examples for controlling arm-type configurations such as the 5-DoF and 6-DoF X-Series arm kits.
+This folder contains examples for controlling arm-type configurations such as the 4-DoF, 5-DoF, and 6-DoF R-Series and X-Series arm kits.
 
 ## Setup
 
@@ -18,44 +18,64 @@ The `kit` variable needs to match your system. Currently the following kits are 
 :kitimg: image:http://docs.hebi.us/resources/kits/images
 :imgsize: width=200px
 
-[width="100%",options="header",cols="^.^1a,^.^1a,^.^1a,^.^2a,^.^1a"]
+[width="100%",options="header",cols="^.^1a,^.^2a,^.^1a"]
 |====================
-| Kit Name | Series | Part Number | Description and Info | Image
+| Kit | Description and Info | Image
 
-|`'6dof'`|`'R-Series'`|A-2084-06|
+|`'A-2240-06G'`|
+6 - DoF R-Series Arm Kit with Gripper +
+{assembly}/A-2240-06_Manual.pdf[Assembly Instructions]|
+{kitimg}/A-2240-06G.png[{imgsize}]
+
+|`'A-2240-06'`|
 6 - DoF R-Series Arm Kit +
-{assembly}/R-Series_6-DoF_Arm.pdf[Assembly Instructions]|
-{kitimg}/R-6-DoF_Arm.png[{imgsize}]
+{assembly}/A-2240-06_Manual.pdf[Assembly Instructions]|
+{kitimg}/A-2240-06.png[{imgsize}]
 
-|`'5dof'`|`'R-Series'`|A-2084-05|
+|`'A-2240-05G'`|
+5 - DoF R-Series Arm Kit with Gripper +
+{assembly}/A-2240-05_Manual.pdf[Assembly Instructions]|
+{kitimg}/A-2240-05G.png[{imgsize}]
+
+|`'A-2240-05'`|
 5 - DoF R-Series Arm Kit +
-{assembly}/R-Series_5-DoF_Arm.pdf[Assembly Instructions]|
-{kitimg}/R-5-DoF_Arm.png[{imgsize}]
+{assembly}/A-2240-05_Manual.pdf[Assembly Instructions]|
+{kitimg}/A-2240-05.png[{imgsize}]
 
-|`'4dof'`|`'R-Series'`|A-2084-04|
+|`'A-2240-04'`|
 4 - DoF R-Series Arm Kit +
-{assembly}/R-Series_4-DoF_Arm.pdf[Assembly Instructions]|
-{kitimg}/R-4-DoF_Arm.png[{imgsize}]
+{assembly}/A-2240-04_Manual.pdf[Assembly Instructions]|
+{kitimg}/A-2240-04.png[{imgsize}]
 
-|`'6dof'`|`'X-Series'`|A-2084-06|
+|`'A-2085-06G'`|
+6 - DoF Arm Kit with Gripper +
+{assembly}/A-2085-06_Manual.pdf[Assembly Instructions]|
+{kitimg}/A-2085-06G.png[{imgsize}]
+
+|`'A-2085-06'`|
 6 - DoF Arm Kit +
-{assembly}/6-DoF_Arm.pdf[Assembly Instructions]|
-{kitimg}/6-DoF_Arm.PNG[{imgsize}]
+{assembly}/A-2085-06_Manual.pdf[Assembly Instructions]|
+{kitimg}/A-2085-06.jpg[{imgsize}]
 
-|`'5dof'`|`'X-Series'`|A-2084-05|
+|`'A-2085-05G'`|
+5 - DoF Arm Kit with Gripper +
+{assembly}/A-2085-05_Manual.pdf[Assembly Instructions]|
+{kitimg}/A-2085-05G.png[{imgsize}]
+
+|`'A-2085-05'`|
 5 - DoF Arm Kit +
-{assembly}/5-DoF_Arm.pdf[Assembly Instructions]|
-{kitimg}/5-DoF_Arm.PNG[{imgsize}]
+{assembly}/A-2085-05_Manual.pdf[Assembly Instructions]|
+{kitimg}/A-2085-05.jpg[{imgsize}]
 
-|`'4dof'`|`'X-Series'`|A-2085-04|
+|`'A-2085-04'`|
 4 - DoF Arm Kit +
-{assembly}/4-DoF_Arm.pdf[Assembly Instructions]|
-{kitimg}/4-DoF_Arm.PNG[{imgsize}]
+{assembly}/A-2085-04_Manual.pdf[Assembly Instructions]|
+{kitimg}/A-2085-04.png[{imgsize}]
 
-|`'4dof-scara'`|`'X-Series'`|A-2084-01|
+|`'A-2084-01'`|
 4 - DoF SCARA Style Arm Kit +
-{assembly}/4-DoF_SCARA-ish_Arm.pdf[Assembly Instructions]|
-{kitimg}/4-DoF_SCARA.JPG[{imgsize}]
+{assembly}/A-2084-01_Manual.pdf[Assembly Instructions]|
+{kitimg}/A-2084-01.png[{imgsize}]
 
 |====================
 
