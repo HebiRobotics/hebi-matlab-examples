@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- R-Series Arm - 4-DoF -->
+<!-- R-Series SCARA 4-DoF Arm -->
 <group_gains>
     
   <control_strategy>4 4 4 4</control_strategy>
