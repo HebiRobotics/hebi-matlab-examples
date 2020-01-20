@@ -35,6 +35,7 @@ function [ group, kin, params ] = setupArm( kit, family, hasGasSpring )
 %    'A-2240-05G' (5-DoF R-Series Arm + Gripper), 
 %    'A-2240-05' (5-DoF R-Series Arm), 
 %    'A-2240-04' (4-DoF R-Series Arm),
+%    'A-2302-01' (4-DoF R-Series SCARA Arm)
 %
 % The 'family' argument specifies the family name of the modules that
 % should be selected.
@@ -108,7 +109,6 @@ switch kit
         % Default seed positions for doing inverse kinematics
         params.ikSeedPos = [0.01 1.0 2.5 1.5 -1.5 0.01];
         
-  
     case 'A-2085-06'
         %% X-Series 6-DoF Arm
         group = HebiLookup.newGroupFromNames(family, {
@@ -162,8 +162,7 @@ switch kit
 
         % Default seed positions for doing inverse kinematics
         params.ikSeedPos = [0.01 1.0 2.5 1.5 -1.5];
-        
-        
+               
     case 'A-2085-05' 
         %% X-Series 5-DoF Arm
         group = HebiLookup.newGroupFromNames(family, {
@@ -188,7 +187,6 @@ switch kit
         % Default seed positions for doing inverse kinematics
         params.ikSeedPos = [0.01 1.0 2.5 1.5 -1.5];
         
-        
     case 'A-2085-04'
         %% X-Series 4-DoF Arm
         group = HebiLookup.newGroupFromNames(family, {
@@ -211,8 +209,7 @@ switch kit
         
         % Default seed positions for doing inverse kinematics
         params.ikSeedPos = [0.01 1.0 2.5 1.5];
-        
-        
+               
     case 'A-2084-01'
         %% X-Series 4-DoF SCARA Arm
         group = HebiLookup.newGroupFromNames(family, {
@@ -235,8 +232,7 @@ switch kit
         
         % Default seed positions for doing inverse kinematics
         params.ikSeedPos = [0.01 1.0 2.5 1.5];
-        
-        
+                
     case 'A-2085-03'
         %% X-Series 3-DoF Arm
         group = HebiLookup.newGroupFromNames(family, {
@@ -288,7 +284,6 @@ switch kit
         % Default seed positions for doing inverse kinematics
         params.ikSeedPos = [0.01 1.0 2.5 1.5 -1.5 0.01];
         
-  
     case 'A-2240-06'
         %% R-Series 6-DoF Arm
         group = HebiLookup.newGroupFromNames(family, {
@@ -342,8 +337,7 @@ switch kit
 
         % Default seed positions for doing inverse kinematics
         params.ikSeedPos = [0.01 1.0 2.5 1.5 -1.5];
-        
-        
+           
     case 'A-2240-05' 
         %% R-Series 5-DoF Arm
         group = HebiLookup.newGroupFromNames(family, {
@@ -368,7 +362,6 @@ switch kit
         % Default seed positions for doing inverse kinematics
         params.ikSeedPos = [0.01 1.0 2.5 1.5 -1.5];
         
-        
     case 'A-2240-04'
         %% R-Series 4-DoF Arm
         group = HebiLookup.newGroupFromNames(family, {
@@ -390,7 +383,30 @@ switch kit
         params.effortOffset = [0 shoulderJointComp 0 0];
         
         % Default seed positions for doing inverse kinematics
-        params.ikSeedPos = [0.01 1.0 2.5 1.5];        
+        params.ikSeedPos = [0.01 1.0 2.5 1.5];    
+        
+    case 'A-2302-01'
+        %% R-Series 4-DoF SCARA Arm
+        group = HebiLookup.newGroupFromNames(family, {
+            'J1_base'
+            'J2_shoulder'
+            'J3_elbow'
+            'J4_wrist1' });
+        
+        % Kinematic Model
+        kin = HebiKinematics([localDir '/hrdf/A-2302-01']);
+        
+        % Load and send arm gains
+        params.gains = HebiUtils.loadGains([localDir '/gains/A-2302-01']);
+        
+        % No Gripper
+        params.hasGripper = false;
+        
+        % Account for external efforts due to the gas spring
+        params.effortOffset = [0 shoulderJointComp 0 0];
+        
+        % Default seed positions for doing inverse kinematics
+        params.ikSeedPos = [0.01 1.0 2.5 1.5];
         
     otherwise
         
