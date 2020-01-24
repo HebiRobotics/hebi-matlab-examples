@@ -193,7 +193,7 @@ switch kit
             'J1_base'
             'J2_shoulder'
             'J3_elbow'
-            'J4_wrist1' });
+            'J4_wrist' });
         
         % Kinematic Model
         kin = HebiKinematics([localDir '/hrdf/A-2085-04']);
@@ -216,7 +216,7 @@ switch kit
             'J1_base'
             'J2_shoulder'
             'J3_elbow'
-            'J4_wrist1' });
+            'J4_wrist' });
         
         % Kinematic Model
         kin = HebiKinematics([localDir '/hrdf/A-2084-01']);
@@ -368,7 +368,7 @@ switch kit
             'J1_base'
             'J2_shoulder'
             'J3_elbow'
-            'J4_wrist1' });
+            'J4_wrist' });
         
         % Kinematic Model
         kin = HebiKinematics([localDir '/hrdf/A-2240-04']);
@@ -391,7 +391,7 @@ switch kit
             'J1_base'
             'J2_shoulder'
             'J3_elbow'
-            'J4_wrist1' });
+            'J4_wrist' });
         
         % Kinematic Model
         kin = HebiKinematics([localDir '/hrdf/A-2302-01']);
