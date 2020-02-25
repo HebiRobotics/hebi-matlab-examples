@@ -416,11 +416,8 @@ end
 
 
 %% Common Setup
-
-% Make sure that the gains are set
-while ~group.send('gains', params.gains, 'RequestAck', true)
-end
 arm = HebiArm(group, kin);
+arm.setGains(params.gains);
 
 % Setup gripper
 if params.hasGripper

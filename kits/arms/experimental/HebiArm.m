@@ -13,29 +13,31 @@ classdef HebiArm < handle
     %     List<struct<armState, auxState>> waypoints;
     % * speed factor? auto-timing?
     
-    properties(Access = public)
-        enableCommands logical = true; % position / velocities / dynamics comp %TODO: disabling should clear active trajectory
-        enableDynamicsComp logical = true; % efforts to compensate for joint accelerations
-        enableGravComp logical = true; % efforts to compensate for gravitational accelerations
-        gripper HebiGripper = HebiGripper(HebiUtils.newImitationGroup(1)); % auxiliary device
-    end
-    
     properties(SetAccess = private)
         group HebiGroup;
         kin HebiKinematics;
         trajGen HebiTrajectoryGenerator;
         traj HebiTrajectory;
+        
+        state struct = [];
+    end
+    
+    properties(Access = public)
+        plugins cell = {};
     end
     
     properties(Access = private)
+        cmd = CommandStruct();
         trajStartTime double = 0;
-        prevState struct = [];
         nZeros double;
     end
     
     methods
         
         function this = HebiArm(varargin)
+            if length(varargin) ~= 2
+               error('expected 2 arguments: group, kinematics'); 
+            end
             this.group = varargin{1};
             this.kin = varargin{2};
             
@@ -46,29 +48,36 @@ classdef HebiArm < handle
             this.nZeros = zeros(1, this.kin.getNumDoF);
         end
         
-        function [] = initialize(this)
-            % TODO: soft-start, maybe soft-start to goal, within some time,
-            % gains, etc. -> soft-start pos/vel (waypoints) and maybe also
-            % effort (pre grav-comp / dynamics-comp)
-            %
-            % Initializes with soft-start to current feedback
-            % maybe also a moveHome()? setHome()?
+        function [] = setGains(this, gains)
+            freq = this.group.getFeedbackFrequency();
+            finally = onCleanup(@() this.group.setFeedbackFrequency(freq));
+            this.group.setFeedbackFrequency(0);
             
-            fbk = this.group.getNextFeedbackFull();
-            this.traj = this.trajGen.newJointMove(...
-                [fbk.position; fbk.position], ...
-                'time', [0 1]);
-            this.update(); % init state
-            
+            maxRetries = 10;
+            while ~this.group.send('gains', gains, 'RequestAck', true)
+                maxRetries = maxRetries - 1;
+                if maxRetries == 0
+                    error('Failed to verify setting gains due to timeouts');
+                end
+            end
+        end
+        
+        function [] = cancelGoal(this)
+            % CANCELGOAL cancels any active goal, returning to a
+            % "weightless" state that does not actively command position
+            % or velocity
+            this.traj = [];
         end
 
         function [] = setGoal(this, varargin)
             %arm.setGoal('positions', pos, 'velocities', vel, 'accelerations', accel, 'time', time); 
             % Calculates trajectory from current pos (fbk) to target
             % same as newJointMove, but includes current state? [cmdPos pos] => traj generator
+            %
+            % Note that update() must be called before setGoal()!
             
-            if isempty(this.prevState)
-                error('trajectory has not yet been initialized');
+            if isempty(this.state)
+               error('update() must be called at least once before setGoal()'); 
             end
             
             % Recalculates the active trajectory from the last commanded
@@ -80,9 +89,8 @@ classdef HebiArm < handle
             parser.parse(varargin{:});
             goal = parser.Results;
             
-            % Set default constraints if unspecified
-            defaultConstraints = goal.Positions;
-            defaultConstraints(:) = nan;
+            % Set default constraints if unspecified            
+            defaultConstraints = nan * goal.Positions;
             defaultConstraints(end,:) = 0;
             if isempty(goal.Velocities)
                 goal.Velocities = defaultConstraints;
@@ -90,16 +98,30 @@ classdef HebiArm < handle
             if isempty(goal.Accelerations)
                 goal.Accelerations = defaultConstraints;
             end
+                    
+            % Start the trajectory from the current state
+            if isempty(this.traj) || isempty(this.state.cmdPos)
+                fbk = this.group.get('feedback');
+                cmdPos = fbk.position;
+                cmdVel = 0 * cmdPos;
+                cmdAccel = 0 * cmdPos;
+                startTime = fbk.time;
+            else
+                cmdPos = this.state.cmdPos;
+                cmdVel = this.state.cmdVel;
+                cmdAccel = this.state.cmdAccel;
+                startTime = this.state.time;
+            end
             
             % Create trajectory starting from last known state 
             % (TODO: timing / duration?)
             % TODO: Time starts always at zero. Passing in zero time would throw
             % a warning unless start is exactly the same (to some epsilon)
             this.traj = this.trajGen.newJointMove(...
-                [this.prevState.cmdPos; goal.Positions], ...
-                'Velocities', [this.prevState.cmdVel; goal.Velocities], ...
-                'Accelerations', [this.prevState.cmdAccel; goal.Accelerations]);
-            this.trajStartTime = this.prevState.time;
+                [cmdPos; goal.Positions], ...
+                'Velocities', [cmdVel; goal.Velocities], ...
+                'Accelerations', [cmdAccel; goal.Accelerations]);
+            this.trajStartTime = startTime;
             
         end
         
@@ -110,66 +132,52 @@ classdef HebiArm < handle
         function [progress] = getProgress(this)
             % returns normalized [0-1] time of where trajectory is
             % currently at
-            if isempty(this.traj) || isempty(this.prevState)
+            if isempty(this.traj) || isempty(this.state)
                 error('trajectory not initialized');
             end
             
-            t = this.prevState.time-this.trajStartTime;
+            t = this.state.time-this.trajStartTime;
             progress = min(t / this.traj.getDuration(),1);
             
         end
         
-        function [cmd, state] = update(this)
-            % reads feedback, updates state, calculates commands
+        function [] = update(this)
+            % reads feedback and updates internal state
             
             % Read feedback
-            fbk = this.group.getNextFeedbackFull();
-            time = fbk.time;
+            newState = struct();
+            newState.fbk = this.group.getNextFeedbackFull();
+            newState.time = newState.fbk.time;
+            newState.numDoF = this.kin.getNumDoF();
             
-            % Initialize efforts
-            numDoF = this.kin.getNumDoF();
-            cmdPos = [];
-            cmdVel = [];
-            cmdAccel = [];
-            cmdEffort = zeros(1, numDoF);
-            
-            % Compensate for accelerations due to gravity
-            if this.enableGravComp
-                cmdEffort = cmdEffort + this.getGravCompEfforts(fbk);
-            end
+            % Always compensate for accelerations due to gravity
+            newState.cmdEffort = this.getGravCompEfforts(newState.fbk);
             
             % Add pos/vel/accel commands
-            if this.enableCommands && ~isempty(this.traj)
+            if ~isempty(this.traj)
                 
                 % Evaluate trajectory state
-                t = min(time - this.trajStartTime, this.traj.getDuration());
-                [cmdPos, cmdVel, cmdAccel] = this.traj.getState(t);
+                t = min(newState.time - this.trajStartTime, this.traj.getDuration());
+                [ newState.cmdPos,  newState.cmdVel,  newState.cmdAccel] = this.traj.getState(t);
                 
                 % Compensate for joint accelerations
-                if this.enableDynamicsComp
-                    cmdEffort = cmdEffort + this.kin.getDynamicCompEfforts(...
-                        fbk.position, cmdPos, cmdVel, cmdAccel);
-                end
+                newState.cmdEffort = this.kin.getDynamicCompEfforts(...
+                    newState.fbk.position, ...
+                    newState.cmdPos, ...
+                    newState.cmdVel, ...
+                    newState.cmdAccel) + newState.cmdEffort;
                 
+            else
+                newState.cmdPos = [];
+                newState.cmdVel = [];
+                newState.cmdAccel = [];
             end
             
-            % Setup command struct
-            cmd = CommandStruct(); % TODO: reuse somehow?
-            cmd.position = cmdPos;
-            cmd.velocity = cmdVel;
-            cmd.effort = cmdEffort;
-            
-            % Populate state feedback
-            state = struct();
-            state.fbk = fbk;
-            state.time = time;
-            state.cmdPos = cmdPos;
-            state.cmdVel = cmdVel;
-            state.cmdAccel = cmdAccel;
-            state.cmdEffort = cmdEffort;
-            
-            % TODO: add FK, Jacobians, End-Effector XYZ / Wrench, etc.
-            this.prevState = state;
+            % Call plugins (FK, Jacobians, End-Effector XYZ, etc.)
+            for i=1:length(this.plugins)
+                newState = this.plugins{i}.update(newState, this.state);
+            end            
+            this.state = newState;
             
             % TODO: --> user code
             % * add effort offsets for e.g. spring.
@@ -179,10 +187,16 @@ classdef HebiArm < handle
 
         end
         
-        function [] = send(this, cmd)
-            % refreshes group commands of arm and gripper
-           this.group.send(cmd); 
-           this.gripper.setState(this.gripper.state);
+        function [] = send(this, varargin)
+            % SEND sends the current command state to the module group
+            
+            % Setup command struct
+            this.cmd.position = this.state.cmdPos;
+            this.cmd.velocity = this.state.cmdVel;
+            this.cmd.effort = this.state.cmdEffort;
+            
+            % Send state to module
+            this.group.send(this.cmd, varargin{:});
         end
         
     end
