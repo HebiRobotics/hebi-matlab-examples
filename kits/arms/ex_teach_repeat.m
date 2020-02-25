@@ -25,7 +25,7 @@ hasGasSpring = false;  % If you attach a gas spring to the shoulder for
 
 [ arm, params ] = setupArm( armName, armFamily, hasGasSpring );
 arm.group.setFeedbackFrequency(100);
-arm.trajGen.setMinDuration(0.75);   % Min move time for 'small' movements
+arm.trajGen.setMinDuration(1.0);   % Min move time for 'small' movements
                                    % (default is 1.0)
 arm.trajGen.setSpeedFactor(0.75);  % Slow down movements to a safer speed.
                                    % (default is 1.0)

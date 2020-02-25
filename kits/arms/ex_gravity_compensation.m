@@ -22,11 +22,12 @@ armFamily = 'Arm';
 hasGasSpring = false;  % If you attach a gas spring to the shoulder for
                        % extra payload, set this to TRUE.
 
-[ arm, armParams ] = setupArm( armName, armFamily, hasGasSpring );
+[ arm, params ] = setupArm( armName, armFamily, hasGasSpring );
+arm.plugins = {
+	EffortOffsetPlugin(params.effortOffset)  
+};
 
-effortOffset = armParams.effortOffset;
-localDir = armParams.localDir;
-
+localDir = params.localDir;
 enableLogging = true;
 
 % Start background logging 
@@ -40,18 +41,11 @@ disp('Press ESC to stop.');
 
 % Keyboard input
 kb = HebiKeyboard();
-keys = read(kb);
+while ~read(kb).ESC   
+    
+    arm.update();
+    arm.send();
 
-arm.gripper.open();
-while ~keys.ESC   
-    
-    [cmd, state] = arm.update();
-    cmd.effort = cmd.effort + effortOffset;
-    arm.send(cmd);
-    
-    % Check for new key presses on the keyboard
-    keys = read(kb);
-    
 end
 
 %%
@@ -67,7 +61,7 @@ if enableLogging
    HebiUtils.plotLogs(hebilog, 'effort');
    
    % Plot the end-effectory trajectory and error
-   kinematics_analysis( hebilog, armKin );
+   kinematics_analysis( hebilog, arm.kin );
    
    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
    % Feel free to put more plotting code here %
