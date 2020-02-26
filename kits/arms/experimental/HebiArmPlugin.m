@@ -15,7 +15,7 @@ classdef HebiArmPlugin < handle
     %   * cmdEffort [Nm|N]
     
     methods(Abstract)
-        newState = update(this, newState, prevState)
+        newState = update(this, newState, arm)
     end
     
     % Inherited methods that we don't want to see in auto-complete

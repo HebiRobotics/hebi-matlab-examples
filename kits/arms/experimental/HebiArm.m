@@ -17,12 +17,11 @@ classdef HebiArm < handle
         group HebiGroup;
         kin HebiKinematics;
         trajGen HebiTrajectoryGenerator;
-        traj HebiTrajectory;
-        
-        state struct = [];
+        traj;
     end
     
     properties(Access = public)
+        state struct = [];
         plugins cell = {};
     end
     
@@ -48,7 +47,10 @@ classdef HebiArm < handle
             this.nZeros = zeros(1, this.kin.getNumDoF);
         end
         
-        function [] = setGains(this, gains)
+        function [] = sendGains(this, gains)
+            % SENDGAINS sends the specified gains and verifies that the
+            % gains actually got set. The time may be non-deterministic and
+            % should not be called inside a control loop.
             freq = this.group.getFeedbackFrequency();
             finally = onCleanup(@() this.group.setFeedbackFrequency(freq));
             this.group.setFeedbackFrequency(0);
@@ -66,6 +68,8 @@ classdef HebiArm < handle
             % CANCELGOAL cancels any active goal, returning to a
             % "weightless" state that does not actively command position
             % or velocity
+            % TODO: naming came from C++, but I always write "clearGoal"
+            % instead... change it?
             this.traj = [];
         end
 
@@ -175,7 +179,7 @@ classdef HebiArm < handle
             
             % Call plugins (FK, Jacobians, End-Effector XYZ, etc.)
             for i=1:length(this.plugins)
-                newState = this.plugins{i}.update(newState, this.state);
+                newState = this.plugins{i}.update(newState, this);
             end            
             this.state = newState;
             

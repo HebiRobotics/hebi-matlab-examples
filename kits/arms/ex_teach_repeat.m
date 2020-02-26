@@ -37,7 +37,6 @@ arm.plugins = {
 kb = HebiKeyboard();
 localDir = params.localDir;
 
-
 % === Demo configuration ===
 % Select whether waypoints should be done as a single trajectory, or
 % multiple trajectories that stop in between.
@@ -82,7 +81,7 @@ if numWaypoints == 0
     waypointFileName = 'defaultWaypoints';
     
     tempStruct = load( [waypointDir waypointFileName] );
-    waypoints = tempStruct.waypoints(:,1:numDoF);
+    waypoints = tempStruct.waypoints(:,1:arm.kin.getNumDoF());
     
     disp('  '); 
     disp('No waypoints saved.  Loading default waypoints.');  
@@ -115,16 +114,11 @@ if enableLogging
 end
 
 % Move from current position to first waypoint
+arm.cancelGoal();
 arm.update();
 arm.setGoal(waypoints(1,:));
 abortFlag = false;
 while ~arm.isAtGoal() && ~abortFlag
-    
-   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-   % If you want to do something with the latest feedback to
-   % change the commands, replan a trajectory, abort, or do
-   % anything else, this is a pretty good place to do it.
-   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
    arm.update();
    arm.send();
    
@@ -149,48 +143,30 @@ end
 disp('Beginning playback.');
 disp('Press ESC to stop.');
 
-% Move along waypoints
+% Move along waypoints in a loop
 while ~abortFlag
-    arm.update();
     
-    if stopBetweenWaypoints
-
-        % Split waypoints into individual movements
-        numMoves = size(waypoints,1);
-        for i = 2:numMoves
-            
-            % Move to next waypoint
-            arm.setGoal(waypoints(i,:));
-            while ~arm.isAtGoal() && ~abortFlag
-                arm.update();
-                arm.send();
-                abortFlag = read(kb).ESC;
-            end
-            
-            if abortFlag
-                break;
-            end
-            
-        end
-        
+    if ~stopBetweenWaypoints
+        % Moves through all waypoints in one movement
+        arm.setGoal(waypoints);
     else
-            
-        % Move through all waypoints in one movement
-        arm.setGoal(waypoints(2:end,:));
-        while ~arm.isAtGoal() && ~abortFlag
-           arm.update();
-           arm.send();
-           abortFlag = read(kb).ESC;
-        end
-        
+        % Adds zero velocity/acceleration constraints at each
+        % waypoint to force a short stop
+        arm.setGoal(waypoints, ...
+            'velocities', 0 * waypoints, ...
+            'accelerations', 0 * waypoints);
     end
-      
-    % Move back to the first waypoint
-    arm.setGoal(waypoints(1,:));
+    
+    % Execute motion
     while ~arm.isAtGoal() && ~abortFlag
        arm.update();
-       arm.send();
-       abortFlag = read(kb).ESC;
+       %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+       % If you want to do something with the latest feedback to
+       % change the commands, replan a trajectory, abort, or do
+       % anything else, this is a pretty good place to do it.
+       %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        arm.send();
+        abortFlag = read(kb).ESC;
     end
     
 end
