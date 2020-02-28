@@ -193,10 +193,13 @@ classdef HebiArm < handle
                     newState.cmdAux = this.aux(auxRow, :);
                 end
                 
+                newState.trajTime = t;
+                
             else
                 newState.cmdPos = [];
                 newState.cmdVel = [];
                 newState.cmdAccel = [];
+                newState.trajTime = [];
             end
             
             % Call plugins (FK, Jacobians, End-Effector XYZ, etc.)

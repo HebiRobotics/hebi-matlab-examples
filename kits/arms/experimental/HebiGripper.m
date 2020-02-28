@@ -36,15 +36,17 @@ classdef HebiGripper < handle
             state = this.setState(~this.state);
         end
         
-        function newState = setState(this, value)
-            %setState Summary of this method goes here
-            %   Detailed explanation goes here
-            if ~isnan(value)
-                newState = logical(value);
+        function state = setState(this, state)
+            %SETSTATE sets gripper to a value between [0-1] where 0 is
+            % fully open and 1 is fully closed. 'nan' is ignored.
+            if state < 0 || state > 1
+               error('Gripper state must be [0-1]'); 
+            end
+            if ~isnan(state)
                 this.cmd.effort = ...
-                    (newState * this.closeEffort) + ...
-                    (~newState * this.openEffort);
-                this.state = newState;
+                    state * this.closeEffort + ...
+                    (1-state) * this.openEffort;
+                this.state = state;
             end
         end
         
