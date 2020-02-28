@@ -29,7 +29,7 @@ hasGasSpring = true;  % If you attach a gas spring to the shoulder for
 [ arm, params ] = setupArm( armName, armFamily, hasGasSpring );  
 impedanceController = ImpedanceControlPlugin();
 arm.plugins = {
-	EffortOffsetPlugin(params.effortOffset)
+    EffortOffsetPlugin(params.effortOffset)
     impedanceController
 };
 
