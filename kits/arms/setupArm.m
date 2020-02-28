@@ -1,4 +1,4 @@
-function [ arm, params ] = setupArm( kit, family, hasGasSpring )
+function [ arm, params, gripper ] = setupArm( kit, family, hasGasSpring )
 % SETUPARM creates models and loads parameters for controlling various 
 % pre-configured arm kits.
 %
@@ -417,9 +417,10 @@ end
 
 %% Common Setup
 arm = HebiArm(group, kin);
-arm.setGains(params.gains);
+arm.sendGains(params.gains);
 
 % Setup gripper
+gripper = [];
 if params.hasGripper
     
     gripperGroup = HebiLookup.newGroupFromNames( family, 'Spool' );
@@ -429,7 +430,6 @@ if params.hasGripper
     gripper = HebiGripper(gripperGroup);
     gripper.openEffort = params.gripperOpenEffort;
     gripper.closeEffort = params.gripperCloseEffort;
-    arm.gripper = gripper;
     
 end
 

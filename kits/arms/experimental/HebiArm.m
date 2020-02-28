@@ -29,6 +29,8 @@ classdef HebiArm < handle
         cmd = CommandStruct();
         trajStartTime double = 0;
         nZeros double;
+        aux double;
+        auxTime double;
     end
     
     methods
@@ -90,6 +92,7 @@ classdef HebiArm < handle
             parser.addRequired('Positions');
             parser.addOptional('Velocities', []);
             parser.addOptional('Accelerations', []);
+            parser.addOptional('Aux', []);
             parser.parse(varargin{:});
             goal = parser.Results;
             
@@ -127,6 +130,18 @@ classdef HebiArm < handle
                 'Accelerations', [cmdAccel; goal.Accelerations]);
             this.trajStartTime = startTime;
             
+            if isempty(goal.Aux)
+               this.aux = [];
+               this.auxTime = [];
+            else
+               initialAux = goal.Aux(1,:) * nan; % TODO: improve when known?
+               this.aux = [initialAux; goal.Aux];
+               this.auxTime = this.traj.getWaypointTime();
+               if size(this.aux, 1) ~= length(this.auxTime)
+                   error(['Expected Aux: ' num2str(length(this.auxTime)-1) 'xM matrix']);
+               end
+            end
+            
         end
         
         function value = isAtGoal(this)
@@ -158,6 +173,7 @@ classdef HebiArm < handle
             newState.cmdEffort = this.getGravCompEfforts(newState.fbk);
             
             % Add pos/vel/accel commands
+            newState.cmdAux = [];
             if ~isempty(this.traj)
                 
                 % Evaluate trajectory state
@@ -170,6 +186,12 @@ classdef HebiArm < handle
                     newState.cmdPos, ...
                     newState.cmdVel, ...
                     newState.cmdAccel) + newState.cmdEffort;
+                
+                % Add aux (e.g. gripper state)
+                if ~isempty(this.aux)
+                    auxRow = find(t >= this.auxTime, 1, 'last' );
+                    newState.cmdAux = this.aux(auxRow, :);
+                end
                 
             else
                 newState.cmdPos = [];

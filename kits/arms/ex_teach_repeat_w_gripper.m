@@ -25,11 +25,11 @@ armFamily = 'Arm';
 hasGasSpring = false;  % If you attach a gas spring to the shoulder for
                        % extra payload, set this to TRUE.
 
-[ arm, armParams ] = setupArm( armName, armFamily, hasGasSpring );
+[ arm, params, gripper ] = setupArm( armName, armFamily, hasGasSpring );
 arm.group.setFeedbackFrequency(100);
-
-effortOffset = armParams.effortOffset;
-localDir = armParams.localDir;
+arm.plugins = {
+    EffortOffsetPlugin(params.effortOffset)
+};
 
 % Keyboard input
 kb = HebiKeyboard();
@@ -49,9 +49,7 @@ disp('  ESC  - Exits waypoint training mode.');
 disp('         If no waypoints are set, default waypoints are loaded.');
 disp('  ');
 
-arm.gripper.open(); % initialize gripper state to open
-arm.enableCommands = false; % disables position / velocities / accel-comp-efforts
-
+gripper.open(); % initialize gripper state to open
 waypoints = [];
 gripStates = [];
 
@@ -59,9 +57,9 @@ keys = read(kb);
 while keys.ESC == 0
     
     % Do grav-comp while training waypoints
-    [cmd, state] = arm.update();
-    cmd.effort = cmd.effort + effortOffset;  
-    arm.send(cmd);
+    arm.update();
+    arm.send();
+    gripper.send();
                         
     % Add new waypoints 
     [keys, diffKeys] = read(kb);
@@ -69,13 +67,13 @@ while keys.ESC == 0
     % Toggle gripper on CTRL key press
     if diffKeys.CTRL == 1 
         disp('Toggling Gripper.');
-        arm.gripper.toggle();
+        gripper.toggle();
     end
     
     % Store waypoints on CTRL or ALT press
     if diffKeys.CTRL == 1 || diffKeys.ALT == 1
-        waypoints(end+1,:) = state.fbk.position;
-        gripStates(end+1,:) = arm.gripper.state;
+        waypoints(end+1,:) = arm.state.fbk.position;
+        gripStates(end+1,:) = gripper.state;
         disp('Waypoint added.');
     end
 
@@ -85,7 +83,7 @@ numWaypoints = size(waypoints,1);
 if numWaypoints == 0
     % Load the set of default waypoints for a 6-DoF arm and trim them down 
     % to the proper number of DoF.
-    waypointDir = [localDir '/waypoints/'];
+    waypointDir = [params.localDir '/waypoints/'];
     waypointFileName = 'defaultWaypoints';
     
     tempStruct = load( [waypointDir waypointFileName] );
@@ -96,7 +94,7 @@ if numWaypoints == 0
     disp('No waypoints saved.  Loading default waypoints.');  
 else
     
-    waypointDir = [localDir '/waypoints'];
+    waypointDir = [params.localDir '/waypoints'];
     waypointFileName = 'latestWaypoints';
     save([waypointDir '/' waypointFileName], 'waypoints', 'gripStates');
     
@@ -108,27 +106,26 @@ disp( 'Press SPACE to move to first waypoint.' );
 % Stay in grav-comp mode to prevent sudden movements from effort commands 
 % turning on and off.
 while keys.SPACE == 0
-    [cmd, state] = arm.update();
-    cmd.effort = cmd.effort + effortOffset;
-    arm.send(cmd);
+    arm.update();
+    arm.send();
+    gripper.send();
     keys = read(kb);
 end
-
-abortFlag = false;
 
 %% 
 %%%%%%%%%%%%%%%%%%%%
 % Replay waypoints %
 %%%%%%%%%%%%%%%%%%%%
+abortFlag = false;
 
 % Start background logging 
 if enableLogging
-   logFile = arm.group.startLog( 'dir', [localDir '/logs'] ); 
+   logFile = arm.group.startLog( 'dir', [params.localDir '/logs'] ); 
 end
 
 % Move from current position to first waypoint
-arm.enableCommands = true;
-arm.initialize(); % TODO: warm startup! 
+arm.cancelGoal();
+arm.update();
 arm.setGoal(waypoints(1,:));
 
 % Execute the trajectory to the first waypoint
@@ -136,23 +133,16 @@ disp('  ');
 disp('Ready to begin playback.');
 disp('Press SPACE again to begin.');
 
-while true
+keys = read(kb);
+while ~arm.isAtGoal() || keys.SPACE == 0 && ~abortFlag
 
-    [cmd, state] = arm.update();
-    cmd.effort = cmd.effort + effortOffset;
-    arm.send(cmd);
+    arm.update();
+    arm.send();
    
     % Check for keyboard input and break out of the main loop
     % if the ESC key is pressed.  
-    keys = read(kb);    
-    if keys.ESC == 1
-        abortFlag = true;
-        break;
-    end
-    
-    if arm.isAtGoal() && keys.SPACE == 1
-       break; 
-    end
+    keys = read(kb);   
+    abortFlag = keys.ESC;
     
 end
 
@@ -165,19 +155,18 @@ disp('Press ESC to stop.');
 %%%%%%%%%%%%%%%%%%%%%%%%
 while ~abortFlag
     
-    arm.setGoal(waypoints, 'velocities', zeros(size(waypoints)), 'accelerations', zeros(size(waypoints))); 
-    while ~arm.isAtGoal()
-        
-        cmd = arm.update();
-        cmd.effort = cmd.effort + effortOffset;
-        arm.send(cmd);
-        
-        [keys] = read(kb);
-        if keys.ESC == 1
-            abortFlag = true;
-            break;
-        end
-        
+    % Add zero constraints to stop at each waypoint
+    arm.setGoal(waypoints, ...
+        'velocities', 0 * waypoints, ...
+        'accelerations', 0 * waypoints, ...
+        'aux', gripStates);
+    
+    while ~arm.isAtGoal() && ~abortFlag
+        arm.update();
+        arm.send();
+        gripper.setState(arm.state.cmdAux);
+        gripper.send();
+        abortFlag = read(kb).ESC;
     end
 
 end
@@ -201,7 +190,7 @@ if enableLogging
    HebiUtils.plotLogs(hebilog, 'effort');
    
    % Plot the end-effectory trajectory and error
-   kinematics_analysis( hebilog, armKin );
+   kinematics_analysis( hebilog, arm.kin );
    
    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
    % Feel free to put more plotting code here %
