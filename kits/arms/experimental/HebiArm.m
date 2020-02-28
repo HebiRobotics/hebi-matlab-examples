@@ -70,8 +70,8 @@ classdef HebiArm < handle
             % CANCELGOAL cancels any active goal, returning to a
             % "weightless" state that does not actively command position
             % or velocity
-            % TODO: naming came from C++, but I always write "clearGoal"
-            % instead... change it?
+            % TODO: name copied from C++, but I think "clearGoal" may fit
+            % better.
             this.traj = [];
         end
 
@@ -93,6 +93,7 @@ classdef HebiArm < handle
             parser.addOptional('Velocities', []);
             parser.addOptional('Accelerations', []);
             parser.addOptional('Aux', []);
+            parser.addOptional('Time', []);
             parser.parse(varargin{:});
             goal = parser.Results;
             
@@ -120,6 +121,11 @@ classdef HebiArm < handle
                 startTime = this.state.time;
             end
             
+            timeArgs = {};
+            if ~isempty(goal.Time)
+                timeArgs = {'Time', [0; goal.Time(:)]};
+            end
+            
             % Create trajectory starting from last known state 
             % (TODO: timing / duration?)
             % TODO: Time starts always at zero. Passing in zero time would throw
@@ -127,7 +133,8 @@ classdef HebiArm < handle
             this.traj = this.trajGen.newJointMove(...
                 [cmdPos; goal.Positions], ...
                 'Velocities', [cmdVel; goal.Velocities], ...
-                'Accelerations', [cmdAccel; goal.Accelerations]);
+                'Accelerations', [cmdAccel; goal.Accelerations], ...
+                timeArgs{:});
             this.trajStartTime = startTime;
             
             if isempty(goal.Aux)
