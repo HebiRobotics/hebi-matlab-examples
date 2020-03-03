@@ -22,11 +22,10 @@ function rosieDemo( mobileBaseType )
         case 'diff-drive'
             [chassisParams, chassisTrajGen] = setupDiffDriveBase();
         case 'mecanum'
-            disp('Mecanum base not yet implemented');
-            return;
+            [chassisParams, chassisTrajGen] = setupMecanumBase();
         otherwise
             disp('Base type not recognized.'); 
-            disp('Please choose: OMNI or DIFF-DRIVE');
+            disp('Please choose: OMNI, DIFF-DRIVE, or MECANUM');
             return;
     end
 

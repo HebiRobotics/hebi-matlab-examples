@@ -69,9 +69,9 @@ while true
     
     % Map joystick inputs to motions
     normVel = ...
-        [1  1  1  1] * -latestPhoneIO.a2 + ... % forward (spin all same way)
-        [-1  -1 1 1] *  latestPhoneIO.a7 + ... % rotation (spin sides opposite ways)
-        [-1 1 1  -1] *  latestPhoneIO.a1;      % sideways strafe
+        [1 1 1 1] * -latestPhoneIO.a2 + ... % forward (spin all same way)
+        [-1 -1 1 1] *  latestPhoneIO.a7 + ... % rotation (spin sides opposite ways)
+        [-1 1 1 -1] *  latestPhoneIO.a1;      % sideways strafe
         
     % Limit the summed velocities to the maximum 
     maxVel = max(abs(normVel));
@@ -81,7 +81,7 @@ while true
     
     % Account for the physical mounting of the wheels on the
     % robot, i.e., convert to local frames and send out
-    mounting = [-1  -1  1 1];
+    mounting = [-1 -1 1 1];
     cmd.velocity = normVel .* mounting * maxSpeed;
     wheels.send(cmd);
     
