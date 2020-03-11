@@ -122,7 +122,8 @@ while ~abortFlag
     
     % Set trajectories to normal speed for following mobile input
     arm.trajGen.setSpeedFactor( 1.0 );
-    arm.trajGen.setMinDuration( 0.5 );
+    arm.trajGen.setMinDuration( 0.5 ); % (acts as a 'low-pass' for user input)
+    goalPosition = ikPosition;
     while ~abortFlag
 
         %%%%%%%%%%%%%%%%%%%
@@ -131,6 +132,7 @@ while ~abortFlag
         try
             arm.update();
             arm.send();
+            gripper.send();
         catch
             disp('Could not get robot feedback!');
             break;
@@ -148,6 +150,11 @@ while ~abortFlag
         hasNewPhoneFbk = ~isempty(phoneGroup.getNextFeedback( ...
             fbkPhoneIO, fbkPhoneMobile, ... % overwrite existing structs
             'timeout', 0 )); % prevent blocking due to bad comms
+        
+        % Abort goal updates if the phone didn't respond
+        if ~hasNewPhoneFbk
+            continue;
+        end
 
         
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -167,7 +174,6 @@ while ~abortFlag
         % Map [-1,+1] slider to [0,1] range such that down is close
         if ~isempty(gripper)
             gripper.setState((fbkPhoneIO.(gripForceSlider) - 1) / -2);
-            gripper.send();
         end
         
         % Parameter to limit XYZ Translation of the arm if a slider is
@@ -204,10 +210,14 @@ while ~abortFlag
                                    'SO3', rotMatTarget, ...
                                    'initial', seedPosIK, ...
                                    'MaxIter', 50 ); 
+                               
+        % Ignore 'changes' that are within the noise of the input device
+        hasGoalChanged = any(abs(ikPosition - goalPosition) > 0.01); % [rad]
 
-        % Start new trajectory at the current state                
-        if arm.state.trajTime > 0.1 % limit replanning to 10 Hz (optional)
+        % Start new trajectory at the current state
+        if hasGoalChanged && arm.state.trajTime > 0.1 % limit replanning to 10 Hz (optional)
             arm.setGoal(ikPosition); 
+            goalPosition = ikPosition;
         end
 
     end
