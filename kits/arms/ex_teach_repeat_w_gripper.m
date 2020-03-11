@@ -30,6 +30,10 @@ arm.group.setFeedbackFrequency(100);
 arm.plugins = {
     EffortOffsetPlugin(params.effortOffset)
 };
+arm.trajGen.setMinDuration(1.0);   % Min move time for 'small' movements
+                                   % (e.g. gripper open/close)
+arm.trajGen.setSpeedFactor(0.75);  % Slow down movements to a safer speed.
+                                   % (default is 1.0)
 
 % Keyboard input
 kb = HebiKeyboard();
@@ -63,11 +67,15 @@ while keys.ESC == 0
                         
     % Add new waypoints 
     [keys, diffKeys] = read(kb);
-    
-    % Toggle gripper on CTRL key press
-    if diffKeys.CTRL == 1 
+        
+    % Add 'toggling' waypoint on CTRL press
+    % (shows up as 2 waypoints to allow
+    % the gripper to open or close)
+    if diffKeys.CTRL == 1
         disp('Toggling Gripper.');
         gripper.toggle();
+        waypoints(end+1,:) = arm.state.fbk.position;
+        gripStates(end+1,:) = gripper.state;
     end
     
     % Store waypoints on CTRL or ALT press
@@ -124,8 +132,7 @@ if enableLogging
 end
 
 % Move from current position to first waypoint
-arm.cancelGoal();
-arm.update();
+arm.initialize();
 arm.setGoal(waypoints(1,:));
 
 % Execute the trajectory to the first waypoint

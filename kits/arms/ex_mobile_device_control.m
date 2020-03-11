@@ -91,17 +91,14 @@ while ~abortFlag
     ikPosition = arm.kin.getIK('xyz', xyzTarget_init, ...
                                'so3', rotMatTarget_init, ...
                                'initial', params.ikSeedPos );   
-      
-    % Reset trajectory state
-    arm.update();
-    arm.cancelGoal();
-                           
-    % Slow trajectory for the initial move to home position   
+        
+    % Slow trajectory timing for the initial move to home position   
     arm.trajGen.setSpeedFactor( 0.5 );
     arm.trajGen.setMinDuration( 1.0 );
-    arm.setGoal(ikPosition);
-
+    
     % Move to initial position
+    arm.initialize();
+    arm.setGoal(ikPosition);
     while ~arm.isAtGoal
         arm.update();
         arm.send();

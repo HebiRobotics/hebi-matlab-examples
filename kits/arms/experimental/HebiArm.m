@@ -43,9 +43,6 @@ classdef HebiArm < handle
             this.kin = varargin{2};
             
             this.trajGen = HebiTrajectoryGenerator(this.kin);
-            this.trajGen.setMinDuration(1.00); % min move time for 'small' movements (default 1.0)
-            this.trajGen.setSpeedFactor(0.75); % slow down to safer speed (default = 1.0)
-            
             this.nZeros = zeros(1, this.kin.getNumDoF);
         end
         
@@ -66,12 +63,16 @@ classdef HebiArm < handle
             end
         end
         
-        function [] = cancelGoal(this)
-            % CANCELGOAL cancels any active goal, returning to a
+        function [] = initialize(this)
+           % INITIALIZE resets any internal state and initializes feedback
+           this.clearGoal();
+           this.update();
+        end
+        
+        function [] = clearGoal(this)
+            % CLEARGOAL cancels any active goal, returning to a
             % "weightless" state that does not actively command position
             % or velocity
-            % TODO: name copied from C++, but I think "clearGoal" may fit
-            % better.
             this.traj = [];
         end
 
@@ -79,11 +80,9 @@ classdef HebiArm < handle
             %arm.setGoal('positions', pos, 'velocities', vel, 'accelerations', accel, 'time', time); 
             % Calculates trajectory from current pos (fbk) to target
             % same as newJointMove, but includes current state? [cmdPos pos] => traj generator
-            %
-            % Note that update() must be called before setGoal()!
             
             if isempty(this.state)
-               error('update() must be called at least once before setGoal()'); 
+               error('Internal state has not been initialized. Please call initialize() before calling setGoal()'); 
             end
             
             % Recalculates the active trajectory from the last commanded

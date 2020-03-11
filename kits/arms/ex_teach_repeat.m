@@ -114,8 +114,7 @@ if enableLogging
 end
 
 % Move from current position to first waypoint
-arm.cancelGoal();
-arm.update();
+arm.initialize();
 arm.setGoal(waypoints(1,:));
 abortFlag = false;
 while ~arm.isAtGoal() && ~abortFlag

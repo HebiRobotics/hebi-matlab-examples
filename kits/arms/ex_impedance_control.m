@@ -102,10 +102,9 @@ keys = read(kb);
 controllerOn = false;
 while ~keys.ESC   
     
-    % update state and disable pos/vel controllers
+    % update state and disable position controller
     arm.update();
     arm.state.cmdPos = []; 
-    arm.state.cmdVel = [];
     arm.send();
 
     % Check for new key presses on the keyboard
@@ -120,7 +119,7 @@ while ~keys.ESC
             arm.setGoal(arm.state.fbk.position);
         else
             disp('Impedance Controller DISABLED.');
-            arm.cancelGoal();
+            arm.clearGoal();
         end
         
     end
