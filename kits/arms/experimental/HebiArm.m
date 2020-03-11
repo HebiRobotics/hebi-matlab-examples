@@ -1,17 +1,30 @@
 classdef HebiArm < handle
-    %HEBIARM Summary of this class goes here
-    %   Detailed explanation goes here
+    %HEBIARM is a higher-level API for working with serial configurations
     %
+    %   HebiArm simplifies many of the tasks commonly encountered when
+    %   with arm-like configurations such as trajectory replanning,
+    %   acceleration compensation, and keeping track of auxiliary state 
+    %   such as a gripper.
     %
-    % % TODO:
-    % * add arm.initialize() or arm.moveHome()?
-    % * we need to ramp-up/soft-start. Scale gains?
-    % * remove duplicate waypoints from auto-timing
-    % * add a data type to store waypoints, e.g., a list-like structure
-    %     wpts = HebiWaypoints();
-    %     wpts.add(fbk.position, aux.state);
-    %     List<struct<armState, auxState>> waypoints;
-    % * speed factor? auto-timing?
+    %   It also features a plugin mechanism to enable optional features
+    %   such as offsetting efforts when working with external springs, or
+    %   adding impedance control.
+    %
+    %   Example
+    %      % Setup the arm
+    %      group = HebiLookup.newGroupFromNames('Arm', 'J*');
+    %      kin = HebiKinematics('A-2085-06.hrdf');
+    %      arm = HebiArm(group, kin);
+    %
+    %      % Move to home position
+    %      arm.initialize();
+    %      arm.setGoal(homePosition);
+    %      while ~arm.isAtGoal()
+    %          arm.update();
+    %          arm.send();
+    %      end
+    % 
+    % See also HebiArmPlugin
     
     properties(SetAccess = private)
         group HebiGroup;
@@ -36,6 +49,8 @@ classdef HebiArm < handle
     methods
         
         function this = HebiArm(varargin)
+            % HebiArm requires a HebiGroup of devices and a corresponding
+            % HebiKinematics object.
             if length(varargin) ~= 2
                error('expected 2 arguments: group, kinematics'); 
             end
