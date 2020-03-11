@@ -7,7 +7,7 @@ switch simpleName
     case 'hebi_load'
         % Path to the binary library file. By default, it is assumed that
         % the library is placed in the same folder as this file.
-        config.libraryVersion = 'hebi-matlab-1.7';
+        config.libraryVersion = 'hebi-matlab-1.7.1-SNAPSHOT';
         config.libraryPath = fileparts(mfilename('fullpath'));
         
     case 'HebiLookup'
@@ -51,11 +51,11 @@ switch simpleName
         % Minimum time to move between the start and end points of a
         % trajectory. If this value is too low, the accelerations may be
         % faster than physically possible.
-        config.defaultMinDuration = 2.0; % [s]
+        config.defaultMinDuration = 1.0; % [s]
         
         % Speed factor that gets applied to all trajectories. For
         % example, a value of 0.5 would slow down all trajectories to 50%.
-        config.defaultSpeedFactor = 1;
+        config.defaultSpeedFactor = 1.0;
         
         % Algorithm used to calculate trajectories
         config.defaultAlgorithm = 'UnconstrainedQp';
