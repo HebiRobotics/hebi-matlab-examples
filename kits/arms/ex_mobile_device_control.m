@@ -97,7 +97,8 @@ while ~abortFlag
     arm.trajGen.setMinDuration( 1.0 );
     
     % Move to initial position
-    arm.initialize();
+    arm.update();
+    arm.clearGoal(); % in case we run only this section
     arm.setGoal(ikPosition);
     while ~arm.isAtGoal
         arm.update();

@@ -17,7 +17,7 @@ classdef HebiArm < handle
     %      arm = HebiArm(group, kin);
     %
     %      % Move to home position
-    %      arm.initialize();
+    %      arm.update();
     %      arm.setGoal(homePosition);
     %      while ~arm.isAtGoal()
     %          arm.update();
@@ -61,29 +61,6 @@ classdef HebiArm < handle
             this.nZeros = zeros(1, this.kin.getNumDoF);
         end
         
-        function [] = sendGains(this, gains)
-            % SENDGAINS sends the specified gains and verifies that the
-            % gains actually got set. The time may be non-deterministic and
-            % should not be called inside a control loop.
-            freq = this.group.getFeedbackFrequency();
-            finally = onCleanup(@() this.group.setFeedbackFrequency(freq));
-            this.group.setFeedbackFrequency(0);
-            
-            maxRetries = 10;
-            while ~this.group.send('gains', gains, 'RequestAck', true)
-                maxRetries = maxRetries - 1;
-                if maxRetries == 0
-                    error('Failed to verify setting gains due to timeouts');
-                end
-            end
-        end
-        
-        function [] = initialize(this)
-           % INITIALIZE resets any internal state and initializes feedback
-           this.clearGoal();
-           this.update();
-        end
-        
         function [] = clearGoal(this)
             % CLEARGOAL cancels any active goal, returning to a
             % "weightless" state that does not actively command position
@@ -97,7 +74,7 @@ classdef HebiArm < handle
             % same as newJointMove, but includes current state? [cmdPos pos] => traj generator
             
             if isempty(this.state)
-               error('Internal state has not been initialized. Please call initialize() before calling setGoal()'); 
+               error('Internal state has not been initialized. Please call update() before calling setGoal()'); 
             end
             
             % Recalculates the active trajectory from the last commanded
@@ -224,6 +201,7 @@ classdef HebiArm < handle
             end
             
             % Call plugins (FK, Jacobians, End-Effector XYZ, etc.)
+            arm.state = newState; % pass arm directly
             for i=1:length(this.plugins)
                 newState = this.plugins{i}.update(newState, this);
             end            
@@ -252,7 +230,7 @@ classdef HebiArm < handle
     end
     
     % Utility methods used internally
-    methods(Access = private)
+    methods(Access = protected)
         
         function gravCompEfforts = getGravCompEfforts(this, fbk)
             

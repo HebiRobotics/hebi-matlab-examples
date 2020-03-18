@@ -132,7 +132,8 @@ if enableLogging
 end
 
 % Move from current position to first waypoint
-arm.initialize();
+arm.clearGoal(); % if you run in sections ...
+arm.update(); % muste be called first
 arm.setGoal(waypoints(1,:));
 
 % Execute the trajectory to the first waypoint

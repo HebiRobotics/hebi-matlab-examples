@@ -818,6 +818,40 @@ classdef (Sealed) HebiUtils
                              2*(a*c + b*d),         2*(b*c - a*d),  -a^2 - b^2 + c^2 + d^2];
             end    
         end
+        
+        function [] = sendWithRetry(group, varargin)
+            % sendWithRetry sends and ensures delivery of a given message
+            %
+            %   Note that this method may block for an unknown (but bounded)
+            %   time and should not be used inside the main control loop.
+            %
+            %   Example
+            %      group = HebiLookup.newGroupFromFamily('*');
+            %      HebiUtils.sendWithRetry(group, 'led', 'r');
+            %
+            % See also HebiGroup.send
+            
+            % good connectivity -> no changes and return asap
+            if group.send('RequestAck', true, varargin{:})
+                return;
+            end
+            
+            % bad connectivity -> reduce other traffic and retry if needed
+            freq = group.getFeedbackFrequency();
+            finally = onCleanup(@() group.setFeedbackFrequency(freq));
+            group.setFeedbackFrequency(0);
+            
+            maxRetries = 10;
+            for i = 1:maxRetries
+                if group.send('RequestAck', true, varargin{:})
+                    return;
+                end
+            end
+            
+            error(['Failed to send message to all devices. Retries: ' num2str(maxRetries)]);
+            
+        end
+        
     end
     
     properties(Constant, Access = private, Hidden = true)

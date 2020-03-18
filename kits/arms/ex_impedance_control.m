@@ -43,7 +43,7 @@ arm.group.setFeedbackFrequency(200);
 % sensitive for tracking force.
 gains = params.gains;
 gains.effortKp = 2 * gains.effortKp;
-arm.sendGains(gains);
+HebiUtils.sendWithRetry(arm.group, 'gains', gains);
 
 enableLogging = true;
 

@@ -417,15 +417,14 @@ end
 
 %% Common Setup
 arm = HebiArm(group, kin);
-arm.sendGains(params.gains);
+HebiUtils.sendWithRetry(arm.group, 'gains', params.gains);
 
 % Setup gripper
 gripper = [];
 if params.hasGripper
     
     gripperGroup = HebiLookup.newGroupFromNames( family, 'Spool' );
-    while ~gripperGroup.send('gains', params.gripperGains, 'RequestAck', true)
-    end
+    HebiUtils.sendWithRetry(gripperGroup, 'gains', params.gripperGains);
     
     gripper = HebiGripper(gripperGroup);
     gripper.openEffort = params.gripperOpenEffort;
