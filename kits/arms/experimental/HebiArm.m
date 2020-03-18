@@ -201,11 +201,10 @@ classdef HebiArm < handle
             end
             
             % Call plugins (FK, Jacobians, End-Effector XYZ, etc.)
-            arm.state = newState; % pass arm directly
-            for i=1:length(this.plugins)
-                newState = this.plugins{i}.update(newState, this);
-            end            
             this.state = newState;
+            for i=1:length(this.plugins)
+                this.plugins{i}.update(this);
+            end            
             
             % TODO: --> user code
             % * add effort offsets for e.g. spring.

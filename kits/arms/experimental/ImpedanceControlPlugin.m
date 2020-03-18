@@ -22,16 +22,16 @@ classdef ImpedanceControlPlugin < handle
         function this = ImpedanceControlPlugin()
         end
         
-        function newState = update(this, newState, arm)
-            if isempty(newState.cmdPos) || isempty(newState.cmdVel)
+        function [] = update(this, arm)
+            if isempty(arm.state.cmdPos) || isempty(arm.state.cmdVel)
                 return;
             end
             
             % Desired/Actual joint state
-            cmdPos = newState.cmdPos;
-            cmdVel = newState.cmdVel;
-            fbkPos = newState.fbk.position;
-            fbkVel = newState.fbk.velocity;
+            cmdPos = arm.state.cmdPos;
+            cmdVel = arm.state.cmdVel;
+            fbkPos = arm.state.fbk.position;
+            fbkVel = arm.state.fbk.velocity;
 
             % Get Updated Forward Kinematics and Jacobians
             desiredTipFK =  arm.kin.getForwardKinematicsEndEffector(cmdPos);
@@ -73,7 +73,7 @@ classdef ImpedanceControlPlugin < handle
             
             % Add impedance efforts to effort output
             impedanceEfforts = J_armTip' * (springWrench + damperWrench);
-            newState.cmdEffort = newState.cmdEffort + impedanceEfforts';
+            arm.state.cmdEffort = arm.state.cmdEffort + impedanceEfforts';
             
         end
         

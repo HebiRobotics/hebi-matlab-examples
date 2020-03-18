@@ -11,8 +11,8 @@ classdef EffortOffsetPlugin < handle
             this.effortOffset = effortOffset;
         end
         
-        function newState = update(this, newState, ~)
-            newState.cmdEffort = newState.cmdEffort + this.effortOffset;
+        function [] = update(this, arm)
+            arm.state.cmdEffort = arm.state.cmdEffort + this.effortOffset;
         end
         
     end

@@ -1,10 +1,9 @@
 classdef HebiArmPlugin < handle
     % HebiArmPlugin interface for custom HebiArm plugins
     %   
-    %   Plugins have access to the new and previous state. Plugins may
-    %   update the new state as needed. Plugin specific state may also
-    %   be stored in the state struct, but users are responsible for 
-    %   avoiding variable name collisions.
+    %   Plugins have access to the arm state and may modify it as needed.
+    %   Plugin specific state may also be stored in the state struct, 
+    %   but users are responsible for avoiding variable name collisions.
     %
     %   The always accessible fields are:
     %   * time [s]
@@ -15,7 +14,7 @@ classdef HebiArmPlugin < handle
     %   * cmdEffort [Nm|N]
     
     methods(Abstract)
-        newState = update(this, newState, arm)
+        [] = update(this, arm)
     end
     
     % Inherited methods that we don't want to see in auto-complete
