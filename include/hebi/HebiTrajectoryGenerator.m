@@ -179,20 +179,22 @@ classdef (Sealed) HebiTrajectoryGenerator
         end
         
         function out = getMinDuration(this, varargin)
-            % getMinDuration returns the minimum auto-determined duration.
+            % getMinDuration returns the minimum duration between two 
+            % adjacent waypoints.
             %
             % See also setMinDuration
             out = getMinDuration(this.obj, varargin{:});
         end
         
         function this = setMinDuration(this, varargin)
-            % setMinDuration sets the minimum duration that gets used when 
-            % relying on the trajectory generator's internal timing heuristic. 
+            % setMinDuration sets the minimum duration between two adjacent 
+            % waypoints that gets used when relying on the trajectory 
+            % generator's internal timing heuristic.
             %
             % This prevents large accelerations when generating a trajectory
             % between positions that are close together. Minimum duration
-            % is over-ridden when either a 'Duration' length or 'Time'
-            % vector is specified when making a new trajectory.
+            % is ignored when a 'Time' vector is specified, and scaled when
+            % a 'Duration' total length is set when making a new trajectory.
             %
             % See also newJointMove, getMinDuration
             setMinDuration(this.obj, varargin{:});
