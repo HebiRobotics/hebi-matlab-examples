@@ -1,4 +1,4 @@
-classdef EffortOffsetPlugin < handle
+classdef EffortOffset < handle
     % EffortOffsetPlugin adds constant offsets to the 
 
     properties
@@ -7,7 +7,7 @@ classdef EffortOffsetPlugin < handle
     
     methods
         
-        function this = EffortOffsetPlugin(effortOffset)
+        function this = EffortOffset(effortOffset)
             this.effortOffset = effortOffset;
         end
         

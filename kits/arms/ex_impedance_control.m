@@ -27,9 +27,9 @@ hasGasSpring = true;  % If you attach a gas spring to the shoulder for
                        % extra payload, set this to TRUE.
 
 [ arm, params ] = setupArm( armName, armFamily, hasGasSpring );  
-impedanceController = ImpedanceControlPlugin();
+impedanceController = HebiArmPlugins.ImpedanceController();
 arm.plugins = {
-    EffortOffsetPlugin(params.effortOffset)
+    HebiArmPlugins.EffortOffset(params.effortOffset)
     impedanceController
 };
 

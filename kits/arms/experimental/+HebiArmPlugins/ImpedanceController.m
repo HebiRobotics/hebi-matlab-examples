@@ -1,4 +1,4 @@
-classdef ImpedanceControlPlugin < handle
+classdef ImpedanceController < handle
     % ImpedanceControlPlugin
     %
     % % Impendance Control Gains
@@ -19,7 +19,7 @@ classdef ImpedanceControlPlugin < handle
     
     methods
         
-        function this = ImpedanceControlPlugin()
+        function this = ImpedanceController()
         end
         
         function [] = update(this, arm)

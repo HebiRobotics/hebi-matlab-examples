@@ -30,7 +30,7 @@ arm.trajGen.setMinDuration(1.0);   % Min move time for 'small' movements
 arm.trajGen.setSpeedFactor(0.75);  % Slow down movements to a safer speed.
                                    % (default is 1.0)
 arm.plugins = {
-    EffortOffsetPlugin(params.effortOffset)
+    HebiArmPlugins.EffortOffset(params.effortOffset)
 };
 
 % Keyboard input

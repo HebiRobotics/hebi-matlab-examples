@@ -28,7 +28,7 @@ hasGasSpring = false;  % If you attach a gas spring to the shoulder for
 [ arm, params, gripper ] = setupArm( armName, armFamily, hasGasSpring );
 arm.group.setFeedbackFrequency(100);
 arm.plugins = {
-    EffortOffsetPlugin(params.effortOffset)
+    HebiArmPlugins.EffortOffset(params.effortOffset)
 };
 arm.trajGen.setMinDuration(1.0);   % Min move time for 'small' movements
                                    % (e.g. gripper open/close)

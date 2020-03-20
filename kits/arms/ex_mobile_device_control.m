@@ -57,7 +57,7 @@ hasGasSpring = false;  % If you attach a gas spring to the shoulder for
 
 [ arm, params, gripper ] = setupArm( armName, armFamily, hasGasSpring );
 arm.plugins = {
-    EffortOffsetPlugin(params.effortOffset)
+    HebiArmPlugins.EffortOffset(params.effortOffset)
 };
                              
 disp('  ');

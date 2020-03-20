@@ -118,9 +118,6 @@ classdef HebiArm < handle
             end
             
             % Create trajectory starting from last known state 
-            % (TODO: timing / duration?)
-            % TODO: Time starts always at zero. Passing in zero time would throw
-            % a warning unless start is exactly the same (to some epsilon)
             this.traj = this.trajGen.newJointMove(...
                 [cmdPos; goal.Positions], ...
                 'Velocities', [cmdVel; goal.Velocities], ...
@@ -205,12 +202,6 @@ classdef HebiArm < handle
             for i=1:length(this.plugins)
                 this.plugins{i}.update(this);
             end            
-            
-            % TODO: --> user code
-            % * add effort offsets for e.g. spring.
-            % * add efforts to add an end effector wrench (local or world coordinates?)
-            % * add impedance controller
-            % * remove efforts if all zeros? e.g. strategy 3
 
         end
         
