@@ -1,4 +1,4 @@
-function [ group, kin, params ] = setupArm( kit, family, hasGasSpring )
+function [ arm, params, gripper ] = setupArm( kit, family, hasGasSpring )
 % SETUPARM creates models and loads parameters for controlling various 
 % pre-configured arm kits.
 %
@@ -193,7 +193,7 @@ switch kit
             'J1_base'
             'J2_shoulder'
             'J3_elbow'
-            'J4_wrist1' });
+            'J4_wrist' });
         
         % Kinematic Model
         kin = HebiKinematics([localDir '/hrdf/A-2085-04']);
@@ -216,7 +216,7 @@ switch kit
             'J1_base'
             'J2_shoulder'
             'J3_elbow'
-            'J4_wrist1' });
+            'J4_wrist' });
         
         % Kinematic Model
         kin = HebiKinematics([localDir '/hrdf/A-2084-01']);
@@ -368,7 +368,7 @@ switch kit
             'J1_base'
             'J2_shoulder'
             'J3_elbow'
-            'J4_wrist1' });
+            'J4_wrist' });
         
         % Kinematic Model
         kin = HebiKinematics([localDir '/hrdf/A-2240-04']);
@@ -391,7 +391,7 @@ switch kit
             'J1_base'
             'J2_shoulder'
             'J3_elbow'
-            'J4_wrist1' });
+            'J4_wrist' });
         
         % Kinematic Model
         kin = HebiKinematics([localDir '/hrdf/A-2302-01']);
@@ -416,23 +416,21 @@ end
 
 
 %% Common Setup
+arm = HebiArm(group, kin);
+HebiUtils.sendWithRetry(arm.group, 'gains', params.gains);
 
-% Set the gains on the arm, set a bunch of times in a loop to make
-% absolutely sure they get set.
-numSends = 20;
-for i=1:numSends
-    fbk = group.getNextFeedback();
-    group.send('gains',params.gains);
+% Setup gripper
+gripper = [];
+if params.hasGripper
+    
+    gripperGroup = HebiLookup.newGroupFromNames( family, 'Spool' );
+    HebiUtils.sendWithRetry(gripperGroup, 'gains', params.gripperGains);
+    
+    gripper = HebiGripper(gripperGroup);
+    gripper.openEffort = params.gripperOpenEffort;
+    gripper.closeEffort = params.gripperCloseEffort;
+    
 end
-
-% Determine initial gravity vector based on the internal pose filter of
-% the base module.
-fbk = group.getNextFeedbackFull();
-baseRotMat = HebiUtils.quat2rotMat( [ fbk.orientationW(1), ...
-                                      fbk.orientationX(1), ...
-                                      fbk.orientationY(1), ...
-                                      fbk.orientationZ(1) ] );
-params.gravityVec = -baseRotMat(3,1:3);
 
 end
 
