@@ -19,19 +19,19 @@
 
 %% Setup
 % select actuators for the wheels (requires names to be set appropriately)
-wheels = HebiLookup.newGroupFromNames('mecanumBase', {
-    'frontLeft'
-    'backLeft'
-    'frontRight'
-    'backRight'
+wheels = HebiLookup.newGroupFromNames('Rosie', {
+    'W1_frontLeft'
+    'W2_backLeft'
+    'W3_frontRight'
+    'W4_backRight'
     });
  
 %%
     %%%%%%%%%%%%%%%%%%%%%%%%%%
     % Setup Mobile I/O Group %
     %%%%%%%%%%%%%%%%%%%%%%%%%%
-    phoneFamily = 'mecanumBase';
-    phoneName = '_Controller';
+    phoneFamily = 'HEBI';
+    phoneName = 'mobileIO';
 
     while true        
         try

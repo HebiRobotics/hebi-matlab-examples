@@ -26,8 +26,8 @@ params.chassisMass = 10;  % kg
 % For rotational inertia, assume the robot is a uniform disk
 params.chassisInertiaZZ = (1/2) * params.chassisMass * (wheelBase/2)^2;
 
-params.wheelModuleNames = { '_LeftWheel', ...
-                            '_RightWheel' };
+params.wheelModuleNames = { 'W1_left', ...
+                            'W2_right' };
 params.numWheels = 2;
 
 % Load the gains for the wheels

@@ -105,7 +105,7 @@ function rosieDemo( mobileBaseType )
     % Setup Mobile I/O Group %
     %%%%%%%%%%%%%%%%%%%%%%%%%%
     phoneFamily = 'HEBI';
-    phoneName = 'Mobile IO';
+    phoneName = 'mobileIO';
 
     while true        
         try

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <group_gains>
-  <control_strategy>4 4 4</control_strategy>
+  <control_strategy>4 4 4 4</control_strategy>
   <position>
     <kp>3 3 3 3</kp>
     <ki>0 0 0 0</ki>
