@@ -22,50 +22,36 @@ armFamily = 'Arm';
 hasGasSpring = false;  % If you attach a gas spring to the shoulder for
                        % extra payload, set this to TRUE.
 
-[ armGroup, armKin, armParams ] = setupArm( armName, armFamily, hasGasSpring );
+[ arm, params ] = setupArm( armName, armFamily, hasGasSpring );
+arm.plugins = {
+	HebiArmPlugins.EffortOffset(params.effortOffset)  
+};
 
-gravityVec = armParams.gravityVec;
-effortOffset = armParams.effortOffset;
-localDir = armParams.localDir;
-
+localDir = params.localDir;
 enableLogging = true;
 
 % Start background logging 
 if enableLogging
-   logFile = armGroup.startLog('dir',[localDir '/logs']); 
+   logFile = arm.group.startLog('dir',[localDir '/logs']); 
 end
 
 %% Gravity compensated mode
-cmd = CommandStruct();
-
-% Keyboard input
-kb = HebiKeyboard();
-keys = read(kb);
-
 disp('Commanded gravity-compensated zero torques to the arm.');
 disp('Press ESC to stop.');
 
-while ~keys.ESC   
+% Keyboard input
+kb = HebiKeyboard();
+while ~read(kb).ESC   
     
-    % Gather sensor data from the arm
-    fbk = armGroup.getNextFeedback();
-    
-    % Calculate required torques to negate gravity at current position
-    cmd.effort = armKin.getGravCompEfforts( fbk.position, gravityVec ) ...
-        + effortOffset;
-    
-    % Send to robot
-    armGroup.send(cmd);
+    arm.update();
+    arm.send();
 
-    % Check for new key presses on the keyboard
-    keys = read(kb);
-    
 end
 
 %%
 if enableLogging
     
-   hebilog = armGroup.stopLogFull();
+   hebilog = arm.group.stopLogFull();
    
    % Plot tracking / error from the joints in the arm.  Note that there
    % will not by any 'error' in tracking for position and velocity, since
@@ -75,7 +61,7 @@ if enableLogging
    HebiUtils.plotLogs(hebilog, 'effort');
    
    % Plot the end-effectory trajectory and error
-   kinematics_analysis( hebilog, armKin );
+   kinematics_analysis( hebilog, arm.kin );
    
    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
    % Feel free to put more plotting code here %

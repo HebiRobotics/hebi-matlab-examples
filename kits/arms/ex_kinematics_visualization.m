@@ -22,7 +22,7 @@ armName = 'A-2085-06';
 armFamily = 'Arm';
 hasGasSpring = true;
 
-[ armGroup, armKin, armParams ] = setupArm( armName, armFamily, hasGasSpring );
+[ arm, params ] = setupArm( armName, armFamily, hasGasSpring );
 
 % Select whether coordinate frames for static links should be drawn as well
 showLinkBodies = false;
@@ -31,7 +31,7 @@ showLinkBodies = false;
 axisLength = 0.05; % [m]
 
 %% Passive Visualization
-selected = armKin.getBodyInfo().isDoF; 
+selected = arm.kin.getBodyInfo().isDoF; 
 if showLinkBodies
    selected(:) = true; 
 end
@@ -48,8 +48,8 @@ disp('Press ESC to stop.');
 while ~keys.ESC
     
     % Calculate kinematics based on latest feedback
-    fbk = armGroup.getNextFeedback();
-    frames = armKin.getForwardKinematics( 'OutputFrame', fbk.position );
+    arm.update();
+    frames = arm.kin.getForwardKinematics( 'OutputFrame', arm.state.fbk.position );
     
     % Draw coordinate frames
     frames = frames(:,:,selected);
