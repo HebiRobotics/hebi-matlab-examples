@@ -16,7 +16,7 @@ function rosieDemo( mobileBaseType )
     %%%%%%%%%%%%%%%%%%%%%%%%%
     % Setup Arm and Gripper %
     %%%%%%%%%%%%%%%%%%%%%%%%%
-    robotFamily = 'Arm';
+    robotFamily = 'Rosie';
     [ arm, armParams, gripper ] = setupArmWithGripper(robotFamily);
     
     %%
@@ -61,7 +61,7 @@ function rosieDemo( mobileBaseType )
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Setup Mobile Phone Input %
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    phoneFamily = 'HEBI';
+    phoneFamily = 'Rosie';
     phoneName = 'mobileIO';
     
     resetPoseButton = 'b1';
@@ -168,7 +168,9 @@ function rosieDemo( mobileBaseType )
             try
                 arm.update();
                 arm.send();
-                gripper.send();
+                if ~isempty(gripper)
+                    gripper.send();
+                end
                 
                 % Wheel feedback. Uncomment if used
                 % wheelFbk = wheelGroup.getNextFeedback();

@@ -14,16 +14,22 @@ params.gains = HebiUtils.loadGains('gains/6-dof-arm-gains-rosie');
 HebiUtils.sendWithRetry(group, 'gains', params.gains);
 
 % Kinematic Model
-kin = HebiKinematics('hrdf/6-DoF_arm_w_gripper'); % TODO: change hrdf to double shoulder
+kin = HebiKinematics('hrdf/X-Series-Double-Shoulder-6DOF'); % TODO: change hrdf to double shoulder
 
 % Gripper
-gripperGroup = HebiLookup.newGroupFromNames(family, 'Spool');
-params.gripperGains = HebiUtils.loadGains('gains/gripper-gains');
-HebiUtils.sendWithRetry(gripperGroup, 'gains', params.gripperGains);
+% gripperGroup = HebiLookup.newGroupFromNames(family, 'Spool');
+% params.gripperGains = HebiUtils.loadGains('gains/gripper-gains');
+gripperGroup = [];
+params.gripperGains = [];
+% HebiUtils.sendWithRetry(gripperGroup, 'gains', params.gripperGains);
 
 % API Wrappers
 arm = HebiArm(group, kin);
-gripper = HebiGripper(gripperGroup);
+if ~isempty(gripperGroup)
+    gripper = HebiGripper(gripperGroup);
+else
+    gripper = [];
+end
 
 % Default seed positions for doing inverse kinematics
 params.ikSeedPos = [0 1 2.5 1.5 -1.5 1];
