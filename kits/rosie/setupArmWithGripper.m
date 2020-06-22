@@ -32,7 +32,7 @@ else
 end
 
 % Default seed positions for doing inverse kinematics
-params.ikSeedPos = [0 1 2.5 1.5 -1.5 1];
+params.ikSeedPos = [0 -1 2.5 1.5 -1.5 1];
 
 % Trajectory generator parameters
 params.minTrajDuration = 0.33; % [sec]
