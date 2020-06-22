@@ -19,30 +19,59 @@
 
 %% Setup
 % select actuators for the wheels (requires names to be set appropriately)
-wheels = HebiLookup.newGroupFromNames('Cart', {
-    'left_front'
-    'left_back'
-    'right_front'
-    'right_back'
+wheels = HebiLookup.newGroupFromNames('Rosie', {
+    'W1_frontLeft'
+    'W2_backLeft'
+    'W3_frontRight'
+    'W4_backRight'
     });
-joy = vrjoystick(1); % alternatively get HebiJoystick(1)
+ 
+%%
+    %%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Setup Mobile I/O Group %
+    %%%%%%%%%%%%%%%%%%%%%%%%%%
+    phoneFamily = 'HEBI';
+    phoneName = 'mobileIO';
+
+    while true        
+        try
+            fprintf('Searching for phone Controller...\n');
+            phoneGroup = HebiLookup.newGroupFromNames( ...
+                            phoneFamily, phoneName );
+            disp('Phone Found.  Starting up');
+            break;
+        catch
+            pause(1.0);
+        end
+    end
+    
+    % Get the initial feedback objects that we'll reuse later
+    fbkPhoneIO = phoneGroup.getNextFeedbackIO();
+    latestPhoneIO = fbkPhoneIO;
+    
+    fbkPhoneMobile = phoneGroup.getNextFeedbackMobile();
 
 %% Control
 cmd = CommandStruct();
-maxSpeed = 10; % rad/s
+cmd.position = nan(1,4);
+cmd.effort = nan(1,4);
+maxSpeed = 6; % rad/s
 
 while true
     
     % Read joystick axes
-    [axes, buttons, povs] = read(joy);
-    deadZone = abs(axes) < 0.1;
-    axes(deadZone) = 0;
+    tempFbk = phoneGroup.getNextFeedback( fbkPhoneIO, fbkPhoneMobile, ...
+                                                  'timeout', 0 );                                   
+    if ~isempty(tempFbk)
+        latestPhoneMobile = fbkPhoneMobile;
+        latestPhoneIO = fbkPhoneIO;
+    end
     
     % Map joystick inputs to motions
     normVel = ...
-        [1  1  1  1] * -axes(5) + ... % forward (spin all same way)
-        [1  1 -1 -1] *  axes(4) + ... % rotation (spin sides opposite ways)
-        [1 -1 -1  1] *  axes(1);      % sideways strafe
+        [1 1 1 1] * -latestPhoneIO.a2 + ... % forward (spin all same way)
+        [-1 -1 1 1] *  latestPhoneIO.a7 + ... % rotation (spin sides opposite ways)
+        [-1 1 1 -1] *  latestPhoneIO.a1;      % sideways strafe
         
     % Limit the summed velocities to the maximum 
     maxVel = max(abs(normVel));
@@ -52,7 +81,7 @@ while true
     
     % Account for the physical mounting of the wheels on the
     % robot, i.e., convert to local frames and send out
-    mounting = [-1  1  1 -1];
+    mounting = [-1 -1 1 1];
     cmd.velocity = normVel .* mounting * maxSpeed;
     wheels.send(cmd);
     
