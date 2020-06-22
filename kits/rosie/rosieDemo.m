@@ -61,24 +61,23 @@ function rosieDemo( mobileBaseType )
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Setup Mobile Phone Input %
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    phoneFamily = 'Rosie';
-    phoneName = 'mobileIO';
-    
+    % Button Mapping
     resetPoseButton = 'b1';
     compliantModeButton = 'b2';
     quitDemoButton = 'b8';
     translationScaleSlider = 'a3';
     gripForceSlider = 'a6';
-    
     xVelAxis = 'a8'; % Right Pad Up/Down
     yVelAxis = 'a7'; % Right Pad Left/Right
     rotVelAxis = 'a1'; % Left Pad Left/Right
     
+    % Search for phone controller. Allow retry because phones tend to
+    % drop out when they aren't used (i.e. sleep mode)
+    phoneName = 'mobileIO';
     while true
         try
             fprintf('Searching for phone Controller...\n');
-            phoneGroup = HebiLookup.newGroupFromNames( ...
-                phoneFamily, phoneName );
+            phoneGroup = HebiLookup.newGroupFromNames(family, phoneName);
             disp('Phone Found.  Starting up');
             break;
         catch
@@ -146,8 +145,10 @@ function rosieDemo( mobileBaseType )
         xyzPhoneNew = xyz_init;
 
         
-        % Initialize a trajectory for the base. (By passing velocities 
-        % as positions we can compute a velocity trajectory)
+        % Initialize a trajectory for the base. (By passing velocities
+        % as positions we can compute a velocity trajectory. The constant
+        % time vector makes it act like a 'minimum-jerk' lowpass on the 
+        % input)
         timeNow = arm.state.time;
         chassisTrajStartTime = timeNow;
         
@@ -168,9 +169,6 @@ function rosieDemo( mobileBaseType )
             try
                 arm.update();
                 arm.send();
-                if ~isempty(gripper)
-                    gripper.send();
-                end
                 
                 % Wheel feedback. Uncomment if used
                 % wheelFbk = wheelGroup.getNextFeedback();
@@ -218,9 +216,10 @@ function rosieDemo( mobileBaseType )
             %%%%%%%%%%%%%%%%%%%
             % Gripper Control %
             %%%%%%%%%%%%%%%%%%%
-            % Map [-1,+1] slider to [0,1] range such that down is close
+            % Map [-1, +1] slider to [0,1] range such that down is close
             if ~isempty(gripper)
                 gripper.setState((fbkPhoneIO.(gripForceSlider) - 1) / -2);
+                gripper.send();
             end
 
             

@@ -16,7 +16,7 @@ wheelBaseLength = 0.500; % [m] distance bewteen front and rear wheels
 % demo script.
 params.wheelRadius = wheelRadius;
 params.wheelBase = wheelBase;
-params.maxLinSpeed = 0.8; % m/s
+params.maxLinSpeed = 0.4; % m/s (Limited to half of actual = 0.8 m/s )
 params.maxRotSpeed = params.maxLinSpeed / wheelBase; % rad/s
 
 params.chassisCoM = [0; 0; wheelRadius];  % m
