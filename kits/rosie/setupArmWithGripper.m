@@ -45,10 +45,10 @@ shoulderJointComp = 0; % Nm  <--- Change this if you add a gas spring
 params.effortOffset = [0 shoulderJointComp 0 0 0 0];
 
 % Default plugins
-mirrorModule = HebiLookup.newGroupFromNames(family, 'J2B_shoulder');
+doubleShoulder = HebiLookup.newGroupFromNames(family, 'J2B_shoulder');
 arm.plugins = {
     HebiArmPlugins.EffortOffset(params.effortOffset)
-    HebiArmPlugins.DoubledJointMirror(2, mirrorModule)
+    HebiArmPlugins.DoubledJointMirror(2, doubleShoulder)
 };
 
 end
