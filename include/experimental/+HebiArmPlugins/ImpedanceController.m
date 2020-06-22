@@ -1,4 +1,4 @@
-classdef ImpedanceController < handle
+classdef ImpedanceController < HebiArmPlugin
     % ImpedanceControlPlugin
     %
     % % Impendance Control Gains

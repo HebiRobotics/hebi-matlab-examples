@@ -8,6 +8,9 @@ addpath(fullfile(localDir));
 addpath(fullfile(localDir, 'hebi'));
 hebi_load();
 
+% Experimental API
+addpath(fullfile(localDir, 'experimental'));
+
 % Joystick / Keyboard input
 addpath(fullfile(localDir, 'input'));
 HebiJoystick.loadLibs();
