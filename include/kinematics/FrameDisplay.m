@@ -180,8 +180,8 @@ classdef FrameDisplay < handle
                 xyzLimitsNew(2,:) = get(this.axHandle,'YLim');
                 xyzLimitsNew(3,:) = get(this.axHandle,'ZLim');
 
-                this.xyzLimits(:,1) = min( this.xyzLimits(:,1), xyzLimitsNew(:,1) );
-                this.xyzLimits(:,2) = max( this.xyzLimits(:,2), xyzLimitsNew(:,2) );          
+                this.xyzLimits(:,1) = min( [this.xyzLimits(:,1) xyzLimitsNew(:,1)], [], 2 );
+                this.xyzLimits(:,2) = max( [this.xyzLimits(:,2) xyzLimitsNew(:,2)], [], 2 );      
             end
             
             xlim(this.axHandle,this.xyzLimits(1,:));
