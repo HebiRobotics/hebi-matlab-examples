@@ -175,11 +175,7 @@ function rosieDemo( mobileBaseType )
             catch
                 disp('Could not get robot feedback!');
                 break;
-            end
-            
-            timeLast = timeNow;
-            timeNow = arm.state.time;
-            dt = timeNow - timeLast;
+            end 
 
             % We get feedback from the phone into the existing structs. The
             % timeout of 0 means that the method returns immediately and won't
@@ -289,6 +285,11 @@ function rosieDemo( mobileBaseType )
                 'Accelerations', jerks, ...
                 'Time', [0 chassisParams.rampTime] );
             chassisTrajStartTime = timeNow;
+            
+            % Compute dt since the last update for integrating position
+            timeLast = timeNow;
+            timeNow = arm.state.time;
+            dt = timeNow - timeLast;
             
             % Convert linear velocities into wheel/joint velocities
             wheelCmd.velocity = (chassisToWheelVelocities * chassisVel')';
