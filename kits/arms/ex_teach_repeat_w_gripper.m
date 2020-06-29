@@ -170,11 +170,13 @@ while ~abortFlag
         'aux', gripStates);
     
     while ~arm.isAtGoal() && ~abortFlag
+        keys = read(kb);
+        
         arm.update();
         arm.send();
         gripper.setState(arm.state.cmdAux);
         gripper.send();
-        abortFlag = read(kb).ESC;
+        abortFlag = keys.ESC;
     end
 
 end
