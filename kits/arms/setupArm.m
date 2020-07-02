@@ -423,7 +423,7 @@ HebiUtils.sendWithRetry(arm.group, 'gains', params.gains);
 gripper = [];
 if params.hasGripper
     
-    gripperGroup = HebiLookup.newGroupFromNames( family, 'Spool' );
+    gripperGroup = HebiLookup.newGroupFromNames( family, 'gripperSpool' );
     HebiUtils.sendWithRetry(gripperGroup, 'gains', params.gripperGains);
     
     gripper = HebiGripper(gripperGroup);
