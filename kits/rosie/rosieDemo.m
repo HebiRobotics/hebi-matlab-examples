@@ -36,14 +36,38 @@ function rosieDemo( mobileBaseType )
             return;
     end
 
-    % Not used anymore? TODO: remove?
-% %     wheelRadius = chassisParams.wheelRadius; 
-% %     wheelBase = chassisParams.wheelBase;  
-% %     chassisCoM = chassisParams.chassisCoM;  
-   
-    % Max speed
-    maxLinSpeed = chassisParams.maxLinSpeed; 
-    maxRotSpeed = chassisParams.maxRotSpeed; 
+    % Create Group
+    wheelGroup = HebiLookup.newGroupFromNames(robotFamily, chassisParams.wheelModuleNames);
+    HebiUtils.sendWithRetry(wheelGroup, 'gains', chassisParams.wheelGains);
+    wheelCmd = CommandStruct();
+    wheelInfo = wheelGroup.getInfo();
+    wheelMechType = wheelInfo.mechanicalType{1};
+    
+    switch wheelMechType
+        
+        case 'X8-3'
+                
+            % Max speed
+            maxLinSpeed = chassisParams.maxLinSpeed;
+            maxRotSpeed = chassisParams.maxRotSpeed;
+            
+        case 'X8-9'
+                
+            % Max speed
+            maxLinSpeed = (30/84) * chassisParams.maxLinSpeed;
+            maxRotSpeed = (30/84) * chassisParams.maxRotSpeed;
+            
+        case 'X8-16'
+            
+            % Max speed
+            maxLinSpeed = (15/84) * chassisParams.maxLinSpeed;
+            maxRotSpeed = (15/84) * chassisParams.maxRotSpeed;
+            
+        otherwise
+            
+            error([wheelMechType ' is not a supported wheel type']);
+            
+    end
     
     % Maps linear (XYZ) chassis velocities to wheel velocities
     chassisToWheelVelocities = chassisParams.wheelVelocityMatrix;
@@ -51,11 +75,6 @@ function rosieDemo( mobileBaseType )
     chassisMass = chassisParams.chassisMass; 
     chassisInertiaZZ = chassisParams.chassisInertiaZZ; 
     chassisMassMatrix = diag( [chassisMass; chassisMass; chassisInertiaZZ] );
-
-    % Create Group
-    wheelGroup = HebiLookup.newGroupFromNames(robotFamily, chassisParams.wheelModuleNames);
-    HebiUtils.sendWithRetry(wheelGroup, 'gains', chassisParams.wheelGains);
-    wheelCmd = CommandStruct();
 
     %%
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -77,7 +96,7 @@ function rosieDemo( mobileBaseType )
     while true
         try
             fprintf('Searching for phone Controller...\n');
-            phoneGroup = HebiLookup.newGroupFromNames(family, phoneName);
+            phoneGroup = HebiLookup.newGroupFromNames(robotFamily, phoneName);
             disp('Phone Found.  Starting up');
             break;
         catch
@@ -104,7 +123,7 @@ function rosieDemo( mobileBaseType )
         xyzScale = [1 1 2]';
         
         % Move to current coordinates
-        xyzTarget_init = [0.3; 0.0; 0.3];
+        xyzTarget_init = [0.5; 0.0; 0.3];
         rotMatTarget_init = R_y(-pi);  % Gripper down
         
         ikPosition = arm.kin.getIK(...
