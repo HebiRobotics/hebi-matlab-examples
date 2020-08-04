@@ -41,7 +41,9 @@ disp('Press ESC to stop.');
 
 % Keyboard input
 kb = HebiKeyboard();
-while ~read(kb).ESC   
+keys = read(kb);
+while ~keys.ESC   
+    keys = read(kb);
     
     arm.update();
     arm.send();

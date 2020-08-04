@@ -166,7 +166,8 @@ while ~abortFlag
        % anything else, this is a pretty good place to do it.
        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         arm.send();
-        abortFlag = read(kb).ESC;
+        keys = read(kb);
+        abortFlag = keys.ESC;
     end
     
 end
