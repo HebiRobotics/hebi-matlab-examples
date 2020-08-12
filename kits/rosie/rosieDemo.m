@@ -123,7 +123,7 @@ function rosieDemo( mobileBaseType )
         xyzScale = [1 1 2]';
         
         % Move to current coordinates
-        xyzTarget_init = [0.5; 0.0; 0.3];
+        xyzTarget_init = [0.3; 0.0; 0.3];
         rotMatTarget_init = R_y(-pi);  % Gripper down
         
         ikPosition = arm.kin.getIK(...
