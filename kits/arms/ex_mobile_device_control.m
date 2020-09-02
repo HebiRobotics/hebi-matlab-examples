@@ -17,6 +17,7 @@ clear *;
 close all;
 
 HebiLookup.initialize();
+HebiLookup.setLookupAddresses({'10.10.12.107', '10.10.10.255'});
 
 enableLogging = true;
 
@@ -24,7 +25,7 @@ enableLogging = true;
 %%%%%%%%%%%%%%%%%%%%%%%
 % Mobile Device Setup %
 %%%%%%%%%%%%%%%%%%%%%%%
-phoneFamily = 'HEBI';
+phoneFamily = 'Control';
 phoneName = 'mobileIO';
 
 resetPoseButton = 'b1';
@@ -50,8 +51,8 @@ end
 % Arm Setup %
 %%%%%%%%%%%%%
 
-armName = 'A-2085-06G';
-armFamily = 'Arm';
+armName = 'A-2085-06';
+armFamily = 'Control';
 hasGasSpring = false;  % If you attach a gas spring to the shoulder for
                        % extra payload, set this to TRUE.
 
@@ -133,7 +134,7 @@ while ~abortFlag
         try
             arm.update();
             arm.send();
-            gripper.send();
+%             gripper.send();
         catch
             disp('Could not get robot feedback!');
             break;

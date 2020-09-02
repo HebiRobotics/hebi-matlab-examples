@@ -3,14 +3,15 @@
 % Features:      Demo with two modes.  One for moving the arm to different
 %                waypoints while in a zero-force gravity-compensated mode.
 %                And a second mode for playing back the waypoints.
+%                WITH MOBILE I/O
 %
 % Requirements:  MATLAB 2013b or higher
 %
-% Author:        Dave Rollinson
+% Author:        Andrew Willig
 %                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
-% Date:          Oct 2018
+% Date:          Sept 2020
 
-% Copyright 2017-2018 HEBI Robotics
+% Copyright 2020 HEBI Robotics
 
 %% Setup
 
@@ -18,11 +19,8 @@
 clear *;
 close all;
 
-HebiLookup.initialize();
-HebiLookup.setLookupAddresses({'10.10.12.107', '10.10.10.255'});
-
 armName = 'A-2085-06';
-armFamily = 'Control';
+armFamily = 'Receive';
 hasGasSpring = false;  % If you attach a gas spring to the shoulder for
                        % extra payload, set this to TRUE.
 
@@ -36,8 +34,6 @@ arm.plugins = {
     HebiArmPlugins.EffortOffset(params.effortOffset)
 };
 
-% Keyboard input
-kb = HebiKeyboard();
 localDir = params.localDir;
 
 % === Demo configuration ===
@@ -48,30 +44,78 @@ stopBetweenWaypoints = true;
 % Select whether you want to log and visualize the replay movement
 enableLogging = true;
 
+%%
+%%%%%%%%%%%%%%%%%%%%%%%
+% Mobile Device Setup %
+%%%%%%%%%%%%%%%%%%%%%%%
+phoneFamily = 'Arm';
+phoneName = 'mobileIO';
+
+altButton = 'b1';
+spaceButton = 'b2';
+playbackButton = 'b3';
+escButton = 'b8';
+
+while true  
+    try
+        fprintf('Searching for phone Controller...\n');
+        phoneGroup = HebiLookup.newGroupFromNames( ...
+                        phoneFamily, phoneName );        
+        disp('Phone Found.  Starting up');
+        break;
+    catch
+        pause(1.0);
+    end
+end
+
+
 %% 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Record waypoints in gravity compensated mode %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 disp('Move the arm to different positions to set waypoints.');
-disp('  ALT  - Adds a new waypoint.');  
-disp('  ESC  - Exits waypoint training mode.');
+disp('  B1  - Adds a new waypoint.');  
+disp('  B8  - Exits waypoint training mode.');
 disp('         If no waypoints are set, default waypoints are loaded.');
 disp('  ');
 
 
 waypoints = [];
-keys = read(kb);
-while keys.ESC == 0
+while ~abortFlag
     
     % Do grav-comp while training waypoints
-    arm.update();
-    arm.send();
+    try
+        arm.update();
+        arm.send();
+    catch
+        disp('Could not get robot feedback!');
+        break;
+    end
 
-    % Add new waypoints on ALT press
-    [keys, diffKeys] = read(kb);
-    if diffKeys.ALT == 1    
+    % Add new waypoints on ALT (B1) press
+    % We get feedback from the phone into the existing structs. The
+    % timeout of 0 means that the method returns immediately and won't
+    % wait for feedback. If there was no feedback, the method returns
+    % empty ([]), and the data in the passed in structs does not get
+    % overwritten.
+    % We do this because the mobile device is typically on wireless and
+    % might drop out or be really delayed, in which case we would
+    % rather keep running with an old data instead of waiting here for
+    % new data.
+    hasNewPhoneFbk = ~isempty(phoneGroup.getNextFeedback( ...
+        fbkPhoneIO, fbkPhoneMobile, ... % overwrite existing structs
+        'timeout', 0 )); % prevent blocking due to bad comms
+    
+    % Abort goal updates if the phone didn't respond
+    if ~hasNewPhoneFbk
+        continue;
+    end
+    
+    if fbkPhoneIO.(altButton)    
         waypoints(end+1,:) = arm.state.fbk.position;
         disp('Waypoint added.');
+    elseif fbkPhoneIO.(escButton)
+        abortFlag = true;
     end
     
 end
@@ -96,14 +140,28 @@ else
     disp( '  ' );
     disp( [ num2str(numWaypoints) ' waypoints saved.' ] );  
 end
-disp( 'Press SPACE to move to first waypoint.' );
-
+disp( 'Press B2 to move to first waypoint.' );
+abortFlag = false;
 % Stay in grav-comp mode to prevent sudden movements from effort commands 
 % turning on and off.
-while keys.SPACE == 0
+
+while ~abortFlag
     arm.update();
     arm.send();
-    keys = read(kb);
+    
+    hasNewPhoneFbk = ~isempty(phoneGroup.getNextFeedback( ...
+        fbkPhoneIO, fbkPhoneMobile, ... % overwrite existing structs
+        'timeout', 0 )); % prevent blocking due to bad comms
+    
+    % Abort goal updates if the phone didn't respond
+    if ~hasNewPhoneFbk
+        continue;
+    end
+    
+    if fbkPhoneIO.(spaceButton) 
+        abortFlag = true;
+    end
+    
 end
 
 %% 
@@ -125,26 +183,51 @@ while ~arm.isAtGoal() && ~abortFlag
    arm.update();
    arm.send();
    
-   % Check for keyboard input and break out of the main loop
-   % if the ESC key is pressed.
-   keys = read(kb);
-   abortFlag = keys.ESC;
+   % Check for input and break out of the main loop
+   % if the ESC key (B8) is pressed.
+   hasNewPhoneFbk = ~isempty(phoneGroup.getNextFeedback( ...
+       fbkPhoneIO, fbkPhoneMobile, ... % overwrite existing structs
+       'timeout', 0 )); % prevent blocking due to bad comms
+   
+   % Abort goal updates if the phone didn't respond
+   if ~hasNewPhoneFbk
+       continue;
+   end
+   
+   if fbkPhoneIO.(escButton)
+       abortFlag = true;
+   end
    
 end
 
-% Hang out at the first waypoint until we press SPACE
+% Hang out at the first waypoint until we press B3
 disp('  '); 
 disp('Ready to begin playback.');
-disp('Press SPACE to begin.');
+disp('Press B3 to begin.');
+abortFlag = false;
 
-while keys.SPACE == 0
+while ~abortFlag
     arm.update();
     arm.send();
-    keys = read(kb);
+    
+    hasNewPhoneFbk = ~isempty(phoneGroup.getNextFeedback( ...
+        fbkPhoneIO, fbkPhoneMobile, ... % overwrite existing structs
+        'timeout', 0 )); % prevent blocking due to bad comms
+    
+    % Abort goal updates if the phone didn't respond
+    if ~hasNewPhoneFbk
+        continue;
+    end
+    
+    if fbkPhoneIO.(playbackButton)
+        abortFlag = true;
+    end
+    
 end
 
 disp('Beginning playback.');
-disp('Press ESC to stop.');
+disp('Press B8 to stop.');
+abortFlag = false;
 
 % Move along waypoints in a loop
 while ~abortFlag
@@ -169,8 +252,19 @@ while ~abortFlag
        % anything else, this is a pretty good place to do it.
        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         arm.send();
-        keys = read(kb);
-        abortFlag = keys.ESC;
+        
+        hasNewPhoneFbk = ~isempty(phoneGroup.getNextFeedback( ...
+            fbkPhoneIO, fbkPhoneMobile, ... % overwrite existing structs
+            'timeout', 0 )); % prevent blocking due to bad comms
+        
+        % Abort goal updates if the phone didn't respond
+        if ~hasNewPhoneFbk
+            continue;
+        end
+        
+        if fbkPhoneIO.(escButton)
+            abortFlag = true;
+        end
     end
     
 end

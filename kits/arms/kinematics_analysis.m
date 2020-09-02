@@ -60,7 +60,7 @@ cmdXYZ_mm = 1000 * cmdXYZ;
 errorXYZ_mm = 1000 * errorXYZ;
 errorNorm_mm = 1000 * errorNorm;
 
-figure(201);
+figure();
 plot3( fbkXYZ_mm(:,1), fbkXYZ_mm(:,2), fbkXYZ_mm(:,3), 'b' );
 hold on;
 plot3( cmdXYZ_mm(:,1), cmdXYZ_mm(:,2), cmdXYZ_mm(:,3), 'r:' );
@@ -76,7 +76,7 @@ legend feedback command;
 
 % If there were any commanded positions, plot the tracking error
 if any(~isnan(cmdXYZ(:)))
-    figure(202);
+    figure();
     subplot(2,1,1);
     plot(log.time, errorXYZ_mm(:,1), 'r');
     hold on;
