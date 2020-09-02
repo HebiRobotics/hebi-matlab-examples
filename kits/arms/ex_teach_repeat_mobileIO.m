@@ -48,7 +48,7 @@ enableLogging = true;
 %%%%%%%%%%%%%%%%%%%%%%%
 % Mobile Device Setup %
 %%%%%%%%%%%%%%%%%%%%%%%
-phoneFamily = 'Arm';
+phoneFamily = 'Receive';
 phoneName = 'mobileIO';
 
 altButton = 'b1';
@@ -81,6 +81,15 @@ disp('  ');
 
 
 waypoints = [];
+abortFlag = false;
+% Grab fbk from phone
+fbkPhoneMobile = phoneGroup.getNextFeedbackMobile();
+fbkPhoneIO = phoneGroup.getNextFeedbackIO();
+fbkPhoneIOLastB1 = 0;
+fbkPhoneIOLastB2 = 0;
+fbkPhoneIOLastB3 = 0;
+fbkPhoneIOLastB8 = 0;
+
 while ~abortFlag
     
     % Do grav-comp while training waypoints
@@ -111,13 +120,14 @@ while ~abortFlag
         continue;
     end
     
-    if fbkPhoneIO.(altButton)    
+    if (fbkPhoneIO.(altButton) - fbkPhoneIOLastB1) > 0
         waypoints(end+1,:) = arm.state.fbk.position;
         disp('Waypoint added.');
     elseif fbkPhoneIO.(escButton)
         abortFlag = true;
     end
     
+    fbkPhoneIOLastB1 = fbkPhoneIO.(altButton);
 end
 
 numWaypoints = size(waypoints,1);
@@ -158,9 +168,11 @@ while ~abortFlag
         continue;
     end
     
-    if fbkPhoneIO.(spaceButton) 
+    if (fbkPhoneIO.(spaceButton) - fbkPhoneIOLastB2) > 0 
         abortFlag = true;
     end
+       
+    fbkPhoneIOLastB2 = fbkPhoneIO.(spaceButton);
     
 end
 
@@ -184,7 +196,7 @@ while ~arm.isAtGoal() && ~abortFlag
    arm.send();
    
    % Check for input and break out of the main loop
-   % if the ESC key (B8) is pressed.
+   % if B8 is pressed.
    hasNewPhoneFbk = ~isempty(phoneGroup.getNextFeedback( ...
        fbkPhoneIO, fbkPhoneMobile, ... % overwrite existing structs
        'timeout', 0 )); % prevent blocking due to bad comms
@@ -194,10 +206,11 @@ while ~arm.isAtGoal() && ~abortFlag
        continue;
    end
    
-   if fbkPhoneIO.(escButton)
+   if (fbkPhoneIO.(escButton) - fbkPhoneIOLastB8) > 0 
        abortFlag = true;
    end
    
+   fbkPhoneIOLastB8 = fbkPhoneIO.(escButton);
 end
 
 % Hang out at the first waypoint until we press B3
@@ -219,10 +232,11 @@ while ~abortFlag
         continue;
     end
     
-    if fbkPhoneIO.(playbackButton)
+    if (fbkPhoneIO.(playbackButton) - fbkPhoneIOLastB3) > 0 
         abortFlag = true;
     end
     
+    fbkPhoneIOLastB3 = fbkPhoneIO.(playbackButton);
 end
 
 disp('Beginning playback.');
@@ -262,7 +276,7 @@ while ~abortFlag
             continue;
         end
         
-        if fbkPhoneIO.(escButton)
+        if fbkPhoneIO.(escButton) % ok to look for continuous here
             abortFlag = true;
         end
     end
