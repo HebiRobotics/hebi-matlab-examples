@@ -25,7 +25,7 @@ enableLogging = true;
 %%%%%%%%%%%%%%%%%%%%%%%
 % Mobile Device Setup %
 %%%%%%%%%%%%%%%%%%%%%%%
-phoneFamily = 'Control';
+phoneFamily = 'Receive';
 phoneName = 'mobileIO';
 
 resetPoseButton = 'b1';
@@ -52,7 +52,7 @@ end
 %%%%%%%%%%%%%
 
 armName = 'A-2085-06';
-armFamily = 'Control';
+armFamily = 'Receive';
 hasGasSpring = false;  % If you attach a gas spring to the shoulder for
                        % extra payload, set this to TRUE.
 
