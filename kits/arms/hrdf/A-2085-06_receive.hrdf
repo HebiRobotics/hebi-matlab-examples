@@ -2,7 +2,7 @@
 <!-- For documentation on the HEBI Robot Configuration please visit: -->
 <!-- https://github.com/HebiRobotics/hebi-hrdf/blob/master/FORMAT.md -->
 
-<!-- X-Series Arm (6-DoF with Gripper) -->
+<!-- X-Series Arm (6-DoF) -->
 <robot version="1.2.0">
   <actuator type="X8-9"/>
   <bracket type="X5HeavyRightInside"/>

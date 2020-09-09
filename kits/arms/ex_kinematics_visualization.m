@@ -18,7 +18,7 @@ close all;
 
 HebiLookup.initialize();
 
-armName = 'A-2085-06';
+armName = 'A-2085-06_receive';
 armFamily = 'Receive';
 hasGasSpring = true;
 
@@ -26,6 +26,9 @@ hasGasSpring = true;
 
 % Select whether coordinate frames for static links should be drawn as well
 showLinkBodies = false;
+
+localDir = params.localDir;
+enableLogging = true;
 
 % Length of the drawn axes
 axisLength = 0.05; % [m]
@@ -45,6 +48,11 @@ keys = read(kb);
 disp('Displaying coordinate frames for the bodies in the arm.');
 disp('Press ESC to stop.');
 
+% Start background logging 
+if enableLogging
+   logFile = arm.group.startLog( 'dir', [localDir '/logs'] ); 
+end
+
 while ~keys.ESC
     
     % Calculate kinematics based on latest feedback
@@ -59,4 +67,22 @@ while ~keys.ESC
     % Check for new key presses on the keyboard
     keys = read(kb);
     
+end
+
+
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+% Stop background logging and visualize %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+if enableLogging
+    
+   disp('Plotting logged feedback.');
+   hebilog = arm.group.stopLogFull();
+   
+   % Plot the end-effectory trajectory and error
+   kinematics_analysis( hebilog, arm.kin );
+   
+   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+   % Feel free to put more plotting code here %
+   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 end
