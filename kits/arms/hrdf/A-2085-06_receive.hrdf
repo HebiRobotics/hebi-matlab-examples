@@ -17,3 +17,5 @@
   <actuator type="X5-4"/>
   <end-effector />
 </robot>
+
+<!-- type="Custom" mass="1.0" -->

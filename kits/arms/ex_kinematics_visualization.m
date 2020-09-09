@@ -40,6 +40,7 @@ if showLinkBodies
 end
 
 frameDisplay = FrameDisplay(axisLength, sum(selected));
+frameDisplay.drawLinks = true;
 
 % Keyboard input
 kb = HebiKeyboard();

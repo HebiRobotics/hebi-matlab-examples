@@ -55,16 +55,18 @@ classdef FrameDisplay < handle
     %         end
     %     end
     
-    properties (Access = private)
+    properties (Access = public)
         figHandle
         axHandle
         x
         y
         z
+        links
         numFrames
         axisLength = 0.05;  % m 
         xyzLimits = nan(3,2); % m (stacked [xLim; yLim; zLim])
         fixedLimits = false;
+        drawLinks = true;
     end
     
     methods(Access = public)
@@ -104,6 +106,11 @@ classdef FrameDisplay < handle
                 this.z(i) = line( [0 0], [0 0], range,'Color', 'b', 'LineWidth', 3);
             end
             
+            if this.drawLinks
+                this.links = plot3( nan, nan, nan, 'Color', 'k', ...
+                                    'LineWidth', 1.5, 'LineStyle', '-' );
+            end
+            
             % Draw black coordinate frame at the origin
             line( range,[0 0], [0 0],'Color', 'k', 'LineWidth', 2);
             line( [0 0],range, [0 0],'Color', 'k', 'LineWidth', 2);
@@ -119,7 +126,7 @@ classdef FrameDisplay < handle
             view(3); 
             
             % labels
-            legend x y z
+            % legend x y z
             title('Robot Coordinate Frames');
             xlabel('x (m)');
             ylabel('y (m)');
@@ -173,6 +180,14 @@ classdef FrameDisplay < handle
                     'ZData', [orig_T(3,3) axes_T(3,3)] );
             end
             
+            if this.drawLinks
+                linkXYZ = squeeze(frames(1:3,4,:));
+                set( this.links, ...
+                    'XData', linkXYZ(1,:), ...
+                    'YData', linkXYZ(2,:), ...
+                    'ZData', linkXYZ(3,:) );
+            end
+            
             % If we didn't set the axis limits, let them auto-update if
             % they grow larger, never shrink them
             if ~this.fixedLimits
@@ -181,7 +196,7 @@ classdef FrameDisplay < handle
                 xyzLimitsNew(3,:) = get(this.axHandle,'ZLim');
 
                 this.xyzLimits(:,1) = min( [this.xyzLimits(:,1) xyzLimitsNew(:,1)], [], 2 );
-                this.xyzLimits(:,2) = max( [this.xyzLimits(:,2) xyzLimitsNew(:,2)], [], 2 );      
+                this.xyzLimits(:,2) = max( [this.xyzLimits(:,2) xyzLimitsNew(:,2)], [], 2 );           
             end
             
             xlim(this.axHandle,this.xyzLimits(1,:));
@@ -202,4 +217,3 @@ classdef FrameDisplay < handle
     end
     
 end
-
