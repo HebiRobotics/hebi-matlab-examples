@@ -58,6 +58,7 @@ while ~keys.ESC
     
     % Calculate kinematics based on latest feedback
     arm.update();
+    arm.send();
     frames = arm.kin.getForwardKinematics( 'OutputFrame', arm.state.fbk.position );
     
     % Draw coordinate frames

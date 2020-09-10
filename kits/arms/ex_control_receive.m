@@ -149,13 +149,13 @@ while ~abortFlag
     % Send effort feedback back to control arm
     effortDiff = receiveArm.state.cmdEffort - receiveArm.state.fbk.effort;
     % Get Grav Comp from Control Arm
-    controlBaseX = controlArm.state.fbk.orientationX(1);
-    controlBaseY = controlArm.state.fbk.orientationY(1);
-    controlBaseZ = controlArm.state.fbk.orientationZ(1);
-    gravityVec = [controlBaseX controlBaseY controlBaseZ];
-    gravCompEffort = controlArm.kin.getGravCompEfforts(controlArm.state.fbk.position, gravityVec);
+%     controlBaseX = controlArm.state.fbk.orientationX(1);
+%     controlBaseY = controlArm.state.fbk.orientationY(1);
+%     controlBaseZ = controlArm.state.fbk.orientationZ(1);
+%     gravityVec = [controlBaseX controlBaseY -controlBaseZ];
+%     gravCompEffort = controlArm.kin.getGravCompEfforts(controlArm.state.fbk.position, gravityVec);
     scale = 0.5;
-    controlArm.state.cmdEffort = gravCompEffort + (scale * effortDiff);
+    controlArm.state.cmdEffort = controlArm.state.cmdEffort + (scale * effortDiff);
     controlArm.send();
     
     % Check for keyboard input and break out of the main loop

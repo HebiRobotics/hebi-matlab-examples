@@ -16,6 +16,7 @@ clear *;
 close all;
 
 HebiLookup.initialize();
+HebiLookup.setLookupAddresses({'10.10.12.107', '10.10.10.255'});
 
 armName = 'A-2085-06';
 armFamily = 'Control';
