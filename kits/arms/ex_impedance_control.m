@@ -76,8 +76,8 @@ disp('  ESC - Exits the demo.');
 %     % HOLD POSITION ONLY (Allow rotation around end-effector position)
     impedance.gainsInEndEffectorFrame = true; 
     impedance.Kp = [500; 500; 500; 0; 0; 0];  % (N/m) or (Nm/rad)
-    impedance.Kd = [5; 5; 5; .0; .0; .0;] * 0; % (N/(m/sec)) or (Nm/(rad/sec))
-
+    impedance.Kd = [5; 5; 5; .0; .0; .0;]; % (N/(m/sec)) or (Nm/(rad/sec))
+ 
 %     % HOLD ROTATION ONLY
 %     impedance.gainsInEndEffectorFrame = true;
 %     impedance.Kp = [0; 0; 0; 5; 5; 5];  % (N/m) or (Nm/rad)
