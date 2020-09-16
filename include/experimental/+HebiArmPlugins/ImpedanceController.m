@@ -28,13 +28,8 @@ classdef ImpedanceController < HebiArmPlugin
         
         function [] = update(this, arm)
             if isempty(arm.state.cmdPos) || isempty(arm.state.cmdVel)
-                this.resetIError();
+                this.iError(:,:) = 0;
                 return;
-            end
-            
-            % reset i error on restarts
-            if arm.state.dt == 0
-               this.resetIError();
             end
 
             % Desired/Actual joint state
@@ -82,12 +77,6 @@ classdef ImpedanceController < HebiArmPlugin
             
         end
         
-    end
-    
-    methods(Access = private, Hidden)
-        function [] = resetIError(this)
-            this.iError(:,:) = 0;
-        end
     end
     
     methods(Static, Hidden)
