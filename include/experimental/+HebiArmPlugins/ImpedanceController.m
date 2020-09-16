@@ -10,11 +10,15 @@ classdef ImpedanceController < HebiArmPlugin
     
     properties
         gainsInEndEffectorFrame logical = true;
-        damperGains double = zeros(6,1); % (N/(m/sec)) or (Nm/(rad/sec))
-        springGains double = zeros(6,1); % (N/m) or (Nm/rad)
+        
+        Kp double = zeros(6,1); % (N/m) or (Nm/rad)
+        Ki double = zeros(6,1); % (N/m*sec) or (Nm/rad*sec)
+        Kd double = zeros(6,1); % (N/(m/sec)) or (Nm/(rad/sec))
+        
     end
     
     properties(Access = private)
+        iError double = zeros(6,1);
     end
     
     methods
@@ -24,19 +28,25 @@ classdef ImpedanceController < HebiArmPlugin
         
         function [] = update(this, arm)
             if isempty(arm.state.cmdPos) || isempty(arm.state.cmdVel)
+                this.iError(:,:) = 0;
                 return;
             end
-            
+
             % Desired/Actual joint state
             cmdPos = arm.state.cmdPos;
             cmdVel = arm.state.cmdVel;
             fbkPos = arm.state.fbk.position;
             fbkVel = arm.state.fbk.velocity;
-
+            
             % Get Updated Forward Kinematics and Jacobians
             desiredTipFK =  arm.kin.getForwardKinematicsEndEffector(cmdPos);
             actualTipFK = arm.kin.getForwardKinematicsEndEffector(fbkPos);
             J_armTip = arm.kin.getJacobianEndEffector(fbkPos);
+            if this.gainsInEndEffectorFrame
+                frameRot = actualTipFK(1:3,1:3); % end effector
+            else
+                frameRot = eye(3); % world frame
+            end
             
             % Linear error is easy
             xyzError = desiredTipFK(1:3,4) - actualTipFK(1:3,4);
@@ -47,37 +57,34 @@ classdef ImpedanceController < HebiArmPlugin
             [axis, angle] = HebiUtils.rotMat2axAng( errorRotMat );
             rotErrorVec = angle * axis;
             
-            if this.gainsInEndEffectorFrame
-                xyzError = actualTipFK(1:3,1:3)' * xyzError;
-                rotErrorVec = actualTipFK(1:3,1:3)' * rotErrorVec;
-            end
-            
             posError = [xyzError; rotErrorVec];
             velError = J_armTip * (cmdVel - fbkVel)';
-            
-             % Calculate Impedance Control Wrenches and Appropriate Joint
-             % Torques
-            springWrench = zeros(6,1);
-            damperWrench = zeros(6,1);
-            
-            springWrench(1:3) = this.springGains(1:3) .* posError(1:3); 
-            springWrench(4:6) = this.springGains(4:6) .* posError(4:6);
-            
-            if this.gainsInEndEffectorFrame
-                springWrench(1:3) = actualTipFK(1:3,1:3) * springWrench(1:3); % linear force
-                springWrench(4:6) = actualTipFK(1:3,1:3) * springWrench(4:6); % rotational torque 
-            end
-            
-            damperWrench(1:3) = this.damperGains(1:3) .* velError(1:3); % linear damping
-            damperWrench(4:6) = this.damperGains(4:6) .* velError(4:6); % rotational damping
-            
+
+            % Calculate Impedance Control Wrenches and Appropriate Joint
+            % Torques
+            posError = this.rotate(frameRot', posError);
+            velError = this.rotate(frameRot', velError);
+            this.iError = this.iError + posError * arm.state.dt;
+            wrench = ...
+                + this.Kp .* posError ...
+                + this.Ki .* this.iError ...
+                + this.Kd .* velError;
+            wrench = this.rotate(frameRot, wrench);
+
             % Add impedance efforts to effort output
-            impedanceEfforts = J_armTip' * (springWrench + damperWrench);
+            impedanceEfforts = J_armTip' * wrench;
             arm.state.cmdEffort = arm.state.cmdEffort + impedanceEfforts';
             
         end
         
     end
     
+    methods(Static, Hidden)
+        function result = rotate(R, vec)
+            result = zeros(6,1);
+            result(1:3) = R(1:3,1:3) * vec(1:3); % linear component
+            result(4:6) = R(1:3,1:3) * vec(4:6); % rotational component
+        end
+    end
+    
 end
-
