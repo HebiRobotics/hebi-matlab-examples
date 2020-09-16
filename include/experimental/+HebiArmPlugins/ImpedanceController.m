@@ -30,6 +30,11 @@ classdef ImpedanceController < HebiArmPlugin
             if isempty(arm.state.cmdPos) || isempty(arm.state.cmdVel)
                 return;
             end
+            
+            % reset i error on restarts
+            if arm.state.dt == 0
+               this.iError(:,:) = 0; 
+            end
 
             % Desired/Actual joint state
             cmdPos = arm.state.cmdPos;
@@ -41,6 +46,11 @@ classdef ImpedanceController < HebiArmPlugin
             desiredTipFK =  arm.kin.getForwardKinematicsEndEffector(cmdPos);
             actualTipFK = arm.kin.getForwardKinematicsEndEffector(fbkPos);
             J_armTip = arm.kin.getJacobianEndEffector(fbkPos);
+            if this.gainsInEndEffectorFrame
+                frameRot = actualTipFK(1:3,1:3); % end effector
+            else
+                frameRot = eye(3); % world frame
+            end
             
             % Linear error is easy
             xyzError = desiredTipFK(1:3,4) - actualTipFK(1:3,4);
@@ -51,58 +61,34 @@ classdef ImpedanceController < HebiArmPlugin
             [axis, angle] = HebiUtils.rotMat2axAng( errorRotMat );
             rotErrorVec = angle * axis;
             
-            if this.gainsInEndEffectorFrame
-                xyzError = actualTipFK(1:3,1:3)' * xyzError;
-                rotErrorVec = actualTipFK(1:3,1:3)' * rotErrorVec;
-            end
-            
             posError = [xyzError; rotErrorVec];
             velError = J_armTip * (cmdVel - fbkVel)';
-            
-            if arm.state.dt == 0
-                this.iError(:,:) = 0; % Reset on restarts
-            else
-                this.iError = this.iError + posError * arm.state.dt;
-            end
-            
+
             % Calculate Impedance Control Wrenches and Appropriate Joint
             % Torques
-            pWrench = zeros(6,1);
-            iWrench = zeros(6,1);
-            dWrench = zeros(6,1);
+            posError = this.rotate(frameRot', posError);
+            velError = this.rotate(frameRot', velError);
+            this.iError = this.iError + posError * arm.state.dt;
+            wrench = ...
+                + this.Kp .* posError ...
+                + this.Ki .* velError ...
+                + this.Kd .* this.iError;
+            wrench = this.rotate(frameRot, wrench);
 
-            if this.gainsInEndEffectorFrame
-                armTipRotFbk = actualTipFK(1:3,1:3);
-                posError(1:3) = armTipRotFbk' * posError(1:3); % linear error
-                posError(4:6) = armTipRotFbk' * posError(4:6); % rotational error     
-                velError(1:3) = armTipRotFbk' * velError(1:3); % linear velocity error
-                velError(4:6) = armTipRotFbk' * velError(4:6); % rotational velocity error
-            end
-
-            this.iError = this.iError + posError * dt;
-
-            pWrench(1:3) = this.Kp(1:3) .* posError(1:3); % linear force
-            pWrench(4:6) = this.Kp(4:6) .* posError(4:6); % rotational torque
-            iWrench(1:3) = this.Ki(1:3) .* this.iError(1:3); % linear force
-            iWrench(4:6) = this.Ki(4:6) .* this.iError(4:6); % rotational torque    
-            dWrench(1:3) = this.Kd(1:3) .* velError(1:3); % linear damping
-            dWrench(4:6) = this.Kd(4:6) .* velError(4:6); % rotational damping
-
-            if this.gainsInEndEffectorFrame
-                pWrench(1:3) = armTipRotFbk * pWrench(1:3);
-                pWrench(4:6) = armTipRotFbk * pWrench(4:6);
-                iWrench(1:3) = armTipRotFbk * iWrench(1:3);
-                iWrench(4:6) = armTipRotFbk * iWrench(4:6);
-                dWrench(1:3) = armTipRotFbk * dWrench(1:3);
-                dWrench(4:6) = armTipRotFbk * dWrench(4:6);
-            end
-            
             % Add impedance efforts to effort output
-            impedanceEfforts = J_armTip' * (pWrench + + iWrench + dWrench);
+            impedanceEfforts = J_armTip' * wrench;
             arm.state.cmdEffort = arm.state.cmdEffort + impedanceEfforts';
             
         end
         
+    end
+    
+    methods(Static, Hidden)
+        function result = rotate(R, vec)
+            result = zeros(6,1);
+            result(1:3) = R(1:3,1:3) * vec(1:3); % linear component
+            result(4:6) = R(1:3,1:3) * vec(4:6); % rotational component
+        end
     end
     
 end
