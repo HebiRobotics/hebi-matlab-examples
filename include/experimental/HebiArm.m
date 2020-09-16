@@ -197,6 +197,18 @@ classdef HebiArm < handle
                 newState.trajTime = [];
             end
             
+            % Add time delta since last feedback, if available
+            newState.dt = 0;
+            if ~isempty(this.state)
+                dt = (newState.time - this.state.time);  
+                
+                % Avoid freak-outs related to users restarting
+                % scripts without creating a new instance
+                if dt > 0 && dt < 1
+                   newState.dt = dt; 
+                end
+            end
+            
             % Call plugins (FK, Jacobians, End-Effector XYZ, etc.)
             this.state = newState;
             for i=1:length(this.plugins)
