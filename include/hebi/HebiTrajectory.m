@@ -6,6 +6,8 @@ classdef (Sealed) HebiTrajectory
     %   visualize the planned path.
     %
     %   HebiTrajectory Methods:
+    %      getStartTime    - returns the start time [s]
+    %      getEndTime      - returns the end time [s]
     %      getDuration     - returns the total duration [s]
     %      getState        - returns position/velocity/acceleration 
     %                        at any given time.
@@ -58,15 +60,38 @@ classdef (Sealed) HebiTrajectory
     %% API Methods
     methods(Access = public)
         
+        function out = getStartTime(this)
+            % getStartTime returns the returns the start time of the trajectory [s]
+            %
+            %   This is equivalent to
+            %
+            %       time = trajectory.getWaypointTime();
+            %       startTime = time(1);
+            %
+            %   See also getDuration
+            out = this.startTime;
+        end
+        
+        function out = getEndTime(this)
+            % getEndTime returns the returns the end time of the trajectory [s]
+            %
+            %   This is equivalent to
+            %
+            %       time = trajectory.getWaypointTime();
+            %       startTime = time(end);
+            %
+            %   See also getDuration
+            out = this.endTime;
+        end
+        
         function duration = getDuration(this)
             % getDuration returns the total duration of the trajectory [s]
             %
-            %   This is equivalent to 
-            %     
-            %       time = trajectory.getWaypointTime();
-            %       duration = time(end) - time(1);
+            %   This is equivalent to
             %
-            %   See also getWaypointTime
+            %       duration = getEndTime() - getStartTime();
+            %
+            %   See also getStartTime, getEndTime
             duration = this.duration;
         end
         
@@ -117,8 +142,10 @@ classdef (Sealed) HebiTrajectory
         
     end
     
-    %% Hidden Properties    
+    %% Hidden Properties
     properties(Access = private, Hidden = true)
+        startTime; % cached start time
+        endTime; % cached end time
         duration; % cached duration
         time = []; % cached time vector
         obj;
@@ -142,7 +169,9 @@ classdef (Sealed) HebiTrajectory
                         error('invalid argument');
                     end
                     this.obj = obj;
-                    this.duration = getDuration(obj);
+                    this.startTime = getStartTime(obj);
+                    this.endTime = getEndTime(obj);
+                    this.duration = this.endTime - this.startTime;
             end
         end
         
