@@ -748,7 +748,7 @@ classdef (Sealed) HebiUtils
             end
             
             trajectory = p.Trajectory;
-            time = 0:p.dt:trajectory.getDuration();
+            time = trajectory.getStartTime():p.dt:trajectory.getEndTime();
             waypointTime = trajectory.getWaypointTime();
             
             [pos,vel,acc] = trajectory.getState(time);
