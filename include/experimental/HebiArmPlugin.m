@@ -7,6 +7,7 @@ classdef HebiArmPlugin < handle
     %
     %   The always accessible fields are:
     %   * time [s]
+    %   * dt [s] (time since last call, or 0 on first run)
     %   * fbk [struct]
     %   * cmdPos [rad]
     %   * cmdVel [rad/s]

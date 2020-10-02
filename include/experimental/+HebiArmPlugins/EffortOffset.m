@@ -1,4 +1,4 @@
-classdef EffortOffset < handle
+classdef EffortOffset < HebiArmPlugin
     % EffortOffsetPlugin adds constant offsets to the 
 
     properties

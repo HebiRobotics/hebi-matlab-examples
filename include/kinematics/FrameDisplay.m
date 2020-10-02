@@ -197,6 +197,7 @@ classdef FrameDisplay < handle
 
                 this.xyzLimits(:,1) = min( [this.xyzLimits(:,1) xyzLimitsNew(:,1)], [], 2 );
                 this.xyzLimits(:,2) = max( [this.xyzLimits(:,2) xyzLimitsNew(:,2)], [], 2 );           
+
             end
             
             xlim(this.axHandle,this.xyzLimits(1,:));

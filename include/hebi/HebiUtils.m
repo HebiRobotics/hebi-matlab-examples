@@ -5,6 +5,8 @@ classdef (Sealed) HebiUtils
     %
     %   now                - returns the current timestamp [s]
     %
+    %   sendWithRetry      - sends and ensures delivery to a HebiGroup
+    %
     %   saveGains          - saves group gains to disk (XML)
     %   loadGains          - loads group gains from disk (XML)
     %
@@ -37,8 +39,8 @@ classdef (Sealed) HebiUtils
     %   quat2rotMat        - converts orientations represented by a unit
     %                        quaternion to a rotation matrix.
 
-    %   Copyright 2014-2018 HEBI Robotics, Inc.
-    
+    %   Copyright 2014-2020 HEBI Robotics, Inc.
+
     % Static API
     methods(Static)
         
@@ -746,7 +748,7 @@ classdef (Sealed) HebiUtils
             end
             
             trajectory = p.Trajectory;
-            time = 0:p.dt:trajectory.getDuration();
+            time = trajectory.getStartTime():p.dt:trajectory.getEndTime();
             waypointTime = trajectory.getWaypointTime();
             
             [pos,vel,acc] = trajectory.getState(time);

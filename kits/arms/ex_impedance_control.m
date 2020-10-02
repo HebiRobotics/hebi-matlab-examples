@@ -27,10 +27,10 @@ hasGasSpring = true;  % If you attach a gas spring to the shoulder for
                        % extra payload, set this to TRUE.
 
 [ arm, params ] = setupArm( armName, armFamily, hasGasSpring );  
-impedanceController = HebiArmPlugins.ImpedanceController();
+impedance = HebiArmPlugins.ImpedanceController();
 arm.plugins = {
     HebiArmPlugins.EffortOffset(params.effortOffset)
-    impedanceController
+   impedance
 };
 
 % Increase feedback frequency since we're calculating velocities at the
@@ -74,29 +74,25 @@ disp('  ESC - Exits the demo.');
 % THE OTHER GAINS.
 
 %     % HOLD POSITION ONLY (Allow rotation around end-effector position)
-    gainsInEndEffectorFrame = true;
-    damperGains = [5; 5; 5; .0; .0; .0;]; % (N/(m/sec)) or (Nm/(rad/sec))
-    springGains = [500; 500; 500; 0; 0; 0];  % (N/m) or (Nm/rad)
-
+    impedance.gainsInEndEffectorFrame = true; 
+    impedance.Kp = [500; 500; 500; 0; 0; 0];  % (N/m) or (Nm/rad)
+    impedance.Kd = [5; 5; 5; .0; .0; .0;]; % (N/(m/sec)) or (Nm/(rad/sec))
+ 
 %     % HOLD ROTATION ONLY
-%     gainsInEndEffectorFrame = true;
-%     damperGains = [0; 0; 0; .1; .1; .1;]; % (N/(m/sec)) or (Nm/(rad/sec))
-%     springGains = [0; 0; 0; 5; 5; 5];  % (N/m) or (Nm/rad)
+%     impedance.gainsInEndEffectorFrame = true;
+%     impedance.Kp = [0; 0; 0; 5; 5; 5];  % (N/m) or (Nm/rad)
+%     impedance.Kd = [0; 0; 0; .1; .1; .1;]; % (N/(m/sec)) or (Nm/(rad/sec))
   
 %     % HOLD POSITION AND ROTATION - BUT ALLOW MOTION ALONG/AROUND Z-AXIS
-%     gainsInEndEffectorFrame = true;
-%     damperGains = [10; 10; 0; .1; .1; .1;]; % (N/(m/sec)) or (Nm/(rad/sec))
-%     springGains = [500; 500; 0; 5; 5; 5];  % (N/m) or (Nm/rad)
+%     impedance.gainsInEndEffectorFrame = true; 
+%     impedance.Kp = [500; 500; 0; 5; 5; 5];  % (N/m) or (Nm/rad)
+%     impedance.Kd = [10; 10; 0; .1; .1; .1;]; % (N/(m/sec)) or (Nm/(rad/sec))
     
     % HOLD POSITION AND ROTATION - BUT ALLOW MOTION IN BASE FRAME XY-PLANE
 %     gainsInEndEffectorFrame = false;
-%     damperGains = [0; 0; 5; .1; .1; .1;]; % (N/(m/sec)) or (Nm/(rad/sec))
-%     springGains = [0; 0; 500; 5; 5; 5];  % (N/m) or (Nm/rad)
-
-
-impedanceController.gainsInEndEffectorFrame = gainsInEndEffectorFrame;
-impedanceController.damperGains = damperGains;
-impedanceController.springGains = springGains;
+%     impedance.Kp = [0; 0; 500; 5; 5; 5] * 0.1;  % (N/m) or (Nm/rad)
+%     impedance.Kd = [0; 0; 5; .1; .1; .1;]; % (N/(m/sec)) or (Nm/(rad/sec))
+ 
 
 keys = read(kb);
 controllerOn = false;

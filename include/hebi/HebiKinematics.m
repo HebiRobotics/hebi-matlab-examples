@@ -131,7 +131,7 @@ classdef (Sealed) HebiKinematics
             %       Parameter          Size    Units      Synonyms
             %       'PositionLimit'    1x2     [rad|m]    ('PosLim')
             %       'VelocityLimit'    1x2     [rad/s]    ('VelLim')
-            %       'EffortLimit'      1x2     [Nm|N]     ('EffLim')
+            %       'EffortLimit'      1x2     [Nm]     ('EffLim')
             %       'Mass'             1x1     [kg]
             %
             %   Example

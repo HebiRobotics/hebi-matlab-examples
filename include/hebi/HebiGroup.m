@@ -235,7 +235,7 @@ classdef (Sealed) HebiGroup < handle
             %   previously persisted gains.
             %
             %   Example
-            %      % set effort limits of +/- 1.5 Nm|N
+            %      % set effort limits of +/- 1.5 Nm
             %      n = group.getNumModules();
             %      limit = 1.5;
             %      gains = GainStruct();
