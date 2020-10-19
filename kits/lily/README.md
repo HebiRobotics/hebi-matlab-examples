@@ -48,7 +48,7 @@ Gains, control parameters, and kinematic information are all set automatically i
 * Download this folder
 * Start Matlab (2013b or later)
 * run `startup.m`
-* run `lilyDemo.m`
+* run `runLily.m`
 
 The demo will start up looking for the actuators in the robot, followed by the mobile device for input.  The border of the HEBI Mobile I/O app will hightlight green when it is connected and the demo starts.
 
