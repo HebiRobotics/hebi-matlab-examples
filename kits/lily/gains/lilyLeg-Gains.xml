@@ -9,8 +9,8 @@
       <feed_forward>0 0 0</feed_forward>
       <punch>0 0 0</punch>
       <dead_zone>0 0 0</dead_zone>
-      <min_output>-10 -20 -10</min_output>
-      <max_output>10 20 10</max_output>
+      <min_output>-20 -40 -20</min_output>
+      <max_output>20 40 20</max_output>
       <min_target>-50.24 -50.24 -50.24</min_target> <!-- -16 * pi -->
       <max_target>50.24 50.24 50.24</max_target> <!-- 16 * pi -->
       <target_lowpass>1 1 1</target_lowpass>
@@ -43,8 +43,8 @@
       <dead_zone>0 0 0</dead_zone>
       <min_output>-1 -1 -1</min_output>
       <max_output>1 1 1</max_output>
-      <min_target>-10 -20 -10</min_target>
-      <max_target>10 20 10</max_target>
+      <min_target>-20 -40 -20</min_target>
+      <max_target>20 40 20</max_target>
       <target_lowpass>1 1 1</target_lowpass>
       <output_lowpass>0.5 0.5 0.5</output_lowpass>
       <d_on_error>0 0 0</d_on_error>
