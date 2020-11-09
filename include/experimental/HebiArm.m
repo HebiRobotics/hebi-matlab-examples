@@ -164,6 +164,11 @@ classdef HebiArm < handle
             newState.time = newState.fbk.time;
             newState.numDoF = this.kin.getNumDoF();
             
+            % Add commonly derived state
+            fbkPos = newState.fbk.position;
+            newState.T_endEffector = this.kin.getForwardKinematicsEndEffector(fbkPos);
+            newState.J_endEffector = this.kin.getJacobianEndEffector(fbkPos);
+            
             % Always compensate for accelerations due to gravity
             newState.cmdEffort = this.getGravCompEfforts(newState.fbk);
             
@@ -177,7 +182,7 @@ classdef HebiArm < handle
                 
                 % Compensate for joint accelerations
                 newState.cmdEffort = this.kin.getDynamicCompEfforts(...
-                    newState.fbk.position, ...
+                    fbkPos, ...
                     newState.cmdPos, ...
                     newState.cmdVel, ...
                     newState.cmdAccel) + newState.cmdEffort;
@@ -242,10 +247,10 @@ classdef HebiArm < handle
                   fbk.orientationY(1), ...
                   fbk.orientationZ(1) ];
             baseRotMat = HebiUtils.quat2rotMat(q);
-            gravityVec = -baseRotMat(3,1:3);
             
-            % TODO: account for base frame rotation. Usually is eye(4)
-            
+            kinBaseFrame = this.kin.getBaseFrame();
+            gravityVec = kinBaseFrame(1:3,1:3) * (-baseRotMat(3,1:3)');
+           
             % Compensate for gravity
             gravCompEfforts = this.kin.getGravCompEfforts(fbk.position, gravityVec);
             
