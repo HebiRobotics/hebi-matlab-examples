@@ -1,15 +1,16 @@
 function [] = startup()
-% startup adds paths required to run demos
+% startup.m sets up libraries and paths and should be run once on startup.
+% 
+% HEBI Robotics
+% Jun 2018
 
 localDir = fileparts(mfilename('fullpath'));
-addpath(fullfile(localDir));
-addpath(fullfile(localDir, 'hebi'));
 
-addpath(fullfile(localDir, 'tools'));
-addpath(fullfile(localDir, 'tools', 'input'));
-addpath(fullfile(localDir, 'tools', 'kinematics'));
+% Run the include script from the top level of the examples
+includeScript = fullfile(localDir, '..', '..', 'include', 'include.m');
+run(includeScript);
 
-HebiJoystick.loadLibs();
-HebiKeyboard.loadLibs();
+% Add this folder and all its subfolders
+addpath(genpath(localDir));
 
 end
