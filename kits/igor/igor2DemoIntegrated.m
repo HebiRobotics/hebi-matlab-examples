@@ -4,17 +4,12 @@
 %
 % HEBI Robotics
 % Apr 2017-2019
+%
+% Updated Nov 2020
 
 function igor2DemoIntegrated( cam_module )
 
 localDir = fileparts(mfilename('fullpath'));
-
-addpath(fullfile(localDir));
-addpath(fullfile(localDir, 'hebi'));
-addpath(fullfile(localDir, 'tools'));
-addpath(fullfile(localDir, 'tools', 'gains'));
-addpath(fullfile(localDir, 'tools', 'input'));
-addpath(fullfile(localDir, 'tools', 'kinematics'));
 
 % % This is optional, use it to only use the local network.
 % HebiLookup.setLookupAddresses('10.10.1.255');
@@ -73,7 +68,7 @@ while true
 end
 
 % Load the gains for all the modules
-gains = HebiUtils.loadGains([localDir '/igorGains.xml']);
+gains = HebiUtils.loadGains([localDir '/gains/igorGains.xml']);
 
 % If there's no camera, remove the camera module from the gains before
 % sending them (the camera is the last one in the group).
@@ -256,13 +251,13 @@ while true
 
     direction = [1, -1];
 
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Setup Robot Parameters %
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
     wheelRadius = .200 / 2;  % m
     wheelBase = .43;  % m
-
-    % THESE VALUES ARE VERY APPROXIMATE
-    chassisCoM = [0; 0; .10 + .3];  % XYZ center of mass (m)
-                                    % center of chassis on hip axis
-    chassisMass = 6;  % kg  (9 is closer to true value)
 
     numLegs = 2;
     numArms = 2;
@@ -305,66 +300,21 @@ while true
     
     T_pose = eye(4);
 
-    %%%%%%%%%%%%%%%%%%
-    % Leg Kinematics %
-    %%%%%%%%%%%%%%%%%%
-
+    %%%%%%%%%%%%%%%%%%%%
+    % Robot Kinematics %
+    %%%%%%%%%%%%%%%%%%%%
+    [legKin, armKin, chassisKin] = makeIgorKinematics(numLegs, numArms);
+    chassisMass = getBodyMasses(chassisKin);
+    chassisCoM = [0; 0; .13];  % XYZ center of mass (m)
+    
+    %%%%%%%%%%%%%%%%%%%%%%%%%
+    % Starting Joint Angles %
+    %%%%%%%%%%%%%%%%%%%%%%%%%
     kneeAngle = deg2rad(130);
     hipAngle = pi/2 + kneeAngle/2;
     legHomeAngles = [ hipAngle  kneeAngle;
-                     -hipAngle -kneeAngle ];
-
-    % Setup Legs
-    R_hip = R_x(pi/2);
-    xyz_hip = [0; .0225; .055]; 
-    T_hip = eye(4);
-    T_hip(1:3,1:3) = R_hip;
-    T_hip(1:3,4) = xyz_hip;
-
-    legBaseFrames(:,:,1) = eye(4);
-    legBaseFrames(:,:,2) = eye(4);
-
-    legBaseFrames(1:3,4,1) = [0; .15; 0];
-    legBaseFrames(1:3,4,2) = [0; -.15; 0];
-
-    legBaseFrames(1:3,1:3,1) = R_x(-pi/2);
-    legBaseFrames(1:3,1:3,2) = R_x(pi/2);
-
-    for leg = 1:numLegs
-        legKin{leg} = HebiKinematics();
-        legKin{leg}.addBody('X5-9');
-        legKin{leg}.addBody('X5Link','ext',.375,'twist',pi);
-        legKin{leg}.addBody('X5-4');
-        legKin{leg}.addBody('X5Link','ext',.325,'twist',pi);
-
-        legKin{leg}.setBaseFrame(legBaseFrames(:,:,leg));
-    end
-
+        -hipAngle -kneeAngle ];
     
-    %%%%%%%%%%%%%%%%%%
-    % Arm Kinematics %
-    %%%%%%%%%%%%%%%%%%
-
-    armBaseXYZ(:,1) = [0; .10; .20];
-    armBaseXYZ(:,2) = [0; -.10; .20];
-
-    mounting = {'left-inside','right-inside'};
-
-    for arm = 1:numArms
-        armKin{arm} = HebiKinematics();
-        armKin{arm}.addBody('X5-4');
-        armKin{arm}.addBody('X5-HeavyBracket', 'mount', mounting{arm} );
-        armKin{arm}.addBody('X5-9');
-        armKin{arm}.addBody('X5Link','ext',.325,'twist',0,'mass',.250);
-        armKin{arm}.addBody('X5-4');
-        armKin{arm}.addBody('X5Link','ext',.325,'twist',pi,'mass',.350);
-        armKin{arm}.addBody('X5-4');
-
-        armTransform = eye(4);
-        armTransform(1:3,4) = armBaseXYZ(:,arm);
-        armKin{arm}.setBaseFrame(armTransform);
-    end
-
     armHomeAngles(1,:) = deg2rad([0 20 60 0]);
     armHomeAngles(2,:) = deg2rad([0 -20 -60 0]);
 
