@@ -18,8 +18,8 @@ close all;
 
 HebiLookup.initialize();
 
-armName = 'A-2085-06';
-armFamily = 'Arm';
+armName = '7-DoF-X-Loaner';
+armFamily = 'NDTArm';
 hasGasSpring = true;
 
 [ arm, params ] = setupArm( armName, armFamily, hasGasSpring );

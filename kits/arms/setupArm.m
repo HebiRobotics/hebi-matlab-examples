@@ -22,6 +22,7 @@ function [ arm, params, gripper ] = setupArm( kit, family, hasGasSpring )
 % (These are the corresponding Assembly Part Numbers for the Arm Kits)
 %
 %   X-Series Arms
+%    '7-DoF-X-Loaner' (Loaner 7-DoF Special Config for this Branch)
 %    'A-2085-06G' (6-DoF X-Series Arm + Gripper), 
 %    'A-2085-06' (6-DoF X-Series Arm),
 %    'A-2085-05G' (5-DoF X-Series Arm + Gripper), 
@@ -78,6 +79,32 @@ end
 
 %% Setup kinematic models
 switch kit
+    
+     case '7-DoF-X-Loaner'
+        %% X-Series 7-DoF Double Elbow Loaner NDT Arm
+        group = HebiLookup.newGroupFromNames(family, {
+            'J1_base'
+            'J2_shoulder1'
+            'J3_shoulder2'
+            'J4_elbow1'
+            'J5_elbow2'
+            'J6_wrist1'
+            'J7_wrist2' });
+        
+        % Kinematic Model
+        kin = HebiKinematics([localDir '/hrdf/7-DoF-X-Loaner']);
+        
+        % Load and send arm gains
+        params.gains = HebiUtils.loadGains([localDir '/gains/7-DoF-X-Loaner']);     
+        
+        % No Gripper
+        params.hasGripper = false;
+        
+        % NO GAS SPRING -- NOT POSSIBLE
+        params.effortOffset = [0 0 0 0 0 0 0];
+        
+        % Default seed positions for doing inverse kinematics
+        params.ikSeedPos = [0.01 1.0 0.01 2.5 0.01 1.5 0.01];
     
     case 'A-2085-06G'
         %% X-Series 6-DoF Arm with Gripper
