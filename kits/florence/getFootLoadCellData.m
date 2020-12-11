@@ -4,6 +4,8 @@ function [footData] = getFootLoadCellData (group,sensorOffset)
 fbk = group.getNextFeedbackIO();
 
 % Convert load cell voltage output to force in lbs
+% The load cell used is this one below:
+% https://www.digikey.com/en/products/detail/te-connectivity-measurement-specialties/FC2231-0000-0100-L/809397
 
 % sensorForceFrontLeft = (fbk.a5 - 0.525)/4 * 100;
 % sensorForceFrontRight = (fbk.a8 - 0.514)/4 * 100;
