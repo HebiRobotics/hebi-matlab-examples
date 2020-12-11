@@ -11,7 +11,7 @@ Included in the case is:
 - WiFi Antennas (2x)
 
 The gas springs and WiFi antennas will need to be attached to the robot after unpacking.  There are photos of the packing process at the link below: 
-https://www.dropbox.com/sh/liuyvpv9i1d8ft1/AABBnn8OZRLyZwI8TJBr-LHsa?dl=0
+https://www.dropbox.com/sh/kambk4initdallt/AACIBHNCOdP-IeG2Uwrq_iLwa?dl=0
 
 Follow the photos in order for packing the robot, follow the photos in reverse to unpack the robot.
 
