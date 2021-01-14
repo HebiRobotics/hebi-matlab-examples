@@ -305,7 +305,7 @@ while true
     %%%%%%%%%%%%%%%%%%%%
     [legKin, armKin, chassisKin] = makeIgorKinematics(numLegs, numArms);
     chassisMass = getBodyMasses(chassisKin);
-    chassisCoM = [0; 0; .13];  % XYZ center of mass (m)
+    chassisCoM = [0; 0; .10 + .3];  % XYZ center of mass (m)
     
     %%%%%%%%%%%%%%%%%%%%%%%%%
     % Starting Joint Angles %
