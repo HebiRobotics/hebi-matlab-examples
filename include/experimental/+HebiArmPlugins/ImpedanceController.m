@@ -12,7 +12,7 @@ classdef ImpedanceController < HebiArmPlugin
         gainsInEndEffectorFrame logical = true;
         
         Kp double = zeros(6,1); % (N/m) or (Nm/rad)
-        Ki double = zeros(6,1); % (N/m*sec) or (Nm/rad*sec)
+        Ki double = zeros(6,1); % (N/(m*sec)) or (Nm/(rad*sec))
         Kd double = zeros(6,1); % (N/(m/sec)) or (Nm/(rad/sec))
         
     end
