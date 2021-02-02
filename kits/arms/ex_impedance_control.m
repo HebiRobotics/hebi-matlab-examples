@@ -21,17 +21,14 @@ close all;
 
 HebiLookup.initialize();
 
-armName = 'A-2085-06';
+armName = 'A-2099-07';
 armFamily = 'Arm';
-hasGasSpring = true;  % If you attach a gas spring to the shoulder for
+hasGasSpring = false;  % If you attach a gas spring to the shoulder for
                        % extra payload, set this to TRUE.
 
 [ arm, params ] = setupArm( armName, armFamily, hasGasSpring );  
 impedance = HebiArmPlugins.ImpedanceController();
-arm.plugins = {
-    HebiArmPlugins.EffortOffset(params.effortOffset)
-   impedance
-};
+arm.plugins{end+1} = impedance;
 
 % Increase feedback frequency since we're calculating velocities at the
 % high level for damping.  Going faster can help reduce a little bit of

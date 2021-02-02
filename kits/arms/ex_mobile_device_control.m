@@ -50,15 +50,12 @@ end
 % Arm Setup %
 %%%%%%%%%%%%%
 
-armName = 'A-2085-06G';
+armName = 'A-2099-07';
 armFamily = 'Arm';
 hasGasSpring = false;  % If you attach a gas spring to the shoulder for
                        % extra payload, set this to TRUE.
 
 [ arm, params, gripper ] = setupArm( armName, armFamily, hasGasSpring );
-arm.plugins = {
-    HebiArmPlugins.EffortOffset(params.effortOffset)
-};
                              
 disp('  ');
 disp('Arm end-effector is now following the mobile device pose.');
@@ -133,7 +130,7 @@ while ~abortFlag
         try
             arm.update();
             arm.send();
-            gripper.send();
+%             gripper.send();
         catch
             disp('Could not get robot feedback!');
             break;

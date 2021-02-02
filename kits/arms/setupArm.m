@@ -424,6 +424,8 @@ switch kit
         
         % Load and send arm gains
         params.gains = HebiUtils.loadGains([localDir '/gains/A-2099-07']);
+        % Get gains from shoulder to send to doubleShoulder
+        mainShoulder = HebiLookup.newGroupFromNames(family, 'J2A_shoulder1');
         
         % Has Gripper
         params.hasGripper = false;
@@ -432,7 +434,10 @@ switch kit
         params.effortOffset = [0 shoulderJointComp 0 0 0 0 0];
         
         % Default seed positions for doing inverse kinematics
-        params.ikSeedPos = [0 -1 0 2.5 1.5 -1.5 1];
+        params.ikSeedPos = [0 -1.25 0 2 -3.5 -1.25 0];
+        
+        % Default plugins
+        doubleShoulder = HebiLookup.newGroupFromNames(family, 'J2B_shoulder1');
         
     otherwise
         
@@ -444,6 +449,19 @@ end
 %% Common Setup
 arm = HebiArm(group, kin);
 HebiUtils.sendWithRetry(arm.group, 'gains', params.gains);
+
+if isequal(kit,'A-2099-07')
+    arm.plugins = {
+        HebiArmPlugins.EffortOffset(params.effortOffset)
+        HebiArmPlugins.DoubledJointMirror(2, doubleShoulder)
+        };
+    shoulderGains = mainShoulder.getGains();
+    HebiUtils.sendWithRetry(doubleShoulder, 'gains', shoulderGains);
+else
+    arm.plugins = {
+        HebiArmPlugins.EffortOffset(params.effortOffset)
+        };
+end
 
 % Setup gripper
 gripper = [];

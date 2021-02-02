@@ -23,9 +23,6 @@ hasGasSpring = false;  % If you attach a gas spring to the shoulder for
                        % extra payload, set this to TRUE.
 
 [ arm, params ] = setupArm( armName, armFamily, hasGasSpring );
-arm.plugins = {
-	HebiArmPlugins.EffortOffset(params.effortOffset)  
-};
 
 localDir = params.localDir;
 enableLogging = true;
