@@ -408,6 +408,32 @@ switch kit
         % Default seed positions for doing inverse kinematics
         params.ikSeedPos = [0.01 1.0 2.5 1.5];
         
+    case 'A-2099-07'
+        %% X-Series 7-DoF Double Shoulder Arm with Gripper
+        group = HebiLookup.newGroupFromNames(family, {
+            'J1_base'
+            'J2A_shoulder1'
+            'J3_shoulder2'
+            'J4_elbow'
+            'J5_wrist1'
+            'J6_wrist2'
+            'J7_wrist3' });
+        
+        % Kinematic Model
+        kin = HebiKinematics([localDir '/hrdf/A-2099-07']);
+        
+        % Load and send arm gains
+        params.gains = HebiUtils.loadGains([localDir '/gains/A-2099-07']);
+        
+        % Has Gripper
+        params.hasGripper = false;
+        
+        % Account for external efforts due to the gas spring
+        params.effortOffset = [0 shoulderJointComp 0 0 0 0 0];
+        
+        % Default seed positions for doing inverse kinematics
+        params.ikSeedPos = [0 -1 0 2.5 1.5 -1.5 1];
+        
     otherwise
         
         error([kit ' is not a supported kit name']);
