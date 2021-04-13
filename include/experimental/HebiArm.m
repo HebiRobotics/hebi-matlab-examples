@@ -31,6 +31,7 @@ classdef HebiArm < handle
         kin HebiKinematics;
         trajGen HebiTrajectoryGenerator;
         traj;
+        kinInfo;
     end
     
     properties(Access = public)
@@ -56,6 +57,7 @@ classdef HebiArm < handle
             end
             this.group = varargin{1};
             this.kin = varargin{2};
+            this.kinInfo = this.kin.getBodyInfo();
             
             this.trajGen = HebiTrajectoryGenerator(this.kin);
             this.nZeros = zeros(1, this.kin.getNumDoF);
@@ -248,8 +250,16 @@ classdef HebiArm < handle
                   fbk.orientationZ(1) ];
             baseRotMat = HebiUtils.quat2rotMat(q);
             
-            kinBaseFrame = this.kin.getBaseFrame();
-            gravityVec = kinBaseFrame(1:3,1:3) * (-baseRotMat(3,1:3)');
+            frames = this.kin.getFK('output', fbk.position);
+            imuFrames = find(this.kinInfo.isDoF);
+            % Check to see if there are transformations between first body
+            % and first IMU/Actuator
+            if imuFrames(1) > 1
+                gravityFrame = frames(:,:,(imuFrames(1)-1));
+            else
+                gravityFrame = frames(:,:,1);
+            end
+            gravityVec = gravityFrame(1:3,1:3) * (-baseRotMat(3,1:3)');
            
             % Compensate for gravity
             gravCompEfforts = this.kin.getGravCompEfforts(fbk.position, gravityVec);
