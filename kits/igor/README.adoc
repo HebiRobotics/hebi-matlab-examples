@@ -28,7 +28,7 @@ To run the main demo code for Igor from Matlab:
 - Run startup.m
 - Run igor2StartupIntegrated.m
 
-Note: By default, the demo will look for a Mobile IO device with family `**HEBI**` and name `**Mobile IO**`.
+Note: By default, the demo will look for a Mobile IO device with family `**Igor**` and name `**mobileIO**`.
 
 ## Controls
 
