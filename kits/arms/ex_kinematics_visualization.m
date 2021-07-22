@@ -18,7 +18,7 @@ close all;
 
 HebiLookup.initialize();
 
-armName = 'A-2099-07';
+armName = 'A-2099-07G';
 armFamily = 'Arm';
 hasGasSpring = false;
 

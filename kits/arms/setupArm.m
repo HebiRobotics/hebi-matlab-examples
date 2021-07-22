@@ -439,6 +439,41 @@ switch kit
         % Default plugins
         doubleShoulder = HebiLookup.newGroupFromNames(family, 'J2B_shoulder1');
         
+    case 'A-2099-07G'
+        %% X-Series 7-DoF Double Shoulder Arm with Gripper
+        group = HebiLookup.newGroupFromNames(family, {
+            'J1_base'
+            'J2A_shoulder1'
+            'J3_shoulder2'
+            'J4_elbow'
+            'J5_wrist1'
+            'J6_wrist2'
+            'J7_wrist3' });
+        
+        % Kinematic Model
+        kin = HebiKinematics([localDir '/hrdf/A-2099-07G']);
+        
+        % Load and send arm gains
+        params.gains = HebiUtils.loadGains([localDir '/gains/A-2099-07G']);
+        % Get gains from shoulder to send to doubleShoulder
+        mainShoulder = HebiLookup.newGroupFromNames(family, 'J2A_shoulder1');
+        
+        % Has Gripper
+        params.hasGripper = true;
+        params.gripperOpenEffort = 1;
+        params.gripperCloseEffort = -5;
+        params.gripperGains = HebiUtils.loadGains( ...
+            [localDir '/gains/A-2255-01'] );
+        
+        % Account for external efforts due to the gas spring
+        params.effortOffset = [0 shoulderJointComp 0 0 0 0 0];
+        
+        % Default seed positions for doing inverse kinematics
+        params.ikSeedPos = [0 -1.25 0 2 -3.5 -1.25 0];
+        
+        % Default plugins
+        doubleShoulder = HebiLookup.newGroupFromNames(family, 'J2B_shoulder1');
+        
     otherwise
         
         error([kit ' is not a supported kit name']);
@@ -450,7 +485,7 @@ end
 arm = HebiArm(group, kin);
 HebiUtils.sendWithRetry(arm.group, 'gains', params.gains);
 
-if isequal(kit,'A-2099-07')
+if contains(kit,'A-2099-07')
     arm.plugins = {
         HebiArmPlugins.EffortOffset(params.effortOffset)
         HebiArmPlugins.DoubledJointMirror(2, doubleShoulder)
