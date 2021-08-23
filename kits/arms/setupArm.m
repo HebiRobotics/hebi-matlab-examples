@@ -63,7 +63,7 @@ function [ arm, params, gripper ] = setupArm( kit, family, hasGasSpring )
 localDir = fileparts(mfilename('fullpath'));
 params.localDir = localDir;
 
-if nargin < 4 || isempty(hasGasSpring)
+if nargin < 3 || isempty(hasGasSpring)
    hasGasSpring = false;
 end
 
