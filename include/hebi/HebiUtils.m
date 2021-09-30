@@ -834,7 +834,7 @@ classdef (Sealed) HebiUtils
             % See also HebiGroup.send
             
             % good connectivity -> no changes and return asap
-            if group.send('RequestAck', true, varargin{:})
+            if group.send(varargin{:}, 'RequestAck', true)
                 return;
             end
             
@@ -845,7 +845,7 @@ classdef (Sealed) HebiUtils
             
             maxRetries = 10;
             for i = 1:maxRetries
-                if group.send('RequestAck', true, varargin{:})
+                if group.send(varargin{:}, 'RequestAck', true)
                     return;
                 end
             end
