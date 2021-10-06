@@ -14,7 +14,11 @@ visualizeOn = false;
 simulate = false;
 logging = true;
 
-[legKin, chassisKin] = makeDaisyKinematics();
+% TODO: replace jointInds with jointIndices
+[~,~,endEffectors,jointIndices] = HebiUtils.loadHrdf('hrdf/Daisy.hrdf');
+legKin = endEffectors(1:6);
+chassisKin = endEffectors{7};
+
 safetyParams = makeDaisySafetyLimits();
 
 for leg=1:length(legKin)
@@ -178,7 +182,7 @@ while true
         
         for i=1:length(imuModules)
             j = imuModules(i);
-            imuFrame = legKin{i}.getBaseFrame();
+            imuFrame = legKin{i}.getBaseFrame(); % TODO: actuator is not first body. Should there be a kin.getTransformToFirstJoint() method?
             
             DCM_module = HebiUtils.quat2rotMat(Q(:,j)');
             DCM_module = DCM_module * imuFrame(1:3,1:3)';
