@@ -13,10 +13,9 @@ classdef (Sealed) HebiKinematics
     %   http://docs.hebi.us/tools.html#robot-description-format
     %
     %   This API currently only supports serial chains. If you are going to
-    %   work with a robot that has multiple limbs, such as a hexapod, we
-    %   recommend creating a cell array that contains a separate kinematic
-    %   object for each limb. The base frames can be set to the pose of the
-    %   first body of the limb with respect to the chassis.
+    %   work with a robot that has multiple limbs, such as a hexapod, you
+    %   need to use HebiUtils.loadHrdf(hrdfFile) which creates a separate
+    %   kinematic object for each defined end effector / limb.
     %
     %   HebiKinematics Methods (setup):
     %      kin = HebiKinematics('robot.hrdf') - where 'robot.hrdf' is the
@@ -607,12 +606,19 @@ classdef (Sealed) HebiKinematics
         
         function this = HebiKinematics(varargin)
             % constructor
-            this.obj = javaObject(HebiKinematics.className);
             
+            % special internal constructor where we pass 
+            % in the raw java object
+            if nargin == 1 && isa(varargin{1}, HebiKinematics.className)
+                this.obj = varargin{1};
+                return;
+            end
+            
+            % normal constructor w/ empty or hrdf argument
+            this.obj = javaObject(HebiKinematics.className);
             if nargin > 0
                 addHrdf(this.obj, varargin{1});
             end
-            
         end
         
         function disp(this)
