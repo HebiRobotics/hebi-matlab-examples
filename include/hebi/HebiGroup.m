@@ -334,7 +334,7 @@ classdef (Sealed) HebiGroup < handle
             %
             %   Example
             %      % Provide continuous user feedback to a mobile controller
-            %      group = HebiLookup.newGroupFromNames('*','Mobile IO');
+            %      group = HebiLookup.newGroupFromNames('HEBI','mobileIO');
             %      while true
             %          fbk = group.getNextFeedbackIO();
             %          logMsg = ['A1: ' num2str(fbk.a1) newline ...

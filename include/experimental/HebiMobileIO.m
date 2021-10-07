@@ -1,23 +1,35 @@
 classdef HebiMobileIO < handle
-    %HebiMobileIO is utility wrapper for the mobileIO phone app
+    % HebiMobileIO is utility wrapper for the mobileIO phone app
     %   
     %   HebiMobileIO Methods:
     %
-    %   setDefaults          - sets all axes and buttons to their default configuration
-    %   setAxisSnap          - configures snapping behavior desired axes
+    %   setDefaults          - sets all UI elements to their default state
+    %   setAxisSnap          - sets the snap position of axes
     %   setAxisValue         - sets the current axis value
     %   setButtonToggle      - configures button toggle mode
     %   setButtonIndicator   - configures visual button indicators
     %   setColor             - sets the color of a visual indicator on the display
+    %   sendText             - append a message to the text display
+    %   clearText            - clears the text display
+    %
+    %   sendVibrate          - send a command to vibrate the device
+    %
+    %   update               - gets next feedback and update internal state
+    %   getFeedbackIO        - returns the latest feedback in 'io' view
+    %   getFeedbackMobile    - returns the latest feedback in 'mobile' view
+    %   getOrientation       - 3x3 orientation matrix based on IMU data
+    %   getArOrientation     - 3x3 orientation matrix based on AR data
+    %   getArPosition        - 3x1 position vector based on AR data
+    %   getArPose            - 4x4 full 6-dof pose based on AR data
     
     %   Copyright 2014-2021 HEBI Robotics, Inc.
     
-    properties
-        retrySends = true;
-    end
-    
     properties(SetAccess = private)
         group HebiGroup;
+    end
+    
+    properties
+        retrySends logical = true;
     end
     
     properties(Access = private)
@@ -25,7 +37,7 @@ classdef HebiMobileIO < handle
         mobileFbk;
         prevIoFbk;
         ioDiff struct = struct();
-        successTime;
+        lastSuccessTime;
     end
     
     % Static API
@@ -64,11 +76,11 @@ classdef HebiMobileIO < handle
             this.ioFbk = group.getNextFeedbackIO();
             this.prevIoFbk = group.get('feedback', 'view', 'io');
             this.mobileFbk = group.get('feedback', 'view', 'mobile');
-            this.successTime = tic();
+            this.lastSuccessTime = tic();
         end
         
         function [] = setDefaults(this)
-            % setDefaults sets all axes and buttons to their default configuration
+            % setDefaults sets all UI elements their default configuration
             ALL = 1:8;
             this.setAxisSnap(ALL, [0 0 nan nan nan nan 0 0]);
             this.setAxisValue(ALL, 0);
@@ -79,12 +91,12 @@ classdef HebiMobileIO < handle
         end
         
         function [] = setAxisSnap(this, axes, values)
-            % setAxisSnap configures snapping behavior for axes
+            % setAxisSnap sets the snap position of one or more axes (sliders)
             %
-            %   This method sets the 'snap' value of specified axes. When
+            %   This method sets the 'snap' position of specified axes. When
             %   the snap value is set, an axis will automatically return  
-            %   to the snap-value once it is not actively being pressed. 
-            %   'nan' deactivates snapping.
+            %   to once it is not actively being pressed. 'nan' deactivates
+            %   snapping.
             %
             %   'Axes' Argument (required)
             %      The axis or an array of axes, e.g., [1 2] for a1 and a2
@@ -103,7 +115,7 @@ classdef HebiMobileIO < handle
         end
         
         function [] = setAxisValue(this, axes, values)
-            % setAxisValue sets the current axis value
+            % setAxisValue sets the position of one or more axes (sliders)
             %
             %   This method sets the value of specified axes. This only
             %   works for non-snapping axes.
@@ -178,28 +190,53 @@ classdef HebiMobileIO < handle
             this.send('AppendLog', text, 'ClearLog', clearPrevious);
         end
         
-        function [hasUpdated, secondsSinceSuccess] = update(this, varargin)
-            % TODO: fix comment (copy & paste from example)
+        function [] = sendVibrate(this, effort)
+            % sendVibrate sends a vibrate command to the phone buzzer
             %
-            % We get feedback from the phone into the existing structs. The
-            % timeout of 0 means that the method returns immediately and won't
-            % wait for feedback. If there was no feedback, the method returns
-            % empty ([]), and the data in the passed in structs does not get
-            % overwritten.
-            % We do this because the mobile device is typically on wireless and
-            % might drop out or be really delayed, in which case we would
-            % rather keep running with an old data instead of waiting here for
-            % new data.
+            %   Note that this feature depends on device support. If the
+            %   device does not support programmatic vibrating, then this
+            %   will be a no-op.
+           if nargin < 2
+              effort = 1; 
+           end
+           cmd = CommandStruct();
+           cmd.effort = effort;
+           this.group.send(cmd);
+        end
+        
+        function [hasNewFeedback, feedbackAge] = update(this, varargin)
+            % update requests the next feedback and updates internal state 
+            %
+            %   This method is a wrapper around group.getNextFeedback()
+            %   that updates multiple feedback structs at once. 
+            %
+            %   This method is blocking by default, but non-blocking
+            %   behavior can be specified using the 'timeout' parameter.
+            %   Non-blocking behavior is often useful when the mobile
+            %   device is on wireless and may lose packets every once in a
+            %   while. In many cases it is better to keep running with old
+            %   data instead of blocking the entire demo.
+            %   
+            %   Example
+            %      [hasNewFeedback, feedbackAge] = mobileIO.update('timeout',0);
+            %      if feedbackAge > 10
+            %        error('mobileIO has been stage for 10 seconds!');
+            %      end
+            %      if hasNewFeedback
+            %        ikTarget = mobileIO.getArPose();
+            %      end
+            %
+            %   See also HebiGroup.getNextFeedback
             tmpIoFbk = this.prevIoFbk;
-            hasUpdated = ~isempty(this.group.getNextFeedback( ...
+            hasNewFeedback = ~isempty(this.group.getNextFeedback( ...
                 tmpIoFbk, this.mobileFbk, varargin{:}));
-            if hasUpdated
-                this.successTime = tic();
-                secondsSinceSuccess = 0;
+            if hasNewFeedback
+                this.lastSuccessTime = tic();
+                feedbackAge = 0;
                 this.prevIoFbk = this.ioFbk;
                 this.ioFbk = tmpIoFbk;
             else
-                secondsSinceSuccess = toc(this.successTime);
+                feedbackAge = toc(this.lastSuccessTime);
             end
         end
         

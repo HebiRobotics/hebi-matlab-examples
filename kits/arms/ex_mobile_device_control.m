@@ -24,27 +24,7 @@ enableLogging = true;
 %%%%%%%%%%%%%%%%%%%%%%%
 % Mobile Device Setup %
 %%%%%%%%%%%%%%%%%%%%%%%
-phoneFamily = 'HEBI';
-phoneName = 'mobileIO';
-
-resetPoseButton = 'b1';
-quitDemoButton = 'b8';
-translationScaleSlider = 'a3';
-gripForceSlider = 'a6';
-
-while true  
-    try
-        fprintf('Searching for phone Controller...\n');
-        phoneGroup = HebiLookup.newGroupFromNames( ...
-                        phoneFamily, phoneName );        
-        disp('Phone Found.  Starting up');
-        break;
-    catch
-        pause(1.0);
-    end
-end
-
-mobileIO = HebiMobileIO(phoneGroup);
+mobileIO = HebiMobileIO.findDevice('HEBI', 'mobileIO');
 mobileIO.setDefaults();
 mobileIO.setAxisValue([3 6], [-1 1]);
 mobileIO.setButtonIndicator([1 8], true);
@@ -52,6 +32,11 @@ mobileIO.sendText('B1 - Reset/re-align pose');
 mobileIO.sendText('A3 - Scale translation commands');
 mobileIO.sendText('A6 - Gripper Open/Close');
 mobileIO.sendText('B8 - Quit');
+
+resetPoseButton = 'b1';
+quitDemoButton = 'b8';
+translationScaleSlider = 'a3';
+gripForceSlider = 'a6';
 
 %%
 %%%%%%%%%%%%%
@@ -89,7 +74,6 @@ while ~abortFlag
     % Start background logging
     if enableLogging
         arm.group.startLog('dir',[params.localDir '/logs']);
-        phoneGroup.startLog('dir',[params.localDir '/logs']);
     end
 
     % Move to current coordinates
