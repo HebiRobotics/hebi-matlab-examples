@@ -10,52 +10,41 @@
 %% Setup
 clear *;
 close all;
-HebiLookup.initialize(); 
-group = HebiLookup.newGroupFromNames( 'HEBI', 'Mobile IO' );
+HebiLookup.initialize();
+mobileIO = HebiMobileIO.findDevice('HEBI', 'mobileIO');
+mobileIO.setDefaults();
+mobileIO.setButtonIndicator(8);
+mobileIO.sendText('Move for 30 seconds or press b8 to finish early');
 
 %% Gather data w/ visualization
 disp('  Visualizing 6-DoF pose estimate from the mobile device.');
 disp('  Move the device over magnets to make the feedback interesting...');  
 
 % Start logging in the background
-group.startLog( 'dir', 'logs' );  
+mobileIO.group.startLog( 'dir', 'logs' );  
 
 % Orientation visualization
 frameDisplay = FrameDisplay();
 
+isRunning = true;
 t0 = tic();
-while toc(t0) < 30
+while toc(t0) < 30 && isRunning
     
-    % Read a struct of mobile specific sensor data
-    fbk = group.getNextFeedbackMobile();
-
-    % Get the orientation feedback and convert to rotation matrix so 
-    % that it can be visualized.
-    mobileQuaterion = [ fbk.arOrientationW ...
-                        fbk.arOrientationX ...
-                        fbk.arOrientationY ...
-                        fbk.arOrientationZ ];
-    mobileRotMat = HebiUtils.quat2rotMat( mobileQuaterion );
-
-    % Get the AR position feedback
-    mobileXYZ = [ fbk.arPositionX;
-                  fbk.arPositionY;
-                  fbk.arPositionZ ];
-   
     % Visualize full 6-DoF pose 
-    arTransform = eye(4);
-    arTransform(1:3,1:3) = mobileRotMat;
-    arTransform(1:3,4) = mobileXYZ;
-    frameDisplay.setFrames( arTransform );
-    title(['AR Quality: ' num2str(fbk.arQuality)]);
+    mobileIO.update();
+    [pose, arQuality] = mobileIO.getArPose();
+    frameDisplay.setFrames( pose );
+    title(['AR Quality: ' num2str(arQuality)]);
     drawnow;
+    
+    isRunning = ~mobileIO.getFeedbackIO().b8;
 
 end
 
 disp('  All done!');
 
 % Stop background logging
-log = group.stopLogMobile();  
+log = mobileIO.group.stopLogMobile();  
 
 %% Analyze logged data
 % Calculate magnetic field strength

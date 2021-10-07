@@ -13,7 +13,7 @@ classdef HebiMobileIO < handle
     %   Copyright 2014-2021 HEBI Robotics, Inc.
     
     properties
-        sendWithRetry = true;
+        retrySends = true;
     end
     
     properties(SetAccess = private)
@@ -26,6 +26,28 @@ classdef HebiMobileIO < handle
         prevIoFbk;
         ioDiff struct = struct();
         successTime;
+    end
+    
+    % Static API
+    methods(Static)
+        
+        function mobileIO = findDevice(familyName, deviceName)
+            % searchController repeatedly searches the network for the specified device
+            timeout = 2;
+            while true
+                try
+                    group = HebiLookup.newGroupFromNames( familyName, deviceName );
+                    break;
+                catch
+                    % If we failed to make a group, pause a bit before trying again.
+                    disp(['Timed out searching for mobileIO device: '...
+                        '"' familyName '" | "' deviceName  '". Retrying...']);
+                    pause(timeout - 1); % Java method timeout takes 1s
+                end
+            end
+            mobileIO = HebiMobileIO(group);
+        end
+        
     end
     
     % Public API
@@ -251,7 +273,7 @@ classdef HebiMobileIO < handle
     end
     
     % Internal utility methods
-    methods(Access = private)
+    methods(Access = private, Hidden)
         
         function [] = setPins(this, letter, indices, values)
             indices = indices(:);
@@ -269,7 +291,7 @@ classdef HebiMobileIO < handle
         end
         
         function [] = send(this, varargin)
-            if this.sendWithRetry
+            if this.retrySends
                 HebiUtils.sendWithRetry(this.group, varargin{:});
             else
                 this.group.send(varargin{:});

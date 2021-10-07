@@ -14,29 +14,22 @@ HebiLookup.initialize();
 % Use Scope to change select a module and change the name and family to
 % match the names below.  Following examples will use the same names.
 familyName = 'HEBI';
-deviceName = 'Mobile IO';
+deviceName = 'mobileIO';
 
-% Loop to keep trying to form the arm group.  Make sure the mobile device
-% has the correct name / family to match the ones above and that it is on
-% the same network as this computer.  You can check for this using Scope.
-while true  
-    try
-        fprintf('Searching for phone Controller...\n');
-        group = HebiLookup.newGroupFromNames( ...
-                        familyName, deviceName );        
-        disp('Phone Found.  Starting up');
-        break;
-    catch
-        % If we failed to make a group, pause a bit before trying again.
-        pause(1.0);
-    end
-end
-
-mobileIO = HebiMobileIO( group );
+% The HebiMobileIO utility wrapper makes it easier to work with the
+% relevant parts of the group API.
+mobileIO = HebiMobileIO.findDevice(familyName, deviceName);
 mobileIO.setDefaults();
 
+% Setup the user visible UI
+mobileIO.setButtonIndicator([1 2 7 8]);
+mobileIO.setButtonToggle([1 2 3 4], true);
+mobileIO.setAxisSnap([3 4], [0.5 -0.5]);
+mobileIO.setAxisValue([5 6], [0.5 -0.5]);
+mobileIO.sendText('Drag the sliders and press some buttons...');
+
 % Start logging in the background
-group.startLog( 'dir', 'logs' ); 
+mobileIO.group.startLog( 'dir', 'logs' ); 
 
 
 %% Visualize Slider Input
@@ -77,7 +70,7 @@ end
 disp('  All done!');
 
 % Stop background logging
-logIO = group.stopLogIO();  
+logIO = mobileIO.group.stopLogIO();  
 
 %% Plot the logged feedback
 figure(101);

@@ -10,7 +10,8 @@
 clear *;
 close all;
 HebiLookup.initialize();
-group = HebiLookup.newGroupFromNames( 'HEBI', 'Mobile IO' );
+mobileIO = HebiMobileIO.findDevice('HEBI', 'mobileIO');
+mobileIO.setDefaults();
 
 %% Gather data w/ visualization
 disp('  Drag the sliders on the app screen and move the device...');
@@ -19,16 +20,13 @@ disp('  Drag the sliders on the app screen and move the device...');
 frameDisplay = FrameDisplay();
 figure(2);
 
-% create structs that we can reuse later
-ioFbk = group.getNextFeedbackIO();
-mobileFbk = group.getNextFeedbackMobile();
-
 t0 = tic();
 while toc(t0) < 30
     
-    % Read sensor data into existing structs. This way both the data
-    % is guaranteed to correspond to the same timestep.
-    group.getNextFeedback(ioFbk, mobileFbk);
+    % Read new sensor data
+    mobileIO.update();
+    ioFbk = mobileIO.getFeedbackIO();
+    mobileFbk = mobileIO.getFeedbackMobile();
     
     % Visualize digital (buttons) and analog (sliders) feedback
     subplot(2,1,1);
