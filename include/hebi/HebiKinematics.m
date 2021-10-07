@@ -48,6 +48,7 @@ classdef (Sealed) HebiKinematics
     %      getBodyInfo           - a table of body related info
     %      getJointInfo          - a table of joint related info
     %      getBaseFrame          - get transform from world to first body
+    %      getFirstJointFrame    - get transform from world to first joint
     %      getPayload            - additional mass at end-effector used 
     %                              for effort compensation
     %
@@ -296,7 +297,7 @@ classdef (Sealed) HebiKinematics
             %   This method expects a 4x4 homogeneous transform that
             %   describes the relationship between the world frame and the
             %   frame of the first body. All kinematics are expressed in
-            %   the world frame.  Units of XYZ translation are in [m].
+            %   the world frame. Units of XYZ translation are in [m].
             %
             %   Example
             %     % Shift the base frame of the kinematics by .5 meters
@@ -307,6 +308,19 @@ classdef (Sealed) HebiKinematics
             %
             %   See also HebiKinematics, getBaseFrame
             setBaseFrame(this.obj, varargin{:});
+        end
+        
+        function out = getFirstJointFrame(this, varargin)
+            % getFirstJointFrame returns the relationship between the world
+            % and the first joint in the kinematic configuration.
+            %
+            %   This method returns a 4x4 homogeneous transform that
+            %   describes the relationship between the world frame and the
+            %   frame of the first joint. All kinematics are expressed in
+            %   the world frame. Units of XYZ translation are in [m].
+            %
+            %   See also HebiKinematics, setBaseFrame
+            out = getFirstJointFrame(this.obj, varargin{:});
         end
         
         function out = getForwardKinematics(this, varargin)
