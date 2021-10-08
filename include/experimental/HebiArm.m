@@ -248,8 +248,8 @@ classdef HebiArm < handle
                   fbk.orientationZ(1) ];
             baseRotMat = HebiUtils.quat2rotMat(q);
             
-            kinBaseFrame = this.kin.getBaseFrame();
-            gravityVec = kinBaseFrame(1:3,1:3) * (-baseRotMat(3,1:3)');
+            fbkFrame = this.kin.getFirstJointFrame();
+            gravityVec = fbkFrame(1:3,1:3) * (-baseRotMat(3,1:3)');
            
             % Compensate for gravity
             gravCompEfforts = this.kin.getGravCompEfforts(fbk.position, gravityVec);
