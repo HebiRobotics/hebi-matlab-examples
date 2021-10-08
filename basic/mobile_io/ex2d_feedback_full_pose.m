@@ -33,10 +33,8 @@ duration = 30; % [sec]
 timer = tic();
 while toc(timer) < duration
     
-    % Get Feedback
+    % Update Feedback
     mobileIO.update();  
-    fbkMobile = mobileIO.getFeedbackMobile();
-  
     [arTransform, arQuality] = mobileIO.getArPose();
     
     frameDisplay.setFrames( arTransform );
