@@ -3,7 +3,7 @@ classdef HebiMobileIO < handle
     %   
     %   HebiMobileIO Methods:
     %
-    %   findDevice         - repeatedly searches until the device is found
+    %   findDevice         - repeatedly searches the network until the device is found
     %
     %   initializeUI       - initializes all UI elements to their default state
     %   setAxisSnap        - sets the axis snap position
