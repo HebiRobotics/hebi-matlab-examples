@@ -3,25 +3,28 @@ classdef HebiMobileIO < handle
     %   
     %   HebiMobileIO Methods:
     %
-    %   initializeUI         - initializes all UI elements to the default state
-    %   setAxisSnap          - sets the snap position of axes
-    %   setAxisValue         - sets the current axis value
-    %   setButtonToggle      - configures button toggle mode
-    %   setButtonIndicator   - configures visual button indicators
-    %   addText              - appends a message to the text display
-    %   clearText            - clears the text display
-    %   setLedColor          - sets the color of a visual indicator on the display
-    %   clearLedColor        - clears the color of the visual indicator
+    %   findDevice         - repeatedly searches until the device is found
     %
-    %   update               - updates internal state with the next feedback
-    %   getFeedbackIO        - returns latest feedback in 'io' view
-    %   getFeedbackMobile    - returns latest feedback in 'mobile' view
-    %   getOrientation       - 3x3 orientation matrix based on IMU data
-    %   getArOrientation     - 3x3 orientation matrix based on AR data
-    %   getArPosition        - 3x1 position vector based on AR data
-    %   getArPose            - 4x4 full 6-dof pose based on AR data
+    %   initializeUI       - initializes all UI elements to their default state
+    %   setAxisSnap        - sets the axis snap position
+    %   setAxisValue       - sets the axis position
+    %   setButtonToggle    - configures button toggle mode
+    %   setButtonIndicator - configures visual button indicators
+    %   addText            - appends a message to the text display
+    %   clearText          - clears the text display
+    %   setLedColor        - sets the color of a visual indicator on the display
+    %   clearLedColor      - clears the color of the visual indicator
     %
-    %   sendVibrate          - send a command to vibrate the device
+    %   update             - updates internal state with the next feedback
+    %   getFeedback        - returns latest feedback in multiple views
+    %   getFeedbackIO      - returns latest feedback in 'io' view
+    %   getFeedbackMobile  - returns latest feedback in 'mobile' view
+    %   getOrientation     - 3x3 orientation matrix based on IMU data
+    %   getArOrientation   - 3x3 orientation matrix based on AR data
+    %   getArPosition      - 3x1 position vector based on AR data
+    %   getArPose          - 4x4 full 6-dof pose based on AR data
+    %
+    %   sendVibrate        - sends a command to vibrate the device
     % 
     %   See also HebiLookup, HebiGroup
     
@@ -47,7 +50,8 @@ classdef HebiMobileIO < handle
     methods(Static)
         
         function mobileIO = findDevice(familyName, deviceName)
-            % searchController repeatedly searches the network for the specified device
+            % searchController repeatedly searches the network until the
+            % device is found
             timeout = 2;
             while true
                 try
@@ -83,7 +87,7 @@ classdef HebiMobileIO < handle
         end
         
         function [] = initializeUI(this)
-            % initializeUI initializes all UI elements to the default state
+            % initializeUI initializes all UI elements to their default state
             ALL = 1:8;
             this.setAxisSnap(ALL, [0 0 nan nan nan nan 0 0]);
             this.setAxisValue(ALL, 0);
@@ -94,7 +98,7 @@ classdef HebiMobileIO < handle
         end
         
         function [] = setAxisSnap(this, axes, values)
-            % setAxisSnap sets the snap position of one or more axes (sliders)
+            % setAxisSnap sets the axis snap position
             %
             %   This method sets the 'snap' position of specified axes. When
             %   the snap value is set, an axis will automatically return  
@@ -118,7 +122,7 @@ classdef HebiMobileIO < handle
         end
         
         function [] = setAxisValue(this, axes, values)
-            % setAxisValue sets the position of one or more axes (sliders)
+            % setAxisValue sets the axis position
             %
             %   This method sets the value of specified axes. This only
             %   works for non-snapping axes.
@@ -144,7 +148,7 @@ classdef HebiMobileIO < handle
             %   'Values' Argument (required)
             %      A scalar, or an array of values specific for each button.
             %      'true' (toggle mode): button remains on finger-up
-            %      'false' (normal mode): button disables on finger-up
+            %      'false' (momentary mode): button disables on finger-up
             %
             %   Example
             %     % Set b1 to normal and b3 to toggle mode
@@ -172,45 +176,36 @@ classdef HebiMobileIO < handle
             this.setPins('e', buttons, logical(values));
         end
         
-        function [] = clearLedColor(this)
-           this.setLedColor([]);
-        end
-        
-        function [] = setLedColor(this, color)
-            % setLedColor sets the color of a visual indicator on the display
-            %
-            %   'Color' Argument (required)
-            %      Can be a string argument ('red', 'green', 'magenta'), 
-            %      a numerical color ([r g b], [0.5 1 0]), 
-            %      or disabled/empty ([]).
-            this.send('led', color);
-        end
-        
-        function [] = clearText(this)
-            this.send('ClearLog', true);
-        end
-        
         function [] = addText(this, text, clearPrevious)
+            % addTextappends a message to the text display
             if nargin < 3
                 clearPrevious = false;
             end
             this.send('AppendLog', text, 'ClearLog', clearPrevious);
         end
         
-        function [] = sendVibrate(this, effort)
-            % sendVibrate sends a vibrate command to the phone buzzer
-            %
-            %   Note that this feature depends on device support. If the
-            %   device does not support programmatic vibrating, then this
-            %   will be a no-op.
-           if nargin < 2
-              effort = 1; 
-           end
-           cmd = CommandStruct();
-           cmd.effort = effort;
-           this.group.send(cmd);
+        function [] = clearText(this)
+            % clearText clears the text display
+            this.send('ClearLog', true);
         end
         
+        function [] = setLedColor(this, color)
+            % setLedColor sets the color of a visual indicator on the display
+            %
+            %   'Color' Argument (required)
+            %      Can be a string argument ('red', 'green', 'magenta'),
+            %      a numerical color ([r g b], [0.5 1 0]),
+            %      or disabled/empty ([]).
+            this.send('led', color);
+        end
+        
+        function [] = clearLedColor(this)
+            % clearLedColor clears the color of the visual indicator
+            %
+            % See also setLedColor
+            this.setLedColor([]);
+        end
+
         function [hasNewFeedback, feedbackAge] = update(this, varargin)
             % update requests the next feedback and updates internal state 
             %
@@ -247,7 +242,18 @@ classdef HebiMobileIO < handle
             end
         end
         
+        function [mobileFbk, ioFbk, ioFbkDiff] = getFeedback(this)
+            % getFeedback returns latest feedback in multiple views
+            mobileFbk = this.mobileFbk;
+            if nargout < 3
+                [ioFbk] = this.getFeedbackIO();
+            else
+                [ioFbk, ioFbkDiff] = this.getFeedbackIO();
+            end
+        end
+        
         function [ioFbk, ioFbkDiff] = getFeedbackIO(this)
+            % getFeedbackIO returns latest feedback in 'io' view
             ioFbk = this.ioFbk;
             if nargout > 1
                 ioFbkDiff = this.ioDiff;
@@ -271,10 +277,12 @@ classdef HebiMobileIO < handle
         end
         
         function [mobileFbk] = getFeedbackMobile(this)
+            % getFeedbackMobile returns latest feedback in 'mobile' view
             mobileFbk = this.mobileFbk;
         end
         
         function [rotMat] = getOrientation(this)
+            % getOrientation returns a 3x3 orientation matrix based on IMU data
             q = [
                 this.mobileFbk.orientationW ...
                 this.mobileFbk.orientationX ...
@@ -284,6 +292,7 @@ classdef HebiMobileIO < handle
         end
         
         function [rotMat, arQuality] = getArOrientation(this)
+            % getArOrientation returns a 3x3 orientation matrix based on AR data
             q = [
                 this.mobileFbk.arOrientationW ...
                 this.mobileFbk.arOrientationX ...
@@ -296,6 +305,7 @@ classdef HebiMobileIO < handle
         end
         
         function [translation, arQuality] = getArPosition(this)
+            % getArPosition returns a 3x1 position vector based on AR data
             translation = [
                 this.mobileFbk.arPositionX; ...
                 this.mobileFbk.arPositionY; ...
@@ -306,12 +316,27 @@ classdef HebiMobileIO < handle
         end
         
         function [pose, arQuality] = getArPose(this)
+            % getArPose returns a 4x4 transform of the 6-dof pose based on AR data
             pose = eye(4);
             pose(1:3,1:3) = this.getArOrientation();
             pose(1:3,4) = this.getArPosition();
             if nargout > 1
                 arQuality = this.mobileFbk.arQuality;
             end
+        end
+        
+        function [] = sendVibrate(this, effort)
+            % sendVibrate sends a command to vibrate the device
+            %
+            %   Note that this feature depends on device support. If the
+            %   device does not support programmatic vibrating, then this
+            %   will be a no-op.
+            if nargin < 2
+                effort = 1;
+            end
+            cmd = CommandStruct();
+            cmd.effort = effort;
+            this.group.send(cmd);
         end
         
     end

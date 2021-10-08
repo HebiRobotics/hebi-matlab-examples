@@ -25,8 +25,7 @@ while toc(t0) < 30
     
     % Read new sensor data
     mobileIO.update();
-    ioFbk = mobileIO.getFeedbackIO();
-    mobileFbk = mobileIO.getFeedbackMobile();
+    [mobileFbk, ioFbk] = mobileIO.getFeedback();
     
     % Visualize digital (buttons) and analog (sliders) feedback
     subplot(2,1,1);
