@@ -14,10 +14,11 @@ visualizeOn = false;
 simulate = false;
 logging = true;
 
-% TODO: replace jointInds with jointIndices
-[~,~,endEffectors,jointIndices] = HebiUtils.loadHrdf('hrdf/Daisy.hrdf');
-legKin = endEffectors(1:6);
-chassisKin = endEffectors{7};
+% Load hrdf subtrees and the corresponding joint indices
+[~,~,limbs,jointInds] = HebiUtils.loadHrdf('hrdf/Daisy.hrdf');
+jointInds = cell2mat(jointInds(1:6));
+legKin = limbs(1:6);
+chassisKin = limbs{7};
 
 safetyParams = makeDaisySafetyLimits();
 
@@ -182,7 +183,7 @@ while true
         
         for i=1:length(imuModules)
             j = imuModules(i);
-            imuFrame = legKin{i}.getBaseFrame(); % TODO: actuator is not first body. Should there be a kin.getTransformToFirstJoint() method?
+            imuFrame = legKin{i}.getFirstJointFrame();
             
             DCM_module = HebiUtils.quat2rotMat(Q(:,j)');
             DCM_module = DCM_module * imuFrame(1:3,1:3)';
