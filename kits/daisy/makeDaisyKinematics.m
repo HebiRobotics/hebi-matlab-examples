@@ -21,7 +21,7 @@ localDir = fileparts(mfilename('fullpath'));
 chassisRadii = [0.2375 0.2375 0.1875 0.1875 0.2375 0.2375]; % m
 chassisAngles = deg2rad( [30 -30 90 -90 150 -150] );
 
-chassisKin = HebiKinematics([localDir '/hrdf/daisyChassis.hrdf']);
+chassiskin = HebiUtils.loadHrdf([localDir '/hrdf/daisyChassis.hrdf']);
 
 baseLims = [-pi/3 pi/3];
 shoulderLims = [-pi/2 pi/3];
@@ -29,9 +29,9 @@ elbowLims = [-pi pi/4];
 
 for leg=1:6
     if rem(leg,2)==1
-        legKin{leg} = HebiKinematics([localDir '/hrdf/daisyLeg-Left.hrdf']);
+        legKin{leg} = HebiUtils.loadHrdf([localDir '/hrdf/daisyLeg-Left.hrdf']);
     else    
-        legKin{leg} = HebiKinematics([localDir '/hrdf/daisyLeg-Right.hrdf']);
+        legKin{leg} = HebiUtils.loadHrdf([localDir '/hrdf/daisyLeg-Right.hrdf']);
     end
 
     legTransform = eye(4);
