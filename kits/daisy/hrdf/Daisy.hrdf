@@ -1,4 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Leg Numbering / Chassis Coordinate convention:
+    This should match ROS wheeled vehicle convention
+
+    1 - - - 2           +x
+        |                ^
+    3 - - - 4            |
+        |          +y <- o
+    5 - - - 6             +z
+-->
 <robot version="1.3.0" description="Daisy">
     <rigid-body mass="0">
         <output rot="Rz(pi/6)"> <!-- leg 1 -->
