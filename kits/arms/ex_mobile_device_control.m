@@ -25,13 +25,13 @@ enableLogging = true;
 % Mobile Device Setup %
 %%%%%%%%%%%%%%%%%%%%%%%
 mobileIO = HebiMobileIO.findDevice('HEBI', 'mobileIO');
-mobileIO.setDefaults();
+mobileIO.initializeUI();
 mobileIO.setAxisValue([3 6], [-1 1]);
 mobileIO.setButtonIndicator([1 8], true);
-mobileIO.sendText('B1 - Reset/re-align pose');
-mobileIO.sendText('A3 - Scale translation commands');
-mobileIO.sendText('A6 - Gripper Open/Close');
-mobileIO.sendText('B8 - Quit');
+mobileIO.addText('B1 - Reset/re-align pose');
+mobileIO.addText('A3 - Scale translation commands');
+mobileIO.addText('A6 - Gripper Open/Close');
+mobileIO.addText('B8 - Quit');
 
 resetPoseButton = 'b1';
 quitDemoButton = 'b8';

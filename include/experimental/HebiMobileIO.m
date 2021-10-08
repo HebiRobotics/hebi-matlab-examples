@@ -3,24 +3,27 @@ classdef HebiMobileIO < handle
     %   
     %   HebiMobileIO Methods:
     %
-    %   setDefaults          - sets all UI elements to their default state
+    %   initializeUI         - initializes all UI elements to the default state
     %   setAxisSnap          - sets the snap position of axes
     %   setAxisValue         - sets the current axis value
     %   setButtonToggle      - configures button toggle mode
     %   setButtonIndicator   - configures visual button indicators
-    %   setColor             - sets the color of a visual indicator on the display
-    %   sendText             - append a message to the text display
+    %   addText              - appends a message to the text display
     %   clearText            - clears the text display
+    %   setLedColor          - sets the color of a visual indicator on the display
+    %   clearLedColor        - clears the color of the visual indicator
     %
-    %   sendVibrate          - send a command to vibrate the device
-    %
-    %   update               - gets next feedback and update internal state
-    %   getFeedbackIO        - returns the latest feedback in 'io' view
-    %   getFeedbackMobile    - returns the latest feedback in 'mobile' view
+    %   update               - updates internal state with the next feedback
+    %   getFeedbackIO        - returns latest feedback in 'io' view
+    %   getFeedbackMobile    - returns latest feedback in 'mobile' view
     %   getOrientation       - 3x3 orientation matrix based on IMU data
     %   getArOrientation     - 3x3 orientation matrix based on AR data
     %   getArPosition        - 3x1 position vector based on AR data
     %   getArPose            - 4x4 full 6-dof pose based on AR data
+    %
+    %   sendVibrate          - send a command to vibrate the device
+    % 
+    %   See also HebiLookup, HebiGroup
     
     %   Copyright 2014-2021 HEBI Robotics, Inc.
     
@@ -79,14 +82,14 @@ classdef HebiMobileIO < handle
             this.lastSuccessTime = tic();
         end
         
-        function [] = setDefaults(this)
-            % setDefaults sets all UI elements their default configuration
+        function [] = initializeUI(this)
+            % initializeUI initializes all UI elements to the default state
             ALL = 1:8;
             this.setAxisSnap(ALL, [0 0 nan nan nan nan 0 0]);
             this.setAxisValue(ALL, 0);
             this.setButtonToggle(ALL, false);
             this.setButtonIndicator(ALL, false);
-            this.setColor([]);
+            this.clearLedColor();
             this.clearText();
         end
         
@@ -169,8 +172,12 @@ classdef HebiMobileIO < handle
             this.setPins('e', buttons, logical(values));
         end
         
-        function [] = setColor(this, color)
-            % setColor sets the color of a visual indicator on the display
+        function [] = clearLedColor(this)
+           this.setLedColor([]);
+        end
+        
+        function [] = setLedColor(this, color)
+            % setLedColor sets the color of a visual indicator on the display
             %
             %   'Color' Argument (required)
             %      Can be a string argument ('red', 'green', 'magenta'), 
@@ -183,7 +190,7 @@ classdef HebiMobileIO < handle
             this.send('ClearLog', true);
         end
         
-        function [] = sendText(this, text, clearPrevious)
+        function [] = addText(this, text, clearPrevious)
             if nargin < 3
                 clearPrevious = false;
             end

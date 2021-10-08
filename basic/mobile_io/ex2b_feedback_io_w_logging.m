@@ -19,14 +19,14 @@ deviceName = 'mobileIO';
 % The HebiMobileIO utility wrapper makes it easier to work with the
 % relevant parts of the group API.
 mobileIO = HebiMobileIO.findDevice(familyName, deviceName);
-mobileIO.setDefaults();
+mobileIO.initializeUI();
 
 % Setup the user visible UI
 mobileIO.setButtonIndicator([1 2 7 8]);
 mobileIO.setButtonToggle([1 2 3 4], true);
 mobileIO.setAxisSnap([3 4], [0.5 -0.5]);
 mobileIO.setAxisValue([5 6], [0.5 -0.5]);
-mobileIO.sendText('Drag the sliders and press some buttons...');
+mobileIO.addText('Drag the sliders and press some buttons...');
 
 % Start logging in the background
 mobileIO.group.startLog( 'dir', 'logs' ); 

@@ -18,7 +18,7 @@ deviceName = 'mobileIO';
 % The HebiMobileIO utility wrapper makes it easier to work with the
 % relevant parts of the group API.
 mobileIO = HebiMobileIO.findDevice(familyName, deviceName);
-mobileIO.setDefaults();
+mobileIO.initializeUI();
 
 mobileIO.group.startLog('dir','logs');
 

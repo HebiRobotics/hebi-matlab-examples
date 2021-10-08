@@ -12,9 +12,9 @@ clear *;
 close all;
 HebiLookup.initialize();
 mobileIO = HebiMobileIO.findDevice('HEBI', 'mobileIO');
-mobileIO.setDefaults();
+mobileIO.initializeUI();
 mobileIO.setButtonIndicator(8);
-mobileIO.sendText('Move for 30 seconds or press b8 to finish early');
+mobileIO.addText('Move for 30 seconds or press b8 to finish early');
 
 %% Gather data w/ visualization
 disp('  Visualizing 6-DoF pose estimate from the mobile device.');

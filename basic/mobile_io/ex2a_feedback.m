@@ -18,7 +18,7 @@ deviceName = 'mobileIO';
 % The HebiMobileIO utility wrapper makes it easier to work with the
 % relevant parts of the group API.
 mobileIO = HebiMobileIO.findDevice(familyName, deviceName);
-mobileIO.setDefaults();
+mobileIO.initializeUI();
 
 %% Visualize Gyro Feedback
 disp('  Plotting gyro data from the mobile device IMU.');

@@ -11,7 +11,7 @@ clear *;
 close all;
 HebiLookup.initialize();
 mobileIO = HebiMobileIO.findDevice('HEBI', 'mobileIO');
-mobileIO.setDefaults();
+mobileIO.initializeUI();
 
 %% Gather data w/ visualization
 disp('  Drag the sliders on the app screen and move the device...');
