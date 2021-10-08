@@ -7,13 +7,12 @@
 % Features:      joystick input to control motions of a 4 wheel base
 %
 % Requirements:  MATLAB 2013b or higher
-%                Logitech Gamepad F310
-%                VR toolbox or MatlabInput (Github)
+%                iOS or Android device with HEBI mobileIO app
 %
 % Author:        Florian Enner
 % Date:          28 March, 2016
-% Last Update:   04 July, 2017
-% API:           hebi-matlab-1.0
+% Last Update:   07 October, 2021
+% API:           hebi-matlab-1.7.3
 %
 % Copyright 2016 HEBI Robotics
 
@@ -25,31 +24,9 @@ wheels = HebiLookup.newGroupFromNames('Rosie', {
     'W3_frontRight'
     'W4_backRight'
     });
- 
-%%
-    %%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Setup Mobile I/O Group %
-    %%%%%%%%%%%%%%%%%%%%%%%%%%
-    phoneFamily = 'HEBI';
-    phoneName = 'mobileIO';
 
-    while true        
-        try
-            fprintf('Searching for phone Controller...\n');
-            phoneGroup = HebiLookup.newGroupFromNames( ...
-                            phoneFamily, phoneName );
-            disp('Phone Found.  Starting up');
-            break;
-        catch
-            pause(1.0);
-        end
-    end
-    
-    % Get the initial feedback objects that we'll reuse later
-    fbkPhoneIO = phoneGroup.getNextFeedbackIO();
-    latestPhoneIO = fbkPhoneIO;
-    
-    fbkPhoneMobile = phoneGroup.getNextFeedbackMobile();
+% Setup Mobile I/O Group
+mobileIO = HebiMobileIO.findDevice('HEBI', 'mobileIO');
 
 %% Control
 cmd = CommandStruct();
@@ -59,19 +36,15 @@ maxSpeed = 6; % rad/s
 
 while true
     
-    % Read joystick axes
-    tempFbk = phoneGroup.getNextFeedback( fbkPhoneIO, fbkPhoneMobile, ...
-                                                  'timeout', 0 );                                   
-    if ~isempty(tempFbk)
-        latestPhoneMobile = fbkPhoneMobile;
-        latestPhoneIO = fbkPhoneIO;
-    end
-    
+    % Update joystick axes
+    mobileIO.update('timeout', 0); 
+    fbk = mobileIO.getFeedbackIO();
+
     % Map joystick inputs to motions
     normVel = ...
-        [1 1 1 1] * -latestPhoneIO.a2 + ... % forward (spin all same way)
-        [-1 -1 1 1] *  latestPhoneIO.a7 + ... % rotation (spin sides opposite ways)
-        [-1 1 1 -1] *  latestPhoneIO.a1;      % sideways strafe
+        [ 1  1  1  1] * -fbk.a2 + ... % forward (spin all same way)
+        [-1 -1  1  1] *  fbk.a7 + ... % rotation (spin sides opposite ways)
+        [-1  1  1 -1] *  fbk.a1;      % sideways strafe
         
     % Limit the summed velocities to the maximum 
     maxVel = max(abs(normVel));
@@ -87,7 +60,7 @@ while true
     
     % Keep network from overloading by adding a small pause to
     % prevent busy-spinning. This is only necessary because this
-    % demo does not rely on any sensor feedback.
+    % demo does not block on any sensor feedback.
     pause(0.001);
     
 end
