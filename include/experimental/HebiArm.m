@@ -13,7 +13,7 @@ classdef HebiArm < handle
     %   Example
     %      % Setup the arm
     %      group = HebiLookup.newGroupFromNames('Arm', 'J*');
-    %      kin = HebiKinematics('A-2085-06.hrdf');
+    %      kin = HebiUtils.loadHrdf('A-2085-06.hrdf');
     %      arm = HebiArm(group, kin);
     %
     %      % Move to home position
