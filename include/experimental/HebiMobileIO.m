@@ -1,5 +1,5 @@
 classdef HebiMobileIO < handle
-    % HebiMobileIO is utility wrapper for the mobileIO phone app
+    % HebiMobileIO is utility wrapper for the HEBI Robotics mobileIO phone app
     %   
     %   HebiMobileIO Methods:
     %
@@ -8,21 +8,21 @@ classdef HebiMobileIO < handle
     %   initializeUI       - initializes all UI elements to their default state
     %   setAxisSnap        - sets the axis snap position
     %   setAxisValue       - sets the axis position
-    %   setButtonToggle    - configures button toggle mode
-    %   setButtonIndicator - configures visual button indicators
+    %   setButtonToggle    - sets the button toggle mode
+    %   setButtonIndicator - sets a visual indicator around a button
     %   addText            - appends a message to the text display
     %   clearText          - clears the text display
-    %   setLedColor        - sets the color of a visual indicator on the display
-    %   clearLedColor      - clears the color of the visual indicator
+    %   setLedColor        - sets the edge led color
+    %   clearLedColor      - clears the edge led color
     %
     %   update             - updates internal state with the next feedback
-    %   getFeedback        - returns latest feedback in multiple views
-    %   getFeedbackIO      - returns latest feedback in 'io' view
-    %   getFeedbackMobile  - returns latest feedback in 'mobile' view
-    %   getOrientation     - 3x3 orientation matrix based on IMU data
-    %   getArOrientation   - 3x3 orientation matrix based on AR data
-    %   getArPosition      - 3x1 position vector based on AR data
-    %   getArPose          - 4x4 full 6-dof pose based on AR data
+    %   getFeedback        - gets 'io' and 'mobile' views of feedback
+    %   getFeedbackIO      - gets 'io' view of feedback
+    %   getFeedbackMobile  - gets 'mobile' view of feedback
+    %   getOrientation     - gets 3x3 orientation matrix based on IMU data
+    %   getArOrientation   - gets 3x3 orientation matrix based on AR data
+    %   getArPosition      - gets 3x1 position vector based on AR data
+    %   getArPose          - gets 4x4 6-dof pose based on AR data
     %
     %   sendVibrate        - sends a command to vibrate the device
     % 
@@ -140,7 +140,7 @@ classdef HebiMobileIO < handle
         end
         
         function [] = setButtonToggle(this, buttons, values)
-            % setButtonToggle configures button toggle mode
+            % setButtonToggle sets the button toggle mode
             %
             %   'Buttons' Argument (required)
             %      The button or an array of buttons, e.g., [1 2] for b1 and b2
@@ -157,7 +157,7 @@ classdef HebiMobileIO < handle
         end
         
         function [] = setButtonIndicator(this, buttons, values)
-            % setButtonIndicator configures visual button indicators
+            % setButtonIndicator sets a visual indicator around a button
             %
             %   'Buttons' Argument (required)
             %      The button or an array of buttons, e.g., [1 2] for b1 and b2
@@ -177,7 +177,7 @@ classdef HebiMobileIO < handle
         end
         
         function [] = addText(this, text, clearPrevious)
-            % addTextappends a message to the text display
+            % addText appends a message to the text display
             if nargin < 3
                 clearPrevious = false;
             end
@@ -190,7 +190,7 @@ classdef HebiMobileIO < handle
         end
         
         function [] = setLedColor(this, color)
-            % setLedColor sets the color of a visual indicator on the display
+            % setLedColor sets the edge led color
             %
             %   'Color' Argument (required)
             %      Can be a string argument ('red', 'green', 'magenta'),
@@ -200,14 +200,14 @@ classdef HebiMobileIO < handle
         end
         
         function [] = clearLedColor(this)
-            % clearLedColor clears the color of the visual indicator
+            % clearLedColor clears the edge led color
             %
             % See also setLedColor
             this.setLedColor([]);
         end
 
         function [hasNewFeedback, feedbackAge] = update(this, varargin)
-            % update requests the next feedback and updates internal state 
+            % update updates internal state with the next feedback
             %
             %   This method is a wrapper around group.getNextFeedback()
             %   that updates multiple feedback structs at once. 
@@ -243,7 +243,7 @@ classdef HebiMobileIO < handle
         end
         
         function [mobileFbk, ioFbk, ioFbkDiff] = getFeedback(this)
-            % getFeedback returns latest feedback in multiple views
+            % getFeedback returns 'mobile' and 'io' views of the latest feedback
             mobileFbk = this.mobileFbk;
             if nargout < 3
                 [ioFbk] = this.getFeedbackIO();
@@ -253,7 +253,7 @@ classdef HebiMobileIO < handle
         end
         
         function [ioFbk, ioFbkDiff] = getFeedbackIO(this)
-            % getFeedbackIO returns latest feedback in 'io' view
+            % getFeedbackIO returns the 'io' view of the latest feedback
             ioFbk = this.ioFbk;
             if nargout > 1
                 ioFbkDiff = this.ioDiff;
@@ -277,7 +277,7 @@ classdef HebiMobileIO < handle
         end
         
         function [mobileFbk] = getFeedbackMobile(this)
-            % getFeedbackMobile returns latest feedback in 'mobile' view
+            % getFeedbackMobile returns the 'mobile' view of the latest feedback
             mobileFbk = this.mobileFbk;
         end
         
