@@ -12,7 +12,7 @@ clear *;
 close all;
 
 % Load the kinematics from HRDF file
-kin = HebiUtils.loadHrdf('3-DoF_arm_example.hrdf');
+kin = HebiUtils.loadHRDF('3-DoF_arm_example.hrdf');
 
 % Initialize a helper utility to view the various coordinate frames
 frameDisp = FrameDisplay();

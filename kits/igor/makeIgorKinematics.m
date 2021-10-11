@@ -33,7 +33,7 @@ legBaseFrames(1:3,1:3,1) = R_x(-pi/2);
 legBaseFrames(1:3,1:3,2) = R_x(pi/2);
 
 for leg = 1:numLegs
-    legKin{leg} = HebiUtils.loadHrdf([localDir '/hrdf/igorLeg.hrdf']);
+    legKin{leg} = HebiUtils.loadHRDF([localDir '/hrdf/igorLeg.hrdf']);
     
     legKin{leg}.setBaseFrame(legBaseFrames(:,:,leg));
 end
@@ -46,8 +46,8 @@ end
 armBaseXYZ(:,1) = [0; .10; .20];
 armBaseXYZ(:,2) = [0; -.10; .20];
 
-armKin{1} = HebiUtils.loadHrdf([localDir '/hrdf/igorArm-Left.hrdf']);
-armKin{2} = HebiUtils.loadHrdf([localDir '/hrdf/igorArm-Right.hrdf']);
+armKin{1} = HebiUtils.loadHRDF([localDir '/hrdf/igorArm-Left.hrdf']);
+armKin{2} = HebiUtils.loadHRDF([localDir '/hrdf/igorArm-Right.hrdf']);
 
 for arm = 1:numArms
     armTransform = eye(4);
@@ -58,4 +58,4 @@ end
 %%%%%%%%%%%%%%%%%%%%%%
 % Chassis Kinematics %
 %%%%%%%%%%%%%%%%%%%%%%
-chassiskin = HebiUtils.loadHrdf([localDir '/hrdf/igorChassis.hrdf']);
+chassiskin = HebiUtils.loadHRDF([localDir '/hrdf/igorChassis.hrdf']);

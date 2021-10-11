@@ -21,7 +21,7 @@ localDir = fileparts(mfilename('fullpath'));
 chassisRadii = [0.3625 0.3625 0.2625 0.2625 0.3625 0.3625]; % m
 chassisAngles = deg2rad( [30 -30 90 -90 150 -150] );
 
-chassiskin = HebiUtils.loadHrdf([localDir '/hrdf/LilyChassis.hrdf']);
+chassiskin = HebiUtils.loadHRDF([localDir '/hrdf/LilyChassis.hrdf']);
 
 baseLims = [-pi/3 pi/3];
 shoulderLims = [-pi/2 pi/3];
@@ -29,9 +29,9 @@ elbowLims = [-pi pi/4];
 
 for leg=1:6
     if rem(leg,2)==1
-        legKin{leg} = HebiUtils.loadHrdf([localDir '/hrdf/lilyLeg-Left.hrdf']);
+        legKin{leg} = HebiUtils.loadHRDF([localDir '/hrdf/lilyLeg-Left.hrdf']);
     else    
-        legKin{leg} = HebiUtils.loadHrdf([localDir '/hrdf/lilyLeg-Right.hrdf']);
+        legKin{leg} = HebiUtils.loadHRDF([localDir '/hrdf/lilyLeg-Right.hrdf']);
     end
 
     legTransform = eye(4);

@@ -11,7 +11,7 @@ clear *;
 close all;
 
 % Load the kinematics from HRDF file
-kin = HebiUtils.loadHrdf('./hrdf/3-DoF_arm_example.hrdf');
+kin = HebiUtils.loadHRDF('./hrdf/3-DoF_arm_example.hrdf');
 
 % Display the basic kinematics information
 disp(kin);

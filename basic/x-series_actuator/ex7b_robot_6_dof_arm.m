@@ -12,7 +12,7 @@ close all;
 
 HebiLookup.initialize();
 
-kin = HebiUtils.loadHrdf('hrdf/6-DoF_arm_example.hrdf');
+kin = HebiUtils.loadHRDF('hrdf/6-DoF_arm_example.hrdf');
 gains = HebiUtils.loadGains('gains/6-DoF_arm_gains.xml');
 trajGen = HebiTrajectoryGenerator();
 

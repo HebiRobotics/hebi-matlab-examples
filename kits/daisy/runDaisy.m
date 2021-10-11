@@ -15,7 +15,7 @@ simulate = false;
 logging = true;
 
 % Load hrdf subtrees and the corresponding joint indices
-[~,~,limbs,jointInds] = HebiUtils.loadHrdf('hrdf/Daisy.hrdf');
+[~,~,limbs,jointInds] = HebiUtils.loadHRDF('hrdf/Daisy.hrdf');
 jointInds = cell2mat(jointInds(1:6));
 legKin = limbs(1:6);
 chassisKin = limbs{7};
