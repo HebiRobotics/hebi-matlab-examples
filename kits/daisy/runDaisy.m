@@ -103,8 +103,8 @@ effortHist = nan(0,3*numLegs);
 xyzVelHist = nan(0,3);
 rotVelHist = nan(0,3);
 
-frames = nan(4,4,6*7);
-frameIndex = reshape(1:42,7,6);
+frames = nan(4,4,6*10);
+frameIndex = reshape(1:60,10,6);
 
 legEfforts = nan(6,3);    
 stanceLegs = 1:numLegs;

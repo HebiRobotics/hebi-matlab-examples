@@ -8,7 +8,7 @@
 
 % Masses / Weights.  Assume all the legs weigh the same
 legMass = sum( legKin{1}.getBodyMasses() );
-chassisMass = chassisKin.getBodyMasses();
+chassisMass = sum(chassisKin.getBodyMasses());
 robotMass = chassisMass + 6*legMass;  % kg
 robotWeight = 9.8 * robotMass;
 
