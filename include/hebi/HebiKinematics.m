@@ -14,7 +14,7 @@ classdef (Sealed) HebiKinematics
     %
     %   This API currently only supports serial chains. If you are going to
     %   work with a robot that has multiple limbs, such as a hexapod, you
-    %   need to use HebiUtils.loadHrdf(hrdfFile) which creates a separate
+    %   need to use HebiUtils.loadHRDF(hrdfFile) which creates a separate
     %   kinematic object for each defined end effector / limb.
     %
     %   HebiKinematics Methods (setup):

@@ -18,7 +18,7 @@ classdef (Sealed) HebiUtils
     %
     %   newImitationGroup  - creates an imitation group for testing
     %
-    %   loadHrdf           - loads an hrdf file into HebiKinematics objects
+    %   loadHRDF           - loads an hrdf file into HebiKinematics objects
     %
     %   loadGroupLog       - loads a binary .hebilog file into memory
     %   loadGroupLogsUI    - shows a UI dialog to load one or more logs.
@@ -249,7 +249,7 @@ classdef (Sealed) HebiUtils
             group = HebiGroup(javaMethod('newImitationGroup', HebiUtils.className,  varargin{:}));
         end
         
-        function varargout = loadHrdf(varargin)
+        function varargout = loadHRDF(varargin)
             % LOADHRDF loads an hrdf file and parses HebiKinematics objects
             %
             %   This method is similar to HebiKinematics(hrdfFile) with
@@ -264,15 +264,15 @@ classdef (Sealed) HebiUtils
             %
             %   Example
             %      % Load an hrdf with a single end effector
-            %      kin = HebiUtils.loadHrdf(hrdfFile);
+            %      kin = HebiUtils.loadHRDF(hrdfFile);
             %
             %      % Get the index mask corresponding to the used joints
-            %      [kin, mask] = HebiUtils.loadHrdf(hrdfFile);
+            %      [kin, mask] = HebiUtils.loadHRDF(hrdfFile);
             %      position = fbk.position(mask);
             %      FK = kin.getForwardKinematicsEndEffector(position);
             %
             %      % Get multiple end effectors and their corresponding masks
-            %      [~,~,kins,masks] = HebiUtils.loadHrdf(hrdfFile);
+            %      [~,~,kins,masks] = HebiUtils.loadHRDF(hrdfFile);
             %      FK = cell(length(kins),1);
             %      for i = 1:length(kins)
             %        position = fbk.position(masks{i});
@@ -280,7 +280,7 @@ classdef (Sealed) HebiUtils
             %      end
             %      
             %   See also HebiUtils, HebiKinematics.
-            result = cell(javaMethod('loadHrdf', HebiUtils.className,  varargin{:}));
+            result = cell(javaMethod('loadHRDF', HebiUtils.className,  varargin{:}));
             varargout = cell(4);
             varargout{1} = HebiKinematics(result{1});
             varargout{2} = result{2};
