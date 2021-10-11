@@ -13,7 +13,7 @@ classdef HebiArm < handle
     %   Example
     %      % Setup the arm
     %      group = HebiLookup.newGroupFromNames('Arm', 'J*');
-    %      kin = HebiKinematics('A-2085-06.hrdf');
+    %      kin = HebiUtils.loadHRDF('A-2085-06.hrdf');
     %      arm = HebiArm(group, kin);
     %
     %      % Move to home position
@@ -248,8 +248,8 @@ classdef HebiArm < handle
                   fbk.orientationZ(1) ];
             baseRotMat = HebiUtils.quat2rotMat(q);
             
-            kinBaseFrame = this.kin.getBaseFrame();
-            gravityVec = kinBaseFrame(1:3,1:3) * (-baseRotMat(3,1:3)');
+            imuFrame = this.kin.getFirstJointFrame();
+            gravityVec = imuFrame(1:3,1:3) * (-baseRotMat(3,1:3)');
            
             % Compensate for gravity
             gravCompEfforts = this.kin.getGravCompEfforts(fbk.position, gravityVec);
