@@ -18,7 +18,7 @@ classdef (Sealed) HebiKinematics
     %   kinematic object for each defined end effector / limb.
     %
     %   HebiKinematics Methods (setup):
-    %      kin = HebiUtils.loadHRDF('robot.hrdf') - where 'robot.hrdf' is the
+    %      kin = HebiKinematics('robot.hrdf') - where 'robot.hrdf' is the
     %                                           path to the file that
     %                                           describes the robot.
     %
@@ -60,7 +60,7 @@ classdef (Sealed) HebiKinematics
     %
     %   Example
     %      % Load model from file (experimental support for hrdf v1.1)
-    %      kin = HebiUtils.loadHRDF('robot.hrdf');
+    %      kin = HebiKinematics('robot.hrdf');
     %
     %   Example
     %      % Calculate forward kinematics for some random joint positions
