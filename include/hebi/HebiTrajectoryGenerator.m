@@ -455,7 +455,7 @@ classdef (Sealed) HebiTrajectoryGenerator
                 elseif numDoF <= 5
                     % 5DoF IK
                     interpAngle = upSampledPhase(i)*rotAngle;
-                    interpRotMat = axAng2rotMat(rotAxis,interpAngle);
+                    interpRotMat = HebiUtils.axAng2rotMat(rotAxis,interpAngle);
                     cmdTipAxis = interpRotMat * T0(1:3,3);
                    
                     IKAngles(i,:) = getInverseKinematics( this.kin, ...
@@ -465,7 +465,7 @@ classdef (Sealed) HebiTrajectoryGenerator
                 else
                     % 6DoF IK
                     interpAngle = upSampledPhase(i)*rotAngle;
-                    interpRotMat = axAng2rotMat(rotAxis,interpAngle);
+                    interpRotMat = HebiUtils.axAng2rotMat(rotAxis,interpAngle);
                     cmdDCM = interpRotMat*T0(1:3,1:3);
                     
                     IKAngles(i,:) = getInverseKinematics( this.kin, ...
