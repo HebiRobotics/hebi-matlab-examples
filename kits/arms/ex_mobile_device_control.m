@@ -24,26 +24,19 @@ enableLogging = true;
 %%%%%%%%%%%%%%%%%%%%%%%
 % Mobile Device Setup %
 %%%%%%%%%%%%%%%%%%%%%%%
-phoneFamily = 'HEBI';
-phoneName = 'mobileIO';
+mobileIO = HebiMobileIO.findDevice('HEBI', 'mobileIO');
+mobileIO.initializeUI();
+mobileIO.setAxisValue([3 6], [-1 1]);
+mobileIO.setButtonIndicator([1 8], true);
+mobileIO.addText('B1 - Reset/re-align pose');
+mobileIO.addText('A3 - Scale translation commands');
+mobileIO.addText('A6 - Gripper Open/Close');
+mobileIO.addText('B8 - Quit');
 
 resetPoseButton = 'b1';
 quitDemoButton = 'b8';
 translationScaleSlider = 'a3';
 gripForceSlider = 'a6';
-
-while true  
-    try
-        fprintf('Searching for phone Controller...\n');
-        phoneGroup = HebiLookup.newGroupFromNames( ...
-                        phoneFamily, phoneName );        
-        disp('Phone Found.  Starting up');
-        break;
-    catch
-        pause(1.0);
-    end
-end
-
 
 %%
 %%%%%%%%%%%%%
@@ -78,7 +71,6 @@ while ~abortFlag
     % Start background logging
     if enableLogging
         arm.group.startLog('dir',[params.localDir '/logs']);
-        phoneGroup.startLog('dir',[params.localDir '/logs']);
     end
 
     % Move to current coordinates
@@ -103,21 +95,11 @@ while ~abortFlag
     end
     
     % Grab initial pose from phone
-    fbkPhoneMobile = phoneGroup.getNextFeedbackMobile();
-    fbkPhoneIO = phoneGroup.getNextFeedbackIO();
-
-    q = [ fbkPhoneMobile.arOrientationW ...
-          fbkPhoneMobile.arOrientationX ...
-          fbkPhoneMobile.arOrientationY ...
-          fbkPhoneMobile.arOrientationZ ];     
-    R_init = HebiUtils.quat2rotMat( q );
-
-    xyz_init = [ fbkPhoneMobile.arPositionX;
-                 fbkPhoneMobile.arPositionY; 
-                 fbkPhoneMobile.arPositionZ ];
+    mobileIO.update();
+    R_init = mobileIO.getArOrientation();
+    xyz_init = mobileIO.getArPosition();
     xyzPhoneNew = xyz_init;
 
-    
     % Set trajectories to normal speed for following mobile input
     arm.trajGen.setSpeedFactor( 1.0 );
     arm.trajGen.setMinDuration( 0.5 ); % (acts as a 'low-pass' for user input)
@@ -136,24 +118,20 @@ while ~abortFlag
             break;
         end
 
-        % We get feedback from the phone into the existing structs. The 
-        % timeout of 0 means that the method returns immediately and won't
-        % wait for feedback. If there was no feedback, the method returns 
-        % empty ([]), and the data in the passed in structs does not get
-        % overwritten.
-        % We do this because the mobile device is typically on wireless and
-        % might drop out or be really delayed, in which case we would
-        % rather keep running with an old data instead of waiting here for
-        % new data.
-        hasNewPhoneFbk = ~isempty(phoneGroup.getNextFeedback( ...
-            fbkPhoneIO, fbkPhoneMobile, ... % overwrite existing structs
-            'timeout', 0 )); % prevent blocking due to bad comms
+        % We use a non-blocking timeout w/ manual update checks so we can
+        % handle common wireless delays/outages without breaking. We only
+        % exit if mobileIO hasn't responded for several seconds, which
+        % indicates a more significant problem.
+        [hasNewPhoneFbk, timeSinceLastFeedback] = mobileIO.update('timeout', 0);
+        if timeSinceLastFeedback > 5
+            error('mobileIO has timed out. Stopping demo.');
+        end
         
         % Abort goal updates if the phone didn't respond
         if ~hasNewPhoneFbk
             continue;
         end
-
+        fbkPhoneIO = mobileIO.getFeedbackIO();
         
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % Read/Map Joystick Inputs %
@@ -182,19 +160,10 @@ while ~abortFlag
         end
 
         % Pose Information for Arm Control
-        xyzPhoneNew = [ fbkPhoneMobile.arPositionX; ...
-                        fbkPhoneMobile.arPositionY; ...
-                        fbkPhoneMobile.arPositionZ ];
-                    
+        xyzPhoneNew = mobileIO.getArPosition();
         xyzTarget = xyzTarget_init + ...
-            phoneControlScale * xyzScale .* (R_init' * (xyzPhoneNew - xyz_init));
-
-        q = [ fbkPhoneMobile.arOrientationW ...
-              fbkPhoneMobile.arOrientationX ...
-              fbkPhoneMobile.arOrientationY ...
-              fbkPhoneMobile.arOrientationZ ];     
-        rotMatTarget = R_init' * HebiUtils.quat2rotMat( q ) * rotMatTarget_init;
-
+            phoneControlScale * xyzScale .* (R_init' * (xyzPhoneNew - xyz_init));   
+        rotMatTarget = R_init' * mobileIO.getArOrientation() * rotMatTarget_init;
 
         %%%%%%%%%%%%%%%
         % Arm Control %

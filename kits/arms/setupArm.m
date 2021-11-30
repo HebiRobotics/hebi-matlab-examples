@@ -63,7 +63,7 @@ function [ arm, params, gripper ] = setupArm( kit, family, hasGasSpring )
 localDir = fileparts(mfilename('fullpath'));
 params.localDir = localDir;
 
-if nargin < 4 || isempty(hasGasSpring)
+if nargin < 3 || isempty(hasGasSpring)
    hasGasSpring = false;
 end
 
@@ -90,7 +90,7 @@ switch kit
             'J6_wrist3' });
         
         % Kinematic Model
-        kin = HebiKinematics([localDir '/hrdf/A-2085-06G']);
+        kin = HebiUtils.loadHRDF([localDir '/hrdf/A-2085-06G']);
         
         % Load and send arm gains
         params.gains = HebiUtils.loadGains([localDir '/gains/A-2085-06']);     
@@ -120,7 +120,7 @@ switch kit
             'J6_wrist3' });
         
         % Kinematic Model
-        kin = HebiKinematics([localDir '/hrdf/A-2085-06']);
+        kin = HebiUtils.loadHRDF([localDir '/hrdf/A-2085-06']);
         
         % Load and send arm gains
         params.gains = HebiUtils.loadGains([localDir '/gains/A-2085-06']);     
@@ -144,7 +144,7 @@ switch kit
             'J5_wrist2' });
         
         % Kinematic Model
-        kin = HebiKinematics([localDir '/hrdf/A-2085-05G']);
+        kin = HebiUtils.loadHRDF([localDir '/hrdf/A-2085-05G']);
         
         % Load and send arm gains
         params.gains = HebiUtils.loadGains([localDir '/gains/A-2085-05']);     
@@ -173,7 +173,7 @@ switch kit
             'J5_wrist2' });
         
         % Kinematic Model
-        kin = HebiKinematics([localDir '/hrdf/A-2085-05']);
+        kin = HebiUtils.loadHRDF([localDir '/hrdf/A-2085-05']);
         
         % Load and send arm gains
         params.gains = HebiUtils.loadGains([localDir '/gains/A-2085-05']);     
@@ -196,7 +196,7 @@ switch kit
             'J4_wrist' });
         
         % Kinematic Model
-        kin = HebiKinematics([localDir '/hrdf/A-2085-04']);
+        kin = HebiUtils.loadHRDF([localDir '/hrdf/A-2085-04']);
         
         % Load and send arm gains
         params.gains = HebiUtils.loadGains([localDir '/gains/A-2085-04']);     
@@ -219,7 +219,7 @@ switch kit
             'J4_wrist' });
         
         % Kinematic Model
-        kin = HebiKinematics([localDir '/hrdf/A-2084-01']);
+        kin = HebiUtils.loadHRDF([localDir '/hrdf/A-2084-01']);
         
         % Load and send arm gains
         params.gains = HebiUtils.loadGains([localDir '/gains/A-2084-01']);     
@@ -240,7 +240,7 @@ switch kit
             'J2_shoulder'
             'J3_elbow' });
         
-        kin = HebiKinematics([localDir '/hrdf/A-2085-03']);
+        kin = HebiUtils.loadHRDF([localDir '/hrdf/A-2085-03']);
         
         % Load and send arm gains
         params.gains = HebiUtils.loadGains([localDir '/gains/A-2085-03']);     
@@ -265,7 +265,7 @@ switch kit
             'J6_wrist3' });
         
         % Kinematic Model
-        kin = HebiKinematics([localDir '/hrdf/A-2240-06G']);
+        kin = HebiUtils.loadHRDF([localDir '/hrdf/A-2240-06G']);
         
         % Load and send arm gains
         params.gains = HebiUtils.loadGains([localDir '/gains/A-2240-06']);     
@@ -295,7 +295,7 @@ switch kit
             'J6_wrist3' });
         
         % Kinematic Model
-        kin = HebiKinematics([localDir '/hrdf/A-2240-06']);
+        kin = HebiUtils.loadHRDF([localDir '/hrdf/A-2240-06']);
         
         % Load and send arm gains
         params.gains = HebiUtils.loadGains([localDir '/gains/A-2240-06']);     
@@ -319,7 +319,7 @@ switch kit
             'J5_wrist2' });
         
         % Kinematic Model
-        kin = HebiKinematics([localDir '/hrdf/A-2240-05G']);
+        kin = HebiUtils.loadHRDF([localDir '/hrdf/A-2240-05G']);
         
         % Load and send arm gains
         params.gains = HebiUtils.loadGains([localDir '/gains/A-2240-05']);     
@@ -348,7 +348,7 @@ switch kit
             'J5_wrist2' });
         
         % Kinematic Model
-        kin = HebiKinematics([localDir '/hrdf/A-2085-05']);
+        kin = HebiUtils.loadHRDF([localDir '/hrdf/A-2085-05']);
         
         % Load and send arm gains
         params.gains = HebiUtils.loadGains([localDir '/gains/A-2240-05']);     
@@ -371,7 +371,7 @@ switch kit
             'J4_wrist' });
         
         % Kinematic Model
-        kin = HebiKinematics([localDir '/hrdf/A-2240-04']);
+        kin = HebiUtils.loadHRDF([localDir '/hrdf/A-2240-04']);
         
         % Load and send arm gains
         params.gains = HebiUtils.loadGains([localDir '/gains/A-2240-04']);     
@@ -394,7 +394,7 @@ switch kit
             'J4_wrist' });
         
         % Kinematic Model
-        kin = HebiKinematics([localDir '/hrdf/A-2302-01']);
+        kin = HebiUtils.loadHRDF([localDir '/hrdf/A-2302-01']);
         
         % Load and send arm gains
         params.gains = HebiUtils.loadGains([localDir '/gains/A-2302-01']);

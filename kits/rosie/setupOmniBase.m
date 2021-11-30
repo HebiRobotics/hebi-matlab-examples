@@ -9,7 +9,7 @@ function [ params, trajGen ] = setupOmniBase()
 % +Z-AXIS = UP
 
 wheelRadius = .150 / 2;  % [m]
-wheelBase = .470;   % [m] (diameter of circumscribing circle of the wheels)
+wheelBase = .315;   % [m] (diameter of circumscribing circle of the wheels)
 
 params.wheelRadius = wheelRadius;
 params.wheelBase = wheelBase;
@@ -42,7 +42,7 @@ wheelBaseFrames(:,:,3) = eye(4);
 
 wheelBaseFrames(1:3,4,1) = [(wheelBase/2)*cos(a1); (wheelBase/2)*sin(a1); wheelRadius];
 wheelBaseFrames(1:3,4,2) = [(wheelBase/2)*cos(a2); (wheelBase/2)*sin(a2); wheelRadius];
-wheelBaseFrames(1:3,4,3) = [0; -1*(wheelBase/2); wheelRadius];
+wheelBaseFrames(1:3,4,3) = [-1*(wheelBase/2); 0; wheelRadius];
 
 wheelBaseFrames(1:3,1:3,1) = R_z(a1) * R_y(pi/2);
 wheelBaseFrames(1:3,1:3,2) = R_z(a2) * R_y(pi/2);

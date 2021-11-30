@@ -14,7 +14,12 @@ visualizeOn = false;
 simulate = false;
 logging = true;
 
-[legKin, chassisKin] = makeDaisyKinematics();
+% Load hrdf subtrees and the corresponding joint indices
+[~,~,limbs,jointInds] = HebiUtils.loadHRDF('hrdf/Daisy.hrdf');
+jointInds = cell2mat(jointInds(1:6));
+legKin = limbs(1:6);
+chassisKin = limbs{7};
+
 safetyParams = makeDaisySafetyLimits();
 
 for leg=1:length(legKin)
@@ -98,8 +103,8 @@ effortHist = nan(0,3*numLegs);
 xyzVelHist = nan(0,3);
 rotVelHist = nan(0,3);
 
-frames = nan(4,4,6*7);
-frameIndex = reshape(1:42,7,6);
+frames = nan(4,4,6*10);
+frameIndex = reshape(1:60,10,6);
 
 legEfforts = nan(6,3);    
 stanceLegs = 1:numLegs;
@@ -178,7 +183,7 @@ while true
         
         for i=1:length(imuModules)
             j = imuModules(i);
-            imuFrame = legKin{i}.getBaseFrame();
+            imuFrame = legKin{i}.getFirstJointFrame();
             
             DCM_module = HebiUtils.quat2rotMat(Q(:,j)');
             DCM_module = DCM_module * imuFrame(1:3,1:3)';

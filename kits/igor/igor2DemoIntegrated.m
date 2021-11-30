@@ -403,12 +403,6 @@ while true
                     'Time', time );        
     end   
 
-    % Initialize Pose Filter
-    poseFilter = HebiPoseFilter();
-    poseFilter.setMaxAccelWeight( .01);
-    poseFilter.setMaxAccelNormDev( .3 );
-    filterTime = fbk.time;
-
     trajTimer = tic;       
     t = toc(trajTimer);
 

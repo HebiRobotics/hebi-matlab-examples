@@ -14,7 +14,7 @@ params.gains = HebiUtils.loadGains('gains/6-dof-arm-gains-rosie');
 HebiUtils.sendWithRetry(group, 'gains', params.gains);
 
 % Kinematic Model
-kin = HebiKinematics('hrdf/6-DoF_arm_w_gripper');
+kin = HebiUtils.loadHRDF('hrdf/6-DoF_arm_w_gripper');
 
 % Gripper
 gripperGroup = HebiLookup.newGroupFromNames(family, 'Spool');

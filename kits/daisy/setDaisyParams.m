@@ -8,22 +8,18 @@
 
 % Masses / Weights.  Assume all the legs weigh the same
 legMass = sum( legKin{1}.getBodyMasses() );
-chassisMass = chassisKin.getBodyMasses();
+chassisMass = sum(chassisKin.getBodyMasses());
 robotMass = chassisMass + 6*legMass;  % kg
 robotWeight = 9.8 * robotMass;
 
 numLegs = length(legKin);
 allLegs = 1:numLegs;
 
-% Leg Indices
-jointInds = 1:(3*numLegs);
-jointInds = reshape(jointInds,3,6)';
-
 % Stance Parameters
 bodyHeight = .21; % meters
 stanceRadius = .55;  % meters
 for leg=1:numLegs
-    baseFrame = legKin{leg}.getBaseFrame();
+    baseFrame = legKin{leg}.getFirstJointFrame();
     homeStanceXYZ(:,leg) = baseFrame(1:3,1:3) * ...
                         [stanceRadius; 0; -bodyHeight];
 end

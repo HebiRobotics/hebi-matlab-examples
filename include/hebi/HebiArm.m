@@ -13,7 +13,7 @@ classdef HebiArm < handle
     %   Example
     %      % Setup the arm
     %      group = HebiLookup.newGroupFromNames('Arm', 'J*');
-    %      kin = HebiKinematics('A-2085-06.hrdf');
+    %      kin = HebiUtils.loadHRDF('A-2085-06.hrdf');
     %      arm = HebiArm(group, kin);
     %
     %      % Move to home position
@@ -246,11 +246,20 @@ classdef HebiArm < handle
                   fbk.orientationX(1), ...
                   fbk.orientationY(1), ...
                   fbk.orientationZ(1) ];
-            baseRotMat = HebiUtils.quat2rotMat(q);
+              
+            if any(isnan(q))
+                % If the group does not provide orientation feedback, we assume
+                % that gravity points 'down' in the base frame (-Z Axis).
+                warning('No orientation feedback available. Assuming gravity points down.');
+                gravityVec = [0; 0; -1];
+            else
+                % The orientation feedback is in the IMU frame, so we 
+                % need to first rotate it into the world frame.
+                baseRotMat = HebiUtils.quat2rotMat(q);
+                imuFrame = this.kin.getFirstJointFrame();
+                gravityVec = imuFrame(1:3,1:3) * (-baseRotMat(3,1:3)');
+            end
             
-            kinBaseFrame = this.kin.getBaseFrame();
-            gravityVec = kinBaseFrame(1:3,1:3) * (-baseRotMat(3,1:3)');
-           
             % Compensate for gravity
             gravCompEfforts = this.kin.getGravCompEfforts(fbk.position, gravityVec);
             

@@ -18,6 +18,8 @@ classdef (Sealed) HebiUtils
     %
     %   newImitationGroup  - creates an imitation group for testing
     %
+    %   loadHRDF           - loads an hrdf file into HebiKinematics objects
+    %
     %   loadGroupLog       - loads a binary .hebilog file into memory
     %   loadGroupLogsUI    - shows a UI dialog to load one or more logs.
     %
@@ -245,6 +247,50 @@ classdef (Sealed) HebiUtils
             %
             %   See also HebiUtils, HebiLookup, HebiGroup
             group = HebiGroup(javaMethod('newImitationGroup', HebiUtils.className,  varargin{:}));
+        end
+        
+        function varargout = loadHRDF(varargin)
+            % LOADHRDF loads an hrdf file and parses HebiKinematics objects
+            %
+            %   This method is similar to HebiKinematics(hrdfFile) with
+            %   additional support for tree structures and multiple end
+            %   effectors.
+            %
+            %   More information and background on kinematics:
+            %   http://docs.hebi.us/core_concepts.html#kinematics
+            %
+            %   More information on the HEBI Robot Description Format (HRDF):
+            %   http://docs.hebi.us/tools.html#robot-description-format
+            %
+            %   Example
+            %      % Load an hrdf with a single end effector
+            %      kin = HebiUtils.loadHRDF(hrdfFile);
+            %
+            %      % Get the index mask corresponding to the used joints
+            %      [kin, mask] = HebiUtils.loadHRDF(hrdfFile);
+            %      position = fbk.position(mask);
+            %      FK = kin.getForwardKinematicsEndEffector(position);
+            %
+            %      % Get multiple end effectors and their corresponding masks
+            %      [~,~,kins,masks] = HebiUtils.loadHRDF(hrdfFile);
+            %      FK = cell(length(kins),1);
+            %      for i = 1:length(kins)
+            %        position = fbk.position(masks{i});
+            %        FK{i} = kins{i}.getForwardKinematicsEndEffector(position);
+            %      end
+            %      
+            %   See also HebiUtils, HebiKinematics.
+            result = cell(javaMethod('loadHRDF', HebiUtils.className,  varargin{:}));
+            varargout = cell(4);
+            varargout{1} = HebiKinematics(result{1});
+            varargout{2} = result{2};
+            varargout{4} = cell(result{4});
+            
+            kinObj = cell(result{3});
+            for i = 1:length(kinObj)
+                kinObj{i} = HebiKinematics(kinObj{i});
+            end
+            varargout{3} = kinObj;
         end
         
         function out = saveGains(varargin)
@@ -834,7 +880,7 @@ classdef (Sealed) HebiUtils
             % See also HebiGroup.send
             
             % good connectivity -> no changes and return asap
-            if group.send('RequestAck', true, varargin{:})
+            if group.send(varargin{:}, 'RequestAck', true)
                 return;
             end
             
@@ -845,7 +891,7 @@ classdef (Sealed) HebiUtils
             
             maxRetries = 10;
             for i = 1:maxRetries
-                if group.send('RequestAck', true, varargin{:})
+                if group.send(varargin{:}, 'RequestAck', true)
                     return;
                 end
             end

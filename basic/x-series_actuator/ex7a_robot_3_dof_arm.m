@@ -11,7 +11,7 @@ clear *;
 close all;
 HebiLookup.initialize();
 
-kin = HebiKinematics('./hrdf/3-DoF_arm_example.hrdf');
+kin = HebiUtils.loadHRDF('./hrdf/3-DoF_arm_example.hrdf');
 gains = HebiUtils.loadGains('./gains/3-DoF_arm_gains.xml');
 trajGen = HebiTrajectoryGenerator();
 

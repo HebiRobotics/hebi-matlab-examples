@@ -13,10 +13,14 @@ HebiLookup.initialize();
 % Use Scope to change select a module and change the name and family to
 % match the names below.  Following examples will use the same names.
 familyName = 'HEBI';
-moduleNames = 'Mobile IO';
-group = HebiLookup.newGroupFromNames( familyName, moduleNames );
+deviceName = 'mobileIO';
 
-group.startLog('dir','logs');
+% The HebiMobileIO utility wrapper makes it easier to work with the
+% relevant parts of the group API.
+mobileIO = HebiMobileIO.findDevice(familyName, deviceName);
+mobileIO.initializeUI();
+
+mobileIO.group.startLog('dir','logs');
 
 %% Visualize Full Pose
 disp('  Visualizing 6-DoF pose estimate from the mobile device.');
@@ -29,32 +33,16 @@ duration = 30; % [sec]
 timer = tic();
 while toc(timer) < duration
     
-    % Read a struct of mobile specific sensor data
-    fbk = group.getNextFeedbackMobile();
-
-    % Get the AR orientation feedback and convert to rotation matrix  
-    % so that it can be visualized.
-    mobileQuaterion = [ fbk.arOrientationW ...
-                        fbk.arOrientationX ...
-                        fbk.arOrientationY ...
-                        fbk.arOrientationZ ];
-    mobileRotMat = HebiUtils.quat2rotMat( mobileQuaterion );
-
-    % Get the AR position feedback
-    mobileXYZ = [ fbk.arPositionX;
-                  fbk.arPositionY;
-                  fbk.arPositionZ ];
-   
-    % Visualize full 6-DoF pose 
-    arTransform = eye(4);
-    arTransform(1:3,1:3) = mobileRotMat;
-    arTransform(1:3,4) = mobileXYZ;
+    % Update Feedback
+    mobileIO.update();  
+    [arTransform, arQuality] = mobileIO.getArPose();
+    
     frameDisplay.setFrames( arTransform );
-    title(['AR Quality: ' num2str(fbk.arQuality)]);
+    title( ['AR Quality: ' num2str(arQuality)] );
     drawnow;
 
 end
 
 disp('  All done!');
 
-log = group.stopLog('view','mobile');
+log = mobileIO.group.stopLogMobile();
