@@ -18,7 +18,7 @@
     <d_on_error>1 1 1 1 1 1 1</d_on_error>
   </position>
   <velocity>
-    <kp>0.3 0.3 0.3 0.2 0.05 0.05 0.05</kp>
+    <kp>0.1 0.3 0.3 0.2 0.05 0.05 0.05</kp>
     <ki>0 0 0 0 0 0 0</ki>
     <kd>0 0 0 0 0 0 0</kd>
     <feed_forward>1 1 1 1 1 1 1</feed_forward>
@@ -34,13 +34,13 @@
     <d_on_error>1 1 1 1 1 1 1</d_on_error>
   </velocity>
   <effort>
-    <kp>0.2 0.3 0.3 0.3 0.25 0.25 0.25</kp>
+    <kp>0.1 0.1 0.1 0.1 0.1 0.1 0.1</kp>
     <ki>0 0 0 0 0 0 0</ki>
     <kd>0.0001 0.0001 0.0001 0.001 0.001 0.001 0.001</kd>
     <feed_forward>1 1 1 1 1 1 1</feed_forward>
     <dead_zone>0 0 0 0 0 0 0</dead_zone>
     <i_clamp>0.25 0.25 0.25 0.25 0.25 0.25 0.25</i_clamp>
-    <punch>0 0 0 0 0 0 0</punch>
+    <punch>0 0 -0 0 -0 0 0</punch>
     <min_target>-40 -40 -40 -40 -4 -4 -4</min_target>
     <max_target>40 40 40 40 4 4 4</max_target>
     <target_lowpass>1 1 1 1 1 1 1</target_lowpass>

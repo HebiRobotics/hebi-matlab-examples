@@ -18,7 +18,7 @@
 clear *;
 close all;
 
-armName = 'A-2303-01  ';
+armName = 'A-2303-01';
 armFamily = 'Arm';
 hasGasSpring = false;  % If you attach a gas spring to the shoulder for
                        % extra payload, set this to TRUE.

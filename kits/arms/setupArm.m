@@ -36,6 +36,8 @@ function [ arm, params, gripper ] = setupArm( kit, family, hasGasSpring )
 %    'A-2240-05' (5-DoF R-Series Arm), 
 %    'A-2240-04' (4-DoF R-Series Arm),
 %    'A-2302-01' (4-DoF R-Series SCARA Arm)
+%    'A-2303-01' (7-DoF R-Series Double Shoulder Arm)
+%    'A-2303-01G' (7-DoF R-Series Double Shoulder Arm + Gripper)
 %
 % The 'family' argument specifies the family name of the modules that
 % should be selected.
@@ -518,7 +520,7 @@ switch kit
             'J7_wrist2' });
         
         % Kinematic Model
-        kin = HebiKinematics([localDir '/hrdf/A-2303-01']);
+        kin = HebiKinematics([localDir '/hrdf/A-2303-01G']);
         
         % Load and send arm gains
         params.gains = HebiUtils.loadGains([localDir '/gains/A-2303-01']);

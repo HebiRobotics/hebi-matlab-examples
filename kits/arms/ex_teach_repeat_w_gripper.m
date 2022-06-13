@@ -20,7 +20,7 @@
 clear *;
 close all;
 
-armName = 'A-2099-07G';
+armName = 'A-2303-01G';
 armFamily = 'Arm';
 hasGasSpring = false;  % If you attach a gas spring to the shoulder for
                        % extra payload, set this to TRUE.
@@ -166,7 +166,7 @@ while ~abortFlag
         'velocities', 0 * waypoints, ...
         'accelerations', 0 * waypoints, ...
         'aux', gripStates);
-    
+       
     while ~arm.isAtGoal() && ~abortFlag
         keys = read(kb);
         
