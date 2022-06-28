@@ -18,9 +18,9 @@ close all;
 
 HebiLookup.initialize();
 
-armName = 'A-2085-06';
+armName = 'A-2303-01G';
 armFamily = 'Arm';
-hasGasSpring = true;
+hasGasSpring = false;
 
 [ arm, params ] = setupArm( armName, armFamily, hasGasSpring );
 

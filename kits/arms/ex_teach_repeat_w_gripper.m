@@ -20,16 +20,14 @@
 clear *;
 close all;
 
-armName = 'A-2085-06G';
+armName = 'A-2303-01G';
 armFamily = 'Arm';
 hasGasSpring = false;  % If you attach a gas spring to the shoulder for
                        % extra payload, set this to TRUE.
 
 [ arm, params, gripper ] = setupArm( armName, armFamily, hasGasSpring );
 arm.group.setFeedbackFrequency(100);
-arm.plugins = {
-    HebiArmPlugins.EffortOffset(params.effortOffset)
-};
+ 
 arm.trajGen.setMinDuration(1.0);   % Min move time for 'small' movements
                                    % (e.g. gripper open/close)
 arm.trajGen.setSpeedFactor(0.75);  % Slow down movements to a safer speed.
@@ -168,7 +166,7 @@ while ~abortFlag
         'velocities', 0 * waypoints, ...
         'accelerations', 0 * waypoints, ...
         'aux', gripStates);
-    
+       
     while ~arm.isAtGoal() && ~abortFlag
         keys = read(kb);
         

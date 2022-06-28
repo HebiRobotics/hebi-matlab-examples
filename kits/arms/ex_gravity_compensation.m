@@ -17,15 +17,12 @@ close all;
 
 HebiLookup.initialize();
 
-armName = 'Maggie7dof';
-armFamily = 'Maggie-Arm';
+armName = 'A-2303-01G';
+armFamily = 'Arm';
 hasGasSpring = false;  % If you attach a gas spring to the shoulder for
                        % extra payload, set this to TRUE.
 
 [ arm, params ] = setupArm( armName, armFamily, hasGasSpring );
-arm.plugins = {
-	HebiArmPlugins.EffortOffset(params.effortOffset)  
-};
 
 localDir = params.localDir;
 enableLogging = true;
