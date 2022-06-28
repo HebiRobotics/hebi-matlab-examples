@@ -385,6 +385,32 @@ switch kit
         % Default seed positions for doing inverse kinematics
         params.ikSeedPos = [0.01 1.0 2.5 1.5];    
         
+    case 'Maggie7dof'
+        %% R-Series 6-DoF Arm
+        group = HebiLookup.newGroupFromNames(family, {
+            'J1_base'
+            'J2_shoulder1'
+            'J3_shoulder2'
+            'J4_elbow1'
+            'J5_elbow2'
+            'J6_wrist1'
+            'J7_wrist2'});
+        
+        % Kinematic Model
+        kin = HebiUtils.loadHRDF([localDir '/hrdf/7-DoF-Maggie']);
+        
+        % Load and send arm gains
+        params.gains = HebiUtils.loadGains([localDir '/gains/A-2240-06']);     
+        
+        % No Gripper
+        params.hasGripper = false;
+        
+        % Compensation to joint efforts due to a gas spring (if present)
+        params.effortOffset = [0 shoulderJointComp 0 0 0 0];
+        
+        % Default seed positions for doing inverse kinematics
+        params.ikSeedPos = [0.01 1.0 2.5 1.5 -1.5 0.01];
+        
     case 'A-2302-01'
         %% R-Series 4-DoF SCARA Arm
         group = HebiLookup.newGroupFromNames(family, {
@@ -406,11 +432,13 @@ switch kit
         params.effortOffset = [0 shoulderJointComp 0 0];
         
         % Default seed positions for doing inverse kinematics
-        params.ikSeedPos = [0.01 1.0 2.5 1.5];
+        params.ikSeedPos = [0.01 1.0 2.5 1.5
+            
         
-    otherwise
         
-        error([kit ' is not a supported kit name']);
+%     otherwise
+%         
+%         error([kit ' is not a supported kit name']);
         
 end
 
