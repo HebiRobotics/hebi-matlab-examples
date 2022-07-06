@@ -18,8 +18,8 @@ close all;
 
 HebiLookup.initialize();
 
-armName = 'A-2303-01G';
-armFamily = 'Arm';
+armName = 'Maggie7Dof';
+armFamily = 'Maggie-Arm';
 hasGasSpring = false;
 
 [ arm, params ] = setupArm( armName, armFamily, hasGasSpring );

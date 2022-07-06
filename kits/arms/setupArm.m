@@ -407,8 +407,6 @@ switch kit
         % No Gripper
         params.hasGripper = false;
         
-        % Compensation to joint efforts due to a gas spring (if present)
-        params.effortOffset = [0 shoulderJointComp 0 0 0 0];
         
         % Default seed positions for doing inverse kinematics
         params.ikSeedPos = [0.01 1.0 2.5 1.5 -1.5 0.01];
@@ -434,7 +432,7 @@ switch kit
         params.effortOffset = [0 shoulderJointComp 0 0];
         
         % Default seed positions for doing inverse kinematics
-        params.ikSeedPos = [0.01 1.0 2.5 1.5
+        params.ikSeedPos = [0.01 1.0 2.5 1.5];
             
         
     case 'A-2099-07'
@@ -534,6 +532,33 @@ switch kit
         
         % Default plugins
         doubleShoulder = HebiLookup.newGroupFromNames(family, 'J2B_shoulder1');  
+        
+    case 'Maggie7Dof'
+        %% R-Series 7-DoF single shoulder arm on Maggie
+        group = HebiLookup.newGroupFromNames(family, {
+            'J1_base'
+            'J2_shoulder1'
+            'J3_shoulder2'
+            'J4_elbow1'
+            'J5_elbow2'
+            'J6_wrist1'
+            'J7_wrist2' });
+        
+        % Kinematic Model
+        kin = HebiKinematics([localDir '/hrdf/7-DoF-Maggie']);
+        
+        % Load and send arm gains
+        params.gains = HebiUtils.loadGains([localDir '/gains/A-2303-01']);
+        
+        % Has Gripper
+        params.hasGripper = false;
+        
+        % Account for external efforts due to the gas spring
+        params.effortOffset = [0 shoulderJointComp 0 0 0 0 0];
+        
+        % Default seed positions for doing inverse kinematics
+        params.ikSeedPos = [0 -1.25 0 2 0 1.25 0];
+        
         
     case 'A-2303-01G'
         %% R-Series 7-DoF Double Shoulder Arm with Gripper
