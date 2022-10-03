@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot version="1.2.0">
+   
+  <actuator type="R8-16"/>
+  <link type="R8" input="Inline" extension="0.14" twist="0"/>
+  <actuator type="R8-16"/>
+  
+  <!-- For custom end-effector parameters and formatting please visit: -->
+  <!-- https://github.com/HebiRobotics/hebi-hrdf/blob/master/FORMAT.md#end-effector -->
+  <end-effector type="Custom" 
+                mass="0.5" 
+                com_trans="0.000 0.000 0.050" 
+                output_trans="0.100 0.000 0.050"
+                output_rot="Ry(pi/2)"/>
+  
+</robot>

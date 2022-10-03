@@ -11,7 +11,7 @@ function mobileBaseDemo( mobileBaseType )
     % Optional step to limit the lookup to a set of interfaces or modules
     % HebiLookup.setLookupAddresses('10.10.10.255');
     enableLogging = true;
-    robotFamily = 'suctionBase';
+    robotFamily = 'Chevron';
 
     %%
 %     %%%%%%%%%%%%%%%%%%%%%%%%%
@@ -31,6 +31,8 @@ function mobileBaseDemo( mobileBaseType )
             [chassisParams, chassisTrajGen] = setupDiffDriveBase();
         case 'mecanum'
             [chassisParams, chassisTrajGen] = setupMecanumBase();
+        case 'pneum'
+            [chassisParams, chassisTrajGen] = setupPneumDriveBase();
         otherwise
             disp('Base type not recognized.'); 
             disp('Please choose: OMNI, DIFF-DRIVE, or MECANUM');
@@ -263,7 +265,7 @@ function mobileBaseDemo( mobileBaseType )
             %%%%%%%%%%%%%%%%%%%%%%%
             % Map joystick input to linear speeds       
             xVel = maxLinSpeed * fbkPhoneIO.(xVelAxis);
-            yVel = -maxLinSpeed * fbkPhoneIO.(yVelAxis);
+            yVel = maxLinSpeed * fbkPhoneIO.(yVelAxis);
             rotVel = maxRotSpeed * fbkPhoneIO.(rotVelAxis); 
             desiredChassisVel = [xVel yVel rotVel];
             
