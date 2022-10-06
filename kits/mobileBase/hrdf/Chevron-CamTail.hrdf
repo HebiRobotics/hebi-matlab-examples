@@ -9,8 +9,7 @@
   <!-- https://github.com/HebiRobotics/hebi-hrdf/blob/master/FORMAT.md#end-effector -->
   <end-effector type="Custom" 
                 mass="0.5" 
-                com_trans="0.000 0.000 0.050" 
-                output_trans="0.100 0.000 0.050"
-                output_rot="Ry(pi/2)"/>
+                output_trans="-0.050 0.000 0.050"
+                output_rot="Ry(-pi/2)"/>
   
 </robot>

@@ -27,14 +27,14 @@ params.chassisMass = 10;  % kg
 % For rotational inertia, assume the robot is a uniform disk
 params.chassisInertiaZZ = (1/2) * params.chassisMass * (wheelBase/2)^2;
 
-params.wheelModuleNames = { 'W1_front-left', ...
+params.driveModuleNames = { 'W1_front-left', ...
                             'W2_front-right' ...
                             'W3_rear-left' ...
                             'W4_rear-right' };
 params.numWheels = 4;
 
 % Load the gains for the wheels
-params.wheelGains = HebiUtils.loadGains('gains/pneum-drive-wheel-gains');
+params.wheelGains = HebiUtils.loadGains('gains/pneum-drive-wheel-gains.xml');
 
 % Transform from the origin of the chassis to the Front Left Wheel
 wheelBaseFrames(:,:,1) = eye(4); 

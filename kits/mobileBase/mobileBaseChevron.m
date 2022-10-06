@@ -14,13 +14,6 @@ enableLogging = true;
 robotFamily = 'Chevron';
 
 %%
-%     %%%%%%%%%%%%%%%%%%%%%%%%%
-%     % Setup Arm and Gripper %
-%     %%%%%%%%%%%%%%%%%%%%%%%%%
-%
-%     [ arm, armParams, gripper ] = setupArmWithGripper(robotFamily);
-%
-%%
 %%%%%%%%%%%%%%%%%%%%%
 % Setup Mobile Base %
 %%%%%%%%%%%%%%%%%%%%%
@@ -61,24 +54,25 @@ wheelCmd = CommandStruct();
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 camGroup = HebiLookup.newGroupFromNames( robotFamily, 'Widey' );
+camCmdIO = IoCommandStruct();
 panTiltGroup = HebiLookup.newGroupFromNames(robotFamily, ...
                 {'C1_pan', 'C2_tilt'});
-camCmdIO = IoCommandStruct();
 
-LED = 'f1';
+
+floodLED = 'f3';
 ledScale = 0.4;
 ledMin = 0.30;
 ledMax = 0.90;
 
 ledDimmerLast = -0.75;
-ledControlScale = 0;
-ledButtonLast = 0;
-ledHighlight = 0;
-camHomeButtonLast = 0;
+floodControlScale = 0;
+floodButtonLast = 0;
+floodHighlight = 0;
 
-camCmdIO.(LED) = ledMin;
+camCmdIO.(floodLED) = ledMin;
 
 cameraRotOffset = 0;   % [deg]
+cameraHome = [pi/2 pi/2];
 RPY = [0 0 0];
 
 camKin = HebiKinematics('hrdf/Chevron-CamTail');
@@ -109,6 +103,10 @@ R_fbk = T_fbk(1:3,1:3);
 rotMatTarget = R_fbk;
 R_fbk_init = R_fbk;
 
+%% Camera Streams Setup
+
+
+
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Setup Mobile Phone Input %
@@ -119,8 +117,13 @@ flipperSlider2 = 'a4';
 flipperSlider3 = 'a5';
 flipperSlider4 = 'a6';
 resetPoseButton = 'b1';
+rightPadUpDown = 'a8';
+rightPadLeftRight = 'a7';
+leftPadUpDown = 'a2';
+leftPadLeftRight = 'a1';
 LEDButton = 'b3';
-LEDSlider = 'a3';
+camHome = 'b4';
+ledSlider = 'a3';
 camHomeMode = 'b6';
 quitDemoButton = 'b8';
 probeXAxis = 'a1'; % Right Pad Up/Down
@@ -129,7 +132,7 @@ xVelAxis = 'a8'; % Right Pad Up/Down
 yVelAxis = 'a7'; % Right Pad Left/Right
 % rotVelAxis = 'a1'; % Left Pad Left/Right
 
-phoneControlScale = 0;
+
 camVelScale = 1; % rad/sec
 
 % Search for phone controller. Allow retry because phones tend to
@@ -139,12 +142,26 @@ while true
     try
         fprintf('Searching for phone Controller...\n');
         phoneGroup = HebiLookup.newGroupFromNames(robotFamily, phoneName);
+        phoneGroupIO = HebiMobileIO.findDevice(robotFamily, phoneName);
         disp('Phone Found.  Starting up');
         break;
     catch
         pause(1.0);
     end
 end
+
+% % IO Command Setup - Controller Layout
+%     phoneGroupIO.initializeUI();
+%     unicode = @(input) sprintf(strrep(input, '\u', '\x'));
+%     
+%     phoneGroupIO.setAxisSnap([3 5], [0 0]);
+%     phoneGroupIO.setAxisValue(6, -1);
+%     phoneGroupIO.setAxisLabel([3 4 5 6 7 8], {unicode('\u21D5'),unicode('\uD83D\uDD26'), ...
+%         'LED','Zm','Y','X'});
+%     phoneGroupIO.setButtonIndicator([1 2 3 4 5 6 7 8], [true true true true true true true true]);
+%     phoneGroupIO.setButtonLabel([1 2 3 4 5 6 7 8], {unicode('\u21BA'), 'T', 'Spot', 'Fld', 'fwd','Home', 'rear', ...
+%         unicode('\u23F9')});
+%     phoneGroupIO.clearText();
 
 %%
 %%%%%%%%%%%%%%%%%%%%%%%
@@ -154,34 +171,51 @@ end
 % Start background logging
 if enableLogging
     %         arm.group.startLog('dir','logs');
-    wheelGroup.startLog('dir','logs');
+    wheelGroup.startLog('dir','/chassis');
 end
 
 % This outer loop is what we fall back to anytime we 're-home' the arm
 loopTimer = tic();
 timeNow = toc(loopTimer);
+
 abortFlag = false;
 
 while ~abortFlag
-    phoneCmd.(flipperSlider1) = 0; % Snap slider to center
-    phoneCmd.(flipperSlider2) = 0; 
-    phoneCmd.(flipperSlider3) = 0; 
-    phoneCmd.(flipperSlider4) = 0; 
     phoneCmd.f5 = ledDimmerLast;
     phoneCmd.e1 = 1;  % Highlight robot reset button
     phoneCmd.e8 = 1;  % Highlight Quit button
     phoneCmd.e2 = 1;  % Highlight B2 button
     phoneCmd.e4 = 1;  % Highlight B4 button
-    phoneCmd.e3 = 1;  % Highlight B3 button
-    phoneCmd.e5 = ledHighlight;
+    phoneCmd.e3 = floodHighlight; % Highlight B3 button on/off
     phoneCmd.(camHomeMode) = 0;  % Momentary button
+    phoneCmd.(LEDButton) = 0;
     controllerColor = 'b';
     
+       
+%     HebiUtils.sendWithRetry(phoneGroup, ...
+%         'led', controllerColor, ... % send LED command
+%         'IoCommand', phoneCmd); % send button and slider settings
     
-    % Grab initial pose from phone
-    fbkPhoneMobile = phoneGroup.getNextFeedbackMobile();
-    panTiltFbk = panTiltGroup.getNextFeedbackFull();
-    fbkPhoneIO = phoneGroup.getNextFeedbackIO();    
+    % IO Command Setup - Controller Layout
+    phoneGroupIO.initializeUI();
+    unicode = @(input) sprintf(strrep(input, '\u', '\x'));
+    
+    phoneGroupIO.setAxisSnap([3 5], [0 0]);
+    phoneGroupIO.setAxisValue(6, -1);
+    phoneGroupIO.setAxisLabel([3], {unicode('\uD83D\uDD26')});
+    phoneGroupIO.setButtonIndicator([1 2 3 4 5 6 7 8], [false false true false false false false true]);
+    phoneGroupIO.setButtonLabel([3 7 8], {'Fld', 'Home', unicode('\u23F9')});
+    phoneGroupIO.clearText();
+    
+    %Grab initial pose from phone
+    [fbkPhoneMobile, fbkPhoneIO] = phoneGroupIO.getFeedback();
+    
+    phoneFbkCounter = 0;
+    controllerLost = false;
+    controllerTextSent = false;
+    mStopPressed = false;
+    mStopTextSent = false;
+
     
     % Initialize a trajectory for the base. (By passing velocities
     % as positions we can compute a velocity trajectory. The constant
@@ -212,6 +246,11 @@ while ~abortFlag
     phoneCmdCam = IoCommandStruct();
     
     while ~abortFlag
+         %%%%%%%%%%%%%%%%%%%
+        % Gather Feedback %
+        %%%%%%%%%%%%%%%%%%%
+        
+        
         % We get feedback from the phone into the existing structs. The
         % timeout of 0 means that the method returns immediately and won't
         % wait for feedback. If there was no feedback, the method returns
@@ -224,6 +263,37 @@ while ~abortFlag
         hasNewPhoneFbk = ~isempty(phoneGroup.getNextFeedback( ...
             fbkPhoneIO, fbkPhoneMobile, ... % overwrite existing structs
             'timeout', 0 )); % prevent blocking due to bad comms
+        
+        % If you lose connection to the iPad, stop all velocity commands
+        if ~hasNewPhoneFbk
+            if phoneFbkCounter < 20
+                phoneFbkCounter = phoneFbkCounter + 1;
+                pause(0.01);
+            else
+                controllerLost = true;
+                pause(0.01);
+                probeXAxis = 0; % Right Pad Up/Down
+                probeYAxis = 0; % Right Pad Left/Right
+                xVelAxis = 0; % Right Pad Up/Down
+                yVelAxis = 0;
+            end
+        else
+            phoneFbkCounter = 0;
+            controllerLost = false;
+        end
+        
+        if controllerLost && ~controllerTextSent
+            disp('Lost connection to Controller. Please reconnect.')
+%             robotGroup.send('led','b');
+%             arm.group.send('led','b');
+            controllerTextSent = true;
+        end
+        
+        if ~controllerLost && controllerTextSent
+            disp('Controller reconnected, demo continued.')
+            phoneGroup.clearText();
+           controllerTextSent = false;
+        end
         
         %%%%%%%%%%%%%%%%%%%%%%
         % Camera Orientation %
@@ -251,7 +321,7 @@ while ~abortFlag
             cameraRoll_gyro = cameraRoll + camFbk.gyroZ(1)*dt;
         end
         
-        pitchCheck = RPY(2);
+        pitchCheck = RPY(1);
         
         % Singularity Check - Video Rotation
         deadZoneRange = 10;
@@ -291,7 +361,76 @@ while ~abortFlag
             break;
         end
         
+        %%%%%%%%%%%%%%%%%%%%%%%%%
+        % Camera / LED Controls %
+        %%%%%%%%%%%%%%%%%%%%%%%%%
         
+        ledDimmer = (fbkPhoneIO.(ledSlider) + 1.0) / 2;
+        if ledDimmer < ledMin
+            ledDimmer = 0;
+        elseif ledDimmer > ledMax
+            ledDimmer = ledMax;
+        end
+
+        
+        if (fbkPhoneIO.(LEDButton) - floodButtonLast) == 1
+            floodControlScale = ~floodControlScale;
+            floodHighlight = ~floodHighlight;
+            ledBtnCmd.e3 = floodHighlight;  % Highlight B3 button on/off
+            HebiUtils.sendWithRetry(phoneGroup, ...
+                    'IoCommand', camCmdIO); % send button and slider settings
+        end
+        
+        floodButtonLast = fbkPhoneIO.(LEDButton);
+        
+        floodCmd = floodControlScale * ledDimmer;
+      
+        camCmdIO.(floodLED) = floodCmd;
+        camCmdIO.(floodLED) = min(camCmdIO.(floodLED), ledMax );
+        
+        
+        camGroup.send(camCmdIO);
+
+        % If you lose connection to the iPad, stop all velocity commands
+    if ~hasNewPhoneFbk
+        if phoneFbkCounter < 20
+            phoneFbkCounter = phoneFbkCounter + 1;
+            pause(0.01);
+        else
+            flip = 0;
+%             tiltJoyVel = 0;
+%             panJoyVel = 0;
+            controllerLost = true;
+            pause(0.01);
+            probeXVel = 0;
+            probeYVel = 0;
+        end
+    else
+        phoneFbkCounter = 0;
+        controllerLost = false;
+    end
+    
+    if controllerLost && ~controllerTextSent
+        disp('Lost connection to Controller. Please reconnect.')
+        robotGroup.send('led','b');
+        controllerTextSent = true;
+    end
+    
+    if ~controllerLost && controllerTextSent
+        disp('Controller reconnected, demo continued.')
+        
+        phoneGroup.setAxisSnap([3 5], [0 0]);
+        phoneGroup.setAxisValue(6, -1);
+        phoneGroup.setAxisLabel([3 4 5 6 7 8], {unicode('\u21D5'),unicode('\uD83D\uDD26'), ...
+            'LED','Zm'});
+        phoneGroup.setButtonIndicator([1 2 3 4 5 6 7 8], [true true true true true true true true]);
+        phoneGroup.setButtonLabel([1 2 3 4 5 6 7 8], {unicode('\u21BA'), 'T', 'Spot', 'Fld', 'fwd','Home', 'rear', ...
+            unicode('\u23F9')});
+        phoneGroup.clearText();
+        
+        robotGroup.send('led',[]);
+        controllerTextSent = false;
+    end
         
         %%%%%%%%%%%%%%%%%%%%%%%
         % Mobile Base Control %
@@ -333,12 +472,13 @@ while ~abortFlag
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % Camera Pan Tilt Base Control %
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        camTiltJoy = probeYAxis;
-        camPanJoy = probeXAxis;
-        camPan = sign(fbkPhoneIO.(camPanJoy)) * fbkPhoneIO.(camPanJoy)^2;
-        camTilt = sign(fbkPhoneIO.(camTiltJoy)) * fbkPhoneIO.(camTiltJoy)^2;
+        camTiltJoy = leftPadUpDown;
+        camPanJoy = leftPadLeftRight;
+        camPan = -sign(fbkPhoneIO.(camPanJoy)) * fbkPhoneIO.(camPanJoy)^2;
+        camTilt = -sign(fbkPhoneIO.(camTiltJoy)) * fbkPhoneIO.(camTiltJoy)^2;
         panVel = camVelScale * camPan;
         tiltVel = camVelScale * camTilt;
+        
         
         fbkPanTiltPos = panTiltFbk.position(armDoF);
         if any(isnan(panTiltFbk.positionCmd))
@@ -369,19 +509,20 @@ while ~abortFlag
         camVels = J_inv_cam * camRotVelVec;
 %         camVels = camRotVelVec;
         
+        if (fbkPhoneIO.(camHome) - camHomeButtonLast) == 1
+        end
 
         % Camera commands
         panTiltCmd.velocity(cameraMotors) = camVels;
         panTiltCmd.position(cameraMotors) = panTiltCmd.position(cameraMotors) + ...
-            panTiltCmd.velocity(cameraMotors)*dt;
+        panTiltCmd.velocity(cameraMotors)*dt;
         
         panTiltGroup.send(panTiltCmd());
-        camGroup.send(camCmdIO);
         
     end
 end
 
 if enableLogging
     wheelGroup.stopLogFull();
-end
+
 end
