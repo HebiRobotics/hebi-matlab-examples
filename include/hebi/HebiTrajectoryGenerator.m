@@ -754,7 +754,10 @@ classdef (Sealed) HebiTrajectoryGenerator
                     arg1 = this.kin.obj;
                 end
                 
-                setVelocityLimits(this.obj, arg1);
+                % Set velocity limits as long as none of them are inf
+                if ~any(abs(this.kin.getJointInfo.velocityLimit(:))==inf)
+                    setVelocityLimits(this.obj, arg1);
+                end
                 
             end
             
