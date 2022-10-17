@@ -18,14 +18,14 @@ close all;
 
 HebiLookup.initialize();
 
-armName = 'A-2085-06';
-armFamily = 'Arm';
+armName = 'mapsArm_7DoF';
+armFamily = 'MAPS';
 hasGasSpring = true;
 
-[ arm, params ] = setupArm( armName, armFamily, hasGasSpring );
+[ arm, params ] = setupArm_MAPS();
 
 % Select whether coordinate frames for static links should be drawn as well
-showLinkBodies = false;
+showLinkBodies = true;
 
 % Length of the drawn axes
 axisLength = 0.05; % [m]

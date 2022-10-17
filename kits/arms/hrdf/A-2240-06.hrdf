@@ -18,6 +18,6 @@
   
   <!-- For custom end-effector parameters and formatting please visit: -->
   <!-- https://github.com/HebiRobotics/hebi-hrdf/blob/master/FORMAT.md#end-effector -->
-  <end-effector />
+  <end-effector mass="0.500"/>
   
 </robot>

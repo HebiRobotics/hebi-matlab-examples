@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- For documentation on the HEBI Robot Configuration please visit: -->
+<!-- https://github.com/HebiRobotics/hebi-hrdf/blob/master/FORMAT.md -->
+
+<!-- MAPS Arm (7-DoF)          -->
+<!--   1 x 1-DoF Base          -->
+<!--   3 x 2-DoF Knuckles      -->
+<!--   Custom Probe on the end -->
+<robot version="1.2.0">
+    
+    
+  <!-- Transforms for the Base Module -->
+  <rigid-body mass="0.000" 
+              output_trans="0.0 0.0 0.0584"/>
+  <joint axis="rz"/>
+  
+  <!-- Standard Accessory Tubing -->            
+  <rigid-body mass="0.010" 
+              output_trans="0.000 0.000 0.050"/>
+    
+  
+  <!-- Transforms for a 2-DoF Module - DOF-A DISTAL -->
+  <rigid-body mass="0.000" 
+              output_trans="-0.04754 0.0 0.03250"/>         
+  <joint axis="-rx"/>
+  <rigid-body mass="0.280" 
+              com_trans="0.017 0.0 0.176"/>                   
+  <joint axis="-rz"/>
+  <rigid-body mass="0.000" 
+              output_trans="0.0 0.0 -0.04404"
+              output_rot="Rx(pi)"/>  
+    
+              
+  <!-- Standard Accessory Tubing -->            
+  <rigid-body mass="0.100" 
+              output_trans="0.000 0.000 0.350"/>
+          
+              
+  <!-- Transforms for a 2-DoF Module - DOF-A DISTAL -->
+  <rigid-body mass="0.000" 
+              output_trans="-0.04754 0.0 0.03250"/>         
+  <joint axis="-rx"/>
+  <rigid-body mass="0.280" 
+              com_trans="0.017 0.0 0.176"/>                   
+  <joint axis="-rz"/>
+  <rigid-body mass="0.000" 
+              output_trans="0.0 0.0 -0.04404"
+              output_rot="Rx(pi)"/>  
+       
+              
+  <!-- Standard Accessory Tubing -->            
+  <rigid-body mass="0.100" 
+              output_trans="0.000 0.000 0.350"/>           
+  
+              
+  <!-- Transforms for a 2-DoF Module - DOF-A DISTAL -->
+  <rigid-body mass="0.000" 
+              output_trans="-0.04754 0.0 0.03250"/>         
+  <joint axis="-rx"/>
+  <rigid-body mass="0.280" 
+              com_trans="0.017 0.0 0.176"/>                   
+  <joint axis="-rz"/>
+  <rigid-body mass="0.000" 
+              output_trans="0.0 0.0 -0.04404"
+              output_rot="Rx(pi)"/>  
+             
+              
+  <!-- Offsets in XYZ for gripper on the end -->   
+  <end-effector type="Custom" 
+                mass="0.050" 
+                com_trans="0 0 0.030" 
+                output_trans="0.000 0.00 0.075"/>
+  
+</robot>
