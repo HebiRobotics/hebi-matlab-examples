@@ -5,7 +5,8 @@
   <control_strategy>4 4 4 4 4 4</control_strategy>
   
   <position>
-    <kp>75 100 50 20 10 10</kp>
+    <!-- <kp>75/2 100/2 75/2 30/2 15/2 15/2</kp> -->
+    <kp>30 50 30 10 5 5</kp>
     <ki>0 0 0 0 0 0</ki>
     <kd>0 0 0 0 0 0</kd>
     <feed_forward>0 0 0 0 0 0</feed_forward>

@@ -12,17 +12,16 @@ close all;
 
 HebiLookup.initialize();
 
-localDir = fileparts(mfilename('fullpath'));
-params.localDir = localDir;
+enableLogging = false;
+
 
 kb = HebiKeyboard();
-
-enableLogging = false;
 
 %%
 
 resetPoseButton = 'TAB';
 quitDemoButton = 'ESC';
+pauseButton = 'SPACE';
 % translationScaleSlider = 'a3';
 toolSpinSlider = 'UP';
 
@@ -55,25 +54,24 @@ arm.plugins = {
 	HebiArmPlugins.EffortOffset(params.effortOffset)  
 };
 
-localDir = params.localDir;
-enableLogging = true;
-
-% Start background logging 
-if enableLogging
-   logFile = arm.group.startLog('dir',[localDir '/logs']); 
-end
+localDir = fileparts(mfilename('fullpath'));
+params.localDir = localDir;
                              
 disp('  ');
 disp('Arm end-effector is now following the MAPS arm pose.');
 disp('The control interface has the following commands:');
-disp('  B1 - Reset/re-align poses.');
-disp('       This takes the arm to home and aligns with mobile device.')
-disp('  B8 - Quits the demo.');
+disp('  TAB - Reset/re-align poses.');
+disp('        This takes the arm to home and aligns with MAPS.')
+disp('  SPACE - Pause the demo.');
+disp('  ESC - Quits the demo.');
 
 %% Startup
 arm.update();
+mapsArm.update();
 
+demoPaused = false;
 abortFlag = false;
+
 while ~abortFlag
     
     xyzScale = [1 1 1]';
@@ -85,7 +83,7 @@ while ~abortFlag
     end
 
     % Move to current coordinates
-    xyzTarget_init = [0.4 0.08 0.03]';
+    xyzTarget_init = [0.4 0.00 0.1]';
     rotMatTarget_init = R_y(pi);
 
     ikPosition = arm.kin.getIK('xyz', xyzTarget_init, ...
@@ -94,16 +92,19 @@ while ~abortFlag
         
     % Slow trajectory timing for the initial move to home position   
     arm.trajGen.setSpeedFactor( 1.0 );
-    arm.trajGen.setMinDuration( 8.0 );
+    arm.trajGen.setMinDuration( 5.0 );
     
     % Move to initial position
     arm.update();
     arm.clearGoal(); % in case we run only this section
     arm.setGoal(ikPosition);
+    disp('Moving arm to home position.  Hold MAPS in desired home position.');
     while ~arm.isAtGoal
         arm.update();
-        arm.send();
+        arm.send('led','b');  % Set LEDs blue while homingo
+        mapsArm.send('led','b');
     end
+    disp('Homing Complete!');
 
     % Grab initial pose from MAPS 
     mapsFbk = mapsGroup.getNextFeedbackFull();
@@ -133,8 +134,13 @@ while ~abortFlag
         %%%%%%%%%%%%%%%%%%%
         try
             arm.update();
-            arm.send();
-            % [handles, camRot] = drawRotatedVideo( arm, cam, fig );
+            if ~demoPaused
+                arm.send('led','g');   % Set LEDs green while operating
+                mapsArm.send('led','g');
+            else
+                arm.send('led','m');   % Set LEDs green while operating
+                mapsArm.send('led','m');
+            end
         catch
             disp('Could not get robot feedback!');
             break;
@@ -155,6 +161,18 @@ while ~abortFlag
         % Check for restart command
         if diffKeys.(resetPoseButton)
             break;
+        end
+        
+        % Check for pause command
+        if diffKeys.(pauseButton) > 0
+            if ~demoPaused
+                demoPaused = true;
+                disp('Pausing Demo.  Press SPACE to resume.');
+            else
+                demoPaused = false;
+                disp('Resuming Demo.');
+            end
+
         end
         
         % Check for quit command
@@ -193,7 +211,7 @@ while ~abortFlag
         % hasGoalChanged = true;
         
         % Start new trajectory at the current state
-        if hasGoalChanged && arm.state.trajTime > 0.1 % limit replanning to 10 Hz (optional)
+        if hasGoalChanged && ~demoPaused
             arm.setGoal(ikPosition); 
             goalPosition = ikPosition;
         end
@@ -202,24 +220,25 @@ while ~abortFlag
 
 end
 
+arm.send('led',[]);
+mapsArm.send('led',[]);
+
 %%
 if enableLogging
     
-   hebilog{1} = arm.group.stopLogFull();
-   hebilog{2} = arm.group.stopLogFull();
+   hebilog = arm.group.stopLogFull();
    
-   kinLogging = {arm.kin, mapsKin};
    
    % Plot tracking / error from the joints in the arm.  Note that there
    % will not by any 'error' in tracking for position and velocity, since
    % this example only commands effort.
    for i = 1:2
-       HebiUtils.plotLogs(hebilog{i}, 'position');
-       HebiUtils.plotLogs(hebilog{i}, 'velocity');
-       HebiUtils.plotLogs(hebilog{i}, 'effort');
+       HebiUtils.plotLogs(hebilog, 'position');
+       HebiUtils.plotLogs(hebilog, 'velocity');
+       HebiUtils.plotLogs(hebilog, 'effort');
    
        % Plot the end-effectory trajectory and error
-       kinematics_analysis( hebilog, kinLogging{i} );
+       kinematics_analysis( hebilog, arm.kin );
    end
    
    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
