@@ -8,8 +8,10 @@ classdef HebiMobileIO < handle
     %   initializeUI       - initializes all UI elements to their default state
     %   setAxisSnap        - sets the axis snap position
     %   setAxisValue       - sets the axis position
+    %   setAxisLabel       - sets the axis label
     %   setButtonToggle    - sets the button toggle mode
     %   setButtonIndicator - sets a visual indicator around a button
+    %   setButtonlabel     - sets the button label
     %   addText            - appends a message to the text display
     %   clearText          - clears the text display
     %   setLedColor        - sets the edge led color
@@ -44,6 +46,8 @@ classdef HebiMobileIO < handle
         prevIoFbk;
         ioDiff struct = struct();
         lastSuccessTime;
+        axisLabels cell;
+        buttonLabels cell;
     end
     
     % Static API
@@ -84,6 +88,8 @@ classdef HebiMobileIO < handle
             this.prevIoFbk = group.get('feedback', 'view', 'io');
             this.mobileFbk = group.get('feedback', 'view', 'mobile');
             this.lastSuccessTime = tic();
+            this.axisLabels = {'A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8'};
+            this.buttonLabels = {'B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8'};
         end
         
         function [] = initializeUI(this)
@@ -91,8 +97,10 @@ classdef HebiMobileIO < handle
             ALL = 1:8;
             this.setAxisSnap(ALL, [0 0 nan nan nan nan 0 0]);
             this.setAxisValue(ALL, 0);
+            this.setAxisLabel(ALL, {'A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8'});
             this.setButtonToggle(ALL, false);
             this.setButtonIndicator(ALL, false);
+            this.setButtonLabel(ALL, {'B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8'});
             this.clearLedColor();
             this.clearText();
         end
@@ -139,6 +147,25 @@ classdef HebiMobileIO < handle
             this.setPins('f', axes, values);
         end
         
+        function [] = setAxisLabel(this, axes, labels)
+            % setAxisLabel sets the axis label
+            %
+            %   This method sets the label of specified axes.
+            %
+            %   'Axes' Argument (required)
+            %      The axis or an array of axes, e.g., [1 2] for a1 and a2
+            %
+            %   'Labels' Argument (required)
+            %      A string, or a cell array of strings specific for each axis.
+            %
+            %   Example
+            %     % Set a3/a4 labels to up/down
+            %     mobileIO.setAxisLabel([3 4], {'up', 'down'});
+            newLabels = this.parseLabels(this.axisLabels, axes, labels);
+            this.send('PinLabelsA', newLabels);
+            this.axisLabels = newLabels;
+        end
+        
         function [] = setButtonToggle(this, buttons, values)
             % setButtonToggle sets the button toggle mode
             %
@@ -168,12 +195,31 @@ classdef HebiMobileIO < handle
             %      'false': does not show a visual indicator
             %
             %   Example
-            %     % Show an indicator on the active b1 and b8 buttons
-            %     mobileIO.setButtonToggle([1 8], true);
+            %     % Shows an indicator on the active b1 and b8 buttons
+            %     mobileIO.setButtonIndicator([1 8], true);
             if nargin < 3
                 values = true;
             end
             this.setPins('e', buttons, logical(values));
+        end
+        
+        function [] = setButtonLabel(this, buttons, labels)
+            % setButtonLabel sets the button label
+            %
+            %   This method sets the label of specified buttons.
+            %
+            %   'Buttons' Argument (required)
+            %      The button or an array of buttons, e.g., [1 2] for b1 and b2
+            %
+            %   'Labels' Argument (required)
+            %      A string, or a cell array of strings specific for each button.
+            %
+            %   Example
+            %     % Set b1/b8 labels to start/stop
+            %     mobileIO.setButtonLabel([1 8], {'start', 'stop'});
+            newLabels = this.parseLabels(this.buttonLabels, buttons, labels);
+            this.send('PinLabelsB', newLabels);
+            this.buttonLabels = newLabels;
         end
         
         function [] = addText(this, text, clearPrevious)
@@ -357,6 +403,24 @@ classdef HebiMobileIO < handle
                 cmd.([letter num2str(indices(i))]) = values(i);
             end
             this.send(cmd);
+        end
+        
+        function newLabels = parseLabels(~, prevLabels, indices, labels)
+            newLabels = prevLabels;
+            for i = 1:length(indices)
+                label = labels;
+                if iscell(labels)
+                    label = labels{i};
+                end
+                if ~ischar(label) && ~isstring(label)
+                    error('labels must be strings');
+                end
+                % support escaped unicode
+                if contains(label, '\u')
+                    label = sprintf(strrep(label, '\u', '\x'));
+                end
+               newLabels{indices(i)} = label;
+            end
         end
         
         function [] = send(this, varargin)

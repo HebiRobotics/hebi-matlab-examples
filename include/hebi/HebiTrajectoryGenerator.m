@@ -753,8 +753,12 @@ classdef (Sealed) HebiTrajectoryGenerator
                     this.kin = arg1;
                     arg1 = this.kin.obj;
                 end
-                
-                setVelocityLimits(this.obj, arg1);
+
+                if all(isfinite(this.kin.getJointInfo.velocityLimit(:)))
+                    setVelocityLimits(this.obj, arg1);
+                else
+                    warning('Ignoring velocity limits due to non-finite values')
+                end
                 
             end
             
