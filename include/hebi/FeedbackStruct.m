@@ -179,7 +179,7 @@ function [] = FeedbackStruct()
     %           f8 
     %
     %   Examples:
-    %       % Read simple feedback from a group of two dummy modules
+    %       % Read simple feedback from a group of two imitation devices
     %       group = HebiUtils.newImitationGroup(2);
     %       fbk = group.getNextFeedback();
     %       disp(fbk.time);
