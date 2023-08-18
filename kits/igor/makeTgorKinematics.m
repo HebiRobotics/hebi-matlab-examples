@@ -1,4 +1,4 @@
-function [ legKin, armKin, chassisKin ] = makeIgorKinematics(numLegs, numArms)
+function [ legKin, armKin, chassisKin ] = makeTgorKinematics(numLegs, numArms)
 %MAKEIGORKINEMATICS returns kinematics for the legs, arms, and chassis of
 % the X-Series Igor Robot
 %
@@ -33,7 +33,7 @@ legBaseFrames(1:3,1:3,1) = R_x(-pi/2);
 legBaseFrames(1:3,1:3,2) = R_x(pi/2);
 
 for leg = 1:numLegs
-    legKin{leg} = HebiUtils.loadHRDF([localDir '/hrdf/igorLeg.hrdf']);
+    legKin{leg} = HebiUtils.loadHRDF([localDir '/hrdf/tgorLeg.hrdf']);
     
     legKin{leg}.setBaseFrame(legBaseFrames(:,:,leg));
 end
@@ -58,4 +58,4 @@ end
 %%%%%%%%%%%%%%%%%%%%%%
 % Chassis Kinematics %
 %%%%%%%%%%%%%%%%%%%%%%
-chassisKin = HebiUtils.loadHRDF([localDir '/hrdf/igorChassis.hrdf']);
+chassisKin = HebiUtils.loadHRDF([localDir '/hrdf/tgorChassis.hrdf']);
