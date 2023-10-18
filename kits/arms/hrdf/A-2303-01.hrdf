@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- For documentation on the HEBI Robot Configuration please visit: -->
+<!-- https://github.com/HebiRobotics/hebi-hrdf/blob/master/FORMAT.md -->
+
+<!-- R-Series Double Shoulder Arm Example (This example is 7-DoF)-->
+<robot version="1.2.0">
+    
+  <actuator type="R8-16"/>
+  
+  <bracket type="R8HeavyLeftOutside"/>
+  
+  <!-- Note that this DoF is doubled-up -->
+  <!-- Should probably add offset mass at some point -->
+  <actuator type="R8-16"/>
+  
+  <!-- R-Series Double-Actuator Yoke Bracket (A-2269-01) -->
+  <rigid-body mass="0.500" 
+              com_trans="0.06 0 -0.08855"
+              output_trans="0.122 0 -0.08855"
+              output_rot="Ry(pi/2)*Rz(pi)"/>
+  
+  <actuator type="R8-9"/>
+   
+  <link type="R8" input="Inline" extension="0.325" twist="0"/>
+
+  <actuator type="R8-16"/>
+  
+  <bracket type="R8LightRight"/>
+  
+  <actuator type="R8-9"/>
+
+  <link type="R8" input="Inline" extension="0.325" twist="0"/>
+  
+  <actuator type="R8-3"/>
+  
+  <bracket type="R8LightRight"/>
+  
+  <actuator type="R8-3"/>
+  
+  <!-- For custom end-effector parameters and formatting please visit: -->
+  <!-- https://github.com/HebiRobotics/hebi-hrdf/blob/master/FORMAT.md#end-effector -->
+  <end-effector />      
+              
+</robot>

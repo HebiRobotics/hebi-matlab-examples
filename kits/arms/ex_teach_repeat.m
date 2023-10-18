@@ -18,7 +18,7 @@
 clear *;
 close all;
 
-armName = 'A-2085-06';
+armName = 'A-2303-01';
 armFamily = 'Arm';
 hasGasSpring = false;  % If you attach a gas spring to the shoulder for
                        % extra payload, set this to TRUE.
@@ -28,10 +28,7 @@ arm.group.setFeedbackFrequency(100);
 arm.trajGen.setMinDuration(1.0);   % Min move time for 'small' movements
                                    % (default is 1.0)
 arm.trajGen.setSpeedFactor(0.75);  % Slow down movements to a safer speed.
-                                   % (default is 1.0)
-arm.plugins = {
-    HebiArmPlugins.EffortOffset(params.effortOffset)
-};
+                                   % (default is 1.0)  
 
 % Keyboard input
 kb = HebiKeyboard();
