@@ -1,4 +1,4 @@
-% Generate a trajectory and execute it using the blocking API.  This code
+ % Generate a trajectory and execute it using the blocking API.  This code
 % does the exact same commands as the next non-blocking API example.
 %
 % For more information type:
@@ -26,8 +26,8 @@ group.startLog( 'dir', 'logs' );
 % Go from 0 to 180-degrees in 3 seconds
 waypoints = [
     0;
-    pi ];
-time = [ 0 3 ];
+    2*pi ];
+time = [ 0 6 ];
 
 % This function generates smooth minimum jerk trajectories
 trajectory = trajGen.newJointMove( waypoints, 'time', time );

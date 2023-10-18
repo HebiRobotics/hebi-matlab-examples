@@ -27,8 +27,8 @@ group.startLog( 'dir', 'logs' );
 % Go from 0 to 180-degrees in 3 seconds
 waypoints = [
     0;
-    pi ];
-time = [ 0 3 ];
+    2*pi ];
+time = [ 0 12 ];
 
 % This function generates smooth minimum jerk trajectories
 trajectory = trajGen.newJointMove( waypoints, 'time', time );

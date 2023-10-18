@@ -19,7 +19,7 @@ frameDisp = FrameDisplay();
 % Inverse kinematics is where you specify a desired target pose for the 
 % end-effector and calculate the joint angles that give you that pose.  
 startXYZ = [ 0.5; -0.2; 0.1 ];  % [m]
-endXYZ = [ 0.5; 0.2; 0.1 ];   % [m]
+endXYZ = [ 0.5; -0.2; -0.1 ];   % [m]
 
 % Because the API uses local optimization to calculate IK, you need to give 
 % an initial guess for the joint angles.  The guess should be something

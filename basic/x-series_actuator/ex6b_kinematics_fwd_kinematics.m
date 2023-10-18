@@ -19,7 +19,7 @@ frameDisp = FrameDisplay();
 % Forward kinematics is where you use a set of joint angles to calculate
 % the poses of various parts along the arm, usually the tip (end-effector).
 startPositions = [0 0 0];           % [rad] 
-endPositions = [-pi/4 pi/4 pi/2];   % [rad]
+endPositions = [pi/4 -pi/4 pi/4];   % [rad]
 
 % This will return the 4x4 homogeneous transform that describes the pose
 % the end-effector in the world frame (in this case, the base module).  For

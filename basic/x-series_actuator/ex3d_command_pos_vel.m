@@ -24,7 +24,7 @@ cmd = CommandStruct();
 group.startLog( 'dir', 'logs' );
 
 % Parameters for sin/cos function
-freqHz = 1.0;           % [Hz]
+freqHz = 0.25;           % [Hz]
 freq = freqHz * 2*pi;   % [rad / sec]
 amp = deg2rad( 45 );    % [rad]
 
