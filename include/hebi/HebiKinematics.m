@@ -51,6 +51,7 @@ classdef (Sealed) HebiKinematics
     %      getFirstJointFrame    - get transform from world to first joint
     %      getPayload            - additional mass at end-effector used 
     %                              for effort compensation
+    %      getIndexOfTag         - the frame index of a tagged element
     %
     %   HebiKinematics Methods (programmatic setup):
     %      addBody               - adds a body to the end of the chain.
@@ -198,6 +199,22 @@ classdef (Sealed) HebiKinematics
             %   See also HebiKinematics, setPayload,
             %   getGravCompEfforts, getDynamicCompEfforts, 
             mass = getPayloadMass(this.obj, varargin{:});
+        end
+
+        function out = getIndexOfTag(this, varargin)
+            % getIndexOfTag returns the frame index of a tagged element
+            %
+            %   This method returns the index of a tagged body within the
+            %   array of transforms returned by the forward kinematics.
+            %   Tags need to be defined in HRDF and be unique.
+            %   
+            %   Example
+            %       imuIx = kin.getIndexOfTag('imu');
+            %       frames = kin.getFK('output', fbk.position);
+            %       imuFrame = frames(:,:,imuIx);
+            %
+            %   See also HebiKinematics, HebiKinematics.getForwardKinematics
+            out = getIndexOfTag(this.obj, varargin{:});
         end
         
         function out = getNumBodies(this, varargin)
