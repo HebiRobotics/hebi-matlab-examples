@@ -21,17 +21,15 @@ close all;
 
 HebiLookup.initialize();
 
-armName = 'A-2085-06';
-armFamily = 'Arm';
-hasGasSpring = true;  % If you attach a gas spring to the shoulder for
-                       % extra payload, set this to TRUE.
+% Instantiate the arm kit based on the config files in config/${name}.yaml
+% If your kit has a gas spring, you need to uncomment the offset lines
+% in the corresponding config file.
+[ arm, params ] = setupArm( 'A-2085-06' );
 
-[ arm, params ] = setupArm( armName, armFamily, hasGasSpring );  
+% Append the impedance controller plugin. You can also define it in the 
+% config file so it gets applied to all demos.
 impedance = HebiArmPlugins.ImpedanceController();
-arm.plugins = {
-    HebiArmPlugins.EffortOffset(params.effortOffset)
-   impedance
-};
+arm.plugins{end+1} = impedance;
 
 % Increase feedback frequency since we're calculating velocities at the
 % high level for damping.  Going faster can help reduce a little bit of
