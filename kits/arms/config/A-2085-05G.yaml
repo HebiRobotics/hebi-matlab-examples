@@ -1,0 +1,25 @@
+# X-Series 5-DoF Arm with Gripper
+families: ["Arm"]
+names: ["J1_base", "J2_shoulder", "J3_elbow", "J4_wrist1", "J5_wrist2"]
+hrdf: "../hrdf/A-2085-05G.hrdf"
+
+gains:
+  default: "../gains/A-2085-05.xml"
+  gripper: "../gains/A-2080-01.xml"
+
+user_data:
+  # Default seed positions for doing inverse kinematics
+  ikSeedPos: [0.01, 1.0, 2.5, 1.5, -1.5]
+
+  # Gripper specific settings
+  hasGripper: true
+  gripperOpenEffort: 1
+  gripperCloseEffort: -5
+
+plugins:
+  # Kits with a gas spring need to add a shoulder compensation torque.
+  # It should be around -7 Nm for most kits, but it may need to be tuned
+  # for your specific setup.
+  #- name: 'gasSpringCompensation'
+  #  type: EffortOffset
+  #  effortOffset: [0, -7, 0, 0, 0]

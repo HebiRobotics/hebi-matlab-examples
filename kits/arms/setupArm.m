@@ -1,4 +1,4 @@
-function [ arm, params, gripper ] = setupArm( kit, family, hasGasSpring )
+function [ arm, params, gripper ] = setupArm( kit, family, ~ )
 % SETUPARM creates models and loads parameters for controlling various 
 % pre-configured arm kits.
 %
@@ -60,370 +60,44 @@ function [ arm, params, gripper ] = setupArm( kit, family, hasGasSpring )
 % HEBI Robotics
 % Jun 2018
 
+%% Load config file
 localDir = fileparts(mfilename('fullpath'));
+configFile = fullfile(localDir, 'config', [kit '.yaml']);
+config = HebiUtils.loadRobotConfig(configFile);
+
+%% Create models according to config
+% Comms
+group = HebiLookup.newGroupFromNames(config.families, config.names);
+
+% Kinematic Model
+kin = HebiUtils.loadHRDF(config.hrdf);
+
+% Initialize params with userData. May contain settings for ik seeds and
+% efforts to open-close the gripper
+params = config.userData;
 params.localDir = localDir;
 
-if nargin < 3 || isempty(hasGasSpring)
-   hasGasSpring = false;
+% Load gain files
+params.gains = HebiUtils.loadGains(config.gains.default);
+
+% Setup optional gripper
+if ~isfield(params, 'hasGripper')
+    params.hasGripper = false;
 end
-
-if hasGasSpring
-    shoulderJointComp = -7; % Nm  <--- This should be around -7 Nm for most
-                            %          kits, but it may need to be tuned
-                            %          for your specific setup.
-else
-    shoulderJointComp = 0;
+if params.hasGripper
+    params.gripperGains = HebiUtils.loadGains(config.gains.gripper);
 end
-
-
-%% Setup kinematic models
-switch kit
-    
-    case 'A-2085-06G'
-        %% X-Series 6-DoF Arm with Gripper
-        group = HebiLookup.newGroupFromNames(family, {
-            'J1_base'
-            'J2_shoulder'
-            'J3_elbow'
-            'J4_wrist1'
-            'J5_wrist2'
-            'J6_wrist3' });
-        
-        % Kinematic Model
-        kin = HebiUtils.loadHRDF([localDir '/hrdf/A-2085-06G']);
-        
-        % Load and send arm gains
-        params.gains = HebiUtils.loadGains([localDir '/gains/A-2085-06']);     
-        
-        % Settings / gains for the gripper spool to open-close the gripper
-        % X-Series Gripper Spool Assembly Part Number = A-2080-01
-        params.hasGripper = true;
-        params.gripperOpenEffort = 1;
-        params.gripperCloseEffort = -5;
-        params.gripperGains = HebiUtils.loadGains( ...
-                                [localDir '/gains/A-2080-01'] );
-        
-        % Compensation to joint efforts due to a gas spring (if present)
-        params.effortOffset = [0 shoulderJointComp 0 0 0 0];
-
-        % Default seed positions for doing inverse kinematics
-        params.ikSeedPos = [0.01 1.0 2.5 1.5 -1.5 0.01];
-        
-    case 'A-2085-06'
-        %% X-Series 6-DoF Arm
-        group = HebiLookup.newGroupFromNames(family, {
-            'J1_base'
-            'J2_shoulder'
-            'J3_elbow'
-            'J4_wrist1'
-            'J5_wrist2'
-            'J6_wrist3' });
-        
-        % Kinematic Model
-        kin = HebiUtils.loadHRDF([localDir '/hrdf/A-2085-06']);
-        
-        % Load and send arm gains
-        params.gains = HebiUtils.loadGains([localDir '/gains/A-2085-06']);     
-        
-        % No Gripper
-        params.hasGripper = false;
-        
-        % Compensation to joint efforts due to a gas spring (if present)
-        params.effortOffset = [0 shoulderJointComp 0 0 0 0];
-        
-        % Default seed positions for doing inverse kinematics
-        params.ikSeedPos = [0.01 1.0 2.5 1.5 -1.5 0.01];
-        
-    case 'A-2085-05G'
-        %% X-Series 5-DoF Arm with Gripper
-        group = HebiLookup.newGroupFromNames(family, {
-            'J1_base'
-            'J2_shoulder'
-            'J3_elbow'
-            'J4_wrist1'
-            'J5_wrist2' });
-        
-        % Kinematic Model
-        kin = HebiUtils.loadHRDF([localDir '/hrdf/A-2085-05G']);
-        
-        % Load and send arm gains
-        params.gains = HebiUtils.loadGains([localDir '/gains/A-2085-05']);     
-        
-        % Settings / gains for the gripper spool to open-close the gripper
-        % X-Series Gripper Spool Assembly Part Number = A-2080-01
-        params.hasGripper = true;
-        params.gripperOpenEffort = 1;
-        params.gripperCloseEffort = -5;
-        params.gripperGains = HebiUtils.loadGains( ...
-                                [localDir '/gains/A-2080-01'] );
-        
-        % Compensation to joint efforts due to a gas spring (if present)
-        params.effortOffset = [0 shoulderJointComp 0 0 0];
-
-        % Default seed positions for doing inverse kinematics
-        params.ikSeedPos = [0.01 1.0 2.5 1.5 -1.5];
-               
-    case 'A-2085-05' 
-        %% X-Series 5-DoF Arm
-        group = HebiLookup.newGroupFromNames(family, {
-            'J1_base'
-            'J2_shoulder'
-            'J3_elbow'
-            'J4_wrist1'
-            'J5_wrist2' });
-        
-        % Kinematic Model
-        kin = HebiUtils.loadHRDF([localDir '/hrdf/A-2085-05']);
-        
-        % Load and send arm gains
-        params.gains = HebiUtils.loadGains([localDir '/gains/A-2085-05']);     
-        
-        % No Gripper
-        params.hasGripper = false;
-        
-        % Account for external efforts due to the gas spring
-        params.effortOffset = [0 shoulderJointComp 0 0 0];
-        
-        % Default seed positions for doing inverse kinematics
-        params.ikSeedPos = [0.01 1.0 2.5 1.5 -1.5];
-        
-    case 'A-2085-04'
-        %% X-Series 4-DoF Arm
-        group = HebiLookup.newGroupFromNames(family, {
-            'J1_base'
-            'J2_shoulder'
-            'J3_elbow'
-            'J4_wrist' });
-        
-        % Kinematic Model
-        kin = HebiUtils.loadHRDF([localDir '/hrdf/A-2085-04']);
-        
-        % Load and send arm gains
-        params.gains = HebiUtils.loadGains([localDir '/gains/A-2085-04']);     
-                
-        % No Gripper
-        params.hasGripper = false;
-        
-        % Account for external efforts due to the gas spring
-        params.effortOffset = [0 shoulderJointComp 0 0];
-        
-        % Default seed positions for doing inverse kinematics
-        params.ikSeedPos = [0.01 1.0 2.5 1.5];
-               
-    case 'A-2084-01'
-        %% X-Series 4-DoF SCARA Arm
-        group = HebiLookup.newGroupFromNames(family, {
-            'J1_base'
-            'J2_shoulder'
-            'J3_elbow'
-            'J4_wrist' });
-        
-        % Kinematic Model
-        kin = HebiUtils.loadHRDF([localDir '/hrdf/A-2084-01']);
-        
-        % Load and send arm gains
-        params.gains = HebiUtils.loadGains([localDir '/gains/A-2084-01']);     
-                
-        % No Gripper
-        params.hasGripper = false;
-        
-        % Account for external efforts due to the gas spring
-        params.effortOffset = [0 shoulderJointComp 0 0];
-        
-        % Default seed positions for doing inverse kinematics
-        params.ikSeedPos = [0.01 1.0 2.5 1.5];
-                
-    case 'A-2085-03'
-        %% X-Series 3-DoF Arm
-        group = HebiLookup.newGroupFromNames(family, {
-            'J1_base'
-            'J2_shoulder'
-            'J3_elbow' });
-        
-        kin = HebiUtils.loadHRDF([localDir '/hrdf/A-2085-03']);
-        
-        % Load and send arm gains
-        params.gains = HebiUtils.loadGains([localDir '/gains/A-2085-03']);     
-                
-        % No Gripper
-        params.hasGripper = false;
-        
-        % Account for external efforts due to the gas spring
-        params.effortOffset = [0 shoulderJointComp 0];
-        
-        % Default seed positions for doing inverse kinematics
-        params.ikSeedPos = [0.01 1.0 2.5];
-        
-    case 'A-2240-06G'
-        %%  R-Series 6-DoF Arm with Gripper
-        group = HebiLookup.newGroupFromNames(family, {
-            'J1_base'
-            'J2_shoulder'
-            'J3_elbow'
-            'J4_wrist1'
-            'J5_wrist2'
-            'J6_wrist3' });
-        
-        % Kinematic Model
-        kin = HebiUtils.loadHRDF([localDir '/hrdf/A-2240-06G']);
-        
-        % Load and send arm gains
-        params.gains = HebiUtils.loadGains([localDir '/gains/A-2240-06']);     
-        
-        % Settings / gains for the gripper spool to open-close the gripper
-        % R-Series Gripper Spool Assembly Part Number = A-2255-01
-        params.hasGripper = true;
-        params.gripperOpenEffort = 1;
-        params.gripperCloseEffort = -5;
-        params.gripperGains = HebiUtils.loadGains( ...
-                                [localDir '/gains/A-2255-01'] );
-        
-        % Compensation to joint efforts due to a gas spring (if present)
-        params.effortOffset = [0 shoulderJointComp 0 0 0 0];
-
-        % Default seed positions for doing inverse kinematics
-        params.ikSeedPos = [0.01 1.0 2.5 1.5 -1.5 0.01];
-        
-    case 'A-2240-06'
-        %% R-Series 6-DoF Arm
-        group = HebiLookup.newGroupFromNames(family, {
-            'J1_base'
-            'J2_shoulder'
-            'J3_elbow'
-            'J4_wrist1'
-            'J5_wrist2'
-            'J6_wrist3' });
-        
-        % Kinematic Model
-        kin = HebiUtils.loadHRDF([localDir '/hrdf/A-2240-06']);
-        
-        % Load and send arm gains
-        params.gains = HebiUtils.loadGains([localDir '/gains/A-2240-06']);     
-        
-        % No Gripper
-        params.hasGripper = false;
-        
-        % Compensation to joint efforts due to a gas spring (if present)
-        params.effortOffset = [0 shoulderJointComp 0 0 0 0];
-        
-        % Default seed positions for doing inverse kinematics
-        params.ikSeedPos = [0.01 1.0 2.5 1.5 -1.5 0.01];
-        
-    case 'A-2240-05G'
-        %% R-Series 5-DoF Arm with Gripper
-        group = HebiLookup.newGroupFromNames(family, {
-            'J1_base'
-            'J2_shoulder'
-            'J3_elbow'
-            'J4_wrist1'
-            'J5_wrist2' });
-        
-        % Kinematic Model
-        kin = HebiUtils.loadHRDF([localDir '/hrdf/A-2240-05G']);
-        
-        % Load and send arm gains
-        params.gains = HebiUtils.loadGains([localDir '/gains/A-2240-05']);     
-        
-        % Settings / gains for the gripper spool to open-close the gripper
-        % R-Series Gripper Spool Assembly Part Number = A-2255-01
-        params.hasGripper = true;
-        params.gripperOpenEffort = 1;
-        params.gripperCloseEffort = -5;
-        params.gripperGains = HebiUtils.loadGains( ...
-                                [localDir '/gains/A-2255-01'] );
-        
-        % Compensation to joint efforts due to a gas spring (if present)
-        params.effortOffset = [0 shoulderJointComp 0 0 0];
-
-        % Default seed positions for doing inverse kinematics
-        params.ikSeedPos = [0.01 1.0 2.5 1.5 -1.5];
-           
-    case 'A-2240-05' 
-        %% R-Series 5-DoF Arm
-        group = HebiLookup.newGroupFromNames(family, {
-            'J1_base'
-            'J2_shoulder'
-            'J3_elbow'
-            'J4_wrist1'
-            'J5_wrist2' });
-        
-        % Kinematic Model
-        kin = HebiUtils.loadHRDF([localDir '/hrdf/A-2085-05']);
-        
-        % Load and send arm gains
-        params.gains = HebiUtils.loadGains([localDir '/gains/A-2240-05']);     
-        
-        % No Gripper
-        params.hasGripper = false;
-        
-        % Account for external efforts due to the gas spring
-        params.effortOffset = [0 shoulderJointComp 0 0 0];
-        
-        % Default seed positions for doing inverse kinematics
-        params.ikSeedPos = [0.01 1.0 2.5 1.5 -1.5];
-        
-    case 'A-2240-04'
-        %% R-Series 4-DoF Arm
-        group = HebiLookup.newGroupFromNames(family, {
-            'J1_base'
-            'J2_shoulder'
-            'J3_elbow'
-            'J4_wrist' });
-        
-        % Kinematic Model
-        kin = HebiUtils.loadHRDF([localDir '/hrdf/A-2240-04']);
-        
-        % Load and send arm gains
-        params.gains = HebiUtils.loadGains([localDir '/gains/A-2240-04']);     
-                
-        % No Gripper
-        params.hasGripper = false;
-        
-        % Account for external efforts due to the gas spring
-        params.effortOffset = [0 shoulderJointComp 0 0];
-        
-        % Default seed positions for doing inverse kinematics
-        params.ikSeedPos = [0.01 1.0 2.5 1.5];    
-        
-    case 'A-2302-01'
-        %% R-Series 4-DoF SCARA Arm
-        group = HebiLookup.newGroupFromNames(family, {
-            'J1_base'
-            'J2_shoulder'
-            'J3_elbow'
-            'J4_wrist' });
-        
-        % Kinematic Model
-        kin = HebiUtils.loadHRDF([localDir '/hrdf/A-2302-01']);
-        
-        % Load and send arm gains
-        params.gains = HebiUtils.loadGains([localDir '/gains/A-2302-01']);
-        
-        % No Gripper
-        params.hasGripper = false;
-        
-        % Account for external efforts due to the gas spring
-        params.effortOffset = [0 shoulderJointComp 0 0];
-        
-        % Default seed positions for doing inverse kinematics
-        params.ikSeedPos = [0.01 1.0 2.5 1.5];
-        
-    otherwise
-        
-        error([kit ' is not a supported kit name']);
-        
-end
-
 
 %% Common Setup
 arm = HebiArm(group, kin);
+arm.plugins = HebiArmPlugins.createFromConfig(config.plugins);
 HebiUtils.sendWithRetry(arm.group, 'gains', params.gains);
 
 % Setup gripper
 gripper = [];
 if params.hasGripper
     
-    gripperGroup = HebiLookup.newGroupFromNames( family, 'gripperSpool' );
+    gripperGroup = HebiLookup.newGroupFromNames( config.families(1), 'gripperSpool' );
     HebiUtils.sendWithRetry(gripperGroup, 'gains', params.gripperGains);
     
     gripper = HebiGripper(gripperGroup);
