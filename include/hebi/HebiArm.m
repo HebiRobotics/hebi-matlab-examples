@@ -166,12 +166,8 @@ classdef HebiArm < handle
             
             % Add commonly derived state
             fbkPos = newState.fbk.position;
-            newState.T_endEffector = this.kin.getForwardKinematicsEndEffector(fbkPos);
-            newState.J_endEffector = this.kin.getJacobianEndEffector(fbkPos);
-            
-            % Always compensate for accelerations due to gravity
-            newState.cmdEffort = this.getGravCompEfforts(newState.fbk);
-            
+            newState.outputFrames = this.kin.getForwardKinematics('output', fbkPos);
+           
             % Add pos/vel/accel commands
             newState.cmdAux = [];
             if ~isempty(this.traj)
@@ -179,13 +175,6 @@ classdef HebiArm < handle
                 % Evaluate trajectory state
                 t = min(newState.time - this.trajStartTime, this.traj.getDuration());
                 [ newState.cmdPos,  newState.cmdVel,  newState.cmdAccel] = this.traj.getState(t);
-                
-                % Compensate for joint accelerations
-                newState.cmdEffort = this.kin.getDynamicCompEfforts(...
-                    fbkPos, ...
-                    newState.cmdPos, ...
-                    newState.cmdVel, ...
-                    newState.cmdAccel) + newState.cmdEffort;
                 
                 % Add aux (e.g. gripper state)
                 if ~isempty(this.aux)
@@ -201,7 +190,7 @@ classdef HebiArm < handle
                 newState.cmdAccel = [];
                 newState.trajTime = [];
             end
-            
+
             % Add time delta since last feedback, if available
             newState.dt = 0;
             if ~isempty(this.state)
@@ -214,11 +203,21 @@ classdef HebiArm < handle
                 end
             end
             
+            % Efforts (grav comp, dynamic comp, etc.) are added by plugins
+            newState.cmdEffort = zeros(1, newState.numDoF);
+
             % Call plugins (FK, Jacobians, End-Effector XYZ, etc.)
             this.state = newState;
             for i=1:length(this.plugins)
-                this.plugins{i}.update(this);
-            end            
+                plugin = this.plugins{i};
+                if plugin.enabled
+                    plugin.update(this);
+                end
+            end 
+
+            % Ignore efforts that aren't used
+            unusedEffort = (this.state.cmdEffort == 0);
+            this.state.cmdEffort(unusedEffort) = nan;
 
         end
         
@@ -232,37 +231,6 @@ classdef HebiArm < handle
             
             % Send state to module
             this.group.send(this.cmd, varargin{:});
-        end
-        
-    end
-    
-    % Utility methods used internally
-    methods(Access = protected)
-        
-        function gravCompEfforts = getGravCompEfforts(this, fbk)
-            
-            % Find gravity vector by looking at orientation of first joint
-            q = [ fbk.orientationW(1), ...
-                  fbk.orientationX(1), ...
-                  fbk.orientationY(1), ...
-                  fbk.orientationZ(1) ];
-              
-            if any(isnan(q))
-                % If the group does not provide orientation feedback, we assume
-                % that gravity points 'down' in the base frame (-Z Axis).
-                warning('No orientation feedback available. Assuming gravity points down.');
-                gravityVec = [0; 0; -1];
-            else
-                % The orientation feedback is in the IMU frame, so we 
-                % need to first rotate it into the world frame.
-                baseRotMat = HebiUtils.quat2rotMat(q);
-                imuFrame = this.kin.getFirstJointFrame();
-                gravityVec = imuFrame(1:3,1:3) * (-baseRotMat(3,1:3)');
-            end
-            
-            % Compensate for gravity
-            gravCompEfforts = this.kin.getGravCompEfforts(fbk.position, gravityVec);
-            
         end
         
     end

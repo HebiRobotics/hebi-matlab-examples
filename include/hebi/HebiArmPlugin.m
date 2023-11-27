@@ -13,9 +13,59 @@ classdef HebiArmPlugin < handle
     %   * cmdVel [rad/s]
     %   * cmdAccel [rad/s^2]
     %   * cmdEffort [Nm|N]
+
+    properties(Access = public)
+
+        % whether the plugin should be run
+        enabled logical = true; 
+
+        % time in seconds to apply full effects after enabling. zero
+        % indicates no ramping
+        rampTime double = 0;
+
+    end
+
+    properties(Access = protected)
+
+        % Timestamp when the ramping started
+        rampStartTime = [];
+
+    end
     
     methods(Abstract)
         [] = update(this, arm)
+    end
+
+    methods (Access = protected)
+
+        function scale = getRampScale(this, timestamp)
+
+            % Initialize ramp timestamp
+            if isempty(this.rampStartTime)
+                this.rampStartTime = timestamp;
+            end
+
+            % Determine the scale for the current time
+            elapsedTime = timestamp - this.rampStartTime;
+            if elapsedTime >= this.rampTime
+                scale = 1; % fully ramped up
+            else
+                scale = elapsedTime / this.rampTime; % gradual ramping
+            end
+
+        end
+
+    end
+
+    methods 
+
+        % Setter for enabled property. Resets the ramp timer
+        % whenever the value gets set.
+        function [] = set.enabled(this, enabled)
+            this.rampStartTime = [];
+            this.enabled = enabled;
+        end
+
     end
     
     % Inherited methods that we don't want to see in auto-complete

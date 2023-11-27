@@ -14,16 +14,57 @@ out = cell(0);
 pluginNames = fields(pluginMap);
 for i = 1:numel(pluginNames)
 
-    plugin = pluginMap.(pluginNames{i});
-    switch plugin.type
+    cfg = pluginMap.(pluginNames{i});
+    switch cfg.type
+
+        case 'GravityCompensationEffort'
+            plugin = HebiArmPlugins.GravityCompensation();
+            if isfield(cfg, 'imu_feedback_index')
+                plugin.imuFeedbackIndex = cfg.imu_feedback_index + 1;
+            end
+            if isfield(cfg, 'imu_frame_index')
+                plugin.imuFrameIndex = cfg.imu_frame_index + 1;
+            end
+            if isfield(cfg, 'imu_rotation_offset')
+                plugin.imuRotationOffset = reshape(cfg.imu_rotation_offset,3,3)';
+            end
+
+        case 'DynamicsCompensationEffort'
+            plugin = HebiArmPlugins.DynamicsCompensation();
 
         case 'EffortOffset'
-            out{end+1} = HebiArmPlugins.EffortOffset(plugin.effortOffset(:)');
+            plugin = HebiArmPlugins.EffortOffset(cfg.offset(:)');
+
+        case 'ImpedanceController'
+            plugin = HebiArmPlugins.ImpedanceController();
+            plugin.gainsInEndEffectorFrame = cfg.gains_in_end_effector_frame;
+            plugin.kp = cfg.kp(:)';
+            plugin.kd = cfg.kd(:)';
+            if isfield(cfg, 'ki')
+                plugin.ki = cfg.ki(:)';
+            end
+            if isfield(cfg, 'i_clamp')
+                plugin.iClamp = cfg.i_clamp(:)';
+            end
+
+        case 'DoubledJoint'
+            index;
 
         otherwise
-            warning(['Ignorning unknown plugin type: ' plugin.type])
+            warning(['Ignorning unknown plugin type: ' cfg.type])
 
     end
+
+    % shared optional fields
+    if isfield(cfg, 'enabled')
+        plugin.enabled = logical(cfg.enabled);
+    end
+    if isfield(cfg, 'ramp_time')
+        plugin.rampTime = double(cfg.ramp_time);
+    end
+
+    % save plugin
+    out{end+1} = plugin;
 
 end
 

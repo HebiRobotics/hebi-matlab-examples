@@ -11,14 +11,16 @@ classdef ImpedanceController < HebiArmPlugin
     properties
         gainsInEndEffectorFrame logical = true;
         
-        Kp double = zeros(6,1); % (N/m) or (Nm/rad)
-        Ki double = zeros(6,1); % (N/(m*sec)) or (Nm/(rad*sec))
-        Kd double = zeros(6,1); % (N/(m/sec)) or (Nm/(rad/sec))
+        Kp double = []; % (N/m) or (Nm/rad)
+        Kd double = []; % (N/(m/sec)) or (Nm/(rad/sec))
+
+        Ki double = []; % (N/(m*sec)) or (Nm/(rad*sec))
+        iClamp = [];
         
     end
     
     properties(Access = private)
-        iError double = zeros(6,1);
+        iError double = [];
     end
     
     methods
@@ -27,8 +29,8 @@ classdef ImpedanceController < HebiArmPlugin
         end
         
         function [] = update(this, arm)
-            if isempty(arm.state.cmdPos) || isempty(arm.state.cmdVel)
-                this.iError(:,:) = 0;
+            if isempty(arm.state.cmdPos) || isempty(arm.state.cmdVel) || isempty(this.iError)
+                this.iError = zeros(arm.state.numDoF, 1);
                 return;
             end
 
@@ -65,15 +67,31 @@ classdef ImpedanceController < HebiArmPlugin
             posError = this.rotate(frameRot', posError);
             velError = this.rotate(frameRot', velError);
             this.iError = this.iError + posError * arm.state.dt;
-            wrench = ...
-                + this.Kp .* posError ...
-                + this.Ki .* this.iError ...
-                + this.Kd .* velError;
+
+            % Combine everything
+            wrench = zeros(1, arm.state.numDoF);
+            if ~isempty(this.Kp)
+                wrench = wrench + (this.Kp .* posError);
+            end
+            if ~isempty(this.Ki) 
+                iWrench = this.Ki .* this.iError;
+                if ~isempty(this.iClamp)
+                    iWrench = max(iWrench, -this.iClamp);
+                    iWrench = min(iWrench, +this.iClamp);
+                end
+                wrench = wrench + iWrench;
+            end
+            if ~isempty(this.Kd)
+                wrench = wrench + (this.Kd .* velError);
+            end
+
+            % Rotate to appropriate frame
             wrench = this.rotate(frameRot, wrench);
 
             % Add impedance efforts to effort output
             impedanceEfforts = J_armTip' * wrench;
-            arm.state.cmdEffort = arm.state.cmdEffort + impedanceEfforts';
+            rampScale = this.getRampScale(arm.state.time);
+            arm.state.cmdEffort = arm.state.cmdEffort + impedanceEfforts' .* rampScale;
             
         end
         
