@@ -11,9 +11,35 @@ user_data:
   ikSeedPos: [0.01, 1.0, 2.5, 1.5, -1.5, 0.01]
 
 plugins:
+
+  - type: GravityCompensationEffort
+    name: gravComp
+    ramp_time: 1
+
+  - type: DynamicsCompensationEffort
+    name: dynamicsComp
+    ramp_time: 1
+
+  # An impedance controller adds a virtual spring to the
+  # end-effector and can improve tracking. It can be enabled
+  # by setting 'enabled' to true. The gains are in the form of
+  # [x, y, z, rx, ry, rz]. Setting gains of zero deactivates
+  # the corresponding degree of translation or rotation.
+  - type: ImpedanceController
+    name: impedanceController
+    ramp_time: 1
+    enabled: false
+    gains_in_end_effector_frame: true
+    kp: [50, 50, 50, 0, 0, 0] # (N/m) or (Nm/rad)
+    kd: [5, 5, 5, 0, 0, 0] # (N/(m/sec)) or (Nm/(rad/sec))
+    ki: [0, 0, 1, 0, 0, 0]
+    i_clamp: [10, 10, 10, 10, 10, 10] # max value
+    
   # Kits with a gas spring need to add a shoulder compensation torque.
   # It should be around -7 Nm for most kits, but it may need to be tuned
   # for your specific setup.
-  #- name: 'gasSpringCompensation'
-  #  type: EffortOffset
-  #  effortOffset: [0, -7, 0, 0, 0, 0]
+  - type: EffortOffset
+    name: gasSpringCompensation
+    ramp_time: 0
+    enabled: false # disabled by default as the default configuration ships without one
+    offset: [0, -7, 0, 0, 0, 0]

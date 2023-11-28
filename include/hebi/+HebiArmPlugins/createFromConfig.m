@@ -38,17 +38,17 @@ for i = 1:numel(pluginNames)
         case 'ImpedanceController'
             plugin = HebiArmPlugins.ImpedanceController();
             plugin.gainsInEndEffectorFrame = cfg.gains_in_end_effector_frame;
-            plugin.kp = cfg.kp(:)';
-            plugin.kd = cfg.kd(:)';
+            plugin.Kp = cfg.kp(:);
+            plugin.Kd = cfg.kd(:);
             if isfield(cfg, 'ki')
-                plugin.ki = cfg.ki(:)';
+                plugin.Ki = cfg.ki(:);
             end
             if isfield(cfg, 'i_clamp')
-                plugin.iClamp = cfg.i_clamp(:)';
+                plugin.iClamp = abs(cfg.i_clamp(:));
             end
 
         case 'DoubledJoint'
-            index;
+            error('The DoubledJoint plugin is not yet supported')
 
         otherwise
             warning(['Ignorning unknown plugin type: ' cfg.type])

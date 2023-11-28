@@ -20,7 +20,7 @@ classdef ImpedanceController < HebiArmPlugin
     end
     
     properties(Access = private)
-        iError double = [];
+        iError double = zeros(6,1);
     end
     
     methods
@@ -29,8 +29,8 @@ classdef ImpedanceController < HebiArmPlugin
         end
         
         function [] = update(this, arm)
-            if isempty(arm.state.cmdPos) || isempty(arm.state.cmdVel) || isempty(this.iError)
-                this.iError = zeros(arm.state.numDoF, 1);
+            if isempty(arm.state.cmdPos) || isempty(arm.state.cmdVel)
+                this.iError(:,:) = 0;
                 return;
             end
 
@@ -69,7 +69,7 @@ classdef ImpedanceController < HebiArmPlugin
             this.iError = this.iError + posError * arm.state.dt;
 
             % Combine everything
-            wrench = zeros(1, arm.state.numDoF);
+            wrench = zeros(arm.state.numDoF, 1);
             if ~isempty(this.Kp)
                 wrench = wrench + (this.Kp .* posError);
             end
