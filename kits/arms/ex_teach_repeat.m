@@ -1,4 +1,4 @@
-% Arm Teach-Repeat Demo
+  % Arm Teach-Repeat Demo
 %
 % Features:      Demo with two modes.  One for moving the arm to different
 %                waypoints while in a zero-force gravity-compensated mode.
@@ -18,7 +18,7 @@
 clear *;
 close all;
 
-armName = 'A-2085-06';
+armName = 'A-2085-04T';
 armFamily = 'Arm';
 hasGasSpring = false;  % If you attach a gas spring to the shoulder for
                        % extra payload, set this to TRUE.

@@ -20,6 +20,8 @@ classdef (Sealed) HebiUtils
     %
     %   loadHRDF           - loads an hrdf file into HebiKinematics objects
     %
+    %   loadRobotConfig    - loads a robot configuration from a yaml file
+    %
     %   loadGroupLog       - loads a binary .hebilog file into memory
     %   loadGroupLogsUI    - shows a UI dialog to load one or more logs.
     %
@@ -247,6 +249,37 @@ classdef (Sealed) HebiUtils
             %
             %   See also HebiUtils, HebiLookup, HebiGroup
             group = HebiGroup(javaMethod('newImitationGroup', HebiUtils.className,  varargin{:}));
+        end
+
+        function out = loadRobotConfig(varargin)
+            % LOADROBOTCONFIG loads a robot configuration from a yaml file
+            %
+            %   See also HebiUtils
+
+            % Java arrays and maps are cumbersome in MATLAB, so we convert
+            % everything to structures that are easier to work with.
+            config = javaMethod('loadRobotConfig', HebiUtils.className,  varargin{:});
+            config = struct(config);
+
+            % Strings are stored with one extra element to enforce cell arrays
+            out = struct();
+            out.families = config.families(1:end-1);
+            out.names = config.names(1:end-1);
+            out.hrdf = config.hrdf{1};
+
+            % Convert gains to a map struct: field -> value
+            out.gains = HebiUtils.mapToStruct(config.gains);
+
+            % User data is also a map struct: field -> value
+            out.userData = HebiUtils.mapToStruct(config.userData);
+
+            % Plugins are a struct of map structs: name -> field -> value
+            out.plugins = struct();
+            for i = 1:length(config.plugins)
+                plugin = HebiUtils.mapToStruct(config.plugins(i));
+                out.plugins.(plugin.name) = plugin;
+            end
+
         end
         
         function varargout = loadHRDF(varargin)
@@ -949,6 +982,32 @@ classdef (Sealed) HebiUtils
     % Experimental utility methods for internal use. May be made part of
     % the public API at some point or may be removed without notice.
     methods(Access = public, Static, Hidden = true)
+
+        function out = mapToStruct(mapValues)
+            % mapToStruct maps a list of key->value entries to a struct
+            % that uses the key as fields. Used for converting Java
+            % maps to something that is easier to work with in MATLAB.
+
+            out = struct();
+            for i = 1:length(mapValues)
+
+                entry = mapValues(i);
+                key = entry(1);
+                value = entry(2);
+
+                % Arrays of strings can't be returned as char[][][] because
+                % they may be interpreted as cell arrays or matrices and
+                % could be inconsistent. Thus, we return String[] and force
+                % a cell array manually.
+                if isa(value, 'java.lang.Object[]')
+                    value = cell(value);
+                end
+
+                out.(key) = value;
+
+            end
+
+        end
         
         function [ feedbackUnits ] = getFeedbackUnits( feedbackField )
             %FEEDBACKUNITS Return units of a given feedback type in a log file

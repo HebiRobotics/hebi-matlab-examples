@@ -34,7 +34,7 @@ function struct = CommandStruct()
     %           pause(.01);     % Use pause to limit loop rate
     %       end
     %
-    %       % Send positiona and velocity commands to all modules in a 
+    %       % Send position and velocity commands to all modules in a
     %       % group, automatically finding the proper number of modules.
     %       numModules = group.getNumModules;
     %       cmd = CommandStruct();

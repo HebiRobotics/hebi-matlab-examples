@@ -210,6 +210,30 @@ switch kit
         % Default seed positions for doing inverse kinematics
         params.ikSeedPos = [0.01 1.0 2.5 1.5];
                
+    case 'A-2085-04T'
+        %% X-Series 4-DoF Arm
+        group = HebiLookup.newGroupFromNames(family, {
+            'J1_base'
+            'J2_shoulder'
+            'J3_elbow'
+            'J4_wrist' });
+        
+        % Kinematic Model
+        kin = HebiUtils.loadHRDF([localDir '/hrdf/A-2085-04T']);
+        
+        % Load and send arm gains
+        params.gains = HebiUtils.loadGains([localDir '/gains/A-2085-04']);
+        
+        % No Gripper
+        params.hasGripper = false;
+        
+        % Account for external efforts due to the gas spring
+        params.effortOffset = [0 shoulderJointComp 0 0];
+        
+        % Default seed positions for doing inverse kinematics
+        params.ikSeedPos = [0.01 1.0 2.5 1.5];
+        
+        
     case 'A-2084-01'
         %% X-Series 4-DoF SCARA Arm
         group = HebiLookup.newGroupFromNames(family, {
