@@ -17,8 +17,8 @@ close all;
 
 HebiLookup.initialize();
 
-armName = 'A-2303-01G';
-armFamily = 'Arm';
+armName = 'A-2303-01';
+armFamily = 'Dow-Leader';
 hasGasSpring = false;  % If you attach a gas spring to the shoulder for
                        % extra payload, set this to TRUE.
 

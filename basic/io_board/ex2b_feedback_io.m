@@ -12,8 +12,8 @@ HebiLookup.initialize();
 
 % Use Scope to change select a module and change the name and family to
 % match the names below.  Following examples will use the same names.
-familyName = 'Test Family';
-moduleNames = 'Test IO Board'; 
+familyName = 'valve_test_board';
+moduleNames = 'io_micro'; 
 group = HebiLookup.newGroupFromNames( familyName, moduleNames );
 
 %% Visualize analog input a1
