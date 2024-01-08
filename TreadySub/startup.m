@@ -5,5 +5,6 @@ localDir = fileparts(mfilename('fullpath'));
 includeScript = fullfile(localDir, '..', 'include', 'include.m');
 run(includeScript);
 
+addpath(fullfile(localDir, '..', 'kits', 'arms'));
 
 end

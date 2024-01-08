@@ -155,12 +155,12 @@ classdef HebiArm < handle
             
         end
         
-        function [] = update(this)
+        function [] = update(this, varargin)
             % reads feedback and updates internal state
             
             % Read feedback
             newState = struct();
-            newState.fbk = this.group.getNextFeedbackFull();
+            newState.fbk = this.group.getNextFeedbackFull(varargin{:});
             newState.time = newState.fbk.time;
             newState.numDoF = this.kin.getNumDoF();
             
