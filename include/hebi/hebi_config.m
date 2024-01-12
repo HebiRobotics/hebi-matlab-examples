@@ -7,7 +7,7 @@ switch simpleName
     case 'hebi_load'
         % Path to the binary library file. By default, it is assumed that
         % the library is placed in the same folder as this file.
-        config.libraryVersion = 'hebi-matlab-1.9.0-snapshot2';
+        config.libraryVersion = 'hebi-matlab-1.9.0-snapshot3';
         config.libraryPath = fileparts(mfilename('fullpath'));
         
     case 'HebiLookup'
