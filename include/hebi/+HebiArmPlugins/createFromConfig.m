@@ -48,7 +48,8 @@ for i = 1:numel(pluginNames)
             end
 
         case 'DoubledJoint'
-            error('The DoubledJoint plugin is not yet supported')
+            group = HebiLookup.newGroupFromNames(cfg.group_family, cfg.group_name);
+            plugin = HebiArmPlugins.DoubledJoint(cfg.index, group, cfg.mirror);
 
         otherwise
             warning(['Ignorning unknown plugin type: ' cfg.type])

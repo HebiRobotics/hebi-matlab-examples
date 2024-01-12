@@ -1,4 +1,4 @@
-classdef DoubledJointMirror < HebiArmPlugin
+classdef DoubledJoint < HebiArmPlugin
     % DoubledJointMirror
     %
     % Utility plugin to work with joints that have two actuators, e.g.,
@@ -15,6 +15,7 @@ classdef DoubledJointMirror < HebiArmPlugin
     properties
         group HebiGroup;
         index double;
+        sign double;
     end
     
     properties(Access = private)
@@ -23,9 +24,14 @@ classdef DoubledJointMirror < HebiArmPlugin
     
     methods
         
-        function this = DoubledJointMirror(index, group)
+        function this = DoubledJoint(index, group, mirror)
             this.index = index;
             this.group = group;
+            if mirror
+                this.sign = -1;
+            else
+                this.sign = +1;
+            end
         end
         
         function [] = update(this, arm)
@@ -34,14 +40,14 @@ classdef DoubledJointMirror < HebiArmPlugin
             if isempty(arm.state.cmdPos)
                this.cmd.position = [];
             else
-               this.cmd.position = -arm.state.cmdPos(this.index); 
+               this.cmd.position = this.sign * arm.state.cmdPos(this.index); 
             end
             
             % Velocity is negative
             if isempty(arm.state.cmdVel)
                this.cmd.velocity = [];
             else
-               this.cmd.velocity = -arm.state.cmdVel(this.index); 
+               this.cmd.velocity = this.sign * arm.state.cmdVel(this.index); 
             end
             
             % Effort is negative and half-ed
@@ -49,7 +55,7 @@ classdef DoubledJointMirror < HebiArmPlugin
                this.cmd.effort = [];
             else
                arm.state.cmdEffort(this.index) = arm.state.cmdEffort(this.index) / 2; 
-               this.cmd.effort = -arm.state.cmdEffort(this.index); 
+               this.cmd.effort = this.sign * arm.state.cmdEffort(this.index); 
             end
             
             % Send immediately (note that this assume that there are no
