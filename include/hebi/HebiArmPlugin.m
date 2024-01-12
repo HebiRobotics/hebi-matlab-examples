@@ -27,8 +27,14 @@ classdef HebiArmPlugin < handle
 
     properties(Access = protected)
 
+        % current enabled ratio
+        enabledRatio double = 0;
+
+        % target ratio
+        targetRatio double = 1;
+
         % Timestamp when the ramping started
-        rampStartTime = [];
+        lastTimestamp = [];
 
     end
     
@@ -40,18 +46,24 @@ classdef HebiArmPlugin < handle
 
         function scale = getRampScale(this, timestamp)
 
-            % Initialize ramp timestamp
-            if isempty(this.rampStartTime)
-                this.rampStartTime = timestamp;
+            % Figure out the step delta (dt / rampTime)
+            if (isempty(this.lastTimestamp))
+                delta = 0;
+            else
+                dt = timestamp - this.lastTimestamp;
+                delta = dt / this.rampTime;
+            end
+            this.lastTimestamp = timestamp;
+
+            % Advance enabled ratio
+            if (this.enabledRatio < this.targetRatio)
+                this.enabledRatio = min(this.enabledRatio + delta, 1);
+            elseif (this.enabledRatio > this.targetRatio)
+                this.enabledRatio = max(this.enabledRatio - delta, 0);
             end
 
-            % Determine the scale for the current time
-            elapsedTime = timestamp - this.rampStartTime;
-            if elapsedTime >= this.rampTime
-                scale = 1; % fully ramped up
-            else
-                scale = elapsedTime / this.rampTime; % gradual ramping
-            end
+            % Current scale
+            scale = this.enabledRatio;
 
         end
 
@@ -62,7 +74,7 @@ classdef HebiArmPlugin < handle
         % Setter for enabled property. Resets the ramp timer
         % whenever the value gets set.
         function [] = set.enabled(this, enabled)
-            this.rampStartTime = [];
+            this.targetRatio = 1.0 * logical(enabled);
             this.enabled = enabled;
         end
 

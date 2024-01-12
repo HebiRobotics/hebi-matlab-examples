@@ -209,10 +209,7 @@ classdef HebiArm < handle
             % Call plugins (FK, Jacobians, End-Effector XYZ, etc.)
             this.state = newState;
             for i=1:length(this.plugins)
-                plugin = this.plugins{i};
-                if plugin.enabled
-                    plugin.update(this);
-                end
+                this.plugins{i}.update(this);
             end 
 
             % Ignore efforts that aren't used
