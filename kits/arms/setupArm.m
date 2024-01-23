@@ -81,10 +81,10 @@ params.localDir = localDir;
 params.gains = HebiUtils.loadGains(config.gains.default);
 
 % Setup optional gripper
-if ~isfield(params, 'hasGripper')
-    params.hasGripper = false;
+if ~isfield(params, 'has_gripper')
+    params.has_gripper = false;
 end
-if params.hasGripper
+if params.has_gripper
     params.gripperGains = HebiUtils.loadGains(config.gains.gripper);
 end
 
@@ -95,7 +95,7 @@ HebiUtils.sendWithRetry(arm.group, 'gains', params.gains);
 
 % Setup gripper
 gripper = [];
-if params.hasGripper
+if params.has_gripper
     
     gripperGroup = HebiLookup.newGroupFromNames( config.families(1), 'gripperSpool' );
     HebiUtils.sendWithRetry(gripperGroup, 'gains', params.gripperGains);
