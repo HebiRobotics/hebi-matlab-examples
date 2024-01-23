@@ -1,0 +1,16 @@
+# X-Series Rosie with default omniwheel configuration
+version: 1.0
+families: ["Rosie"]
+names: ["J1_base", "J2_shoulder", "J3_elbow", "J4_wrist1", "J5_wrist2", "J6_wrist3", "W1", "W2", "W3"]
+hrdf: "../hrdf/Rosie.hrdf"
+
+gains:
+  omni_wheels: "../gains/omni-drive-wheel-gains.xml"
+  mecanum_wheels: "../gains/mecanum-wheel-gains.xml"
+  diff_drive: "../gains/diff-drive-wheel-gains.xml"
+  arm: "../gains/6-dof-arm-gains-rosie.xml"
+  gripper: "../gains/gripper-gains.xml"
+
+user_data:
+  controller_family: "HEBI"
+  controller_name: "mobileIO"

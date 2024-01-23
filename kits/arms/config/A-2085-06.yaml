@@ -9,17 +9,19 @@ gains:
 
 user_data:
   # Default seed positions for doing inverse kinematics
-  ikSeedPos: [0.01, 1.0, 2.5, 1.5, -1.5, 0.01]
+  ik_seed_pos: [0.01, 1.0, 2.5, 1.5, -1.5, 0.01]
 
 plugins:
 
   - type: GravityCompensationEffort
     name: gravComp
-    ramp_time: 1
+    enabled: true
+    ramp_time: 2
 
   - type: DynamicsCompensationEffort
     name: dynamicsComp
-    ramp_time: 1
+    enabled: true
+    ramp_time: 2
 
   # An impedance controller adds a virtual spring to the
   # end-effector and can improve tracking. It can be enabled
@@ -28,8 +30,8 @@ plugins:
   # the corresponding degree of translation or rotation.
   - type: ImpedanceController
     name: impedanceController
-    ramp_time: 1
     enabled: false
+    ramp_time: 2
     gains_in_end_effector_frame: true
     kp: [50, 50, 50, 0, 0, 0] # (N/m) or (Nm/rad)
     kd: [5, 5, 5, 0, 0, 0] # (N/(m/sec)) or (Nm/(rad/sec))
@@ -41,6 +43,6 @@ plugins:
   # for your specific setup.
   - type: EffortOffset
     name: gasSpringCompensation
-    ramp_time: 0
     enabled: false # disabled by default as the default configuration ships without one
+    ramp_time: 2
     offset: [0, -7, 0, 0, 0, 0]

@@ -1,0 +1,12 @@
+# R-Series 6-DoF Arm
+version: 1.0
+families: ["Daisy"]
+names: ["L1_J1_base", "L1_J2_shoulder", "L1_J3_elbow", "L2_J1_base", "L2_J2_shoulder", "L2_J3_elbow", "L3_J1_base", "L3_J2_shoulder", "L3_J3_elbow", "L4_J1_base", "L4_J2_shoulder", "L4_J3_elbow", "L5_J1_base", "L5_J2_shoulder", "L5_J3_elbow", "L6_J1_base", "L6_J2_shoulder", "L6_J3_elbow"]
+hrdf: "../hrdf/Daisy.hrdf"
+
+gains:
+  leg: "../gains/daisyLeg-gains.xml"
+
+user_data:
+  controller_family: "HEBI"
+  controller_name: "mobileIO"

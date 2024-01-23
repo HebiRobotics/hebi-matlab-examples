@@ -77,7 +77,7 @@ while ~abortFlag
 
     ikPosition = arm.kin.getIK('xyz', xyzTarget_init, ...
                                'so3', rotMatTarget_init, ...
-                               'initial', params.ikSeedPos );   
+                               'initial', params.ik_seed_pos );
         
     % Slow trajectory timing for the initial move to home position   
     arm.trajGen.setSpeedFactor( 0.5 );

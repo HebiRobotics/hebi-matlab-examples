@@ -1,4 +1,4 @@
-function [ arm, params, gripper ] = setupArm( kit, family, ~ )
+function [ arm, params, gripper ] = setupArm( kit )
 % SETUPARM creates models and loads parameters for controlling various 
 % pre-configured arm kits.
 %
@@ -101,8 +101,8 @@ if params.hasGripper
     HebiUtils.sendWithRetry(gripperGroup, 'gains', params.gripperGains);
     
     gripper = HebiGripper(gripperGroup);
-    gripper.openEffort = params.gripperOpenEffort;
-    gripper.closeEffort = params.gripperCloseEffort;
+    gripper.openEffort = params.gripper_open_effort;
+    gripper.closeEffort = params.gripper_close_effort;
     
 end
 
