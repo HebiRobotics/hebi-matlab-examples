@@ -254,6 +254,22 @@ classdef (Sealed) HebiUtils
         function out = loadRobotConfig(varargin)
             % LOADROBOTCONFIG loads a robot configuration from a yaml file
             %
+            %   Example:
+            %     % Load a robot configuration file
+            %     configFile = 'A-2085-06G.yaml';
+            %     config = HebiUtils.loadRobotConfig(configFile);
+            %     group = HebiLookup.newGroupFromNames(config.families, config.names);
+            %     kin = HebiKinematics(config.hrdf);
+            %     userData = config.userData;
+            %     
+            %     % Initialize the default gains
+            %     defaultGains = HebiUtils.loadGains(config.gains.default);
+            %     HebiUtils.sendWithRetry(group, 'gains', defaultGains);
+            %     
+            %     % Create the arm wrapper
+            %     arm = HebiArm(group, kin);
+            %     arm.plugins = HebiArmPlugins.createFromConfig(config.plugins);
+            %
             %   See also HebiUtils
 
             % Java arrays and maps are cumbersome in MATLAB, so we convert
