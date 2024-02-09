@@ -24,7 +24,7 @@ HebiLookup.initialize();
 % Instantiate the arm kit based on the config files in config/${name}.yaml
 % If your kit has a gas spring, you need to uncomment the offset lines
 % in the corresponding config file.
-[ arm, params ] = setupArm( 'A-2085-06' );
+[ arm, params ] = setupArm( 'A-2240-06G' );
 
 % Append the impedance controller plugin. You can also define it in the 
 % config file so it gets applied to all demos.
@@ -38,9 +38,13 @@ arm.plugins{end+1} = impedance;
 arm.group.setFeedbackFrequency(200); 
 
 % Double the effort gains from their default values, to make the arm more
-% sensitive for tracking force.
+% sensitive for tracking force.  Remove the position gains, so that only
+% the commanded torques are moving the arm.
 gains = params.gains;
-gains.effortKp = 2 * gains.effortKp;
+gains.positionKp = 0 * gains.positionKp;
+gains.positionKi = 0 * gains.positionKi;
+gains.positionKd = 0 * gains.positionKd;
+gains.velocityKp = 0 * gains.velocityKp;
 HebiUtils.sendWithRetry(arm.group, 'gains', gains);
 
 enableLogging = true;
@@ -71,25 +75,26 @@ disp('  ESC - Exits the demo.');
 % UNCOMMENT THE GAINS YOU WANT TO USE FOR A GIVEN RUN, AND COMMENT OUT ALL
 % THE OTHER GAINS.
 
-%     % HOLD POSITION ONLY (Allow rotation around end-effector position)
+    % HOLD POSITION ONLY (Allow rotation around end-effector position)
     impedance.gainsInEndEffectorFrame = true; 
-    impedance.Kp = [500; 500; 500; 0; 0; 0];  % (N/m) or (Nm/rad)
-    impedance.Kd = [5; 5; 5; .0; .0; .0;]; % (N/(m/sec)) or (Nm/(rad/sec))
+    impedance.Kp = [1000; 1000; 1000; 0; 0; 0];  % (N/m) or (Nm/rad)
+    impedance.Kd = [10; 10; 10; .0; .0; .0;]; % (N/(m/sec)) or (Nm/(rad/sec))
  
 %     % HOLD ROTATION ONLY
 %     impedance.gainsInEndEffectorFrame = true;
 %     impedance.Kp = [0; 0; 0; 5; 5; 5];  % (N/m) or (Nm/rad)
 %     impedance.Kd = [0; 0; 0; .1; .1; .1;]; % (N/(m/sec)) or (Nm/(rad/sec))
   
-%     % HOLD POSITION AND ROTATION - BUT ALLOW MOTION ALONG/AROUND Z-AXIS
+%     % HOLD POSITION AND ROTATION - BUT ALLOW MOTION ALONG/AROUND Z-AXIS 
+%     % OF THE END EFFECTOR
 %     impedance.gainsInEndEffectorFrame = true; 
-%     impedance.Kp = [500; 500; 0; 5; 5; 5];  % (N/m) or (Nm/rad)
-%     impedance.Kd = [10; 10; 0; .1; .1; .1;]; % (N/(m/sec)) or (Nm/(rad/sec))
+%     impedance.Kp = [500; 500; 0; 5; 5; 0];  % (N/m) or (Nm/rad)
+%     impedance.Kd = [10; 10; 0; .1; .1; 0;]; % (N/(m/sec)) or (Nm/(rad/sec))
     
-    % HOLD POSITION AND ROTATION - BUT ALLOW MOTION IN BASE FRAME XY-PLANE
-%     gainsInEndEffectorFrame = false;
-%     impedance.Kp = [0; 0; 500; 5; 5; 5] * 0.1;  % (N/m) or (Nm/rad)
-%     impedance.Kd = [0; 0; 5; .1; .1; .1;]; % (N/(m/sec)) or (Nm/(rad/sec))
+%     % HOLD POSITION AND ROTATION - BUT ALLOW MOTION IN BASE FRAME XY-PLANE
+%     impedance.gainsInEndEffectorFrame = false;
+%     impedance.Kp = [0; 0; 1000; 5; 5; 5];  % (N/m) or (Nm/rad)
+%     impedance.Kd = [0; 0; 10 ; .1; .1; .1;]; % (N/(m/sec)) or (Nm/(rad/sec))
  
 
 keys = read(kb);
