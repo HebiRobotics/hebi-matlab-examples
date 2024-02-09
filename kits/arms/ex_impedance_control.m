@@ -37,9 +37,8 @@ arm.plugins{end+1} = impedance;
 % for most applications.
 arm.group.setFeedbackFrequency(200); 
 
-% Double the effort gains from their default values, to make the arm more
-% sensitive for tracking force.  Remove the position gains, so that only
-% the commanded torques are moving the arm.
+% Remove the position gains, so that only the commanded torques 
+% are moving the arm.
 gains = params.gains;
 gains.positionKp = 0 * gains.positionKp;
 gains.positionKi = 0 * gains.positionKi;
