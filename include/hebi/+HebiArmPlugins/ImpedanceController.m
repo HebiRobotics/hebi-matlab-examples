@@ -69,7 +69,7 @@ classdef ImpedanceController < HebiArmPlugin
             this.iError = this.iError + posError * arm.state.dt;
 
             % Combine everything
-            wrench = zeros(arm.state.numDoF, 1);
+            wrench = zeros(6, 1);
             if ~isempty(this.Kp)
                 wrench = wrench + (this.Kp .* posError);
             end

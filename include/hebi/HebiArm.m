@@ -167,7 +167,9 @@ classdef HebiArm < handle
             % Add commonly derived state
             fbkPos = newState.fbk.position;
             newState.outputFrames = this.kin.getForwardKinematics('output', fbkPos);
-           
+            newState.T_endEffector = newState.outputFrames(:,:,end);
+            newState.J_endEffector = this.kin.getJacobianEndEffector(fbkPos);
+            
             % Add pos/vel/accel commands
             newState.cmdAux = [];
             if ~isempty(this.traj)

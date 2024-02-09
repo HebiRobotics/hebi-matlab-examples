@@ -22,6 +22,8 @@ classdef (Sealed) HebiGroup < handle
     %   getInfo               - returns meta information such as names
     %   getGains              - returns the current gains
     %   getSafetyParams       - returns safety parameters such as limits
+    %   setLocalState         - sets local user state for logging purposes
+    %   getLocalState         - returns the most recently set local state
     %   startLog              - starts background logging to disk
     %   isLogging             - returns whether logging is currently active
     %   stopLog               - stops logging and returns a readable format
@@ -595,6 +597,31 @@ classdef (Sealed) HebiGroup < handle
                     out(end, :) = [];
                 end
             end
+        end
+
+        function out = setLocalState(this, varargin)
+            %setLocalState sets local user state for logging purposes
+            %
+            %  Allows users to add local state variables to a log file.
+            %  This is used to store additional user data that gets time
+            %  synchronized with logged feedback. The state does not
+            %  get sent to any device and has no other purpose.
+            %
+            %  Example
+            %    trialNumber = 27;
+            %    localState = LocalStateStruct();
+            %    localState.state1 = trialNumber;
+            %    group.setLocalState(localState);
+            %
+            %   See also HebiGroup, HebiGroup.getLocalState, LocalStateStruct
+            out = setLocalState(this.obj, varargin{:});
+        end
+
+        function out = getLocalState(this, varargin)
+            %getLocalState returns the most recently set local user state
+            %
+            %   See also HebiGroup, HebiGroup.setLocalState, LocalStateStruct
+            out = getLocalState(this.obj, varargin{:});
         end
         
         function out = startLog(this, varargin)

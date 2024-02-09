@@ -39,9 +39,12 @@ classdef GravityCompensation < HebiArmPlugin
             else
                 % The orientation feedback is in the IMU frame, so we 
                 % need to first rotate it into the world frame.
-                baseRotMat = this.imuRotationOffset * HebiUtils.quat2rotMat(q);
+                imuRot = HebiUtils.quat2rotMat(q);
+                imuGravityVec = -imuRot(3,1:3)';
+                
+                baseGravityVec = this.imuRotationOffset * imuGravityVec;
                 imuFrame = arm.state.outputFrames(:,:,this.imuFrameIndex);
-                gravityVec = imuFrame(1:3,1:3) * (-baseRotMat(3,1:3)');
+                gravityVec = imuFrame(1:3,1:3) * baseGravityVec;
             end
 
             % Compensate for gravity
