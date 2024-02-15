@@ -723,12 +723,20 @@ classdef (Sealed) HebiUtils
                 % Assign the mask for plotting only some modules from a
                 % group.  If its empty figure out the size based on the
                 % number of entries in the field that is known to be 1xN.
-                % I picked 'position'
+                % I picked 'position', but that isn't in IO views.
                 plotMask = p.Modules;
                 if isempty(plotMask)
                     logFields = fields(hebiLogs{i});  
+                    
+                    % Most logs have position feedback, so use that
                     posField = find(strcmp(logFields,'position'));
-                    plotMask = 1:size(hebiLogs{i}.(logFields{posField}),2);
+                    if any(posField)
+                        plotMask = 1:size(hebiLogs{i}.(logFields{posField}),2);
+                    else
+                        % But in IO logs we need something else
+                        ioField = find(strcmp(logFields,'a1'));
+                        plotMask = 1:size(hebiLogs{i}.(logFields{ioField}),2);
+                    end
                 end
                 
                 % Assign figure number, or count up from the user-defined
