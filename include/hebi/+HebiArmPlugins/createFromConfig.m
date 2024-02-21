@@ -20,10 +20,10 @@ for i = 1:numel(pluginNames)
         case 'GravityCompensationEffort'
             plugin = HebiArmPlugins.GravityCompensation();
             if isfield(cfg, 'imu_feedback_index')
-                plugin.imuFeedbackIndex = cfg.imu_feedback_index + 1;
+                plugin.imuFeedbackIndex = cfg.imu_feedback_index; % zero indexed
             end
             if isfield(cfg, 'imu_frame_index')
-                plugin.imuFrameIndex = cfg.imu_frame_index + 1;
+                plugin.imuFrameIndex = cfg.imu_frame_index; % zero indexed
             end
             if isfield(cfg, 'imu_rotation_offset')
                 plugin.imuRotationOffset = reshape(cfg.imu_rotation_offset,3,3)';

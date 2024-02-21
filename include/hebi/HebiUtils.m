@@ -722,12 +722,21 @@ classdef (Sealed) HebiUtils
                 
                 % Assign the mask for plotting only some modules from a
                 % group.  If its empty figure out the size based on the
-                % number of entries in the second field (the first is the
-                % master 'time' vector that always has one).
+                % number of entries in the field that is known to be 1xN.
+                % 
+                % There are no common fields that work across all views,
+                % but all of the current ones have at least position
+                % or timestamp information.
                 plotMask = p.Modules;
                 if isempty(plotMask)
-                    logFields = fields(hebiLogs{i});                 
-                    plotMask = 1:size(hebiLogs{i}.(logFields{2}),2);
+                     
+                    logFields = fields(hebiLogs{i});
+                    fieldIndex = find(strcmp(logFields,'position') | strcmp(logFields,'pcRxTime'));
+                    if isempty(fieldIndex)
+                        error('unsupported struct type')
+                    end
+                    plotMask = 1:size(hebiLogs{i}.(logFields{fieldIndex}),2);
+
                 end
                 
                 % Assign figure number, or count up from the user-defined

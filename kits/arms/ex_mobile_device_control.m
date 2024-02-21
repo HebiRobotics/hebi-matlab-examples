@@ -46,7 +46,7 @@ gripForceSlider = 'a6';
 % Instantiate the arm kit based on the config files in config/${name}.yaml
 % If your kit has a gas spring, you need to uncomment the offset lines
 % in the corresponding config file.
-[ arm, params, gripper ] = setupArm( 'A-2085-06G' );
+[ arm, params, gripper ] = setupArm( 'A-2240-06G' );
                              
 disp('  ');
 disp('Arm end-effector is now following the mobile device pose.');

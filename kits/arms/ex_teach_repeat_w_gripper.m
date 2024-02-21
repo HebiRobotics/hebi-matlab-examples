@@ -23,13 +23,13 @@ close all;
 % Instantiate the arm kit based on the config files in config/${name}.yaml
 % If your kit has a gas spring, you need to uncomment the offset lines
 % in the corresponding config file.
-[ arm, params, gripper ] = setupArm( 'A-2085-06G' );
+[ arm, params, gripper ] = setupArm( 'A-2240-06G' );
 
 % Basic setup
 arm.group.setFeedbackFrequency(100);
 arm.trajGen.setMinDuration(1.0);   % Min move time for 'small' movements
                                    % (e.g. gripper open/close)
-arm.trajGen.setSpeedFactor(0.75);  % Slow down movements to a safer speed.
+arm.trajGen.setSpeedFactor(1.0);  % Slow down movements to a safer speed.
                                    % (default is 1.0)
 
 % Keyboard input
