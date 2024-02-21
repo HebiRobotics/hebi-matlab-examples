@@ -21,7 +21,7 @@ close all;
 % Instantiate the arm kit based on the config files in config/${name}.yaml
 % If your kit has a gas spring, you need to uncomment the offset lines
 % in the corresponding config file.
-[ arm, params ] = setupArm( 'A-2085-06' );
+[ arm, params ] = setupArm( 'A-2085-06G' );
 
 % Basic setup
 arm.group.setFeedbackFrequency(100);
