@@ -36,6 +36,13 @@ function [ arm, params, gripper ] = setupArm( kit )
 %    'A-2240-05' (5-DoF R-Series Arm), 
 %    'A-2240-04' (4-DoF R-Series Arm),
 %    'A-2302-01' (4-DoF R-Series SCARA Arm)
+%   T-Series Arms
+%    'A-2580-06G' (6-DoF T-Series Arm + Gripper), 
+%    'A-2580-06' (6-DoF T-Series Arm),
+%    'A-2580-05G' (5-DoF T-Series Arm + Gripper), 
+%    'A-2580-05' (5-DoF T-Series Arm), 
+%    'A-2580-04' (4-DoF T-Series Arm),
+%    'A-2590-01' (4-DoF T-Series SCARA Arm)
 %
 % The 'family' argument specifies the family name of the modules that
 % should be selected.
