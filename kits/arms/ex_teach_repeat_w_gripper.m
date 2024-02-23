@@ -1,4 +1,4 @@
-% Arm Teach-Repeat w/ Gripper Demo
+  % Arm Teach-Repeat w/ Gripper Demo
 %
 % Features:      Demo with two modes.  One for moving the arm to different
 %                waypoints while in a zero-force gravity-compensated mode.

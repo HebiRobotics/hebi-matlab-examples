@@ -22,6 +22,8 @@ function [ arm, params, gripper ] = setupArm( kit )
 % (These are the corresponding Assembly Part Numbers for the Arm Kits)
 %
 %   X-Series Arms
+%    'A-2099-01G' (7-DoF Double-shouldered X-Series Arm + Gripper), 
+%    'A-2099-01' (7-DoF Double-shouldered X-Series Arm),
 %    'A-2085-06G' (6-DoF X-Series Arm + Gripper), 
 %    'A-2085-06' (6-DoF X-Series Arm),
 %    'A-2085-05G' (5-DoF X-Series Arm + Gripper), 
@@ -30,6 +32,8 @@ function [ arm, params, gripper ] = setupArm( kit )
 %    'A-2084-01' (4-DoF X-Series SCARA Arm),
 %    'A-2085-03' (3-DoF X-Series Arm),
 %   R-Series Arms
+%    'A-2303-01G' (7-DoF Double-shouldered R-Series Arm + Gripper), 
+%    'A-2303-01' (7-DoF Double-shouldered R-Series Arm),
 %    'A-2240-06G' (6-DoF R-Series Arm + Gripper), 
 %    'A-2240-06' (6-DoF R-Series Arm),
 %    'A-2240-05G' (5-DoF R-Series Arm + Gripper), 
@@ -37,6 +41,8 @@ function [ arm, params, gripper ] = setupArm( kit )
 %    'A-2240-04' (4-DoF R-Series Arm),
 %    'A-2302-01' (4-DoF R-Series SCARA Arm)
 %   T-Series Arms
+%    'A-2582-01G' (7-DoF Double-shouldered T-Series Arm + Gripper), 
+%    'A-2582-01' (7-DoF Double-shouldered T-Series Arm),
 %    'A-2580-06G' (6-DoF T-Series Arm + Gripper), 
 %    'A-2580-06' (6-DoF T-Series Arm),
 %    'A-2580-05G' (5-DoF T-Series Arm + Gripper), 

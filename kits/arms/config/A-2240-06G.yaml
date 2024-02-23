@@ -21,9 +21,6 @@ plugins:
   - type: GravityCompensationEffort
     name: gravComp
     enabled: true
-    imu_feedback_index: 2
-    imu_frame_index: 4 
-    imu_rotation_offset: [ 1, 0, 0, 0, 1, 0, 0, 0, 1 ] 
     ramp_time: 2
 
   - type: DynamicsCompensationEffort
