@@ -268,9 +268,9 @@ classdef (Sealed) HebiUtils
             %     
             %     % Create the arm wrapper
             %     arm = HebiArm(group, kin);
-            %     arm.plugins = HebiArmPlugins.createFromConfig(config.plugins);
+            %     arm.plugins = HebiArmPlugin.createFromConfigMap(config.plugins);
             %
-            %   See also HebiUtils
+            %   See also HebiUtils, HebiArmPlugin.createFromConfigMap
 
             % Java arrays and maps are cumbersome in MATLAB, so we convert
             % everything to structures that are easier to work with.
@@ -735,7 +735,7 @@ classdef (Sealed) HebiUtils
                     if isempty(fieldIndex)
                         error('unsupported struct type')
                     end
-                    plotMask = 1:size(hebiLogs{i}.(logFields{fieldIndex}),2);
+                    plotMask = 1:size(hebiLogs{i}.(logFields{fieldIndex(1)}),2);
 
                 end
                 

@@ -23,19 +23,19 @@
    
   <link type="R8" input="Inline" extension="0.325" twist="0"/>
 
-  <actuator type="T8-9"/>
+  <actuator type="T8-16"/>
   
   <bracket type="R8LightRight"/>
   
-  <actuator type="T5-4"/>
+  <actuator type="T8-9"/>
 
   <link type="R8" input="Inline" extension="0.325" twist="0"/>
   
-  <actuator type="T5-4"/>
+  <actuator type="T5-9"/>
   
   <bracket type="R8LightRight"/>
   
-  <actuator type="T5-4"/>
+  <actuator type="T5-9"/>
   
   <!-- For custom end-effector parameters and formatting please visit: -->
   <!-- https://github.com/HebiRobotics/hebi-hrdf/blob/master/FORMAT.md#end-effector -->
