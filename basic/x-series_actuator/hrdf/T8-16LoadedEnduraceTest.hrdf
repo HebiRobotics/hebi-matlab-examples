@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- T-25 Loaded Endurance Test -->
+<robot version="1.4.0">
+  <actuator type="T8-16"/>
+  <link type="R8" extension="0.325" twist="pi"/>
+  <end-effector mass="5.0"/>
+ </robot>
