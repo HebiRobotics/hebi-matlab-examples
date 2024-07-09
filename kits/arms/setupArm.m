@@ -103,7 +103,7 @@ end
 
 %% Common Setup
 arm = HebiArm(group, kin);
-arm.plugins = HebiArmPlugins.createFromConfig(config.plugins);
+arm.plugins = HebiArmPlugin.createFromConfigMap(config.plugins);
 HebiUtils.sendWithRetry(arm.group, 'gains', params.gains);
 
 % Setup gripper

@@ -172,10 +172,14 @@ classdef (Sealed) HebiGroup < handle
             %   conflicting targets from, e.g., the GUI, or any other groups
             %   running in Matlab or from any other APIs.
             %
-            %   This feature can be disabled by setting 'inf' or the empty
+            %   This feature can be disabled by setting '0' or the empty
             %   matrix '[]'. When disabled, the hardware will continue to
             %   execute the last sent command. Note that this can result in
             %   unexpected behavior when sending efforts and velocities.
+            %
+            %   Commands sent with an 'inf' lifetime never expire, and the
+            %   module stays locked indefinitely. Crashes may require a
+            %   hardware reset, so use with caution.
             %
             %   The default command lifetime for a new group is 0.25 sec.
             %
