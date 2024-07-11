@@ -13,4 +13,6 @@ run(includeScript);
 % Add this folder and all its subfolders
 addpath(genpath(localDir));
 
+HebiLookup.setLookupFrequency(1);
+
 end
