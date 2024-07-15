@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<robot version="1.4.0" description="Left Inner">
-
-<rigid-body mass="0.154" 
-    com_trans="0 0.035 0.039"
-    output_trans="0 0.035 0.07"
-    output_rot="Rx(pi/2)"
-    mesh_path="meshes/A-2635-01_Inner.obj" mesh_rot="Rz(pi)"/>           
-</robot>

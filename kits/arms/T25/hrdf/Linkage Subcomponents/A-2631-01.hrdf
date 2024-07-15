@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<robot version="1.4.0" description="Output tube adapter size 55">
-
-<rigid-body mass="0.25" 
-    com_trans="0.02785 0 0.0228"
-    output_trans="0 0 0.0275"
-    output_rot="Rx(pi/2)"
-    mesh_path="meshes/A-2631-01_Output_Tube_Adapter_Size_55.obj" mesh_trans="0 0 0" mesh_rot="Rx(pi/2)"/>           
-</robot>

@@ -3,15 +3,15 @@
 
   <include path="A-2610-25.hrdf"/>
 
-  <include path="A-2635-01_Right_Inner.hrdf"/> 
+  <include path="A-2635-01_Left_Inside.hrdf"/> 
 
   <include path="A-2610-25.hrdf"/>
   
-  <include path="Size_55_Link_Twist_Pi.hrdf"/>
+  <include path="Size_55_To_55_Link_Twist_0.hrdf"/>
 
   <include path="A-2610-25.hrdf"/>
 
-  <include path="Size_55_Link_Twist_Pi.hrdf"/>
+  <include path="Size_55_To_35_Link_Twist_pi.hrdf"/>
 
   <actuator type="T8-9"/>
 
