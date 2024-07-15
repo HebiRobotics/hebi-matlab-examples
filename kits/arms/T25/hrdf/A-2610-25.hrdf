@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot version="1.4.0" description="T25">
+    <!-- T25 -->
+    <rigid-body mass="1.5" com_trans="-0.0252 -0.0019 0.0351" output_trans="0 0 0.067"
+                mesh_path="meshes/A-2610-25.obj"/>
+    <joint axis="rz"/>
+</robot>

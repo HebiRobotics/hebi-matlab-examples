@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- For documentation on the HEBI Robot Configuration please visit: -->
+<!-- https://github.com/HebiRobotics/hebi-hrdf/blob/master/FORMAT.md -->
+
+<!-- T-Series Double Shoulder Arm Example (This example is 7-DoF)-->
+<robot version="1.4.0">
+    
+  <include path="A-2610-25.hrdf"/>
+
+  <include path="A-2635-01_Left_Inner.hrdf"/>
+
+  <include path="A-2610-25.hrdf"/>
+
+  <include path="inline_bracket.hrdf"/>
+
+  <include path="A-2610-25.hrdf"/>
+
+  <link type="R8" input="Inline" extension="0.325" twist="0"/>
+
+  <actuator type="T8-16"/>
+  
+  <bracket type="R8LightRight"/>
+  
+  <actuator type="T8-9"/>
+
+  <link type="R8" input="Inline" extension="0.325" twist="0"/>
+  
+  <actuator type="T5-9"/>
+  
+  <bracket type="R8LightRight"/>
+  
+  <actuator type="T5-9"/>
+  
+  <!-- For custom end-effector parameters and formatting please visit: -->
+  <!-- https://github.com/HebiRobotics/hebi-hrdf/blob/master/FORMAT.md#end-effector -->
+  <end-effector />      
+              
+</robot>

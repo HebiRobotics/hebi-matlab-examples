@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot version="1.4.0" description="Inline bracket">
+
+<rigid-body mass="0.154" 
+    com_trans="0 0 0"
+    output_trans="0.07 0 0"
+    output_rot="Ry(pi/2)*Rz(pi)"/>  
+              
+</robot>
