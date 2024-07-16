@@ -7,13 +7,13 @@
 
   <include path="A-2610-25.hrdf"/>
   
-  <include path="Size_55_To_55_Link_Twist_0.hrdf"/>
+  <include path="Size_55_To_55_Link_Twist_pi.hrdf"/>
 
   <include path="A-2610-25.hrdf"/>
 
   <include path="Size_55_To_35_Link_Twist_pi.hrdf"/>
 
-  <actuator type="T8-9"/>
+  <actuator type="T5-9"/>
 
   <bracket type="R8LightRight"/>
 
