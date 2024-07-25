@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot version="1.4.0" description="Heavy right angle bracket inside">
+
+<rigid-body mass="0.328" 
+    com_trans="0 -0.026 0.0305"
+    output_trans="0 -0.055 0.055"
+    output_rot="Rx(pi/2)"
+    mesh_path="meshes/A-2641-01.obj"/>             
+</robot>

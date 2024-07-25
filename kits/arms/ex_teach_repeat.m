@@ -21,7 +21,7 @@ close all;
 % Instantiate the arm kit based on the config files in config/${name}.yaml
 % If your kit has a gas spring, you need to uncomment the offset lines
 % in the corresponding config file.
-[ arm, params ] = setupArm( 'A-2582-01' );
+[ arm, params ] = setupArm( 'T25-5-DoF' );
 
 % Basic setup
 arm.group.setFeedbackFrequency(100);
@@ -107,11 +107,11 @@ end
 if enableLogging
    logFile = arm.group.startLog( 'dir', [localDir '/logs'] ); 
 end
-
+time = 3;
 % Move from current position to first waypoint
 arm.update();
 arm.clearGoal(); % in case we re-run this section
-arm.setGoal(waypoints(1,:));
+arm.setGoal(waypoints(1,:), 'time', time);
 abortFlag = false;
 while ~arm.isAtGoal() && ~abortFlag
    arm.update();
@@ -147,9 +147,11 @@ while ~abortFlag
     else
         % Adds zero velocity/acceleration constraints at each
         % waypoint to force a short stop
+        moveTime = linspace(time,numWaypoints*time,numWaypoints);
         arm.setGoal(waypoints, ...
             'velocities', 0 * waypoints, ...
-            'accelerations', 0 * waypoints);
+            'accelerations', 0 * waypoints, ...
+            'time', moveTime);
     end
     
     % Execute motion

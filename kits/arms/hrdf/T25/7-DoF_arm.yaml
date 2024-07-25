@@ -1,0 +1,30 @@
+version: 1.0
+families: ["T25_7-DoF_Arm"]
+names: ["J1", "J2", "J3","J4", "J5", "J6", J7]
+
+hrdf: "hrdf/7-DoF_arm.hrdf"
+
+gains:
+  default: "7-DoF_arm_gains.xml"
+
+user_data:
+  
+  feedbackFreqHz: [100]
+
+  # Default seed positions for doing inverse kinematics
+  ikSeedPos_init: [0, -1.57, -1.57, 1.57, 1.57, 0, 0]
+
+plugins:
+
+  - type: GravityCompensationEffort
+    name: gravComp
+    enabled: true
+    ramp_time: 5
+    imu_feedback_index: 0
+    imu_frame_index: 1 
+    imu_rotation_offset: [ 1, 0, 0, 0, 1, 0, 0, 0, 1 ] 
+
+  - type: DynamicsCompensationEffort
+    name: dynamicsComp
+    enabled: true
+    ramp_time: 5

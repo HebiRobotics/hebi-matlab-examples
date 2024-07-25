@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot version="1.4.0" description="size 55 link">
+
+<rigid-body mass="0.832"
+ 
+    com_trans="0.15 0 0"
+    output_trans="0.325 0 0"
+    output_rot="Rx(pi)"
+    mesh_path="meshes/Size_55_To_55_Link_Twist_Pi.obj" mesh_trans="0 0 0"/>  
+              
+</robot>

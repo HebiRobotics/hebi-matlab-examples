@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot version="1.4.0" description="6-DoF arm mixed with T25">
+
+  <include path="A-2610-25.hrdf"/>
+
+  <include path="A-2635-01_Right_Inside.hrdf"/> 
+
+  <include path="A-2610-25.hrdf"/>
+  
+  <include path="Size_55_To_55_Link_Twist_pi.hrdf"/>
+
+  <include path="A-2610-25.hrdf"/>
+
+  <include path="Size_55_To_35_Link_Twist_pi.hrdf"/>
+
+  <actuator type="T5-9"/>
+
+  <bracket type="R8LightRight"/>
+
+  <actuator type="T5-4"/>
+
+  <bracket type="R8LightRight"/>
+
+  <actuator type="T5-4"/>
+
+  <!-- For custom end-effector parameters and formatting please visit: -->
+  <!-- https://github.com/HebiRobotics/hebi-hrdf/blob/master/FORMAT.md#end-effector -->
+  <end-effector type="Custom" mass="0" com_trans="0 0 0" output_trans="0 0 0"/>
+  
+</robot>
