@@ -4,3 +4,5 @@
 *.hebilog
 !**/exampleLog.hebilog
 
+*.DS_Store
+

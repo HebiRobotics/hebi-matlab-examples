@@ -43,15 +43,10 @@ gripForceSlider = 'a6';
 % Arm Setup %
 %%%%%%%%%%%%%
 
-armName = 'A-2085-06G';
-armFamily = 'Arm';
-hasGasSpring = false;  % If you attach a gas spring to the shoulder for
-                       % extra payload, set this to TRUE.
-
-[ arm, params, gripper ] = setupArm( armName, armFamily, hasGasSpring );
-arm.plugins = {
-    HebiArmPlugins.EffortOffset(params.effortOffset)
-};
+% Instantiate the arm kit based on the config files in config/${name}.yaml
+% If your kit has a gas spring, you need to uncomment the offset lines
+% in the corresponding config file.
+[ arm, params, gripper ] = setupArm( 'A-2240-06G' );
                              
 disp('  ');
 disp('Arm end-effector is now following the mobile device pose.');
@@ -82,7 +77,7 @@ while ~abortFlag
 
     ikPosition = arm.kin.getIK('xyz', xyzTarget_init, ...
                                'so3', rotMatTarget_init, ...
-                               'initial', params.ikSeedPos );   
+                               'initial', params.ik_seed_pos );
         
     % Slow trajectory timing for the initial move to home position   
     arm.trajGen.setSpeedFactor( 0.5 );

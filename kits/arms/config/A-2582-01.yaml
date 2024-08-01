@@ -1,0 +1,31 @@
+# T-Series 6-DoF Arm with Gripper
+version: 1.0
+families: ["T-Series 7-DoF Arm"]
+names: ["J1_base", "J2_shoulder1A", "J3_shoulder2", "J4_elbow1", "J5_elbow2", "J6_wrist1", "J7_wrist2"]
+hrdf: "../hrdf/A-2582-01.hrdf"
+
+gains:
+  default: "../gains/A-2582-01.xml"
+
+user_data:
+  # Default seed positions for doing inverse kinematics
+  ik_seed_pos: [0, -1, 0, -1, -1.5, 0, 0]
+
+plugins:
+  - type: GravityCompensationEffort
+    name: gravComp
+    enabled: true
+    ramp_time: 2
+
+  - type: DynamicsCompensationEffort
+    name: dynamicsComp
+    enabled: true
+    ramp_time: 2
+
+  - name: 'DoubleShoulder'
+    type: DoubledJoint
+    enabled: true
+    group_family: ["T-Series 7-DoF Arm"]
+    group_name: ["J2_shoulder1B"]
+    index: 2
+    mirror: true

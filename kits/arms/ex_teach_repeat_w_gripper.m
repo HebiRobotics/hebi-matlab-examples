@@ -1,4 +1,4 @@
-% Arm Teach-Repeat w/ Gripper Demo
+  % Arm Teach-Repeat w/ Gripper Demo
 %
 % Features:      Demo with two modes.  One for moving the arm to different
 %                waypoints while in a zero-force gravity-compensated mode.
@@ -20,19 +20,16 @@
 clear *;
 close all;
 
-armName = 'A-2085-06G';
-armFamily = 'Arm';
-hasGasSpring = false;  % If you attach a gas spring to the shoulder for
-                       % extra payload, set this to TRUE.
+% Instantiate the arm kit based on the config files in config/${name}.yaml
+% If your kit has a gas spring, you need to uncomment the offset lines
+% in the corresponding config file.
+[ arm, params, gripper ] = setupArm( 'A-2240-06G' );
 
-[ arm, params, gripper ] = setupArm( armName, armFamily, hasGasSpring );
+% Basic setup
 arm.group.setFeedbackFrequency(100);
-arm.plugins = {
-    HebiArmPlugins.EffortOffset(params.effortOffset)
-};
 arm.trajGen.setMinDuration(1.0);   % Min move time for 'small' movements
                                    % (e.g. gripper open/close)
-arm.trajGen.setSpeedFactor(0.75);  % Slow down movements to a safer speed.
+arm.trajGen.setSpeedFactor(1.0);  % Slow down movements to a safer speed.
                                    % (default is 1.0)
 
 % Keyboard input

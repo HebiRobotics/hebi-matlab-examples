@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- For documentation on the HEBI Robot Configuration please visit: -->
+<!-- https://github.com/HebiRobotics/hebi-hrdf/blob/master/FORMAT.md -->
+
+<!-- T-Series SCARA Arm (4-DoF with Gripper) -->
+<robot version="1.4.0">
+  <actuator type="T5-4"/>
+  <bracket type="R8HeavyRightOutside"/>
+  <actuator type="T5-9"/>
+  <link type="R8" extension="0.325" twist="pi/2"/>
+  <actuator type="T5-4"/>
+  <link type="R8" extension="0.325" twist="0"/>
+  <actuator type="T5-1"/>
+
+  <!-- For custom end-effector parameters and formatting please visit: -->
+  <!-- https://github.com/HebiRobotics/hebi-hrdf/blob/master/FORMAT.md#end-effector -->
+  <end-effector />
+</robot>

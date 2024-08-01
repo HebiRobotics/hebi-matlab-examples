@@ -1,0 +1,32 @@
+# T-Series 4-DoF SCARA Arm
+version: 1.0
+families: ["Arm"]
+names: ["J1_base", "J2_shoulder", "J3_elbow", "J4_wrist"]
+hrdf: "../hrdf/A-2590-01.hrdf"
+
+gains:
+  default: "../gains/A-2590-01.xml"
+
+user_data:
+  # Default seed positions for doing inverse kinematics
+  ik_seed_pos: [0.01, 1.0, 2.5, 1.5]
+
+plugins:
+
+  - type: GravityCompensationEffort
+    name: gravComp
+    enabled: true
+    ramp_time: 2
+
+  - type: DynamicsCompensationEffort
+    name: dynamicsComp
+    enabled: true
+    ramp_time: 2
+
+  # Kits with a gas spring need to add a shoulder compensation torque.
+  # It should be around -7 Nm for most kits, but it may need to be tuned
+  # for your specific setup.
+  - name: 'gasSpringCompensation'
+    type: EffortOffset
+    offset: [0, -7, 0, 0]
+    enabled: false

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- For documentation on the HEBI Robot Configuration please visit: -->
+<!-- https://github.com/HebiRobotics/hebi-hrdf/blob/master/FORMAT.md -->
+
+<!-- T-Series Arm (5-DoF) -->
+<robot version="1.4.0">
+  <actuator type="T8-9"/>
+  <bracket type="R8HeavyRightOutside"/>
+  <actuator type="T8-16"/>
+  <link type="R8" extension="0.325" twist="pi"/>
+  <actuator type="T8-9"/>
+  <link type="R8" extension="0.325" twist="pi"/>
+  <actuator type="T5-1"/>
+  <bracket type="R8LightRight"/>
+  <actuator type="T5-1"/>
+
+  <!-- For custom end-effector parameters and formatting please visit: -->
+  <!-- https://github.com/HebiRobotics/hebi-hrdf/blob/master/FORMAT.md#end-effector -->
+  <end-effector />
+</robot>

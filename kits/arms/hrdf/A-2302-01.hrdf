@@ -7,7 +7,7 @@
   <actuator type="R8-9"/>
   <bracket type="R8HeavyRightOutside"/>
   <actuator type="R8-16"/>
-  <link type="R8" extension="0.325" twist="-pi/2"/>
+  <link type="R8" extension="0.325" twist="pi/2"/>
   <actuator type="R8-3"/>
   <link type="R8" extension="0.325" twist="0"/>
   <actuator type="R8-3"/>

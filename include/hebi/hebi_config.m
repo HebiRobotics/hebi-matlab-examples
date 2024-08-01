@@ -7,7 +7,7 @@ switch simpleName
     case 'hebi_load'
         % Path to the binary library file. By default, it is assumed that
         % the library is placed in the same folder as this file.
-        config.libraryVersion = 'hebi-matlab-1.8.0';
+        config.libraryVersion = 'hebi-matlab-2.1';
         config.libraryPath = fileparts(mfilename('fullpath'));
         
     case 'HebiLookup'
@@ -22,7 +22,7 @@ switch simpleName
         % rate at which meta info get updated, e.g., names and ip
         % addresses. In the default mode, this also affects how fast
         % gains get updated in groups.
-        config.defaultLookupFrequency = 5; % [Hz]
+        config.defaultLookupFrequency = 1; % [Hz]
         
         % The initial frequency at which group.getNextFeedback() can run.
         config.defaultInitialGroupFeedbackFrequency = 100; % [Hz]
@@ -39,7 +39,7 @@ switch simpleName
         % network. This pause is only executed at the first call and does
         % not affect subsequent calls. Slow or unreliable networks may need
         % a longer pause.
-        config.initialNetworkLookupPause = 0.5; % [s]
+        config.initialNetworkLookupPause = 2; % [s]
         
     case 'HebiGroup'
         % Triggers a garbage collection after calls to stop logging. This

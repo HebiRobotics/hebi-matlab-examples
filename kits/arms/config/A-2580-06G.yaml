@@ -1,0 +1,38 @@
+# T-Series 6-DoF Arm with Gripper
+version: 1.0
+families: ["Arm"]
+names: ["J1_base", "J2_shoulder", "J3_elbow", "J4_wrist1", "J5_wrist2", "J6_wrist3"]
+hrdf: "../hrdf/A-2580-06G.hrdf"
+
+gains:
+  default: "../gains/A-2580-06.xml"
+  gripper: "../gains/A-2080-01.xml"
+
+user_data:
+  # Default seed positions for doing inverse kinematics
+  ik_seed_pos: [0.01, 1.0, 2.5, 1.5, -1.5, 0.01]
+
+  # Gripper specific settings
+  has_gripper: true
+  gripper_open_effort: 1
+  gripper_close_effort: -5
+
+plugins:
+  - type: GravityCompensationEffort
+    name: gravComp
+    enabled: true
+    ramp_time: 2
+
+  - type: DynamicsCompensationEffort
+    name: dynamicsComp
+    enabled: true
+    ramp_time: 2
+
+  # Kits with a gas spring need to add a shoulder compensation torque.
+  # It should be around -7 Nm for most kits, but it may need to be tuned
+  # for your specific setup.
+  - name: 'gasSpringCompensation'
+    type: EffortOffset
+    enabled: false
+    ramp_time: 2
+    offset: [0, -7, 0, 0, 0, 0]

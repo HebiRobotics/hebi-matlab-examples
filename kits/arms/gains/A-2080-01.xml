@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- X-Series Gripper Spool Gains -->
+<!-- X/T-Series Gripper Spool Gains -->
 <group_gains>
   <control_strategy>4</control_strategy>
   <position>

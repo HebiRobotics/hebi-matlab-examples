@@ -20,6 +20,8 @@ classdef (Sealed) HebiUtils
     %
     %   loadHRDF           - loads an hrdf file into HebiKinematics objects
     %
+    %   loadRobotConfig    - loads a robot configuration from a yaml file
+    %
     %   loadGroupLog       - loads a binary .hebilog file into memory
     %   loadGroupLogsUI    - shows a UI dialog to load one or more logs.
     %
@@ -247,6 +249,54 @@ classdef (Sealed) HebiUtils
             %
             %   See also HebiUtils, HebiLookup, HebiGroup
             group = HebiGroup(javaMethod('newImitationGroup', HebiUtils.className,  varargin{:}));
+        end
+
+        function out = loadRobotConfig(varargin)
+            % LOADROBOTCONFIG loads a robot configuration from a yaml file
+            %
+            %   Example:
+            %     % Load a robot configuration file
+            %     configFile = 'A-2085-06G.yaml';
+            %     config = HebiUtils.loadRobotConfig(configFile);
+            %     group = HebiLookup.newGroupFromNames(config.families, config.names);
+            %     kin = HebiKinematics(config.hrdf);
+            %     userData = config.userData;
+            %     
+            %     % Initialize the default gains
+            %     defaultGains = HebiUtils.loadGains(config.gains.default);
+            %     HebiUtils.sendWithRetry(group, 'gains', defaultGains);
+            %     
+            %     % Create the arm wrapper
+            %     arm = HebiArm(group, kin);
+            %     arm.plugins = HebiArmPlugin.createFromConfigMap(config.plugins);
+            %
+            %   See also HebiUtils, HebiArmPlugin.createFromConfigMap
+
+            % Java arrays and maps are cumbersome in MATLAB, so we convert
+            % everything to structures that are easier to work with.
+            config = javaMethod('loadRobotConfig', HebiUtils.className,  varargin{:});
+            config = struct(config);
+
+            % Strings are stored with one extra element to enforce cell arrays
+            out = struct();
+            out.version = config.version{1};
+            out.families = config.families(1:end-1);
+            out.names = config.names(1:end-1);
+            out.hrdf = config.hrdf{1};
+
+            % Convert gains to a map struct: field -> value
+            out.gains = HebiUtils.mapToStruct(config.gains);
+
+            % User data is also a map struct: field -> value
+            out.userData = HebiUtils.mapToStruct(config.userData);
+
+            % Plugins are a struct of map structs: name -> field -> value
+            out.plugins = struct();
+            for i = 1:length(config.plugins)
+                plugin = HebiUtils.mapToStruct(config.plugins(i));
+                out.plugins.(plugin.name) = plugin;
+            end
+
         end
         
         function varargout = loadHRDF(varargin)
@@ -566,10 +616,11 @@ classdef (Sealed) HebiUtils
             hebiLogs = cell(numLogs,1);
             infos = cell(numLogs,1);
             gains = cell(numLogs,1);
+            fullFileNames = cell(numLogs,1);
             for i=1:numLogs
                 
-                fullFileName = [pathName fileNames{i}];
-                fileInfo = dir(fullFileName);
+                fullFileNames{i} = [pathName fileNames{i}];
+                fileInfo = dir(fullFileNames{i});
                 
                 disp([ 'Loading ' num2str(i) ' of ' ...
                     num2str(numLogs) ': '  fileNames{i} ' - ' ...
@@ -578,19 +629,19 @@ classdef (Sealed) HebiUtils
                 if nargout <= 1
                     % pure conversion
                     hebiLogs{i} = ...
-                        HebiUtils.convertGroupLog(fullFileName, ...
+                        HebiUtils.convertGroupLog(fullFileNames{i}, ...
                         varargin{:});
                 else
                     % also read info/gains
                     [hebiLogs{i}, infos{i}, gains{i}] = ...
-                        HebiUtils.convertGroupLog(fullFileName, ...
+                        HebiUtils.convertGroupLog(fullFileNames{i}, ...
                         varargin{:});
                 end
                 
             end
             
             % Output as 3 args, e.g., [hebiLogs, infos, gains] = ...
-            varargout = {hebiLogs, infos, gains};
+            varargout = {hebiLogs, infos, gains, fullFileNames};
         end
         
         function [ ] = plotLogs( hebiLogs, feedbackField, varargin )
@@ -672,12 +723,21 @@ classdef (Sealed) HebiUtils
                 
                 % Assign the mask for plotting only some modules from a
                 % group.  If its empty figure out the size based on the
-                % number of entries in the second field (the first is the
-                % master 'time' vector that always has one).
+                % number of entries in the field that is known to be 1xN.
+                % 
+                % There are no common fields that work across all views,
+                % but all of the current ones have at least position
+                % or timestamp information.
                 plotMask = p.Modules;
                 if isempty(plotMask)
-                    logFields = fields(hebiLogs{i});                 
-                    plotMask = 1:size(hebiLogs{i}.(logFields{2}),2);
+                     
+                    logFields = fields(hebiLogs{i});
+                    fieldIndex = find(strcmp(logFields,'position') | strcmp(logFields,'pcRxTime'));
+                    if isempty(fieldIndex)
+                        error('unsupported struct type')
+                    end
+                    plotMask = 1:size(hebiLogs{i}.(logFields{fieldIndex(1)}),2);
+
                 end
                 
                 % Assign figure number, or count up from the user-defined
@@ -949,6 +1009,32 @@ classdef (Sealed) HebiUtils
     % Experimental utility methods for internal use. May be made part of
     % the public API at some point or may be removed without notice.
     methods(Access = public, Static, Hidden = true)
+
+        function out = mapToStruct(mapValues)
+            % mapToStruct maps a list of key->value entries to a struct
+            % that uses the key as fields. Used for converting Java
+            % maps to something that is easier to work with in MATLAB.
+
+            out = struct();
+            for i = 1:length(mapValues)
+
+                entry = mapValues(i);
+                key = entry(1);
+                value = entry(2);
+
+                % Arrays of strings can't be returned as char[][][] because
+                % they may be interpreted as cell arrays or matrices and
+                % could be inconsistent. Thus, we return String[] and force
+                % a cell array manually.
+                if isa(value, 'java.lang.Object[]')
+                    value = cell(value);
+                end
+
+                out.(key) = value;
+
+            end
+
+        end
         
         function [ feedbackUnits ] = getFeedbackUnits( feedbackField )
             %FEEDBACKUNITS Return units of a given feedback type in a log file
