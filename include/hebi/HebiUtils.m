@@ -616,10 +616,11 @@ classdef (Sealed) HebiUtils
             hebiLogs = cell(numLogs,1);
             infos = cell(numLogs,1);
             gains = cell(numLogs,1);
+            fullFileNames = cell(numLogs,1);
             for i=1:numLogs
                 
-                fullFileName = [pathName fileNames{i}];
-                fileInfo = dir(fullFileName);
+                fullFileNames{i} = [pathName fileNames{i}];
+                fileInfo = dir(fullFileNames{i});
                 
                 disp([ 'Loading ' num2str(i) ' of ' ...
                     num2str(numLogs) ': '  fileNames{i} ' - ' ...
@@ -628,19 +629,19 @@ classdef (Sealed) HebiUtils
                 if nargout <= 1
                     % pure conversion
                     hebiLogs{i} = ...
-                        HebiUtils.convertGroupLog(fullFileName, ...
+                        HebiUtils.convertGroupLog(fullFileNames{i}, ...
                         varargin{:});
                 else
                     % also read info/gains
                     [hebiLogs{i}, infos{i}, gains{i}] = ...
-                        HebiUtils.convertGroupLog(fullFileName, ...
+                        HebiUtils.convertGroupLog(fullFileNames{i}, ...
                         varargin{:});
                 end
                 
             end
             
             % Output as 3 args, e.g., [hebiLogs, infos, gains] = ...
-            varargout = {hebiLogs, infos, gains};
+            varargout = {hebiLogs, infos, gains, fullFileNames};
         end
         
         function [ ] = plotLogs( hebiLogs, feedbackField, varargin )
