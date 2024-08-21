@@ -8,4 +8,4 @@
 
 include/hebi/HebiKeyboard.m
 include/hebi/HebiJoystick.m
-
+include/hebi/matlab-input-*.jar
