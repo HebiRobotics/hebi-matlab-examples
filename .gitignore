@@ -6,3 +6,6 @@
 
 *.DS_Store
 
+include/hebi/HebiKeyboard.m
+include/hebi/HebiJoystick.m
+matlab-input-*.jar
