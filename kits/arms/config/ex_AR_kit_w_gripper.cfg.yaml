@@ -1,0 +1,41 @@
+# 6-DoF Arm
+version: 1.0
+families: ["Arm"]
+names: ["J1_base", "J2_shoulder", "J3_elbow", "J4_wrist1", "J5_wrist2", "J6_wrist3"]
+hrdf: "hrdf/A-2240-06G.hrdf"
+
+gains:
+  default: "gains/A-2240-06.xml"
+
+plugins:
+
+  - type: GravityCompensationEffort
+    name: gravComp
+    enabled: true
+    ramp_time: 5
+
+  - type: DynamicsCompensationEffort
+    name: dynamicsComp
+    enabled: true
+    ramp_time: 5
+
+user_data:
+
+  # Joint angles at home for AR demo: [0, pi/3, pi/2, 2*pi/3, -pi/2, 0]
+  home_position: [0, 1.0471975511965976, 1.5707963267948966, 2.0943951023931953, -1.5707963267948966, 0] # radians
+
+  # Time taken for a steady motion to the home position
+  soft_start_time: 4 # seconds
+
+  # Displacements of the phone are scaled by this value to give displacement of the end-effector
+  xyz_scale: 0.75
+
+  gripper_family: "Arm"
+  gripper_name: "gripperSpool"
+  gripper_gains: "gains/gripper_spool_gains.xml"
+  gripper_close_effort: -5.0 # (Nm) Effort applied to close the gripper. More negative effort will pinch the gripper harder.
+  gripper_open_effort: 1.0 # (Nm) Effort applied to open the gripper. More positive effort will NOT make the gripper harder to close.
+
+  mobile_io_family: "Arm"
+  mobile_io_name: "mobileIO"
+  mobile_io_layout: "layouts/ex_AR_kit_w_gripper.json"
