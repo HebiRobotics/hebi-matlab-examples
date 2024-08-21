@@ -5,7 +5,3 @@
 !**/exampleLog.hebilog
 
 *.DS_Store
-
-include/hebi/HebiKeyboard.m
-include/hebi/HebiJoystick.m
-include/hebi/matlab-input-*.jar

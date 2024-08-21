@@ -107,7 +107,7 @@ while ~keys.ESC
 
     % Check for new key presses on the keyboard
     [keys, diffKeys] = read(kb);
-    if diffKeys.SPACE == 1
+    if diffKeys.SPACE == 1 
         
         % Toggle impedance
         controllerOn = ~controllerOn;
