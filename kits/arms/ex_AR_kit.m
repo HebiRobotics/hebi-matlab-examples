@@ -20,11 +20,18 @@ HebiLookup.initialize();
 
 enableLogging = true;
 
+%% Load config file
+localDir = fileparts(mfilename('fullpath'));
+exampleConfigFile = fullfile(localDir, 'config', 'ex_AR_kit.cfg.yaml');
+exampleConfig = HebiUtils.loadRobotConfig(exampleConfigFile);
+
 %%
 %%%%%%%%%%%%%%%%%%%%%%%
 % Mobile Device Setup %
 %%%%%%%%%%%%%%%%%%%%%%%
-mobileIO = HebiMobileIO.findDevice('HEBI', 'mobileIO');
+
+mobileIO = createMobileIOFromConfig(exampleConfig);
+
 mobileIO.initializeUI();
 mobileIO.setAxisValue([3 6], [-1 1]);
 mobileIO.setButtonIndicator([1 8], true);
@@ -46,7 +53,7 @@ gripForceSlider = 'a6';
 % Instantiate the arm kit based on the config files in config/${name}.yaml
 % If your kit has a gas spring, you need to uncomment the offset lines
 % in the corresponding config file.
-[ arm, params, gripper ] = setupArm( 'A-2240-06G' );
+[ arm, params] = setupArm( 'A-2085-06' );
                              
 disp('  ');
 disp('Arm end-effector is now following the mobile device pose.');
@@ -110,7 +117,6 @@ while ~abortFlag
         try
             arm.update();
             arm.send();
-            gripper.send();
         catch
             disp('Could not get robot feedback!');
             break;
@@ -146,9 +152,9 @@ while ~abortFlag
         end
         
         % Map [-1,+1] slider to [0,1] range such that down is close
-        if ~isempty(gripper)
-            gripper.setState((fbkPhoneIO.(gripForceSlider) - 1) / -2);
-        end
+        % if ~isempty(gripper)
+        %     gripper.setState((fbkPhoneIO.(gripForceSlider) - 1) / -2);
+        % end
         
         % Parameter to limit XYZ Translation of the arm if a slider is
         % pulled down.  Pulling all the way down resets translation.
