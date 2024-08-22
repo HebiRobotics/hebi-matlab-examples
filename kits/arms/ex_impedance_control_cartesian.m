@@ -1,11 +1,25 @@
-% End-Effector Impedance Control Demo
+                      % End-Effector Impedance Control Demo
+
+% Features:     In this example we will implement various hybrid motion-force controllers using the impedance control plugin, 
+%               which can be used for a wide variety of applications.
+%               Impedance control is BEST SUITED for enabling free, rigid and springy behaviour, along/about each different axis.
+%               While this is perfectly useful for:
+%               - Having a selectively compliant end-effector,
+%               - Switching between fixed and free behaviour to simulate (mostly) rigid constraints, and
+%               - Allowing human intervention for automated operations by separating controls across different axes,
+%               any applications involving more salient control of the forces (as more complex functions with flexible inputs) 
+%               should use our force control plugin. See ex_force_control_demoname.py.
 %
-% Features:      Demo where the arm can be interacted with and moved around
-%                while in a zero-force gravity-compensated mode, and an
-%                impedance controller can be turned on and off where the
-%                end-effector is controlled based on virtual springs and
-%                dampers in Cartesian space.  Multiple spring/damper
-%                configurations are selectable in the code below.
+%               This comprises the following demos:
+%               - Fixed: A task-space pose controller implemented entirely using force control via the (PD) impedance controller.
+%               - Cartesian: Locks onto a particular end-effector position while having some compliant orientation.
+%               - Gimbal: A gimbal that locks a specific end-effector orientation, while keeping the rest of the arm compliant.
+%               - Floor: The end-effector is free to move but can't travel below a virtual floor. To further simulate sliding on the floor, 
+%                        see force_control example.
+%               - Damping: The end-effector behaves as 3-different damped systems (overdamped, critically damped, and underdamped), 
+%                          at 3 different heights.
+%
+% The following example is for the "Cartesian" demo:
 %
 % Requirements:  MATLAB 2013b or higher
 %
@@ -19,17 +33,17 @@
 clear *;
 close all;
 
+%% Load config file
+localDir = fileparts(mfilename('fullpath'));
+exampleConfigFile = fullfile(localDir, 'config', 'ex_impedance_control_cartesian.cfg.yaml');
+exampleConfig = HebiUtils.loadRobotConfig(exampleConfigFile);
+
 HebiLookup.initialize();
 
 % Instantiate the arm kit based on the config files in config/${name}.yaml
 % If your kit has a gas spring, you need to uncomment the offset lines
 % in the corresponding config file.
-[ arm, params ] = setupArm( 'A-2085-06' );
-    
-% Append the impedance controller plugin. You can also define it in the 
-% config file so it gets applied to all demos.
-impedance = HebiArmPlugins.ImpedanceController();
-arm.plugins{end+1} = impedance;
+arm = createArmFromConfig(exampleConfig);
 
 % Increase feedback frequency since we're calculating velocities at the
 % high level for damping.  Going faster can help reduce a little bit of
@@ -39,12 +53,12 @@ arm.group.setFeedbackFrequency(200);
 
 % Remove the position gains, so that only the commanded torques 
 % are moving the arm.
-gains = params.gains;
+impedance_gains = arm.group.getGains;
 gains.positionKp = 0 * gains.positionKp;
 gains.positionKi = 0 * gains.positionKi;
 gains.positionKd = 0 * gains.positionKd;
 gains.velocityKp = 0 * gains.velocityKp;
-HebiUtils.sendWithRetry(arm.group, 'gains', gains);
+HebiUtils.sendWithRetry(arm.group, 'gains', impedance_gains);
 
 enableLogging = true;
 
@@ -53,7 +67,7 @@ kb = HebiKeyboard();
 
 % Start background logging 
 if enableLogging
-   logFile = arm.group.startLog('dir',[params.localDir '/logs']); 
+   logFile = arm.group.startLog('dir',[localDir '/logs']); 
 end
 
 %% Gravity compensated mode
@@ -71,30 +85,6 @@ disp('  ESC - Exits the demo.');
 % base frame or in the end effector frame.  See code below for
 % details.
 %
-% UNCOMMENT THE GAINS YOU WANT TO USE FOR A GIVEN RUN, AND COMMENT OUT ALL
-% THE OTHER GAINS.
-
-    % HOLD POSITION ONLY (Allow rotation around end-effector position)
-    impedance.gainsInEndEffectorFrame = true; 
-    impedance.Kp = [1000; 1000; 1000; 0; 0; 0];  % (N/m) or (Nm/rad)
-    impedance.Kd = [10; 10; 10; .0; .0; .0;]; % (N/(m/sec)) or (Nm/(rad/sec))
- 
-%     % HOLD ROTATION ONLY
-%     impedance.gainsInEndEffectorFrame = true;
-%     impedance.Kp = [0; 0; 0; 5; 5; 5];  % (N/m) or (Nm/rad)
-%     impedance.Kd = [0; 0; 0; .1; .1; .1;]; % (N/(m/sec)) or (Nm/(rad/sec))
-  
-%     % HOLD POSITION AND ROTATION - BUT ALLOW MOTION ALONG/AROUND Z-AXIS 
-%     % OF THE END EFFECTOR
-%     impedance.gainsInEndEffectorFrame = true; 
-%     impedance.Kp = [500; 500; 0; 5; 5; 0];  % (N/m) or (Nm/rad)
-%     impedance.Kd = [10; 10; 0; .1; .1; 0;]; % (N/(m/sec)) or (Nm/(rad/sec))
-    
-%     % HOLD POSITION AND ROTATION - BUT ALLOW MOTION IN BASE FRAME XY-PLANE
-%     impedance.gainsInEndEffectorFrame = false;
-%     impedance.Kp = [0; 0; 1000; 5; 5; 5];  % (N/m) or (Nm/rad)
-%     impedance.Kd = [0; 0; 10 ; .1; .1; .1;]; % (N/(m/sec)) or (Nm/(rad/sec))
- 
 
 keys = read(kb);
 controllerOn = false;
@@ -102,7 +92,6 @@ while ~keys.ESC
     
     % update state and disable position controller
     arm.update();
-    arm.state.cmdPos = []; 
     arm.send();
 
     % Check for new key presses on the keyboard
