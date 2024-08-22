@@ -1,4 +1,4 @@
-                           % End-Effector Impedance Control Demo
+                                    % End-Effector Impedance Control Demo
 
 % Features:     In this example we will implement various hybrid motion-force controllers using the impedance control plugin, 
 %               which can be used for a wide variety of applications.
@@ -23,11 +23,11 @@
 %
 % Author:        Dave Rollinson
 %                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
-% Date:          Oct 2018
+% Date:          Oct 2018 
 % 
 % Copyright 2017-2018 HEBI Robotics
 % 
-% The following example is for the "Floor" demo:
+% The following example is for the "Damping" demo:
 
 %% Setup
 clear *;
@@ -35,7 +35,7 @@ close all;
 
 %% Load config file
 localDir = fileparts(mfilename('fullpath'));
-exampleConfigFile = fullfile(localDir, 'config', 'ex_impedance_control_floor.cfg.yaml');
+exampleConfigFile = fullfile(localDir, 'config', 'ex_impedance_control_damping.cfg.yaml');
 exampleConfig = HebiUtils.loadRobotConfig(exampleConfigFile);
 
 HebiLookup.initialize();
@@ -48,11 +48,15 @@ arm = createArmFromConfig(exampleConfig);
 % Remove the position gains, so that only the commanded torques 
 % are moving the arm.
 gains = arm.group.getGains;
-gains.positionKp = 0 * gains.positionKp     ;
+gains.positionKp = 0 * gains.positionKp;
 gains.positionKi = 0 * gains.positionKi;
 gains.positionKd = 0 * gains.positionKd;
 gains.velocityKp = 0 * gains.velocityKp;
 HebiUtils.sendWithRetry(arm.group, 'gains', gains);
+
+% Retreive the impedance control plugin
+% impedance_plugin = arm.getPluginByType('HebiArmPlugins.ImpedanceController');
+impedance_plugin = arm.plugins{3};
 
 % Keyboard input
 kb = HebiKeyboard();
@@ -88,13 +92,19 @@ disp('  ESC - Exits the demo.');
 
 % Control Variables
 
-% Initialize floor demo variables
-floorLevel = 0.0;
-floorBuffer = 0.01; % 1cm
+% Meters above the base for overdamped, critically damped, and underdamped cases respectively
+lowerLimits = exampleConfig.userData.lower_limits;
+% State variable for current mode: 0 for overdamped, 1 for crtically damped, 2 for underdamped, -1 for free
+mode = -1;
+prevmode = -1;
 
-% Initialize floor demo flags
-floorCommandFlag = false; % Indicates whether or not to command floor stiffness goals
-cancelCommandFlag = false; % Indicates whether or not to cancel goals
+% Arrange different gains in an ordered list
+dampingKp = [exampleConfig.userData.overdamped_kp;
+              exampleConfig.userData.critically_damped_kp; 
+              exampleConfig.userData.underdamped_kp];
+dampingKd = [exampleConfig.userData.overdamped_kd; 
+              exampleConfig.userData.critically_damped_kd; 
+              exampleConfig.userData.underdamped_kd];
 
 keys = read(kb);
 controllerOn = false;
@@ -116,17 +126,6 @@ while ~keys.ESC
             disp('Impedance Controller ENABLED.');
             arm.setGoal(arm.state.fbk.position);
 
-            % Store current height as floor level, for floor demo
-
-            % Use forward kinematics to find end-effector pose
-            eePose0 = arm.kin.getFK('endEffector', arm.group.getNextFeedback().position);
-
-            % Give a little margin to floor level
-            floorLevel = eePose0(3,4) - floorBuffer;
-
-            % Update flags to indicate having left the floor
-            cancelCommandFlag = true;
-
         else
             disp('Impedance Controller DISABLED.');
         end
@@ -138,40 +137,30 @@ while ~keys.ESC
         % Use forward kinematics to calculate pose of end-effector
         eePoseCurr = arm.kin.getFK('endEffector', arm.group.getNextFeedback().position);
 
-        % Snap goal to floor if end-effector is at or below floor, only when it first reaches the floor
-        if (eePoseCurr(3,4) <= floorLevel) && floorCommandFlag
-
-            % Snap current pose to floor
-            eePoseFloor = eePoseCurr;
-            eePoseFloor(3,4) = floorLevel;
-
-            % Use inverse kinematics to calculate appropriate joint positions
-            positionFloor = arm.kin.getIK('XYZ', eePoseFloor(1:3, 4), ...
-                                          'SO3', eePoseFloor(1:3, 1:3), ...
-                                          'initial', arm.group.getNextFeedback().position);
-
-            % Set snapped pose as goal
-            arm.setGoal(positionFloor);
-
-            % Update flags to indicate being in contact with the floor
-            floorCommandFlag = false;
-            cancelCommandFlag = true;
-
-        % Cancel goal if end-effector is above the floor, only when it leaves the floor
-        elseif (eePoseCurr(3,4) > floorLevel) && cancelCommandFlag    
-
-            % Cancel goal to move freely
-            arm.clearGoal();
-
-            % Update flags to indicate having left the floor
-            cancelCommandFlag = false;
-            floorCommandFlag = true;
-
+        % Assign mode based on current position
+        for i = 1:length(lowerLimits)
+            if eePoseCurr(3,4) > lowerLimits(i)
+                mode = i-1;
+            end
         end
+        
+        % Change gains only upon mode switches
+        if mode ~= prevmode && mode >= 0
+            % Set the gains based on the new mode
+            impedance_plugin.Kp = dampingKp(mode+1,:)';
+            impedance_plugin.Kd = dampingKd(mode+1,:)';
+            
+            fprintf('Mode: %d\n', mode);
+        end
+
+        % Update prevmode to current mode
+        prevmode = mode;
 
     else
 
         arm.clearGoal();
+        mode = -1; %  Free
+        prevmode = -1;
 
     end
     
