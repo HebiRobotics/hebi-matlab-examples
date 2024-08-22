@@ -19,15 +19,16 @@
 %               - Damping: The end-effector behaves as 3-different damped systems (overdamped, critically damped, and underdamped), 
 %                          at 3 different heights.
 %
-% The following example is for the "Fixed" demo:
-%
 % Requirements:  MATLAB 2013b or higher
 %
 % Author:        Dave Rollinson
 %                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
 % Date:          Oct 2018
-
+% 
 % Copyright 2017-2018 HEBI Robotics
+% 
+% The following example is for the "Fixed" demo:
+
 
 %% Setup
 clear *;
@@ -45,25 +46,25 @@ HebiLookup.initialize();
 % in the corresponding config file.
 arm = createArmFromConfig(exampleConfig);
 
+% Remove the position gains, so that only the commanded torques 
+% are moving the arm.
+gains = arm.group.getGains;
+gains.positionKp = 0 * gains.positionKp;
+gains.positionKi = 0 * gains.positionKi;
+gains.positionKd = 0 * gains.positionKd;
+gains.velocityKp = 0 * gains.velocityKp;
+HebiUtils.sendWithRetry(arm.group, 'gains', gains);
+
+% Keyboard input
+kb = HebiKeyboard();
+
 % Increase feedback frequency since we're calculating velocities at the
 % high level for damping.  Going faster can help reduce a little bit of
 % jitter for fast motions, but going slower (100 Hz) also works just fine
 % for most applications.
 arm.group.setFeedbackFrequency(200); 
 
-% Remove the position gains, so that only the commanded torques 
-% are moving the arm.
-impedance_gains = arm.group.getGains;
-gains.positionKp = 0 * gains.positionKp;
-gains.positionKi = 0 * gains.positionKi;
-gains.positionKd = 0 * gains.positionKd;
-gains.velocityKp = 0 * gains.velocityKp;
-HebiUtils.sendWithRetry(arm.group, 'gains', impedance_gains);
-
 enableLogging = true;
-
-% Keyboard input
-kb = HebiKeyboard();
 
 % Start background logging 
 if enableLogging
