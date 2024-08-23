@@ -26,26 +26,6 @@ exampleConfigFile = fullfile(localDir, 'config', 'ex_AR_kit.cfg.yaml');
 exampleConfig = HebiUtils.loadRobotConfig(exampleConfigFile);
 
 %%
-%%%%%%%%%%%%%%%%%%%%%%%
-% Mobile Device Setup %
-%%%%%%%%%%%%%%%%%%%%%%%
-
-mobileIO = createMobileIOFromConfig(exampleConfig);
-
-mobileIO.initializeUI();
-mobileIO.setAxisValue([3 6], [-1 1]);
-mobileIO.setButtonIndicator([1 8], true);
-mobileIO.addText('B1 - Reset/re-align pose');
-mobileIO.addText('A3 - Scale translation commands');
-mobileIO.addText('A6 - Gripper Open/Close');
-mobileIO.addText('B8 - Quit');
-
-resetPoseButton = 'b1';
-quitDemoButton = 'b8';
-translationScaleSlider = 'a3';
-gripForceSlider = 'a6';
-
-%%
 %%%%%%%%%%%%%
 % Arm Setup %
 %%%%%%%%%%%%%
@@ -53,7 +33,7 @@ gripForceSlider = 'a6';
 % Instantiate the arm kit based on the config files in config/${name}.yaml
 % If your kit has a gas spring, you need to uncomment the offset lines
 % in the corresponding config file.
-[ arm, params] = setupArm( 'A-2085-06' );
+arm = createArmFromConfig(exampleConfig);
                              
 disp('  ');
 disp('Arm end-effector is now following the mobile device pose.');
@@ -66,6 +46,30 @@ disp('  A6 - Control the gripper (if the arm has gripper).');
 disp('       Sliding down closes the gripper, sliding up opens.');
 disp('  B8 - Quits the demo.');
 
+%%
+%%%%%%%%%%%%%%%%%%%%%%%
+% Mobile Device Setup %
+%%%%%%%%%%%%%%%%%%%%%%%
+
+mobileIO = createMobileIOFromConfig(exampleConfig);
+
+% mobileIO.initializeUI();
+% mobileIO.setAxisValue([3 6], [-1 1]);
+% mobileIO.setButtonIndicator([1 8], true);
+% mobileIO.addText('B1 - Reset/re-align pose');
+% mobileIO.addText('A3 - Scale translation commands');
+% mobileIO.addText('A6 - Gripper Open/Close');
+% mobileIO.addText('B8 - Quit');
+
+resetPoseButton = 'b1';
+quitDemoButton = 'b8';
+translationScaleSlider = 'a3';
+gripForceSlider = 'a6';
+
+% Start background logging
+if enableLogging
+    arm.group.startLog('dir',[localDir '/logs']);
+end
 
 %% Startup
 abortFlag = false;
@@ -73,18 +77,14 @@ while ~abortFlag
     
     xyzScale = [1 1 2]';
 
-    % Start background logging
-    if enableLogging
-        arm.group.startLog('dir',[params.localDir '/logs']);
-    end
-
     % Move to current coordinates
-    xyzTarget_init = [0.5 0.0 0.1]';
-    rotMatTarget_init = R_y(pi);
+    % xyzTarget_init = [0.5 0.0 0.1]';
+    % rotMatTarget_init = R_y(pi);
 
-    ikPosition = arm.kin.getIK('xyz', xyzTarget_init, ...
-                               'so3', rotMatTarget_init, ...
-                               'initial', params.ik_seed_pos );
+    % ikPosition = arm.kin.getIK('xyz', xyzTarget_init, ...
+    %                            'so3', rotMatTarget_init, ...
+    %                            'initial', params.ik_seed_pos );
+    ikPosition = exampleConfig.userData.home_position
         
     % Slow trajectory timing for the initial move to home position   
     arm.trajGen.setSpeedFactor( 0.5 );

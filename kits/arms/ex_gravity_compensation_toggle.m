@@ -16,7 +16,7 @@ clear *;
 close all;
 
 HebiLookup.initialize();
-    
+            
 %% Load config file
 localDir = fileparts(mfilename('fullpath'));
 exampleConfigFile = fullfile(localDir, 'config', 'ex_gravity_compensation_toggle.cfg.yaml');

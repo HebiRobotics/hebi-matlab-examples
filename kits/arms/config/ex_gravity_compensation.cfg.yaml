@@ -1,6 +1,6 @@
 # 6-DoF Arm
 version: 1.0
-families: ["Arm"]
+families: ["HEBIArm"]
 names: ["J1_base", "J2_shoulder", "J3_elbow", "J4_wrist1", "J5_wrist2", "J6_wrist3"]
 hrdf: "hrdf/A-2085-06.hrdf"
 
