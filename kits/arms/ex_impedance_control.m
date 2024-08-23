@@ -24,7 +24,7 @@ HebiLookup.initialize();
 % Instantiate the arm kit based on the config files in config/${name}.yaml
 % If your kit has a gas spring, you need to uncomment the offset lines
 % in the corresponding config file.
-[ arm, params ] = setupArm( 'A-2582-01' );
+[ arm, params ] = setupArm( 'A-2085-06' );
     
 % Append the impedance controller plugin. You can also define it in the 
 % config file so it gets applied to all demos.

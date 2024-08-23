@@ -75,7 +75,7 @@ function [ arm, params, gripper ] = setupArm( kit )
 
 %% Load config file
 localDir = fileparts(mfilename('fullpath'));
-configFile = fullfile(localDir, 'config', [kit '.yaml']);
+configFile = fullfile(localDir, 'config', [kit '.cfg.yaml']);
 config = HebiUtils.loadRobotConfig(configFile);
 
 %% Create models according to config
