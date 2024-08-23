@@ -214,10 +214,6 @@ classdef HebiArm < handle
                 this.plugins{i}.update(this);
             end 
 
-            % Ignore efforts that aren't used
-            unusedEffort = (this.state.cmdEffort == 0);
-            this.state.cmdEffort(unusedEffort) = nan;
-
         end
         
         function [] = send(this, varargin)
