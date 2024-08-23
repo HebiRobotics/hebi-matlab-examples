@@ -235,6 +235,22 @@ classdef HebiArm < handle
             % Send state to module
             this.group.send(this.cmd, varargin{:});
         end
+
+        function plugin = getPluginByType(this, type)
+            % getPluginByType Retrieves a plugin by its class type
+            %
+            % Example:
+            %   plugin = arm.getPluginByType('HebiArmPlugins.ImpedanceController');
+            
+            pluginFields = fieldnames(this.plugins);
+            for i = 1:length(pluginFields)
+                plugin = this.plugins.(pluginFields{i});
+                if isa(plugin, type)
+                    return;
+                end
+            end
+            error('Plugin of type "%s" not found.', type);
+        end
         
     end
     
