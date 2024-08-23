@@ -100,11 +100,11 @@ classdef HebiArmPlugin < handle
             % See also HebiArm, HebiUtils.loadRobotConfig
             
             pluginNames = fields(pluginMap);
-            numPlugins = numel(pluginNames);
-            out = cell(numPlugins, 1);
+            out = struct();
 
             for i = 1:numel(pluginNames)
-                out{i} = HebiArmPlugin.createFromConfig(pluginMap.(pluginNames{i}));
+                plugin = HebiArmPlugin.createFromConfig(pluginMap.(pluginNames{i}));
+                out.(plugin.name) = plugin; % Use plugin's name as the struct field name
             end
                 
         end
