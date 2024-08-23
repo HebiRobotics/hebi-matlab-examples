@@ -33,12 +33,12 @@
 clear *;
 close all;
 
+HebiLookup.initialize();
+
 %% Load config file
 localDir = fileparts(mfilename('fullpath'));
 exampleConfigFile = fullfile(localDir, 'config', 'ex_impedance_control_cartesian.cfg.yaml');
 exampleConfig = HebiUtils.loadRobotConfig(exampleConfigFile);
-
-HebiLookup.initialize();
 
 % Instantiate the arm kit based on the config files in config/${name}.yaml
 % If your kit has a gas spring, you need to uncomment the offset lines
