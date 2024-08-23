@@ -7,7 +7,7 @@
   <actuator type="R8-16"/>
   <bracket type="R8HeavyRightOutside"/>
   <actuator type="R8-16"/>
-  <link type="R8" extension="0.325" twist="pi"/>
+  <link type="R8" extension="0.325" twist="pi" mass_offset="1.0"/>
   <actuator type="R8-16"/>
   <link type="R8" extension="0.325" twist="pi"/>
   <actuator type="R8-3"/>
@@ -15,5 +15,5 @@
   <actuator type="R8-3"/>
   <bracket type="R8LightRight"/>
   <actuator type="R8-3"/>
-  <end-effector type="R8Parallel"/>
+  <end-effector type="R8Parallel" mass_offset="0.5"/>
 </robot>
