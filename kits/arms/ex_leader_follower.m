@@ -50,7 +50,7 @@ while ~keys.ESC
     
     arm2.setGoal( arm.state.fbk.position );
     
-    effortError = arm2.state.fbk.effort - arm2.state.fbk.effortCmd;
+    effortError = arm2.state.fbk.effortCmd - arm2.state.fbk.effort;
     
     % Tweak to reduce the applied torque errors when they're small.  This
     % helps make the arm feel better when there are only small errors due
@@ -62,7 +62,7 @@ while ~keys.ESC
     
     modifiedError = fudgeFactor .* effortError;
     
-    arm.state.cmdEffort = arm.state.cmdEffort - modifiedError;
+    arm.state.cmdEffort = arm.state.cmdEffort + modifiedError;
     
     arm.send();
     arm2.send();
