@@ -35,7 +35,7 @@ classdef HebiArm < handle
     
     properties(Access = public)
         state struct = [];
-        plugins cell = {};
+        plugins struct = struct();
     end
     
     properties(Access = private)
@@ -210,8 +210,12 @@ classdef HebiArm < handle
 
             % Call plugins (FK, Jacobians, End-Effector XYZ, etc.)
             this.state = newState;
-            for i=1:length(this.plugins)
-                this.plugins{i}.update(this);
+            pluginFields = fieldnames(this.plugins);
+            for i=1:length(pluginFields)
+                plugin = this.plugins.(pluginFields{i});
+                if plugin.enabled % Optional: check if the plugin is enabled
+                    plugin.update(this);
+                end
             end 
 
             % Ignore efforts that aren't used
