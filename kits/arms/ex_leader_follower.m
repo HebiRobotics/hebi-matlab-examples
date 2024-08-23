@@ -56,7 +56,7 @@ while ~keys.ESC
     % helps make the arm feel better when there are only small errors due
     % to modeling / spring error, but still apply torques when there's
     % significant error from collisions / disturbances
-    effortScales = 0.5*[16 16 16 9 9 3];  % Scales depending on joint
+    effortScales = 0.5 * [16 16 16 9 9 3];  % Scales depending on joint
     fudgeFactor = abs(effortError) ./ effortScales;
     fudgeFactor = min( fudgeFactor, 1.0 ); % Cap at 1 (don't amplify errors)
     
