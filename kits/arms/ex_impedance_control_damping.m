@@ -1,4 +1,4 @@
-                                    % End-Effector Impedance Control Demo
+                                      % End-Effector Impedance Control Demo
 
 % Features:     In this example we will implement various hybrid motion-force controllers using the impedance control plugin, 
 %               which can be used for a wide variety of applications.
@@ -54,9 +54,9 @@ gains.positionKd = 0 * gains.positionKd;
 gains.velocityKp = 0 * gains.velocityKp;
 HebiUtils.sendWithRetry(arm.group, 'gains', gains);
 
-% Retreive the impedance control plugin
-% impedance_plugin = arm.getPluginByType('HebiArmPlugins.ImpedanceController');
-impedance_plugin = arm.plugins{3};
+% Retreive the impedance control plugin using the "name" field in the config file
+impedance_plugin = arm.plugins.impedanceController;
+% impedance_plugin = arm.getPluginByType('HebiArmPlugins.ImpedanceController'); % "type" field can also be used
 
 % Keyboard input
 kb = HebiKeyboard();
