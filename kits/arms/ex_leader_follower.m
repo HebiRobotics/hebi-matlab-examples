@@ -36,7 +36,9 @@ if enableLogging
 end
 
 %% Gravity compensated mode
-disp('Commanded gravity-compensated zero torques to the arm.');
+disp('Commanding gravity-compensated torques to both arms.');
+disp('Commanding leader arm to follower arm.');
+disp('Commanding follower arm torque errors to leader arm.');
 disp('Press ESC to stop.');
 
 % Keyboard input
