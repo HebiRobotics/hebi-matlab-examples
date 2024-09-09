@@ -69,7 +69,7 @@ classdef HebiArm < handle
         end
 
         function [] = setGoal(this, varargin)
-            % arm.setGoal('positions', pos, 'velocities', vel, 'accelerations', accel, 'time', time); 
+            % arm.setGoal(pos, 'velocities', vel, 'accelerations', accel, 'time', time); 
             % Calculates trajectory from current pos (fbk) to target
             % same as newJointMove, but includes current state? [cmdPos pos] => traj generator
             

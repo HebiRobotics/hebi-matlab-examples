@@ -1,4 +1,4 @@
-                 % Arm Gravity Compensation Toggle Demo
+                   % Arm Gravity Compensation Toggle Demo
 %
 % Features:      Demo where the arm can be interacted with and moved around
 %                while in a zero-force gravity-compensated mode, which can be toggled on and off.

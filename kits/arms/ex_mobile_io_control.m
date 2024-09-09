@@ -1,10 +1,9 @@
 % 6-DoF Arm (w/ Optional Gripper) Tele-Op Demo 
 %
-% Features:      Mobile App input to control motions of arm and gripper
+% Features:      Mobile App input to control motions of arm
 %
 % Requirements:  MATLAB 2013b or higher
-%                Android or iOS device running HEBI Mobile I/O that
-%                supports ARCore / ARKit.
+%                Android or iOS device running HEBI Mobile I/O
 %
 % Author:        Dave Rollinson
 %                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
@@ -22,7 +21,7 @@ enableLogging = true;
 
 %% Load config file
 localDir = fileparts(mfilename('fullpath'));
-exampleConfigFile = fullfile(localDir, 'config', 'ex_AR_kit.cfg.yaml');
+exampleConfigFile = fullfile(localDir, 'config', 'ex_mobile_io_control.cfg.yaml');
 exampleConfig = HebiUtils.loadRobotConfig(exampleConfigFile);
 
 %%
@@ -42,24 +41,15 @@ runMode = "softstart";
 
 % Command the softstart to the home position
 arm.update();
-arm.clearGoal(); % in case we run only this section
-arm.setGoal(exampleConfig.userData.home_position, ...
-            'time', exampleConfig.userData.homing_duration);
-
-% Get the cartesian position and rotation matrix @ home position
-transformHome = arm.kin.getFK('endEffector', exampleConfig.userData.home_position);
-xyzHome = transformHome(1:3, 4);
-rotHome = transformHome(1:3, 1:3);
+% arm.clearGoal(); % in case we run only this section
+% arm.setGoal(exampleConfig.userData.home_position, ...
+%             'time', exampleConfig.userData.homing_duration);
 
 % Print instructions
 instructions = [
-'Arm end-effector can now follow the mobile device pose in AR mode.', newline ...
-'The control interface has the following commands:', newline ...
-'  (House emoji) - Home', newline ...
-'                  This takes the arm to home and aligns with mobile device.', newline ...
-'  (Phone emoji) - Engage/Disengage AR Control', newline ...
-'  (Earth emoji) - Go to grav comp mode.', newline ...
-'  (Cross emoji) - Quit the demo.'
+'   B1-B3      - Waypoints 1-3', newline ...
+'(Earth Emoji) - Grav Comp Mode', newline ...
+'(Cross Emoji) - Quit'
 ]; 
 
 disp(instructions);
@@ -72,6 +62,9 @@ disp(instructions);
 mobileIO = createMobileIOFromConfig(exampleConfig);
 mobileIO.update();
 
+buttons = ['b1'; 'b2'; 'b3'];
+waypoints = [exampleConfig.userData.waypoint_1; exampleConfig.userData.waypoint_2; exampleConfig.userData.waypoint_3];
+
 % Start background logging
 if enableLogging
     arm.group.startLog('dir',[localDir '/logs']);
@@ -79,26 +72,8 @@ end
 
 %% Startup
 while ~abortFlag
-
-    %%%%%%%%%%%%%%%%%%%
-    % Gather Feedback %
-    %%%%%%%%%%%%%%%%%%%
-    try
-        arm.send()
-        arm.update();
-    catch
-        disp('Could not get robot feedback!');
-        break;
-    end
-
-    if runMode == "softstart"
-        % End softstart when the arm reaches the home_position
-        if arm.isAtGoal
-            runMode = "waiting";
-            continue;
-        end
-        continue;
-    end
+    % Update the arm
+    arm.update();
 
     % We use a non-blocking timeout w/ manual update checks so we can
     % handle common wireless delays/outages without breaking. We only
@@ -114,59 +89,29 @@ while ~abortFlag
         continue;
     end
     fbkMobileIO = mobileIO.getFeedbackIO();
-    
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Read/Map Joystick Inputs %
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    % Check for homing command
-    if fbkMobileIO.('b1')
-        runMode = "waiting";
-        arm.setGoal(exampleConfig.userData.home_position, ...
-                    'time', exampleConfig.userData.homing_duration);
+    % Iterate over buttons 1, 2, 3
+    for N = 1:3
+        % BN - Waypoint N (N = 1, 2, 3)
+        if fbkMobileIO.(buttons(N, :))  % "ToOn"
+            arm.setGoal(waypoints(N,:), 'time', exampleConfig.userData.travel_time);
+        end
     end
 
-    % Check for AR Mode command
-    if fbkMobileIO.('b3') && runMode ~= "ar_mode" % ToOn
-
-        runMode = "ar_mode";
-
-        % Store initial position and orientation as baseline
-        rotPhone_init = mobileIO.getArOrientation();
-        xyzPhone_init = mobileIO.getArPosition();
-
-    end
-    
-    % Check for Grav Comp
-    if fbkMobileIO.('b6')
-        runMode = "grav_comp";
+    % B6 - Grav Comp
+    if fbkMobileIO.('b6')  % "ToOn"
         arm.clearGoal();
     end
 
-    % Check for quit command
-    if fbkMobileIO.('b8')
+    % B8 - Quit
+    if fbkMobileIO.('b8')  % "ToOn"
+        % Reset text & color, and quit
         abortFlag = true;
         break;
     end
 
-    if runMode == "ar_mode"
-
-        rotPhone = mobileIO.getArOrientation();
-        xyzPhone = mobileIO.getArPosition();
-
-        xyzTarget = xyzHome + ...
-            exampleConfig.userData.xyz_scale * [1; 1; 2] .* (rotPhone_init' * (xyzPhone - xyzPhone_init));   
-        rotTarget = rotPhone_init' * rotPhone * rotHome;
-
-        % Use inverse kinematics to calculate appropriate joint positions
-        targetJoints = arm.kin.getIK('XYZ', xyzTarget, ...
-            'SO3', rotTarget, ...
-            'initial', arm.group.getNextFeedback().position);
-
-        % Set snapped pose as goal
-        % arm.clearGoal();
-        arm.setGoal(targetJoints);
-    end
+    % Send the arm command
+    arm.send();
 end
 
 %%
