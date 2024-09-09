@@ -1,4 +1,4 @@
-                      % End-Effector Impedance Control Demo
+ n                      % End-Effector Impedance Control Demo
 
 % Features:     In this example we will implement various hybrid motion-force controllers using the impedance control plugin, 
 %               which can be used for a wide variety of applications.
