@@ -1,0 +1,31 @@
+# X-Series 3-DoF Arm
+families: ["Arm"]
+names: ["J1_base", "J2_shoulder", "J3_elbow"]
+hrdf: "hrdf/A-2085-03.hrdf"
+
+gains:
+  default: "gains/A-2085-03.xml"
+
+user_data:
+  # Default seed positions for doing inverse kinematics
+  ik_seed_pos: [0.01, 1.0, 2.5]
+
+plugins:
+  - type: GravityCompensationEffort
+    name: gravComp
+    enabled: true
+    ramp_time: 5
+
+  - type: DynamicsCompensationEffort
+    name: dynamicsComp
+    enabled: true
+    ramp_time: 5
+
+  # Kits with a gas spring need to add a shoulder compensation torque.
+  # It should be around -7 Nm for most kits, but it may need to be tuned
+  # for your specific setup.
+  - name: 'gasSpringCompensation'
+    type: EffortOffset
+    enabled: false
+    ramp_time: 5
+    offset: [0, -7, 0]

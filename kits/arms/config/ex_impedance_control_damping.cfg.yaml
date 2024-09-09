@@ -1,0 +1,53 @@
+# 6-DoF Arm
+version: 1.0
+families: ["Arm"]
+names: ["J1_base", "J2_shoulder", "J3_elbow", "J4_wrist1", "J5_wrist2", "J6_wrist3"]
+hrdf: "hrdf/A-2085-06.hrdf"
+
+gains:
+  default: "gains/A-2085-06.xml"
+
+plugins:
+
+  - type: GravityCompensationEffort
+    name: gravComp
+    enabled: true
+    ramp_time: 5
+
+  - type: DynamicsCompensationEffort
+    name: dynamicsComp
+    enabled: true
+    ramp_time: 5
+
+  # An impedance controller adds a virtual spring to the
+  # end-effector and can improve tracking. It can be enabled
+  # by setting 'enabled' to true. The gains are in the form of
+  # [x, y, z, rx, ry, rz]. Setting gains of zero deactivates
+  # the corresponding degree of translation or rotation.
+  # These gains are initialized to zero as the will be changed over the course of the damping example
+  - type: ImpedanceController
+    name: impedanceController
+    enabled: true
+    ramp_time: 0.5
+    gains_in_end_effector_frame: false
+    kp: [0, 0, 0, 0, 0, 0] # (N/m) or (Nm/rad)
+    kd: [0, 0, 0, 0, 0, 0] # (N/(m/sec)) or (Nm/(rad/sec))
+
+# Any extra configuration data is stored here
+user_data:
+
+  # Distance above the base for overdamped, critically damped, and underdamped cases respectively
+  lower_limits: [0.0, 0.15, 0.3] # (m)
+
+  overdamped_kp: [100, 100, 0, 5, 5, 1] # (N/m) or (Nm/rad)
+  overdamped_kd: [15, 15, 1, 0, 0, 0] # (N/(m/sec)) or (Nm/(rad/sec))
+
+  critically_damped_kp: [100, 100, 0, 5, 5, 1] # (N/m) or (Nm/rad)
+  critically_damped_kd: [5, 5, 1, 0, 0, 0] # (N/(m/sec)) or (Nm/(rad/sec))
+
+  underdamped_kp: [100, 100, 0, 5, 5, 1] # (N/m) or (Nm/rad)
+  underdamped_kd: [0, 0, 0, 0, 0, 0] # (N/(m/sec)) or (Nm/(rad/sec))
+
+  mobile_io_family: "Arm"
+  mobile_io_name: "mobileIO"
+  mobile_io_layout: "layouts/ex_impedance_control_damping.json"

@@ -1,0 +1,42 @@
+# 6-DoF Arm
+version: 1.0
+families: ["Arm"]
+names: ["J1_base", "J2_shoulder", "J3_elbow", "J4_wrist1", "J5_wrist2", "J6_wrist3"]
+hrdf: "hrdf/A-2085-06.hrdf"
+
+gains:
+  default: "gains/A-2085-06.xml"
+
+plugins:
+
+  - type: GravityCompensationEffort
+    name: gravComp
+    enabled: true
+    ramp_time: 5
+
+  - type: DynamicsCompensationEffort
+    name: dynamicsComp
+    enabled: true
+    ramp_time: 5
+
+  # An impedance controller adds a virtual spring to the
+  # end-effector and can improve tracking. It can be enabled
+  # by setting 'enabled' to true. The gains are in the form of
+  # [x, y, z, rx, ry, rz]. Setting gains of zero deactivates
+  # the corresponding degree of translation or rotation.
+  # These gains correspond to the stiffness of the virtual floor
+  - type: ImpedanceController
+    name: impedanceController
+    enabled: true
+    ramp_time: 0.5
+    gains_in_end_effector_frame: true
+    kp: [500, 500, 500, 5, 5, 1] # (N/m) or (Nm/rad)
+    kd: [5, 5, 5, 0, 0, 0] # (N/(m/sec)) or (Nm/(rad/sec))
+    ki: [20, 20, 20, 0.5, 0.5, 0.5]
+    i_clamp: [10, 10, 10, 1, 1, 1] # max value
+
+user_data:
+
+  mobile_io_family: "Arm"
+  mobile_io_name: "mobileIO"
+  mobile_io_layout: "layouts/ex_impedance_control_floor.json"

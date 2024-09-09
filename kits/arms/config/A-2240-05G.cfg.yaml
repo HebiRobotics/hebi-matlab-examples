@@ -1,0 +1,39 @@
+# R-Series 5-DoF Arm with Gripper
+version: 1.0
+families: ["Arm"]
+names: ["J1_base", "J2_shoulder", "J3_elbow", "J4_wrist1", "J5_wrist2"]
+hrdf: "hrdf/A-2240-05G.hrdf"
+
+gains:
+  default: "gains/A-2240-05.xml"
+  gripper: "gains/A-2255-01.xml"
+
+user_data:
+  # Default seed positions for doing inverse kinematics
+  ik_seed_pos: [0.01, 1.0, 2.5, 1.5, -1.5]
+
+  # Gripper specific settings
+  has_gripper: true
+  gripper_open_effort: 1
+  gripper_close_effort: -5
+
+plugins:
+
+  - type: GravityCompensationEffort
+    name: gravComp
+    enabled: true
+    ramp_time: 5
+
+  - type: DynamicsCompensationEffort
+    name: dynamicsComp
+    enabled: true
+    ramp_time: 5
+
+  # Kits with a gas spring need to add a shoulder compensation torque.
+  # It should be around -7 Nm for most kits, but it may need to be tuned
+  # for your specific setup.
+  - name: 'gasSpringCompensation'
+    type: EffortOffset
+    enabled: false
+    ramp_time: 5
+    offset: [0, -7, 0, 0, 0]

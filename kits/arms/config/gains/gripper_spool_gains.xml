@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<group_gains>
+  <control_strategy>4</control_strategy>
+  <position>
+    <kp>15</kp>
+    <ki>0</ki>
+    <kd>0</kd>
+    <feed_forward>0</feed_forward>
+    <dead_zone>0</dead_zone>
+    <i_clamp>1</i_clamp>
+    <punch>0</punch>
+    <min_target>-inf</min_target>
+    <max_target>inf</max_target>
+    <target_lowpass>1</target_lowpass>
+    <min_output>-20</min_output>
+    <max_output>20</max_output>
+    <output_lowpass>1</output_lowpass>
+    <d_on_error>1</d_on_error>
+  </position>
+  <velocity>
+    <kp>0.05</kp>
+    <ki>0</ki>
+    <kd>0</kd>
+    <feed_forward>1</feed_forward>
+    <dead_zone>0</dead_zone>
+    <i_clamp>0.25</i_clamp>
+    <punch>0</punch>
+    <min_target>-1.502675</min_target>
+    <max_target>1.502675</max_target>
+    <target_lowpass>1</target_lowpass>
+    <min_output>-1</min_output>
+    <max_output>1</max_output>
+    <output_lowpass>0.75</output_lowpass>
+    <d_on_error>1</d_on_error>
+  </velocity>
+  <effort>
+    <kp>0.25</kp>
+    <ki>0</ki>
+    <kd>0.001</kd>
+    <feed_forward>1</feed_forward>
+    <dead_zone>0</dead_zone>
+    <i_clamp>0.25</i_clamp>
+    <punch>0</punch>
+    <min_target>-20</min_target>
+    <max_target>20</max_target>
+    <target_lowpass>1</target_lowpass>
+    <min_output>-1</min_output>
+    <max_output>1</max_output>
+    <output_lowpass>0.9</output_lowpass>
+    <d_on_error>0</d_on_error>
+  </effort>
+</group_gains>
+

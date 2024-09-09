@@ -1,0 +1,88 @@
+[
+  {
+      "id": "b1",
+      "type": "button",
+      "x": -0.8,
+      "y":  -0.73,
+      "width": 0.15,
+      "height": 0.15,
+      "parameters": {
+          "text": "📌",
+          "mode": "momentary"
+      }
+  },
+  {
+      "id": "b2",
+      "type": "button",
+      "x": -0.4,
+      "y": -0.73,
+      "width": 0.15,
+      "height": 0.15,
+      "parameters": {
+          "text": "🚏",
+          "mode": "momentary"
+      }
+  },
+  {
+      "id": "b3",
+      "type": "button",
+      "x": -0,
+      "y":  -0.73,
+      "width": 0.15,
+      "height": 0.15,
+      "parameters": {
+          "text": "🔄",
+          "mode": "momentary"
+      }
+  },
+  {
+      "id": "b4",
+      "type": "button",
+      "x": 0.4,
+      "y": -0.73,
+      "width": 0.15,
+      "height": 0.15,
+      "parameters": {
+          "text": "🗑️",
+          "mode": "momentary"
+      }
+  },
+  {
+      "id": "b8",
+      "type": "button",
+      "x": 0.8,
+      "y": -0.73,
+      "width": 0.15,
+      "height": 0.15,
+      "parameters": {
+          "text": "❌",
+          "mode": "momentary"
+      }
+  },
+  {
+      "id": "a3",
+      "type": "rotslider",
+      "x": -0.25,
+      "y": 0.6,
+      "width": 0.05,
+      "height": 0.5,
+      "parameters": {
+          "text": "⏱️",
+          "steps": 10,
+          "min": -1,
+          "max": 1,
+          "rest": 0
+      }
+  },
+  {
+      "id": "led",
+      "type": "led",
+      "x": 0.25,
+      "y": 0,
+      "width": 0.2,
+      "height": 0.2,
+      "parameters": {
+          "text": "led"
+      }
+  }
+]

@@ -1,0 +1,49 @@
+[
+  {
+      "id": "b1",
+      "type": "button",
+      "x": -0.5,
+      "y":  -0.73,
+      "width": 0.15,
+      "height": 0.15,
+      "parameters": {
+          "text": "Home",
+          "mode": 0
+      }
+  },
+  {
+      "id": "b2",
+      "type": "button",
+      "x": 0,
+      "y": -0.73,
+      "width": 0.15,
+      "height": 0.15,
+      "parameters": {
+          "text": "Arm Control",
+          "mode": 0
+      }
+  },
+  {
+      "id": "b3",
+      "type": "button",
+      "x": 0.5,
+      "y":  -0.73,
+      "width": 0.15,
+      "height": 0.15,
+      "parameters": {
+          "text": "Gripper",
+          "mode": 0
+      }
+  },
+  {
+      "id": "led",
+      "type": "led",
+      "x": 0,
+      "y": 0,
+      "width": 0.2,
+      "height": 0.2,
+      "parameters": {
+          "text": "led"
+      }
+  }
+]

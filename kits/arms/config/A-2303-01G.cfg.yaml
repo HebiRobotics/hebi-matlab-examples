@@ -1,0 +1,36 @@
+# R-Series 6-DoF Arm with Gripper
+version: 1.0
+families: ["Arm"]
+names: ["J1_base", "J2_shoulder1A", "J3_shoulder2", "J4_elbow1", "J5_elbow2", "J6_wrist1", "J7_wrist2"]
+hrdf: "hrdf/A-2303-01G.hrdf"
+
+gains:
+  default: "gains/A-2303-01.xml"
+  gripper: "gains/A-2255-01.xml"
+
+user_data:
+  # Default seed positions for doing inverse kinematics
+  ik_seed_pos: [0, -1, 0, 0, -1.5, 0, 0]
+
+  # Gripper specific settings
+  has_gripper: true
+  gripper_open_effort: 1
+  gripper_close_effort: -5
+
+plugins:
+  - type: GravityCompensationEffort
+    name: gravComp
+    enabled: true
+    ramp_time: 2
+
+  - type: DynamicsCompensationEffort
+    name: dynamicsComp
+    enabled: true
+    ramp_time: 2
+
+  - name: 'DoubleShoulder'
+    type: DoubledJointMirror
+    enabled: true
+    group_Family: ["Arm"]
+    group_name: ["J2_shoulder1B"]
+    index: 2

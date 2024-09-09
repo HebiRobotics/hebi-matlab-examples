@@ -1,0 +1,42 @@
+# 6-DoF Arm
+version: 1.0
+families: ["Arm"]
+names: ["J1_base", "J2_shoulder", "J3_elbow", "J4_wrist1", "J5_wrist2", "J6_wrist3"]
+hrdf: "hrdf/A-2240-06G.hrdf"
+
+gains:
+  default: "gains/A-2240-06.xml"
+
+plugins:
+
+  - type: GravityCompensationEffort
+    name: gravComp
+    enabled: true
+    ramp_time: 5
+
+  - type: DynamicsCompensationEffort
+    name: dynamicsComp
+    enabled: true
+    ramp_time: 5
+
+user_data:
+
+  # Travel time is calculated using
+  #   base_travel_time + slider * (base_travel_time - min_travel_time)
+  # Since slider goes from -1 to 1, travel time goes from min_travel_time to 2 * base_travel_time - min_travel_time
+
+  # Minimum travel time value
+  min_travel_time: 0.5
+
+  # The default travel time value
+  base_travel_time: 3 # seconds
+
+  gripper_family: "Arm"
+  gripper_name: "gripperSpool"
+  gripper_gains: "gains/gripper_spool_gains.xml"
+  gripper_close_effort: -5.0 # (Nm) Effort applied to close the gripper. More negative effort will pinch the gripper harder.
+  gripper_open_effort: 1.0 # (Nm) Effort applied to open the gripper. More positive effort will NOT make the gripper harder to close.
+
+  mobile_io_family: "Arm"
+  mobile_io_name: "mobileIO"
+  mobile_io_layout: "layouts/ex_teach_repeat_w_gripper.json"

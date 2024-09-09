@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- For documentation on the HEBI Robot Configuration please visit: -->
+<!-- https://github.com/HebiRobotics/hebi-hrdf/blob/master/FORMAT.md -->
+
+<!-- R-Series SCARA Arm (4-DoF with Gripper) -->
+<robot version="1.2.0">
+  <actuator type="R8-9"/>
+  <bracket type="R8HeavyRightOutside"/>
+  <actuator type="R8-16"/>
+  <link type="R8" extension="0.325" twist="-pi/2"/>
+  <actuator type="R8-3"/>
+  <link type="R8" extension="0.325" twist="0"/>
+  <actuator type="R8-3"/>
+  <end-effector type="R8Parallel"/>
+</robot>

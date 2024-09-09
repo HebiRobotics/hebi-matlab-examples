@@ -35,7 +35,7 @@ classdef HebiArm < handle
     
     properties(Access = public)
         state struct = [];
-        plugins cell = {};
+        plugins struct = struct();
     end
     
     properties(Access = private)
@@ -69,7 +69,7 @@ classdef HebiArm < handle
         end
 
         function [] = setGoal(this, varargin)
-            %arm.setGoal('positions', pos, 'velocities', vel, 'accelerations', accel, 'time', time); 
+            % arm.setGoal(pos, 'velocities', vel, 'accelerations', accel, 'time', time); 
             % Calculates trajectory from current pos (fbk) to target
             % same as newJointMove, but includes current state? [cmdPos pos] => traj generator
             
@@ -210,13 +210,13 @@ classdef HebiArm < handle
 
             % Call plugins (FK, Jacobians, End-Effector XYZ, etc.)
             this.state = newState;
-            for i=1:length(this.plugins)
-                this.plugins{i}.update(this);
+            pluginFields = fieldnames(this.plugins);
+            for i=1:length(pluginFields)
+                plugin = this.plugins.(pluginFields{i});
+                if plugin.enabled % Optional: check if the plugin is enabled
+                    plugin.update(this);
+                end
             end 
-
-            % Ignore efforts that aren't used
-            unusedEffort = (this.state.cmdEffort == 0);
-            this.state.cmdEffort(unusedEffort) = nan;
 
         end
         
@@ -230,6 +230,22 @@ classdef HebiArm < handle
             
             % Send state to module
             this.group.send(this.cmd, varargin{:});
+        end
+
+        function plugin = getPluginByType(this, type)
+            % getPluginByType Retrieves a plugin by its class type
+            %
+            % Example:
+            %   plugin = arm.getPluginByType('HebiArmPlugins.ImpedanceController');
+            
+            pluginFields = fieldnames(this.plugins);
+            for i = 1:length(pluginFields)
+                plugin = this.plugins.(pluginFields{i});
+                if isa(plugin, type)
+                    return;
+                end
+            end
+            error('Plugin of type "%s" not found.', type);
         end
         
     end
