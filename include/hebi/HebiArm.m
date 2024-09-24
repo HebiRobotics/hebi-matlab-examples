@@ -35,7 +35,8 @@ classdef HebiArm < handle
     
     properties(Access = public)
         state struct = [];
-        plugins struct = struct();
+        pluginList cell; % plugins as a list
+        plugins struct = struct(); % plugin lookup by names
     end
     
     properties(Access = private)
@@ -45,7 +46,28 @@ classdef HebiArm < handle
         aux double;
         auxTime double;
     end
-    
+
+    % Accessors to keep plugin list and struct in sync
+    methods
+        function plugins = get.plugins(this)
+            % plugin lookup by names
+            plugins = struct();
+            for i=1:length(this.pluginList)
+                % TODO: duplicate names -> pick last or first? return array?
+                plugin = this.pluginList{i};
+                plugins.(plugin.name) = plugin;
+            end
+        end
+        function [] = set.plugins(this, input)
+            % Return the plugin list as a struct
+            fields = fieldnames(input);
+            this.pluginList = cell(length(fields),1);
+            for i = 1:length(fields)
+                this.pluginList{i} = input.(fields{i});
+            end
+        end
+    end
+
     methods
         
         function this = HebiArm(varargin)
@@ -210,9 +232,8 @@ classdef HebiArm < handle
 
             % Call plugins (FK, Jacobians, End-Effector XYZ, etc.)
             this.state = newState;
-            pluginFields = fieldnames(this.plugins);
-            for i=1:length(pluginFields)
-                plugin = this.plugins.(pluginFields{i});
+            for i=1:length(this.pluginList)
+                plugin = this.pluginList{i};
                 if plugin.enabled % Optional: check if the plugin is enabled
                     plugin.update(this);
                 end
