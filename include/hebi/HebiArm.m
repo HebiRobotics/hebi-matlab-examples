@@ -68,6 +68,35 @@ classdef HebiArm < handle
         end
     end
 
+    methods(Static)
+        function [arm, config] = createFromConfig(configOrPath)
+            % createFromConfig creates a HebiArm according to the config
+
+            % Support config structs or file paths
+            if isa(configOrPath, 'struct')
+                config = configOrPath;
+            elseif exist(configOrPath, 'file')
+                config = HebiUtils.loadRobotConfig(configOrPath);
+            else
+                error('expected config struct or path to existing confg file');
+            end
+
+            % Create backing group comms
+            group = HebiLookup.newGroupFromNames(config.families, config.names);
+
+            % Setup default gains
+            if isfield(config.gains, 'default')
+                gains = HebiUtils.loadGains(config.gains.default);
+                HebiUtils.sendWithRetry(group, 'gains', gains);
+            end
+
+            % Setup arm with kinematics and plugins
+            kin = HebiUtils.loadHRDF(config.hrdf);
+            arm = HebiArm(group, kin);
+            arm.plugins = HebiArmPlugin.createFromConfigMap(config.plugins);
+        end
+    end
+
     methods
         
         function this = HebiArm(varargin)
