@@ -18,6 +18,11 @@ classdef HebiArmPlugin < handle
     
     %   Copyright 2023-2023 HEBI Robotics, Inc.
 
+    properties(SetAccess = protected)
+        % type of the plugin
+        type char = '';
+    end
+
     properties(Access = public)
 
         % whether the plugin should be run
@@ -160,6 +165,9 @@ classdef HebiArmPlugin < handle
             
             % name
             plugin.name = cfg.name;
+
+            % type (TODO: set these directly in the subclasses)
+            plugin.type = cfg.type;
             
             % shared optional fields
             if isfield(cfg, 'enabled')
