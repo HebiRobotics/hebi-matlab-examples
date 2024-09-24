@@ -25,7 +25,7 @@ exampleConfig = HebiUtils.loadRobotConfig(exampleConfigFile);
 % Instantiate the arm kit based on the config files in config/${name}.yaml
 % If your kit has a gas spring, you need to uncomment the offset lines
 % in the corresponding config file.
-arm = createArmFromConfig(exampleConfig);
+arm = HebiArm.createFromConfig(exampleConfig);
 
 enableLogging = true;
 
