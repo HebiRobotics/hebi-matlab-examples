@@ -254,15 +254,15 @@ classdef HebiArm < handle
         end
 
         function plugin = getPluginByType(this, type)
-            % getPluginByType Retrieves a plugin by its class type
+            % getPluginByType Retrieves a plugin by its plugin type
             %
             % Example:
-            %   plugin = arm.getPluginByType('HebiArmPlugins.ImpedanceController');
+            %   plugin = arm.getPluginByType('GravityCompensationEffort');
             
             pluginFields = fieldnames(this.plugins);
             for i = 1:length(pluginFields)
                 plugin = this.plugins.(pluginFields{i});
-                if isa(plugin, type)
+                if strcmp(plugin.type, type)
                     return;
                 end
             end
