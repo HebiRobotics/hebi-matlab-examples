@@ -71,6 +71,11 @@ classdef HebiArm < handle
     methods(Static)
         function [arm, config] = createFromConfig(configOrPath)
             % createFromConfig creates a HebiArm according to the config
+            %
+            % The config can be a config struct or a path to the file. The
+            % config is also returned to work as a shortcut for HebiUtils.loadRobotConfig
+            %
+            % See also HebiUtils.loadRobotConfig
 
             % Support config structs or file paths
             if isa(configOrPath, 'struct')

@@ -21,9 +21,7 @@ HebiLookup.initialize();
 enableLogging = true;
 
 %% Load config file
-localDir = fileparts(mfilename('fullpath'));
-exampleConfigFile = fullfile(localDir, 'config', 'ex_AR_kit.cfg.yaml');
-exampleConfig = HebiUtils.loadRobotConfig(exampleConfigFile);
+exampleConfig = HebiUtils.loadRobotConfig('./config/ex_AR_kit.cfg.yaml');
 
 %%
 %%%%%%%%%%%%%
