@@ -1,4 +1,4 @@
-function [ arm, params, gripper ] = setupArm( kit )
+function [ arm, userData, gripper ] = setupArm( kit )
 % SETUPARM creates models and loads parameters for controlling various 
 % pre-configured arm kits.
 %
@@ -58,14 +58,10 @@ function [ arm, params, gripper ] = setupArm( kit )
 % is not specified it defaults to 'false'.
 %
 % OUTPUTS:
-% 'group' is the HebiGroup object for the modules in the arm that is used
-% to control and get feedback from the arm
+% 'arm' is the HebiArm object that contains the group and kinematic model
+% for a given arm.
 %
-% 'kin' is the HebiKinematics object for calculating things like foward
-% kinematics (FK), inverse kinematics (IK), Jacobians, gravity
-% compensation, etc.
-%
-% 'params' is a struct that holds other information like the initialized
+% 'userData' is a struct that holds other information like the initialized
 % directions of gravity, gripper information, torque offsets if using a gas
 % spring to assist the robot, etc.  This struct can be a good place to put
 % configuration-specific info as you start to customize the code.
@@ -78,44 +74,32 @@ localDir = fileparts(mfilename('fullpath'));
 configFile = fullfile(localDir, 'config', [kit '.cfg.yaml']);
 config = HebiUtils.loadRobotConfig(configFile);
 
-%% Create models according to config
-% Comms
-group = HebiLookup.newGroupFromNames(config.families, config.names);
-
-% Kinematic Model
-kin = HebiUtils.loadHRDF(config.hrdf);
-
 % Initialize params with userData. May contain settings for ik seeds and
 % efforts to open-close the gripper
-params = config.userData;
-params.localDir = localDir;
+userData = config.userData;
+userData.localDir = localDir;
 
-% Load gain files
-params.gains = HebiUtils.loadGains(config.gains.default);
+%% Create comms and models according to config
+arm = HebiArm.createFromConfig(config);
 
-% Setup optional gripper
-if ~isfield(params, 'has_gripper')
-    params.has_gripper = false;
-end
-if params.has_gripper
-    params.gripperGains = HebiUtils.loadGains(config.gains.gripper);
-end
+%% Create optional gripper based on convention
 
-%% Common Setup
-arm = HebiArm(group, kin);
-arm.plugins = HebiArmPlugin.createFromConfigMap(config.plugins);
-HebiUtils.sendWithRetry(arm.group, 'gains', params.gains);
-
-% Setup gripper
+% Common fields
 gripper = [];
-if params.has_gripper
-    
+userData.has_gripper = isfield(userData, 'has_gripper');
+
+% Setup
+if userData.has_gripper
+
+    % Load and set gains
+    userData.gripperGains = HebiUtils.loadGains(config.gains.gripper);
     gripperGroup = HebiLookup.newGroupFromNames( config.families(1), 'gripperSpool' );
-    HebiUtils.sendWithRetry(gripperGroup, 'gains', params.gripperGains);
+    HebiUtils.sendWithRetry(gripperGroup, 'gains', userData.gripperGains);
     
+    % Other params
     gripper = HebiGripper(gripperGroup);
-    gripper.openEffort = params.gripper_open_effort;
-    gripper.closeEffort = params.gripper_close_effort;
+    gripper.openEffort = userData.gripper_open_effort;
+    gripper.closeEffort = userData.gripper_close_effort;
     
 end
 
