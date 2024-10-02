@@ -36,9 +36,7 @@ close all;
 HebiLookup.initialize();
 
 %% Load config file
-localDir = fileparts(mfilename('fullpath'));
-exampleConfigFile = fullfile(localDir, 'config', 'ex_impedance_control_cartesian.cfg.yaml');
-exampleConfig = HebiUtils.loadRobotConfig(exampleConfigFile);
+exampleConfig = HebiUtils.loadRobotConfig('./config/ex_impedance_control_cartesian.cfg.yaml');
 
 % Instantiate the arm kit based on the config files in config/${name}.yaml
 % If your kit has a gas spring, you need to uncomment the offset lines
@@ -67,7 +65,7 @@ enableLogging = true;
 
 % Start background logging 
 if enableLogging
-   logFile = arm.group.startLog('dir',[localDir '/logs']); 
+   logFile = arm.group.startLog('dir', './logs');
 end
 
 %% Gravity compensated mode

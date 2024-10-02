@@ -18,20 +18,16 @@ close all;
 HebiLookup.initialize();
 
 %% Load config file
-localDir = fileparts(mfilename('fullpath'));
-exampleConfigFile = fullfile(localDir, 'config', 'ex_gravity_compensation.cfg.yaml');
-exampleConfig = HebiUtils.loadRobotConfig(exampleConfigFile);
-
 % Instantiate the arm kit based on the config files in config/${name}.yaml
 % If your kit has a gas spring, you need to uncomment the offset lines
 % in the corresponding config file.
-arm = HebiArm.createFromConfig(exampleConfig);
+arm = HebiArm.createFromConfig('./config/ex_gravity_compensation.cfg.yaml');
 
 enableLogging = true;
 
 % Start background logging 
 if enableLogging
-   logFile = arm.group.startLog('dir',[localDir '/logs']); 
+   logFile = arm.group.startLog('dir', './logs'); 
 end
 
 %% Gravity compensated mode
