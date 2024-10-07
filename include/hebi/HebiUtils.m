@@ -274,13 +274,13 @@ classdef (Sealed) HebiUtils
 
             % Java arrays and maps are cumbersome in MATLAB, so we convert
             % everything to structures that are easier to work with.
-
             config = javaMethod('loadRobotConfig', HebiUtils.className,  varargin{:});
             config = struct(config);
 
             % Strings are stored with one extra element to enforce cell arrays
             out = struct();
             out.version = config.version{1};
+            out.configLocation = config.configLocation{1};
             out.families = config.families(1:end-1);
             out.names = config.names(1:end-1);
             out.hrdf = config.hrdf{1};
