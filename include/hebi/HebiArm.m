@@ -99,6 +99,9 @@ classdef HebiArm < handle
             kin = HebiUtils.loadHRDF(config.hrdf);
             arm = HebiArm(group, kin);
             arm.plugins = HebiArmPlugin.createFromConfigMap(config.plugins);
+
+            % Initialize state
+            arm.update();
         end
     end
 
