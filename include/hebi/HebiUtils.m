@@ -957,7 +957,7 @@ classdef (Sealed) HebiUtils
                 end
             end
             
-            error(['Failed to send message to all devices. Retries: ' num2str(maxRetries)]);
+            error(['Failed to send message to one or more devices. Retries: ' num2str(maxRetries)]);
             
         end
         
