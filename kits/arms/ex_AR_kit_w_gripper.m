@@ -1,4 +1,4 @@
-% 6-DoF Arm (w/ Optional Gripper) Tele-Op Demo 
+% 6-DoF Arm (w/ Optional Gripper) Tele-Op Demo
 %
 % Features:      Mobile App input to control motions of arm and gripper
 %
@@ -7,210 +7,173 @@
 %                supports ARCore / ARKit.
 %
 % Author:        Dave Rollinson
-%                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
+%
 % Date:          Oct 2018
 
-% Copyright 2017-2018 HEBI Robotics
+% Copyright 2017-2024 HEBI Robotics
 
 %% Setup
 clear *;
 close all;
-
 HebiLookup.initialize();
 
+% Demo Settings
 enableLogging = true;
+xyzScale = [1 1 2]';
 
-%% Load config file
-exampleConfig = HebiUtils.loadRobotConfig('./config/ex_AR_kit_w_gripper.cfg.yaml');
-
-%%
-%%%%%%%%%%%%%%%%%%%%%%%
-% Mobile Device Setup %
-%%%%%%%%%%%%%%%%%%%%%%%
-
+%% Set up arm, mobileIO, and gripper from config
+exampleConfig = HebiUtils.loadRobotConfig('config/ex_AR_kit_w_gripper.cfg.yaml');
+arm = HebiArm.createFromConfig(exampleConfig);
 mobileIO = createMobileIOFromConfig(exampleConfig);
+gripper = createGripperFromConfig(exampleConfig);
 
-mobileIO.initializeUI();
-    mobileIO.setAxisValue([3 6], [-1 1]);
-    mobileIO.setButtonIndicator([1 8], true);
-    mobileIO.addText('B1 - Reset/re-align pose');
-    mobileIO.addText('A3 - Scale translation commands');
-    mobileIO.addText('A6 - Gripper Open/Close');
-    mobileIO.addText('B8 - Quit');
+%% Homing / Initialization
+% Command the softstart to the home position
+arm.update();
+arm.clearGoal(); % in case we run only this section
+arm.setGoal(exampleConfig.userData.home_position, ...
+    'time', exampleConfig.userData.homing_duration);
 
-resetPoseButton = 'b1';
-quitDemoButton = 'b8';
-translationScaleSlider = 'a3';
-gripForceSlider = 'a6';
+% Get the cartesian position and rotation matrix @ home position
+transformHome = arm.kin.getFK('endEffector', exampleConfig.userData.home_position);
+xyzHome = transformHome(1:3, 4);
+rotHome = transformHome(1:3, 1:3);
 
-%%
-%%%%%%%%%%%%%
-% Arm Setup %
-%%%%%%%%%%%%%
+% Print instructions
+instructions = [
+    'Arm end-effector can now follow the mobile device pose in AR mode.', newline ...
+    'The control interface has the following commands:', newline ...
+    '  (Hand emoji)  - Gripper Control' ...
+    '  (House emoji) - Home', newline ...
+    '                  This takes the arm to home and aligns with mobile device.', newline ...
+    '  (Phone emoji) - Engage/Disengage AR Control', newline ...
+    '  (Earth emoji) - Go to grav comp mode.', newline ...
+    '  (Cross emoji) - Quit the demo.'
+    ];
 
-% Instantiate the arm kit based on the config files in config/${name}.yaml
-% If your kit has a gas spring, you need to uncomment the offset lines
-% in the corresponding config file.
-[ arm, params] = setupArm( 'A-2240-06' );
-                             
-disp('  ');
-disp('Arm end-effector is now following the mobile device pose.');
-disp('The control interface has the following commands:');
-disp('  B1 - Reset/re-align poses.');
-disp('       This takes the arm to home and aligns with mobile device.');
-disp('  A3 - Scale down the translation commands to the arm.');
-disp('       Sliding all the way down means the end-effector only rotates.');
-disp('  A6 - Control the gripper (if the arm has gripper).');
-disp('       Sliding down closes the gripper, sliding up opens.');
-disp('  B8 - Quits the demo.');
+disp(instructions);
 
+%% Start optional background logging
+if enableLogging
+    logFile = arm.group.startLog('dir', 'logs');
+end
 
-%% Startup
+%% Demo
+runMode = "softstart";
 abortFlag = false;
 while ~abortFlag
-    
-    xyzScale = [1 1 2]';
 
-    % Start background logging
-    if enableLogging
-        arm.group.startLog('dir',[params.localDir '/logs']);
-    end
-
-    % Move to current coordinates
-    xyzTarget_init = [0.5 0.0 0.1]';
-    rotMatTarget_init = R_y(pi);
-
-    ikPosition = arm.kin.getIK('xyz', xyzTarget_init, ...
-                               'so3', rotMatTarget_init, ...
-                               'initial', params.ik_seed_pos );
-        
-    % Slow trajectory timing for the initial move to home position   
-    arm.trajGen.setSpeedFactor( 0.5 );
-    arm.trajGen.setMinDuration( 1.0 );
-    
-    % Move to initial position
-    arm.update();
-    arm.clearGoal(); % in case we run only this section
-    arm.setGoal(ikPosition);
-    while ~arm.isAtGoal
-        arm.update();
+    %%%%%%%%%%%%%%%%%%%
+    % Gather Feedback %
+    %%%%%%%%%%%%%%%%%%%
+    try
         arm.send();
+        arm.update();
+        gripper.send();
+    catch
+        disp('Could not get robot feedback!');
+        break;
     end
-    
-    % Grab initial pose from phone
-    mobileIO.update();
-    R_init = mobileIO.getArOrientation();
-    xyz_init = mobileIO.getArPosition();
-    xyzPhoneNew = xyz_init;
 
-    % Set trajectories to normal speed for following mobile input
-    arm.trajGen.setSpeedFactor( 1.0 );
-    arm.trajGen.setMinDuration( 0.5 ); % (acts as a 'low-pass' for user input)
-    goalPosition = ikPosition;
-    while ~abortFlag
-
-        %%%%%%%%%%%%%%%%%%%
-        % Gather Feedback %
-        %%%%%%%%%%%%%%%%%%%
-        try
-            arm.update();
-            arm.send();
-            gripper.send();
-        catch
-            disp('Could not get robot feedback!');
-            break;
-        end
-
-        % We use a non-blocking timeout w/ manual update checks so we can
-        % handle common wireless delays/outages without breaking. We only
-        % exit if mobileIO hasn't responded for several seconds, which
-        % indicates a more significant problem.
-        [hasNewPhoneFbk, timeSinceLastFeedback] = mobileIO.update('timeout', 0);
-        if timeSinceLastFeedback > 5
-            error('mobileIO has timed out. Stopping demo.');
-        end
-        
-        % Abort goal updates if the phone didn't respond
-        if ~hasNewPhoneFbk
+    if runMode == "softstart"
+        % End softstart when the arm reaches the home_position
+        if arm.isAtGoal
+            runMode = "waiting";
             continue;
         end
-        fbkPhoneIO = mobileIO.getFeedbackIO();
-        
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        % Read/Map Joystick Inputs %
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        % Check for restart command
-        if fbkPhoneIO.(resetPoseButton)
-            break;
-        end
-        
-        % Check for quit command
-        if fbkPhoneIO.(quitDemoButton)
-            abortFlag = true;
-            break;
-        end
-        
-        % Map [-1,+1] slider to [0,1] range such that down is close
-        if ~isempty(gripper)
-            gripper.setState((fbkPhoneIO.(gripForceSlider) - 1) / -2);
-        end
-        
-        % Parameter to limit XYZ Translation of the arm if a slider is
-        % pulled down.  Pulling all the way down resets translation.
-        phoneControlScale = fbkPhoneIO.(translationScaleSlider);
-        if phoneControlScale < 0
-            xyz_init = xyzPhoneNew;
-        end
+        continue;
+    end
 
-        % Pose Information for Arm Control
-        xyzPhoneNew = mobileIO.getArPosition();
-        xyzTarget = xyzTarget_init + ...
-            phoneControlScale * xyzScale .* (R_init' * (xyzPhoneNew - xyz_init));   
-        rotMatTarget = R_init' * mobileIO.getArOrientation() * rotMatTarget_init;
+    % We use a non-blocking timeout w/ manual update checks so we can
+    % handle common wireless delays/outages without breaking. We only
+    % exit if mobileIO hasn't responded for several seconds, which
+    % indicates a more significant problem.
+    [hasNewMobileFbk, timeSinceLastFeedback] = mobileIO.update('timeout', 0);
+    if timeSinceLastFeedback > 5
+        error('mobileIO has timed out. Stopping demo.');
+    end
 
-        %%%%%%%%%%%%%%%
-        % Arm Control %
-        %%%%%%%%%%%%%%%
-        % Force elbow up config
-        seedPosIK = arm.state.cmdPos;
-        seedPosIK(3) = abs(seedPosIK(3));
+    % Abort goal updates if the phone didn't respond
+    if ~hasNewMobileFbk
+        continue;
+    end
+    fbkMobileIO = mobileIO.getFeedbackIO();
 
-        % Find target using inverse kinematics
-        ikPosition = arm.kin.getIK('xyz', xyzTarget, ...
-                                   'SO3', rotMatTarget, ...
-                                   'initial', seedPosIK, ...
-                                   'MaxIter', 50 ); 
-                               
-        % Ignore 'changes' that are within the noise of the input device
-        hasGoalChanged = any(abs(ikPosition - goalPosition) > 0.01); % [rad]
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Read/Map Joystick Inputs %
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-        % Start new trajectory at the current state
-        if hasGoalChanged && arm.state.trajTime > 0.1 % limit replanning to 10 Hz (optional)
-            arm.setGoal(ikPosition); 
-            goalPosition = ikPosition;
-        end
+    % Check for homing command
+    if fbkMobileIO.b1
+        runMode = "waiting";
+        arm.setGoal(exampleConfig.userData.home_position, ...
+            'time', exampleConfig.userData.homing_duration);
+    end
+
+    % Check for AR Mode command
+    if fbkMobileIO.b3 && runMode ~= "ar_mode" % ToOn
+        runMode = "ar_mode";
+
+        % Store initial position and orientation as baseline
+        rotPhone_init = mobileIO.getArOrientation();
+        xyzPhone_init = mobileIO.getArPosition();
 
     end
+
+    % Check for Grav Comp
+    if fbkMobileIO.b6
+        runMode = "grav_comp";
+        arm.clearGoal();
+    end
+
+    % Check for quit command
+    if fbkMobileIO.b8
+        abortFlag = true;
+        break;
+    end
+
+    if runMode == "ar_mode"
+
+        rotPhone = mobileIO.getArOrientation();
+        xyzPhone = mobileIO.getArPosition();
+
+        xyzTarget = xyzHome + ...
+            exampleConfig.userData.xyz_scale * xyzScale .* (rotPhone_init' * (xyzPhone - xyzPhone_init));
+        rotTarget = rotPhone_init' * rotPhone * rotHome;
+
+        % Use inverse kinematics to calculate appropriate joint positions
+        targetJoints = arm.kin.getIK('XYZ', xyzTarget, ...
+            'SO3', rotTarget, ...
+            'initial', arm.group.getNextFeedback().position);
+
+        % Set snapped pose as goal
+        arm.setGoal(targetJoints);
+    end
+
+
+    % Set the gripper separately to follow slider A3
+    % Map [-1,+1] slider to [0,1] range such that down is close
+    gripper.setState((fbkMobileIO.a3 - 1) / -2);
 
 end
 
-%%
+%% Analysis of logged data
 if enableLogging
-    
-   hebilog = arm.group.stopLogFull();
-   
-   % Plot tracking / error from the joints in the arm.  Note that there
-   % will not by any 'error' in tracking for position and velocity, since
-   % this example only commands effort.
-   HebiUtils.plotLogs(hebilog, 'position');
-   HebiUtils.plotLogs(hebilog, 'velocity');
-   HebiUtils.plotLogs(hebilog, 'effort');
-   
-   % Plot the end-effectory trajectory and error
-   kinematics_analysis( hebilog, arm.kin );
-   
-   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-   % Feel free to put more plotting code here %
-   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+    hebilog = arm.group.stopLogFull();
+
+    % Plot tracking / error from the joints in the arm.  Note that there
+    % will not by any 'error' in tracking for position and velocity, since
+    % this example only commands effort.
+    HebiUtils.plotLogs(hebilog, 'position');
+    HebiUtils.plotLogs(hebilog, 'velocity');
+    HebiUtils.plotLogs(hebilog, 'effort');
+
+    % Plot the end-effectory trajectory and error
+    kinematics_analysis( hebilog, arm.kin );
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Feel free to put more plotting code here %
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 end
 
