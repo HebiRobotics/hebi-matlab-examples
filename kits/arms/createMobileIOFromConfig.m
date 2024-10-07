@@ -18,6 +18,6 @@ function mobileIO = createMobileIOFromConfig( config )
 
     % Validate the mobile_io configuration
     mobileIO = HebiMobileIO.findDevice(userData.mobile_io_family, userData.mobile_io_name);
-    mobileIO.group.send('MobileLayout', layoutFile); % TODO: replace with a HebiUtils command
+    mobileIO.sendLayout(layoutFile);
 
 end
