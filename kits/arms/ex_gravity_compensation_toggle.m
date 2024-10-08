@@ -9,67 +9,61 @@
 %                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
 % Date:          Oct 2018
 
-% Copyright 2017-2018 HEBI Robotics
+% Copyright 2017-2024 HEBI Robotics
 
 %% Setup
 clear *;
 close all;
-
 HebiLookup.initialize();
-            
-%% Load config file
-% Instantiate the arm kit based on the config files in config/${name}.yaml
-% If your kit has a gas spring, you need to uncomment the offset lines
-% in the corresponding config file.
-arm = HebiArm.createFromConfig('./config/ex_gravity_compensation_toggle.cfg.yaml');
 
-% Retreive the gravity compensation plugin using the "name" field in the config file
-gravCompPlugin = arm.plugins.gravComp;
-% gravCompPlugin = arm.getPluginByType('HebiArmPlugins.GravityCompensation'); % "type" field can also be used
-
+% Demo Settings
 enableLogging = true;
+            
+%% Set up arm from config
+arm = HebiArm.createFromConfig('config/ex_gravity_compensation_toggle.cfg.yaml');
 
-% Start background logging 
-if enableLogging
-   logFile = arm.group.startLog('dir', './logs');
-end
+% Get a reference to the grav comp plugin so we can enable/disable it
+gravCompPlugin = arm.getPluginByType('GravityCompensationEffort');
 
-%% Gravity compensated mode
+%% Instructions
 disp('Commanded gravity-compensated zero torques to the arm.');
 disp('  SPACE - Toggles gravity compensation on/off:');
 disp('  ESC - Exits the demo.');
+disp(' ')
+disp(['Gravity Compensation: ' num2str(gravCompPlugin.enabled)])
 
+%% Start optional background logging
+if enableLogging
+   logFile = arm.group.startLog('dir', 'logs');
+end
+
+%% Demo - Toggle Grav Comp
 % Keyboard input
 kb = HebiKeyboard();
-
 keys = read(kb);
-controllerOn = false;
 while ~keys.ESC   
-   keys = read(kb);
 
+   % Without a set goal, only the grav comp plugin is actively working.
+   % Thus, when we have an empty control loop, the arm is in
+   % grav-comp awaiting further instructions.
+   %
+   % Note that no robotic system is modelled perfectly, so some amount of
+   % drift is normal. Real systems often overlay position control, and
+   % only enable true grav-comp when a user is actively guiding the robot.
+   % This can e.g. be determined by a button on the end effector.
    arm.update();
    arm.send();
 
-   % Check for new key presses on the keyboard
+   % Toggle grav comp when the key is pressed down
    [keys, diffKeys] = read(kb);
-   if diffKeys.SPACE == 1 
-       
-      % Toggle impedance
-      controllerOn = ~controllerOn;
-      
-      if controllerOn
-         disp('Gravity Compensation ENABLED.');
-         gravCompPlugin.enabled = true;
-      else
-         disp('Gravity Compensation DISABLED.');
-         gravCompPlugin.enabled = false;
-      end
-       
+   if diffKeys.SPACE == 1
+       gravCompPlugin.enabled = ~gravCompPlugin.enabled;
+       disp(['Gravity Compensation: ' num2str(gravCompPlugin.enabled)])
    end
 
 end
 
-%%
+%% Analysis of logged data
 if enableLogging
     
    hebilog = arm.group.stopLogFull();

@@ -9,43 +9,52 @@
 %                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
 % Date:          Oct 2018
 
-% Copyright 2017-2018 HEBI Robotics
+% Copyright 2017-2024 HEBI Robotics
 
 %% Setup
 clear *;
 close all;
-
 HebiLookup.initialize();
 
-%% Load config file
-% Instantiate the arm kit based on the config files in config/${name}.yaml
-% If your kit has a gas spring, you need to uncomment the offset lines
-% in the corresponding config file.
-arm = HebiArm.createFromConfig('./config/ex_gravity_compensation.cfg.yaml');
-
+% Demo Settings
 enableLogging = true;
 
-% Start background logging 
+%% Set up arm from config
+arm = HebiArm.createFromConfig('config/ex_gravity_compensation.cfg.yaml');
+
+% do modifications, e.g., feedback frequency
+arm.group.setFeedbackFrequency(200);
+
+
+%% Start optional background logging
 if enableLogging
-   logFile = arm.group.startLog('dir', './logs'); 
+   logFile = arm.group.startLog('dir', 'logs'); 
 end
 
-%% Gravity compensated mode
+%% Demo - Gravity Compensated Mode
 disp('Commanded gravity-compensated zero torques to the arm.');
 disp('Press ESC to stop.');
-
+ 
 % Keyboard input
 kb = HebiKeyboard();
 keys = read(kb);
 while ~keys.ESC   
    keys = read(kb);
    
+   % When no goal is set, the arm automatically returns to grav-comp
+   % mode. Thus, when we have an empty control loop, the arm is in
+   % grav-comp awaiting further instructions.
+   %
+   % Note that no robotic system is modelled perfectly, so some amount of
+   % drift is normal. Real systems often overlay position control, and
+   % only enable true grav-comp when a user is actively guiding the robot.
+   % This can e.g. be determined by a button on the end effector.
    arm.update();
    arm.send();
 
 end
 
-%%
+%% Analysis of logged data
 if enableLogging
     
    hebilog = arm.group.stopLogFull();
