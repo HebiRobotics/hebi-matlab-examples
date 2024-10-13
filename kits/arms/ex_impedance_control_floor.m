@@ -1,59 +1,55 @@
-                            % End-Effector Impedance Control Demo
+% End-Effector Impedance Control Demos
+%
+% The impedance control examples modify a built-in impedance controller
+% plugin to implement various hybrid motion-force controllers that are
+% useful for a variety of applications.
+%
+% Impedance control can be thought of as a virtual spring that computes
+% forces/torques to push a point towards a target. The target in this case
+% can be static (e.g. stay at a certain point) or dynamic (e.g. improve 
+% tracking over a trajectory).
+%
+% The spring is implemented with pid gains along/about each rotational and
+% translational degree of freedom, and it can be selectively enabled for
+% any subset of axes. For example, an end-effector position can be fixed
+% while users are free to change the orientation, or a virtual wall can
+% push a robot away when entering an undesired region.
+%
+% These examples comprise of the following demos:
+%
+% - Fixed:     A task-space pose controller implemented entirely using 
+%              force control via the (PD) impedance controller.
+%
+% - Cartesian: Locks onto a particular end-effector position while keeping
+%              the orientation compliant.
+%
+% - Gimbal:    A gimbal that locks a specific end-effector orientation, 
+%              while keeping the end effecotr position compliant.
+%
+% - Floor:     The end-effector is free to move but snaps to a position
+%              whenever it goes below a given floor.
+%
+% - Damping:  The end-effector behaves as 3-different damped systems
+%             (overdamped, critically damped, and underdamped), at 3 
+%             different heights.
+%
+% Note that the first 3 examples only differ by the gains in the
+% corresponding config files.
+% 
+% The following example is the 'Floor' demo.
 
-% Features:     In this example we will implement various hybrid motion-force controllers using the impedance control plugin, 
-%               which can be used for a wide variety of applications.
-%               Impedance control is BEST SUITED for enabling free, rigid and springy behaviour, along/about each different axis.
-%               While this is perfectly useful for:
-%               - Having a selectively compliant end-effector,
-%               - Switching between fixed and free behaviour to simulate (mostly) rigid constraints, and
-%               - Allowing human intervention for automated operations by separating controls across different axes,
-%               any applications involving more salient control of the forces (as more complex functions with flexible inputs) 
-%               should use our force control plugin. See ex_force_control_demoname.py.
-%
-%               This comprises the following demos:
-%               - Fixed: A task-space pose controller implemented entirely using force control via the (PD) impedance controller.
-%               - Cartesian: Locks onto a particular end-effector position while having some compliant orientation.
-%               - Gimbal: A gimbal that locks a specific end-effector orientation, while keeping the rest of the arm compliant.
-%               - Floor: The end-effector is free to move but can't travel below a virtual floor. To further simulate sliding on the floor, 
-%                        see force_control example.
-%               - Damping: The end-effector behaves as 3-different damped systems (overdamped, critically damped, and underdamped), 
-%                          at 3 different heights.
-%   
-% Requirements:  MATLAB 2013b or higher
-%
-% Author:        Dave Rollinson
-%                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
-% Date:          Oct 2018
-% 
-% Copyright 2017-2018 HEBI Robotics
-% 
-% The following example is for the "Floor" demo:
+% Copyright 2017-2024 HEBI Robotics
 
 %% Setup
 clear *;
 close all;
-
 HebiLookup.initialize();
 
-%% Load config file
-exampleConfig = HebiUtils.loadRobotConfig('./config/ex_impedance_control_floor.cfg.yaml');
+% Demo Settings
+enableLogging = true;
 
-% Instantiate the arm kit based on the config files in config/${name}.yaml
-% If your kit has a gas spring, you need to uncomment the offset lines
-% in the corresponding config file.
-arm = HebiArm.createFromConfig(exampleConfig);
-
-% Remove the position gains, so that only the commanded torques 
-% are moving the arm.
-gains = arm.group.getGains;
-gains.positionKp = 0 * gains.positionKp     ;
-gains.positionKi = 0 * gains.positionKi;
-gains.positionKd = 0 * gains.positionKd;
-gains.velocityKp = 0 * gains.velocityKp;
-HebiUtils.sendWithRetry(arm.group, 'gains', gains);
-
-% Keyboard input
-kb = HebiKeyboard();
+%% Load config and setup components
+arm = HebiArm.createFromConfig('config/ex_impedance_control_floor.cfg.yaml');
 
 % Increase feedback frequency since we're calculating velocities at the
 % high level for damping.  Going faster can help reduce a little bit of
@@ -61,125 +57,109 @@ kb = HebiKeyboard();
 % for most applications.
 arm.group.setFeedbackFrequency(200); 
 
-enableLogging = true;
+% The impedance controller is based on the position/velocity commands. It
+% typically works in combination with the joint-level controllers, but for
+% this demo we are only interested in the impedance controller effects. We
+% can effectively disable the joint controllers by setting the
+% corresponding pid gains to zero. We also double the effort kp in order to
+% make the arm more sensitive.
+%
+% The impedance controller itself has a separate set of pid gains that
+% correspond to [ trans_x trans_y trans_z rot_x rot_y rot_z ], as well as a
+% setting to specify whether they are applied in the base frame or the
+% end-effector frame.
+gains = arm.group.getGains();
+gains.positionKp = 0 * gains.positionKp;
+gains.positionKi = 0 * gains.positionKi;
+gains.positionKd = 0 * gains.positionKd;
+gains.velocityKp = 0 * gains.velocityKp;
+gains.effortKp   = 2 * gains.effortKp;
+HebiUtils.sendWithRetry(arm.group, 'gains', gains);
 
-% Start background logging 
+%% Start optional background logging
 if enableLogging
-   logFile = arm.group.startLog('dir', './logs');
+    logFile = arm.group.startLog('dir', 'logs');
 end
 
-%% Gravity compensated mode
+%% Demo - Impedance Control
 disp('Commanded gravity-compensated zero force to the arm.');
 disp('  SPACE - Toggles an impedance controller on/off:');
-disp('          ON  - Apply controller based on current position');
+disp('          ON  - Replace virtual floor at current height');
 disp('          OFF - Go back to gravity-compensated mode');
 disp('  ESC - Exits the demo.');
 
-% Impedance Control Gains
-% NOTE: The gains corespond to:
-% [ trans_x trans_y trans_z rot_x rot_y rot_z ]
-%
-% Translations and Rotations can be specified in the
-% base frame or in the end effector frame.  See code below for
-% details.
-%
-
-% Control Variables
-
 % Initialize floor demo variables
 floorLevel = 0.0;
-floorBuffer = 0.01; % 1cm
+floorBuffer = 0.01; % 1 cm
 
-% Initialize floor demo flags
-floorCommandFlag = false; % Indicates whether or not to command floor stiffness goals
-cancelCommandFlag = false; % Indicates whether or not to cancel goals
-
+% Main demo loop
+prevIsBelowFloor = false;
+kb = HebiKeyboard();
 keys = read(kb);
 controllerOn = false;
 while ~keys.ESC   
     
-    % update state and disable position controller
+     % update state and disable position controller
     arm.update();
     arm.send();
 
-    % Set and unset impedance mode when button is pressed and released, respectively
+    % Check for new key presses on the keyboard
     [keys, diffKeys] = read(kb);
     if diffKeys.SPACE == 1 
         
-        % Toggle impedance
+        % Toggle impedance controller
         controllerOn = ~controllerOn;
         
         if controllerOn
-
+            % The impedance plugin works based on the commanded position,
+            % so we set the position to wherever it was at enablement.
             disp('Impedance Controller ENABLED.');
             arm.setGoal(arm.state.fbk.position);
 
             % Store current height as floor level, for floor demo
+            zHeight = arm.state.T_endEffector(3,4);
+            floorLevel = zHeight - floorBuffer;
 
-            % Use forward kinematics to find end-effector pose
-            eePose0 = arm.kin.getFK('endEffector', arm.group.getNextFeedback().position);
-
-            % Give a little margin to floor level
-            floorLevel = eePose0(3,4) - floorBuffer;
-
-            % Update flags to indicate having left the floor
-            cancelCommandFlag = true;
+            % Trigger snapping in the section below
+            prevIsBelowFloor = false;
 
         else
+            % Pure gravity compensation with unrestricted motion
             disp('Impedance Controller DISABLED.');
+            arm.clearGoal();
         end
         
     end
 
+    % Active controller behavior
     if controllerOn
 
-        % Use forward kinematics to calculate pose of end-effector
-        eePoseCurr = arm.kin.getFK('endEffector', arm.group.getNextFeedback().position);
+        % Check whether the end effector has gotten into contact
+        eePose = arm.state.T_endEffector;
+        zHeight = eePose(3,4);
+        isBelowFloor = zHeight <= floorLevel;
+        hasChanged = isBelowFloor ~= prevIsBelowFloor;
+        prevIsBelowFloor = isBelowFloor;
 
-        % Snap goal to floor if end-effector is at or below floor, only when it first reaches the floor
-        if (eePoseCurr(3,4) <= floorLevel) && floorCommandFlag
-
-            % Snap current pose to floor
-            eePoseFloor = eePoseCurr;
-            eePoseFloor(3,4) = floorLevel;
-
-            % Use inverse kinematics to calculate appropriate joint positions
-            positionFloor = arm.kin.getIK('XYZ', eePoseFloor(1:3, 4), ...
-                                          'SO3', eePoseFloor(1:3, 1:3), ...
-                                          'initial', arm.group.getNextFeedback().position);
-
-            % Set snapped pose as goal
-            arm.setGoal(positionFloor);
-
-            % Update flags to indicate being in contact with the floor
-            floorCommandFlag = false;
-            cancelCommandFlag = true;
-
-        % Cancel goal if end-effector is above the floor, only when it leaves the floor
-        elseif (eePoseCurr(3,4) > floorLevel) && cancelCommandFlag    
-
-            % Cancel goal to move freely
-            arm.clearGoal();
-
-            % Update flags to indicate having left the floor
-            cancelCommandFlag = false;
-            floorCommandFlag = true;
-
+        % Snap current pose to floor when the end effector first reaches the floor
+        if hasChanged && isBelowFloor
+            disp('Snapping to floor')
+            arm.setGoal(arm.state.fbk.position);
         end
 
-    else
-
-        arm.clearGoal();
+        % Pure gravity compensated mode when above the floor
+        if hasChanged && ~isBelowFloor
+            disp('Free motion')
+            arm.clearGoal();
+        end
 
     end
-    
-    prevKeys = keys;
+
 end
 
 disp('Stopping Demo...')
 
-%%
-% Stop Logging
+%% Stop Logging
 if enableLogging  
    hebilog = arm.group.stopLogFull();
 end
