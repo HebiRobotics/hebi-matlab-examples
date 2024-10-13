@@ -22,20 +22,21 @@ enableLogging = true;
 xyzScale = [1 1 2]';
 
 %% Set up arm, mobileIO, and gripper from config
-exampleConfig = HebiUtils.loadRobotConfig('config/ex_AR_kit_w_gripper.cfg.yaml');
-arm = HebiArm.createFromConfig(exampleConfig);
-mobileIO = createMobileIOFromConfig(exampleConfig);
-gripper = createGripperFromConfig(exampleConfig);
+config = HebiUtils.loadRobotConfig('config/ex_AR_kit_w_gripper.cfg.yaml');
+userData = config.userData;
+arm = HebiArm.createFromConfig(config);
+mobileIO = createMobileIOFromConfig(config);
+gripper = createGripperFromConfig(config);
 
 %% Homing / Initialization
 % Command the softstart to the home position
 arm.update();
 arm.clearGoal(); % in case we run only this section
-arm.setGoal(exampleConfig.userData.home_position, ...
-    'time', exampleConfig.userData.homing_duration);
+arm.setGoal(userData.home_position, ...
+    'time', userData.homing_duration);
 
 % Get the cartesian position and rotation matrix @ home position
-transformHome = arm.kin.getFK('endEffector', exampleConfig.userData.home_position);
+transformHome = arm.kin.getFK('endEffector', userData.home_position);
 xyzHome = transformHome(1:3, 4);
 rotHome = transformHome(1:3, 1:3);
 
@@ -106,8 +107,8 @@ while ~abortFlag
     % Check for homing command
     if fbkMobileIO.b1
         runMode = "waiting";
-        arm.setGoal(exampleConfig.userData.home_position, ...
-            'time', exampleConfig.userData.homing_duration);
+        arm.setGoal(userData.home_position, ...
+            'time', userData.homing_duration);
     end
 
     % Check for AR Mode command
@@ -138,7 +139,7 @@ while ~abortFlag
         xyzPhone = mobileIO.getArPosition();
 
         xyzTarget = xyzHome + ...
-            exampleConfig.userData.xyz_scale * xyzScale .* (rotPhone_init' * (xyzPhone - xyzPhone_init));
+            userData.xyz_scale * xyzScale .* (rotPhone_init' * (xyzPhone - xyzPhone_init));
         rotTarget = rotPhone_init' * rotPhone * rotHome;
 
         % Use inverse kinematics to calculate appropriate joint positions

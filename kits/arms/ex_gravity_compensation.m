@@ -25,7 +25,6 @@ arm = HebiArm.createFromConfig('config/ex_gravity_compensation.cfg.yaml');
 % do modifications, e.g., feedback frequency
 arm.group.setFeedbackFrequency(200);
 
-
 %% Start optional background logging
 if enableLogging
    logFile = arm.group.startLog('dir', 'logs'); 
