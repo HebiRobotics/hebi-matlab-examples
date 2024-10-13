@@ -157,7 +157,7 @@ while ~keys.ESC
 
 end
 
-disp('Stopping Demo...')
+disp('Stopping Demo.')
 
 %% Stop Logging
 if enableLogging  
