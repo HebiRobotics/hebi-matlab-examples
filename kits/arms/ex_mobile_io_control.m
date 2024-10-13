@@ -9,69 +9,40 @@
 %                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
 % Date:          Oct 2018
 
-% Copyright 2017-2018 HEBI Robotics
+% Copyright 2017-2024 HEBI Robotics
 
 %% Setup
 clear *;
 close all;
-
 HebiLookup.initialize();
 
+% Demo Settings
 enableLogging = true;
 
-%% Load config file
-exampleConfig = HebiUtils.loadRobotConfig('./config/ex_mobile_io_control.cfg.yaml');
+%% Load config and setup components
+config = HebiUtils.loadRobotConfig('config/ex_mobile_io_control.cfg.yaml');
+userData = config.userData;
+arm = HebiArm.createFromConfig(config);
+mobileIO = createMobileIOFromConfig(config);
 
-%%
-%%%%%%%%%%%%%
-% Arm Setup %
-%%%%%%%%%%%%%
+%% Start optional background logging
+if enableLogging
+    logFile = arm.group.startLog('dir', 'logs');
+end
 
-% Instantiate the arm kit based on the config files in config/${name}.yaml
-% If your kit has a gas spring, you need to uncomment the offset lines
-% in the corresponding config file.
-arm = HebiArm.createFromConfig(exampleConfig);
-
-% Demo Variables
-abortFlag = false;
-runMode = "softstart";
-% goal = hebi.arm.Goal(arm.size)
-
-% Command the softstart to the home position
-arm.update();
-% arm.clearGoal(); % in case we run only this section
-% arm.setGoal(exampleConfig.userData.home_position, ...
-%             'time', exampleConfig.userData.homing_duration);
-
-% Print instructions
-instructions = [
+%% Demo
+disp([
 '   B1-B3      - Waypoints 1-3', newline ...
 '(Earth Emoji) - Grav Comp Mode', newline ...
 '(Cross Emoji) - Quit'
-]; 
+]); 
 
-disp(instructions);
-
-%%
-%%%%%%%%%%%%%%%%%%%%%%%
-% Mobile Device Setup %
-%%%%%%%%%%%%%%%%%%%%%%%
-
-mobileIO = createMobileIOFromConfig(exampleConfig);
-mobileIO.update();
-
-buttons = ['b1'; 'b2'; 'b3'];
-waypoints = [exampleConfig.userData.waypoint_1; exampleConfig.userData.waypoint_2; exampleConfig.userData.waypoint_3];
-
-% Start background logging
-if enableLogging
-    arm.group.startLog('dir',[localDir '/logs']);
-end
-
-%% Startup
+abortFlag = false;
 while ~abortFlag
-    % Update the arm
+
+    % Update the state
     arm.update();
+    arm.send();
 
     % We use a non-blocking timeout w/ manual update checks so we can
     % handle common wireless delays/outages without breaking. We only
@@ -88,34 +59,37 @@ while ~abortFlag
     end
     fbkMobileIO = mobileIO.getFeedbackIO();
 
-    % Iterate over buttons 1, 2, 3
-    for N = 1:3
-        % BN - Waypoint N (N = 1, 2, 3)
-        if fbkMobileIO.(buttons(N, :))  % "ToOn"
-            arm.setGoal(waypoints(N,:), 'time', exampleConfig.userData.travel_time);
-        end
+    % B1-3 Move to predefined waypoints
+    if fbkMobileIO.b1
+        arm.setGoal(userData.waypoint_1, 'time', userData.travel_time);
+    elseif fbkMobileIO.b2
+        arm.setGoal(userData.waypoint_2, 'time', userData.travel_time);
+    elseif  fbkMobileIO.b3
+        arm.setGoal(userData.waypoint_3, 'time', userData.travel_time);
     end
 
     % B6 - Grav Comp
-    if fbkMobileIO.('b6')  % "ToOn"
+    if fbkMobileIO.b6
         arm.clearGoal();
     end
 
     % B8 - Quit
-    if fbkMobileIO.('b8')  % "ToOn"
-        % Reset text & color, and quit
+    if fbkMobileIO.b8
         abortFlag = true;
-        break;
     end
+    
+end
 
-    % Send the arm command
-    arm.send();
+disp('Stopping Demo...')
+
+%% Stop Logging
+if enableLogging  
+   hebilog = arm.group.stopLogFull();
 end
 
 %%
+% Plotting
 if enableLogging
-    
-   hebilog = arm.group.stopLogFull();
    
    % Plot tracking / error from the joints in the arm.  Note that there
    % will not by any 'error' in tracking for position and velocity, since
