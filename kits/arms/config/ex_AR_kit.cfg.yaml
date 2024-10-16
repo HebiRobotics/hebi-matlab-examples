@@ -36,6 +36,6 @@ user_data:
   # displacement of the end-effector
   xyz_scale: [ 1.0, 1.0, 2.0 ]   # [ x, y, z ]
 
-  mobile_io_family: "Arm"
+  mobile_io_family: "Tready"
   mobile_io_name: "mobileIO"
   mobile_io_layout: "layouts/ex_AR_kit.json"
