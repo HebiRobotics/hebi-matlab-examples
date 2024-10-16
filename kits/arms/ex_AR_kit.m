@@ -145,13 +145,16 @@ while ~abortFlag
             'initial', arm.group.getNextFeedback().position);
 
         % Set snapped pose as goal
-        arm.setGoal(targetJoints);
+        arm.setGoal( targetJoints, 'time', userData.delay_time );
     end
 end
 
+disp('Quitting Demo.');
+
 %% Analysis of logged data
 if enableLogging
-
+    
+    fprintf('Loading log and plotting...');
     hebilog = arm.group.stopLogFull();
 
     % Plot tracking / error from the joints in the arm.  Note that there
@@ -167,5 +170,7 @@ if enableLogging
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Feel free to put more plotting code here %
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
+    fprintf('DONE.\n\n');
 end
 
