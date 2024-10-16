@@ -19,7 +19,6 @@ HebiLookup.initialize();
 
 % Demo Settings
 enableLogging = true;
-xyzScale = [1 1 2]';
 
 %% Set up arm, and mobileIO from config
 config = HebiUtils.loadRobotConfig('config/ex_AR_kit.cfg.yaml');
@@ -38,6 +37,8 @@ arm.setGoal(userData.home_position, ...
 transformHome = arm.kin.getFK('endEffector', userData.home_position);
 xyzHome = transformHome(1:3, 4);
 rotHome = transformHome(1:3, 1:3);
+
+xyzScale = userData.xyz_scale';
 
 % Print instructions
 instructions = [
@@ -136,13 +137,17 @@ while ~abortFlag
         xyzPhone = mobileIO.getArPosition();
 
         xyzTarget = xyzHome + ...
-            userData.xyz_scale * xyzScale .* (rotPhone_init' * (xyzPhone - xyzPhone_init));
+            xyzScale .* (rotPhone_init' * (xyzPhone - xyzPhone_init));
         rotTarget = rotPhone_init' * rotPhone * rotHome;
 
         % Use inverse kinematics to calculate appropriate joint positions
-        targetJoints = arm.kin.getIK('XYZ', xyzTarget, ...
-            'SO3', rotTarget, ...
-            'initial', arm.group.getNextFeedback().position);
+        targetJoints = arm.kin.getIK( 'XYZ', xyzTarget, ...
+                                      'SO3', rotTarget, ...
+                                      'initial', arm.state.fbk.position);
+                                  
+        T_check = arm.kin.getFK( 'endeffector', targetJoints );
+        xyz_check = T_check(1:3,4);
+        xyzTarget - xyz_check
 
         % Set snapped pose as goal
         arm.setGoal( targetJoints, 'time', userData.delay_time );
