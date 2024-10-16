@@ -12,37 +12,30 @@
 %                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
 % Date:          Oct 2018
 
-% Copyright 2017-2018 HEBI Robotics
+% Copyright 2017-2024 HEBI Robotics
 
 %% Setup
-
-% Reset the workspace
 clear *;
 close all;
+HebiLookup.initialize();
 
-% Instantiate the arm kit based on the config files in config/${name}.yaml
-% If your kit has a gas spring, you need to uncomment the offset lines
-% in the corresponding config file.
-[ arm, params, gripper ] = setupArm( 'A-2240-06G' );
-
-% Basic setup
-arm.group.setFeedbackFrequency(100);
-arm.trajGen.setMinDuration(1.0);   % Min move time for 'small' movements
-                                   % (e.g. gripper open/close)
-arm.trajGen.setSpeedFactor(1.0);  % Slow down movements to a safer speed.
-                                   % (default is 1.0)
-
-% Keyboard input
-kb = HebiKeyboard();
+% Select whether waypoints should be done as a single trajectory, or
+% multiple trajectories that stop in between.
+stopBetweenWaypoints = true;
 
 % Select whether you want to log and visualize the replay movement
 enableLogging = true;
 
+%% Load config and setup components
+config = HebiUtils.loadRobotConfig('config/ex_teach_repeat_w_gripper.cfg.yaml');
+userData = config.userData;
+arm = HebiArm.createFromConfig(config);
+gripper = createGripperFromConfig(config);
 
-%% 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Record waypoints in gravity compensated mode %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Set a minimum move time for 'small' movements. Default is 1.0
+arm.trajGen.setMinDuration(userData.min_travel_time);
+
+%% Step 1 - Record waypoints in gravity compensated mode
 disp('Move the arm to different positions to set waypoints.');
 disp('  ALT  - Adds a new waypoint.');  
 disp('  CTRL - Adds a new waypoint and toggles the gripper.');  
@@ -54,6 +47,7 @@ gripper.open(); % initialize gripper state to open
 waypoints = [];
 gripStates = [];
 
+kb = HebiKeyboard();
 keys = read(kb);
 while keys.ESC == 0
     
@@ -84,32 +78,18 @@ while keys.ESC == 0
 
 end
 
+% Make sure we have enough points
 numWaypoints = size(waypoints,1);
-if numWaypoints == 0
-    % Load the set of default waypoints for a 6-DoF arm and trim them down 
-    % to the proper number of DoF.
-    waypointDir = [params.localDir '/waypoints/'];
-    waypointFileName = 'defaultWaypoints';
-    
-    tempStruct = load( [waypointDir waypointFileName] );
-    waypoints = tempStruct.waypoints(:,1:arm.kin.getNumDoF());
-    gripStates = tempStruct.gripStates;
-    
-    disp('  '); 
-    disp('No waypoints saved.  Loading default waypoints.');  
-else
-    
-    waypointDir = [params.localDir '/waypoints'];
-    waypointFileName = 'latestWaypoints';
-    save([waypointDir '/' waypointFileName], 'waypoints', 'gripStates');
-    
-    disp( '  ' );
-    disp( [ num2str(numWaypoints) ' waypoints saved.' ] );  
+if numWaypoints < 2
+    disp('Demo aborted because you selected fewer than two waypoints.');
+    return;
 end
-disp( 'Press SPACE to move to first waypoint.' );
 
+
+%% Wait for input
 % Stay in grav-comp mode to prevent sudden movements from effort commands 
 % turning on and off.
+disp( 'Press SPACE to move to first waypoint.' );
 while keys.SPACE == 0
     arm.update();
     arm.send();
@@ -117,47 +97,39 @@ while keys.SPACE == 0
     keys = read(kb);
 end
 
-%% 
-%%%%%%%%%%%%%%%%%%%%
-% Replay waypoints %
-%%%%%%%%%%%%%%%%%%%%
-abortFlag = false;
-
-% Start background logging 
+%% Start optional background logging
 if enableLogging
-   logFile = arm.group.startLog( 'dir', [params.localDir '/logs'] ); 
+    logFile = arm.group.startLog('dir', 'logs');
 end
+
+%% Step 2 - Replay waypoints
 
 % Move from current position to first waypoint
 arm.clearGoal(); % if you run in sections ...
 arm.update(); % muste be called first
 arm.setGoal(waypoints(1,:));
-
-% Execute the trajectory to the first waypoint
-disp('  '); 
-disp('Ready to begin playback.');
-disp('Press SPACE again to begin.');
-
-keys = read(kb);
-while ~arm.isAtGoal() || keys.SPACE == 0 && ~abortFlag
-
-    arm.update();
-    arm.send();
-   
-    % Check for keyboard input and break out of the main loop
-    % if the ESC key is pressed.  
-    keys = read(kb);   
-    abortFlag = keys.ESC;
-    
+abortFlag = false;
+while ~arm.isAtGoal() && ~abortFlag
+   arm.update();
+   arm.send();
+   keys = read(kb);
+   abortFlag = keys.ESC;
 end
 
 % Hang out at the first waypoint until we press SPACE
+disp('  '); 
+disp('Ready to begin playback.');
+disp('Press SPACE to begin.');
+while keys.SPACE == 0 && ~abortFlag
+    arm.update();
+    arm.send();
+    keys = read(kb);
+    abortFlag = keys.ESC;
+end
+
+% Move along waypoints in a loop
 disp('Beginning playback.');
 disp('Press ESC to stop.');  
-
-%%%%%%%%%%%%%%%%%%%%%%%%
-% Move along waypoints %
-%%%%%%%%%%%%%%%%%%%%%%%%
 while ~abortFlag
     
     % Add zero constraints to stop at each waypoint
@@ -167,31 +139,35 @@ while ~abortFlag
         'aux', gripStates);
     
     while ~arm.isAtGoal() && ~abortFlag
-        keys = read(kb);
-        
+
+        % Execute trajectory
         arm.update();
         arm.send();
         gripper.setState(arm.state.cmdAux);
         gripper.send();
+
+        % Abort on ESC
+        keys = read(kb);
         abortFlag = keys.ESC;
+
     end
 
 end
 
-disp('  ');
-disp('Quitting playback.');
-disp('Plotting logged feedback.');
+disp('Stopping Demo.')
 
+%% Stop Logging
+if enableLogging  
+   hebilog = arm.group.stopLogFull();
+end
 
 %%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
-% Stop background logging and visualize %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Plotting
 if enableLogging
-    
-   hebilog = arm.group.stopLogFull();
    
-   % Plot tracking / error from the joints in the arm
+   % Plot tracking / error from the joints in the arm.  Note that there
+   % will not by any 'error' in tracking for position and velocity, since
+   % this example only commands effort.
    HebiUtils.plotLogs(hebilog, 'position');
    HebiUtils.plotLogs(hebilog, 'velocity');
    HebiUtils.plotLogs(hebilog, 'effort');
@@ -203,6 +179,4 @@ if enableLogging
    % Feel free to put more plotting code here %
    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 end
-
-disp('DONE.');
 
