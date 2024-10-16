@@ -1,7 +1,7 @@
 # 6-DoF Arm
 version: 1.0
-families: ["Arm"]
-names: ["J1_base", "J2_shoulder", "J3_elbow", "J4_wrist1", "J5_wrist2", "J6_wrist3"]
+families: ["Arm Test"]
+names: ["J1", "J2", "J3", "J4", "J5", "J6"]
 hrdf: "hrdf/A-2085-06.hrdf"
 
 gains:
@@ -22,13 +22,19 @@ plugins:
 user_data:
 
   # Joint angles at home for AR demo: [0, pi/3, 2*pi/3, 5*pi/6, -pi/2, 0]
-  home_position: [0, 1.0471975511965976, 2.0943951023931953, 2.6179938779914944, -1.5707963267948966, 0] # radians
+  home_position: [ 0.000, 1.047, 2.0943, 2.618, -1.571, 0.000 ] # radians
 
   # Time taken for a steady motion to the home position
-  homing_duration: 4 # seconds
+  homing_duration: 5 # seconds
 
-  # Displacements of the phone are scaled by this value to give displacement of the end-effector
-  xyz_scale: 0.75
+  # Online trajectory delay to smooth out controller motion.  A shorter 
+  # delay will make a trajectory more response, and longer delay will make 
+  # the trajectory smooother.
+  delay_time: 0.5 # seconds
+
+  # Displacements of the mobile device are scaled by these value to give  
+  # displacement of the end-effector
+  xyz_scale: [ 1.0, 1.0, 2.0 ]   # [ x, y, z ]
 
   mobile_io_family: "Arm"
   mobile_io_name: "mobileIO"
