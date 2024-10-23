@@ -254,14 +254,17 @@ classdef HebiMobileIO < handle
             this.setLedColor([]);
         end
 
-        function [] = sendLayout(this, layout)
-            % sendLayout sends a layout file. May be blocking.
+        function [] = sendLayout(this, varargin)
+            % sendLayout sends a layout file. may be blocking
             %
             % See also initializeUI
 
-            % TODO: 
-            %   replace with a HebiUtils method that can handle >2k files
-            this.send('MobileLayout', layout);
+            % Layouts may be larger than what can be sent with the group
+            % API, so we use a special utility method that creates a
+            % dedicated single-use connection. This should never be used
+            % inside a fast loop.
+            javaMethod('sendMobileLayout', HebiMobileIO.className,  this.group.obj, varargin{:});
+            % this.send('MobileLayout', varargin{1});
         end
 
         function [hasNewFeedback, feedbackAge] = update(this, varargin)
@@ -481,6 +484,10 @@ classdef HebiMobileIO < handle
         function varargout = notify(varargin)
             varargout{:} = notify@handle(varargin{:});
         end
+    end
+
+    properties(Constant, Access = private, Hidden = true)
+        className = hebi_load('HebiMobileIO');
     end
     
 end
