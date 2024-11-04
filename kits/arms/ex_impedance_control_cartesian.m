@@ -26,9 +26,6 @@
 % - Gimbal:    A gimbal that locks a specific end-effector orientation, 
 %              while keeping the end effecotr position compliant.
 %
-% - Floor:     The end-effector is free to move but snaps to a position
-%              whenever it goes below a given floor.
-%
 % - Damping:  The end-effector behaves as 3-different damped systems
 %             (overdamped, critically damped, and underdamped), at 3 
 %             different heights.
