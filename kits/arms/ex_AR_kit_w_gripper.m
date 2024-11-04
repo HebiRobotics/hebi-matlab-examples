@@ -19,7 +19,6 @@ HebiLookup.initialize();
 
 % Demo Settings
 enableLogging = true;
-xyzScale = [1 1 2]';
 
 %% Set up arm, mobileIO, and gripper from config
 config = HebiUtils.loadRobotConfig('config/ex_AR_kit_w_gripper.cfg.yaml');
@@ -39,6 +38,8 @@ arm.setGoal(userData.home_position, ...
 transformHome = arm.kin.getFK('endEffector', userData.home_position);
 xyzHome = transformHome(1:3, 4);
 rotHome = transformHome(1:3, 1:3);
+
+xyzScale = userData.xyz_scale';
 
 % Print instructions
 instructions = [
@@ -139,16 +140,17 @@ while ~abortFlag
         xyzPhone = mobileIO.getArPosition();
 
         xyzTarget = xyzHome + ...
-            userData.xyz_scale * xyzScale .* (rotPhone_init' * (xyzPhone - xyzPhone_init));
+            xyzScale .* (rotPhone_init' * (xyzPhone - xyzPhone_init));
         rotTarget = rotPhone_init' * rotPhone * rotHome;
 
         % Use inverse kinematics to calculate appropriate joint positions
-        targetJoints = arm.kin.getIK('XYZ', xyzTarget, ...
+        targetJoints = arm.kin.getIK( ...
+            'XYZ', xyzTarget, ...
             'SO3', rotTarget, ...
-            'initial', arm.group.getNextFeedback().position);
+            'initial', arm.state.fbk.position);
 
         % Set snapped pose as goal
-        arm.setGoal(targetJoints);
+        arm.setGoal(targetJoints, 'time', userData.delay_time);
     end
 
 
@@ -158,9 +160,12 @@ while ~abortFlag
 
 end
 
+disp('Quitting Demo.');
+
 %% Analysis of logged data
 if enableLogging
 
+    fprintf('Loading log and plotting...');
     hebilog = arm.group.stopLogFull();
 
     % Plot tracking / error from the joints in the arm.  Note that there
@@ -176,5 +181,7 @@ if enableLogging
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Feel free to put more plotting code here %
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+    fprintf('DONE.\n\n');
 end
 

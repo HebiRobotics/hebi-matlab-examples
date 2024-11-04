@@ -144,10 +144,11 @@ while ~abortFlag
         targetJoints = arm.kin.getIK( 'XYZ', xyzTarget, ...
                                       'SO3', rotTarget, ...
                                       'initial', arm.state.fbk.position);
-                                  
-        T_check = arm.kin.getFK( 'endeffector', targetJoints );
-        xyz_check = T_check(1:3,4);
-        xyzTarget - xyz_check
+        
+        % Sanity check (uncomment for debug info)
+%         T_check = arm.kin.getFK( 'endeffector', targetJoints );
+%         xyz_check = T_check(1:3,4);
+%         xyzTarget - xyz_check
 
         % Set snapped pose as goal
         arm.setGoal( targetJoints, 'time', userData.delay_time );
