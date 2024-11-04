@@ -21,12 +21,12 @@ plugins:
   - type: GravityCompensationEffort
     name: gravComp
     enabled: true
-    ramp_time: 2
+    ramp_time: 5
 
   - type: DynamicsCompensationEffort
     name: dynamicsComp
     enabled: true
-    ramp_time: 2
+    ramp_time: 5
 
   - name: 'DoubleShoulder'
     type: DoubledJointMirror

@@ -21,12 +21,12 @@ plugins:
   - type: GravityCompensationEffort
     name: gravComp
     enabled: true
-    ramp_time: 2
+    ramp_time: 5
 
   - type: DynamicsCompensationEffort
     name: dynamicsComp
     enabled: true
-    ramp_time: 2
+    ramp_time: 5
 
   # Kits with a gas spring need to add a shoulder compensation torque.
   # It should be around -7 Nm for most kits, but it may need to be tuned
@@ -34,5 +34,5 @@ plugins:
   - name: 'gasSpringCompensation'
     type: EffortOffset
     enabled: false
-    ramp_time: 2
+    ramp_time: 5
     offset: [0, -7, 0, 0, 0, 0]
