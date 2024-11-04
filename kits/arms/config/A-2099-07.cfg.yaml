@@ -9,7 +9,7 @@ gains:
 
 user_data:
   # Default seed positions for doing inverse kinematics
-  ik_seed_pos: [0, -1, 0, 1.5, 0, 0, 0]
+  ik_seed_pos: [0.01, -1, 0, 1.5, 0.01, 0.01, 0.01]
 
 plugins:
   - type: GravityCompensationEffort
