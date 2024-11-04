@@ -22,7 +22,7 @@ plugins:
 user_data:
 
   # Joint angles at home for AR demo: [0, pi/3, pi/2, 2*pi/3, -pi/2, 0]
-  home_position: [ 0.000, 1.047, 2.0943, 2.618, -1.571, 0.000 ] # radians
+  home_position: [ 0.001, 1.047, 2.0943, 2.618, -1.571, 0.001 ] # radians
 
   # Time taken for a steady motion to the home position
   homing_duration: 5 # seconds
