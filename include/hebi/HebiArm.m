@@ -35,7 +35,8 @@ classdef HebiArm < handle
     
     properties(Access = public)
         state struct = [];
-        plugins struct = struct();
+        pluginList cell; % plugins as a list
+        plugins struct = struct(); % plugin lookup by names
     end
     
     properties(Access = private)
@@ -45,7 +46,65 @@ classdef HebiArm < handle
         aux double;
         auxTime double;
     end
-    
+
+    % Accessors to keep plugin list and struct in sync
+    methods
+        function plugins = get.plugins(this)
+            % plugin lookup by names
+            plugins = struct();
+            for i=1:length(this.pluginList)
+                % TODO: duplicate names -> pick last or first? return array?
+                plugin = this.pluginList{i};
+                plugins.(plugin.name) = plugin;
+            end
+        end
+        function [] = set.plugins(this, input)
+            % Return the plugin list as a struct
+            fields = fieldnames(input);
+            this.pluginList = cell(length(fields),1);
+            for i = 1:length(fields)
+                this.pluginList{i} = input.(fields{i});
+            end
+        end
+    end
+
+    methods(Static)
+        function [arm, config] = createFromConfig(configOrPath)
+            % createFromConfig creates a HebiArm according to the config
+            %
+            % The config can be a config struct or a path to the file. The
+            % config is also returned to work as a shortcut for HebiUtils.loadRobotConfig
+            %
+            % See also HebiUtils.loadRobotConfig
+
+            % Support config structs or file paths
+            if isa(configOrPath, 'struct')
+                config = configOrPath;
+            elseif exist(configOrPath, 'file')
+                config = HebiUtils.loadRobotConfig(configOrPath);
+            else
+                error('expected config struct or path to existing confg file');
+            end
+
+            % Create backing group comms
+            group = HebiLookup.newGroupFromNames(config.families, config.names);
+
+            % Setup default gains
+            if isfield(config.gains, 'default')
+                gains = HebiUtils.loadGains(config.gains.default);
+                HebiUtils.sendWithRetry(group, 'gains', gains);
+            end
+
+            % Setup arm with kinematics and plugins
+            kin = HebiUtils.loadHRDF(config.hrdf);
+            arm = HebiArm(group, kin);
+            arm.plugins = HebiArmPlugin.createFromConfigMap(config.plugins);
+
+            % Initialize state
+            arm.update();
+        end
+    end
+
     methods
         
         function this = HebiArm(varargin)
@@ -69,7 +128,7 @@ classdef HebiArm < handle
         end
 
         function [] = setGoal(this, varargin)
-            %arm.setGoal('positions', pos, 'velocities', vel, 'accelerations', accel, 'time', time); 
+            % arm.setGoal(pos, 'velocities', vel, 'accelerations', accel, 'time', time); 
             % Calculates trajectory from current pos (fbk) to target
             % same as newJointMove, but includes current state? [cmdPos pos] => traj generator
             
@@ -210,9 +269,8 @@ classdef HebiArm < handle
 
             % Call plugins (FK, Jacobians, End-Effector XYZ, etc.)
             this.state = newState;
-            pluginFields = fieldnames(this.plugins);
-            for i=1:length(pluginFields)
-                plugin = this.plugins.(pluginFields{i});
+            for i=1:length(this.pluginList)
+                plugin = this.pluginList{i};
                 if plugin.enabled % Optional: check if the plugin is enabled
                     plugin.update(this);
                 end
@@ -233,15 +291,15 @@ classdef HebiArm < handle
         end
 
         function plugin = getPluginByType(this, type)
-            % getPluginByType Retrieves a plugin by its class type
+            % getPluginByType Retrieves a plugin by its plugin type
             %
             % Example:
-            %   plugin = arm.getPluginByType('HebiArmPlugins.ImpedanceController');
+            %   plugin = arm.getPluginByType('GravityCompensationEffort');
             
             pluginFields = fieldnames(this.plugins);
             for i = 1:length(pluginFields)
                 plugin = this.plugins.(pluginFields{i});
-                if isa(plugin, type)
+                if strcmp(plugin.type, type)
                     return;
                 end
             end

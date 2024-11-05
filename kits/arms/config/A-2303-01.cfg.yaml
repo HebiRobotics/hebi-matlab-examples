@@ -9,18 +9,18 @@ gains:
 
 user_data:
   # Default seed positions for doing inverse kinematics
-  ik_seed_pos: [0, -1, 0, 0, -1.5, 0, 0]
+  ik_seed_pos: [0.01, -1, 0.01, 0.01, -1.5, 0.01, 0.01]
 
 plugins:
   - type: GravityCompensationEffort
     name: gravComp
     enabled: true
-    ramp_time: 2
+    ramp_time: 5
 
   - type: DynamicsCompensationEffort
     name: dynamicsComp
     enabled: true
-    ramp_time: 2
+    ramp_time: 5
 
   - name: 'DoubleShoulder'
     type: DoubledJointMirror

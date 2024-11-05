@@ -17,6 +17,8 @@ classdef HebiMobileIO < handle
     %   setLedColor        - sets the edge led color
     %   clearLedColor      - clears the edge led color
     %
+    %   sendLayout         - sends a layout file. may be blocking
+    %
     %   update             - updates internal state with the next feedback
     %   getFeedback        - gets 'io' and 'mobile' views of feedback
     %   getFeedbackIO      - gets 'io' view of feedback
@@ -61,10 +63,10 @@ classdef HebiMobileIO < handle
                 try
                     group = HebiLookup.newGroupFromNames( familyName, deviceName );
                     break;
-                catch
+                catch err
                     % If we failed to make a group, pause a bit before trying again.
-                    disp(['Timed out searching for mobileIO device: '...
-                        '"' familyName '" | "' deviceName  '". Retrying...']);
+                    warning(err.message); % print the error (either warning or e.g. duplicate name)
+                    disp('Failed to create mobileIO device group. Retrying... ')
                     pause(timeout - 1); % Java method timeout takes 1s
                 end
             end
@@ -250,6 +252,19 @@ classdef HebiMobileIO < handle
             %
             % See also setLedColor
             this.setLedColor([]);
+        end
+
+        function [] = sendLayout(this, varargin)
+            % sendLayout sends a layout file. may be blocking
+            %
+            % See also initializeUI
+
+            % Layouts may be larger than what can be sent with the group
+            % API, so we use a special utility method that creates a
+            % dedicated single-use connection. This should never be used
+            % inside a fast loop.
+            javaMethod('sendMobileLayout', HebiMobileIO.className,  this.group.obj, varargin{:});
+            % this.send('MobileLayout', varargin{1});
         end
 
         function [hasNewFeedback, feedbackAge] = update(this, varargin)
@@ -469,6 +484,10 @@ classdef HebiMobileIO < handle
         function varargout = notify(varargin)
             varargout{:} = notify@handle(varargin{:});
         end
+    end
+
+    properties(Constant, Access = private, Hidden = true)
+        className = hebi_load('HebiMobileIO');
     end
     
 end

@@ -874,7 +874,7 @@ classdef (Sealed) HebiGroup < handle
         
     end
     
-    properties(Access = private, Hidden = true)
+    properties(Access = {?HebiMobileIO}, Hidden = true)
         obj
     end
     

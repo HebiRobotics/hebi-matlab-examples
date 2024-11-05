@@ -1,7 +1,7 @@
-% Arm Gravity Compensation Demo
+                   % Arm Gravity Compensation Toggle Demo
 %
 % Features:      Demo where the arm can be interacted with and moved around
-%                while in a zero-force gravity-compensated mode.
+%                while in a zero-force gravity-compensated mode, which can be toggled on and off.
 %
 % Requirements:  MATLAB 2013b or higher
 %
@@ -18,30 +18,33 @@ HebiLookup.initialize();
 
 % Demo Settings
 enableLogging = true;
-
+            
 %% Set up arm from config
-arm = HebiArm.createFromConfig('config/ex_gravity_compensation.cfg.yaml');
+arm = HebiArm.createFromConfig('config/ex_gravity_compensation_toggle.cfg.yaml');
 
-% do modifications, e.g., feedback frequency
-arm.group.setFeedbackFrequency(200);
+% Get a reference to the grav comp plugin so we can enable/disable it
+gravCompPlugin = arm.getPluginByType('GravityCompensationEffort');
+
+%% Instructions
+disp('Commanded gravity-compensated zero torques to the arm.');
+disp('  SPACE - Toggles gravity compensation on/off:');
+disp('  ESC - Exits the demo.');
+disp(' ')
+disp(['Gravity Compensation: ' num2str(gravCompPlugin.enabled)])
 
 %% Start optional background logging
 if enableLogging
-   logFile = arm.group.startLog('dir', 'logs'); 
+   logFile = arm.group.startLog('dir', 'logs');
 end
 
-%% Demo - Gravity Compensated Mode
-disp('Commanded gravity-compensated zero torques to the arm.');
-disp('Press ESC to stop.');
- 
+%% Demo - Toggle Grav Comp
 % Keyboard input
 kb = HebiKeyboard();
 keys = read(kb);
 while ~keys.ESC   
-   keys = read(kb);
-   
-   % When no goal is set, the arm automatically returns to grav-comp
-   % mode. Thus, when we have an empty control loop, the arm is in
+
+   % Without a set goal, only the grav comp plugin is actively working.
+   % Thus, when we have an empty control loop, the arm is in
    % grav-comp awaiting further instructions.
    %
    % Note that no robotic system is modelled perfectly, so some amount of
@@ -50,6 +53,13 @@ while ~keys.ESC
    % This can e.g. be determined by a button on the end effector.
    arm.update();
    arm.send();
+
+   % Toggle grav comp when the key is pressed down
+   [keys, diffKeys] = read(kb);
+   if diffKeys.SPACE == 1
+       gravCompPlugin.enabled = ~gravCompPlugin.enabled;
+       disp(['Gravity Compensation: ' num2str(gravCompPlugin.enabled)])
+   end
 
 end
 

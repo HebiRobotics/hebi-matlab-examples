@@ -280,6 +280,7 @@ classdef (Sealed) HebiUtils
             % Strings are stored with one extra element to enforce cell arrays
             out = struct();
             out.version = config.version{1};
+            out.configLocation = config.configLocation{1};
             out.families = config.families(1:end-1);
             out.names = config.names(1:end-1);
             out.hrdf = config.hrdf{1};
@@ -956,7 +957,7 @@ classdef (Sealed) HebiUtils
                 end
             end
             
-            error(['Failed to send message to all devices. Retries: ' num2str(maxRetries)]);
+            error(['Failed to send message to one or more devices. Retries: ' num2str(maxRetries)]);
             
         end
         
