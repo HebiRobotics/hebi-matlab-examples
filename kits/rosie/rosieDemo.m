@@ -17,7 +17,12 @@ function rosieDemo( mobileBaseType )
     % Setup Arm and Gripper %
     %%%%%%%%%%%%%%%%%%%%%%%%%
     robotFamily = 'Rosie';
-    [ arm, armParams, gripper ] = setupArmWithGripper(robotFamily);
+%     [ arm, armParams, gripper ] = setupArmWithGripper('Arm');
+    
+    config = HebiUtils.loadRobotConfig('config/Rosie_Arm.yaml');
+    armParams = config.userData;
+    arm = HebiArm.createFromConfig(config);
+    gripper = createGripperFromConfig(config);
     
     %%
     %%%%%%%%%%%%%%%%%%%%%
@@ -73,11 +78,11 @@ function rosieDemo( mobileBaseType )
     
     % Search for phone controller. Allow retry because phones tend to
     % drop out when they aren't used (i.e. sleep mode)
-    phoneName = 'mobileIO';
+    phoneName = 'MobileIO';
     while true
         try
             fprintf('Searching for phone Controller...\n');
-            phoneGroup = HebiLookup.newGroupFromNames(family, phoneName);
+            phoneGroup = HebiLookup.newGroupFromNames(robotFamily, phoneName);
             disp('Phone Found.  Starting up');
             break;
         catch
@@ -113,8 +118,8 @@ function rosieDemo( mobileBaseType )
             'initial', armParams.ikSeedPos );
         
         % Slow trajectory timing for the initial move to home position
-        arm.trajGen.setSpeedFactor( 0.5 );
-        arm.trajGen.setMinDuration( 1.0 );
+        arm.trajGen.setSpeedFactor( 1.0 );
+        arm.trajGen.setMinDuration( 2.0 );
         
         % Move to initial position
         arm.update();
@@ -126,8 +131,8 @@ function rosieDemo( mobileBaseType )
         end
         
         % Reset behavior to normal speed
-        arm.trajGen.setSpeedFactor(armParams.defaultSpeedFactor);
-        arm.trajGen.setMinDuration(armParams.minTrajDuration);
+        arm.trajGen.setSpeedFactor(1.0);
+        arm.trajGen.setMinDuration(0.33);
        
         % Grab initial pose from phone
         fbkPhoneMobile = phoneGroup.getNextFeedbackMobile();

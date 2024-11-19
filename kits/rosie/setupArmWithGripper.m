@@ -17,7 +17,7 @@ HebiUtils.sendWithRetry(group, 'gains', params.gains);
 kin = HebiUtils.loadHRDF('hrdf/6-DoF_arm_w_gripper');
 
 % Gripper
-gripperGroup = HebiLookup.newGroupFromNames(family, 'Spool');
+gripperGroup = HebiLookup.newGroupFromNames(family, 'gripperSpool');
 params.gripperGains = HebiUtils.loadGains('gains/gripper-gains');
 HebiUtils.sendWithRetry(gripperGroup, 'gains', params.gripperGains);
 
@@ -29,8 +29,8 @@ gripper = HebiGripper(gripperGroup);
 params.ikSeedPos = [0 1 2.5 1.5 -1.5 1];
 
 % Trajectory generator parameters
-params.minTrajDuration = 0.33; % [sec]
-params.defaultSpeedFactor = 0.9;
+params.minTrajDuration = 0.5; % [sec]
+params.defaultSpeedFactor = 1.0;
 arm.trajGen.setMinDuration(params.minTrajDuration);
 arm.trajGen.setSpeedFactor(params.defaultSpeedFactor);
 
@@ -39,8 +39,8 @@ shoulderJointComp = 0; % Nm  <--- Change this if you add a gas spring
 params.effortOffset = [0 shoulderJointComp 0 0 0 0];
 
 % Default plugins
-arm.plugins = {
-    HebiArmPlugins.EffortOffset(params.effortOffset)
-    };
+% arm.plugins = {
+%     HebiArmPlugins.EffortOffset(params.effortOffset)
+%     };
 
 end
