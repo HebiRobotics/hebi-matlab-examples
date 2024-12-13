@@ -36,7 +36,6 @@ arm.trajGen.setMinDuration(userData.min_travel_time);
 disp('Move the arm to different positions to set waypoints.');
 disp('  ALT  - Adds a new waypoint.');  
 disp('  ESC  - Exits waypoint training mode.');
-disp('         If no waypoints are set, default waypoints are loaded.');
 disp('  ');
 
 waypoints = [];
