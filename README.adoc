@@ -44,7 +44,7 @@ This folder contains example code for various preconfigured kits. Additional doc
 |====================
 | Kit | Comment
 
-| {kits}/arms[Arms] |
+| {kits}/arm[Arm] |
 * A variety of arm configurations, from 4-DoF to 6-DoF.
 
 | {kits}/hexapod[Hexapod] |

@@ -40,7 +40,6 @@ disp('Move the arm to different positions to set waypoints.');
 disp('  ALT  - Adds a new waypoint.');  
 disp('  CTRL - Adds a new waypoint and toggles the gripper.');  
 disp('  ESC  - Exits waypoint training mode.');
-disp('         If no waypoints are set, default waypoints are loaded.');
 disp('  ');
 
 gripper.open(); % initialize gripper state to open
