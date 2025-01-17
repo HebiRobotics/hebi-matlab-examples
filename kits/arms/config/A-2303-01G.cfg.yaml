@@ -1,7 +1,7 @@
-# R-Series 6-DoF Arm with Gripper
+# R-Series 7-DoF Double Shoulder Arm with Gripper
 version: 1.0
 families: ["Arm"]
-names: ["J1_base", "J2_shoulder1A", "J3_shoulder2", "J4_elbow1", "J5_elbow2", "J6_wrist1", "J7_wrist2"]
+names: ["J1_base", J2A_shoulder1", "J3_shoulder2", "J4_elbow1", "J5_elbow2", "J6_wrist1", "J7_wrist2"]
 hrdf: "hrdf/A-2303-01G.hrdf"
 
 gains:
@@ -31,6 +31,6 @@ plugins:
   - name: 'DoubleShoulder'
     type: DoubledJointMirror
     enabled: true
-    group_Family: ["Arm"]
-    group_name: ["J2_shoulder1B"]
-    index: 2
+    group_family: ["Arm"]
+    group_name: [J2B_shoulder1"]
+    index: 1
