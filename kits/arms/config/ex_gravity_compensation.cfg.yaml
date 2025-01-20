@@ -18,5 +18,3 @@ plugins:
     name: dynamicsComp
     enabled: true
     ramp_time: 5
-
-user_data:

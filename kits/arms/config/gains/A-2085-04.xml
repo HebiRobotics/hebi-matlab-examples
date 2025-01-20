@@ -25,8 +25,8 @@
     <dead_zone>0 0 0 0</dead_zone>
     <i_clamp>0.25 0.25 0.25 0.25</i_clamp>
     <punch>0 0 0 0</punch>
-    <min_target>-1.502675 -1.502675 -3.434687 -9.617128</min_target>
-    <max_target>1.502675 1.502675 3.434687 9.617128</max_target>
+    <min_target>-3.4 -1.5 -3.4 -9.6</min_target>
+    <max_target>3.4 1.5 3.4 9.6</max_target>
     <target_lowpass>1 1 1 1</target_lowpass>
     <min_output>-1 -1 -1 -1</min_output>
     <max_output>1 1 1 1</max_output>
