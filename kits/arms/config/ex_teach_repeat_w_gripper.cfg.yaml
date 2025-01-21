@@ -26,10 +26,10 @@ user_data:
   # Since slider goes from -1 to 1, travel time goes from min_travel_time to 2 * base_travel_time - min_travel_time
 
   # Minimum travel time value
-  min_travel_time: 0.5
+  min_travel_time: 5
 
   # The default travel time value
-  base_travel_time: 3 # seconds
+  base_travel_time: 10 # seconds
 
   gripper_family: "Arm"
   gripper_name: "gripperSpool"

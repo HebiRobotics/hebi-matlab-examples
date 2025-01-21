@@ -24,7 +24,7 @@ HebiLookup.initialize();
 stopBetweenWaypoints = true;
 
 % Select whether you want to log and visualize the replay movement
-enableLogging = true;
+enableLogging = false  ;
 
 %% Load config and setup components
 config = HebiUtils.loadRobotConfig('config/ex_teach_repeat_w_gripper.cfg.yaml');

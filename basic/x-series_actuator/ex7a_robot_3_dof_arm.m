@@ -11,31 +11,31 @@ clear *;
 close all;
 HebiLookup.initialize();
 
-kin = HebiUtils.loadHRDF('./hrdf/3-DoF_arm_example.hrdf');
-gains = HebiUtils.loadGains('./gains/3-DoF_arm_gains.xml');
+% kin = HebiUtils.loadHRDF('./hrdf/3-DoF_arm_example.hrdf');
+% gains = HebiUtils.loadGains('./gains/3-DoF_arm_gains.xml');
 trajGen = HebiTrajectoryGenerator();
 
 % Assume gravity points down in the frame of the first module.  This will
 % get used for gravity compensation when controlling the arm.  You can use
 % the IMUs in the module to measure the actual orientation of the arm. See
 % the advanced examples on how to do this.
-gravityVec = [0 0 -1];
+gravityVec = [-1 0 0];
 
-familyName = 'My Arm';
-moduleNames = {'Base','Shoulder','Elbow'};
+familyName = 'Plus_Test';
+moduleNames = {'T8-16','T8-16-Plus'};
 
 group = HebiLookup.newGroupFromNames( familyName, moduleNames );
-group.send('gains',gains);
+% group.send('gains',gains);
 cmd = CommandStruct();
 
-group.startLog('dir','logs');
+% group.startLog('dir','logs');
 
 % Four Corners of a Box
-xyzTargets = [ 0.20  0.40  0.40  0.20;    % x [m]
+xyzTargets = [ 3pi/2  0.40  0.40  0.20;    % x [m]
                0.30  0.30 -0.30 -0.30;    % y [m]
                0.10  0.10  0.10  0.10 ];  % z [m]
 
-initPosition = [ 0 -pi/4 -pi/2 ];
+initPosition = [ -pi/2 -pi/2 ];
 
 % Do IK to get joint position waypoints for each XYZ target.  Copy the
 % first waypoint at the end, so that it closes the loop
