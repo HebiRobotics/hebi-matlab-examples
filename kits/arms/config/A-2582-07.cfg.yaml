@@ -2,10 +2,10 @@
 version: 1.0
 families: ["Arm"]
 names: ["J1_base", J2A_shoulder1", "J3_shoulder2", "J4_elbow1", "J5_elbow2", "J6_wrist1", "J7_wrist2"]
-hrdf: "hrdf/A-2582-01.hrdf"
+hrdf: "hrdf/A-2582-07.hrdf"
 
 gains:
-  default: "gains/A-2582-01.xml"
+  default: "gains/A-2582-07.xml"
 
 user_data:
   # Default seed positions for doing inverse kinematics
