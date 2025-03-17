@@ -1,73 +1,87 @@
 [
-  {
-      "id": "b1",
-      "type": "button",
-      "x": -0.8,
-      "y":  -0.73,
-      "width": 0.15,
-      "height": 0.15,
-      "parameters": {
-          "text": "1",
-          "mode": "momentary"
-      }
-  },
-  {
-      "id": "b2",
-      "type": "button",
-      "x": -0.4,
-      "y": -0.73,
-      "width": 0.15,
-      "height": 0.15,
-      "parameters": {
-          "text": "2",
-          "mode": "momentary"
-      }
-  },
-  {
-      "id": "b3",
-      "type": "button",
-      "x": -0,
-      "y":  -0.73,
-      "width": 0.15,
-      "height": 0.15,
-      "parameters": {
-          "text": "3",
-          "mode": "momentary"
-      }
-  },
-  {
-      "id": "b6",
-      "type": "button",
-      "x": 0.4,
-      "y": -0.73,
-      "width": 0.15,
-      "height": 0.15,
-      "parameters": {
-          "text": "🌍",
-          "mode": "momentary"
-      }
-  },
-  {
-      "id": "b8",
-      "type": "button",
-      "x": 0.8,
-      "y": -0.73,
-      "width": 0.15,
-      "height": 0.15,
-      "parameters": {
-          "text": "❌",
-          "mode": "momentary"
-      }
-  },
-  {
-      "id": "led",
-      "type": "led",
-      "x": -0,
-      "y": -0.15,
-      "width": 0.2,
-      "height": 0.2,
-      "parameters": {
-          "text": "led"
-      }
-  }
+    {
+        "id": "b1",
+        "channels": [
+            "b1"
+        ],
+        "type": "button",
+        "x": -0.8,
+        "y": -0.73,
+        "width": 0.15,
+        "height": 0.15,
+        "parameters": {
+            "text": [
+                "1"
+            ],
+            "mode": "momentary"
+        }
+    },
+    {
+        "id": "b2",
+        "channels": [
+            "b2"
+        ],
+        "type": "button",
+        "x": -0.4,
+        "y": -0.73,
+        "width": 0.15,
+        "height": 0.15,
+        "parameters": {
+            "text": [
+                "2"
+            ],
+            "mode": "momentary"
+        }
+    },
+    {
+        "id": "b3",
+        "channels": [
+            "b3"
+        ],
+        "type": "button",
+        "x": -0,
+        "y": -0.73,
+        "width": 0.15,
+        "height": 0.15,
+        "parameters": {
+            "text": [
+                "3"
+            ],
+            "mode": "momentary"
+        }
+    },
+    {
+        "id": "b6",
+        "channels": [
+            "b6"
+        ],
+        "type": "button",
+        "x": 0.4,
+        "y": -0.73,
+        "width": 0.15,
+        "height": 0.15,
+        "parameters": {
+            "text": [
+                "🌍"
+            ],
+            "mode": "momentary"
+        }
+    },
+    {
+        "id": "b8",
+        "channels": [
+            "b8"
+        ],
+        "type": "button",
+        "x": 0.8,
+        "y": -0.73,
+        "width": 0.15,
+        "height": 0.15,
+        "parameters": {
+            "text": [
+                "❌"
+            ],
+            "mode": "momentary"
+        }
+    }
 ]
