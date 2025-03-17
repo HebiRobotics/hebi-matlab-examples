@@ -1,112 +1,131 @@
 [
-  {
-      "id": "b1",
-      "type": "button",
-      "x": -0.8,
-      "y":  -0.73,
-      "width": 0.15,
-      "height": 0.15,
-      "parameters": {
-          "text": "Home",
-          "mode": 0
-      }
-  },
-  {
-      "id": "b4",
-      "type": "button",
-      "x": -0.4,
-      "y": -0.73,
-      "width": 0.15,
-      "height": 0.15,
-      "parameters": {
-          "text": "Quit",
-          "mode": 0
-      }
-  },
-  {
-      "id": "b6",
-      "type": "button",
-      "x": -0,
-      "y":  -0.73,
-      "width": 0.15,
-      "height": 0.15,
-      "parameters": {
-          "text": "\u21E7",
-          "mode": 0
-      }
-  },
-  {
-      "id": "b7",
-      "type": "button",
-      "x": 0.4,
-      "y": -0.73,
-      "width": 0.15,
-      "height": 0.15,
-      "parameters": {
-          "text": "Grip",
-          "mode": 1
-      }
-  },
-  {
-      "id": "b8",
-      "type": "button",
-      "x": 0.8,
-      "y": -0.73,
-      "width": 0.15,
-      "height": 0.15,
-      "parameters": {
-          "text": "\u21E9",
-          "mode": 0
-      }
-  },
-  {
-      "id": "a1,a2",
-      "type": "joystick",
-      "x": -0.9,
-      "y": 0.88,
-      "width": 0.18,
-      "height": 0.22,
-      "parameters": {
-          "text1": "",
-          "text2": "Rotate"
-      }
-  },
-  {
-      "id": "a3",
-      "type": "rotslider",
-      "x": -0.25,
-      "y": 0.6,
-      "width": 0.05,
-      "height": 0.5,
-      "parameters": {
-          "text": "Wrist",
-          "steps": 10,
-          "min": -1,
-          "max": 1,
-          "rest": 0
-      }
-  },
-  {
-      "id": "led",
-      "type": "led",
-      "x": 0.25,
-      "y": 0,
-      "width": 0.2,
-      "height": 0.2,
-      "parameters": {
-          "text": "led"
-      }
-  },
-  {
-    "id": "a7,a8",
-    "type": "joystick",
-    "x": 0.9,
-    "y": 0.86,
-    "width": 0.18,
-    "height": 0.22,
-    "parameters": {
-        "text1": "",
-        "text2": "Translate"
+    {
+        "id": "b1",
+        "channels": [
+            "b1"
+        ],
+        "type": "button",
+        "x": -0.8,
+        "y": -0.73,
+        "width": 0.15,
+        "height": 0.15,
+        "parameters": {
+            "text": [
+                "Home"
+            ],
+            "mode": 0
+        }
+    },
+    {
+        "id": "b4",
+        "channels": [
+            "b4"
+        ],
+        "type": "button",
+        "x": -0.4,
+        "y": -0.73,
+        "width": 0.15,
+        "height": 0.15,
+        "parameters": {
+            "text": [
+                "Quit"
+            ],
+            "mode": 0
+        }
+    },
+    {
+        "id": "b6",
+        "channels": [
+            "b6"
+        ],
+        "type": "button",
+        "x": -0,
+        "y": -0.73,
+        "width": 0.15,
+        "height": 0.15,
+        "parameters": {
+            "text": [
+                "\u21E7"
+            ],
+            "mode": 0
+        }
+    },
+    {
+        "id": "b7",
+        "channels": [
+            "b7"
+        ],
+        "type": "button",
+        "x": 0.4,
+        "y": -0.73,
+        "width": 0.15,
+        "height": 0.15,
+        "parameters": {
+            "text": [
+                "Grip"
+            ],
+            "mode": 1
+        }
+    },
+    {
+        "id": "b8",
+        "channels": [
+            "b8"
+        ],
+        "type": "button",
+        "x": 0.8,
+        "y": -0.73,
+        "width": 0.15,
+        "height": 0.15,
+        "parameters": {
+            "text": [
+                "\u21E9"
+            ],
+            "mode": 0
+        }
+    },
+    {
+        "id": "a1,a2",
+        "type": "joystick",
+        "x": -0.9,
+        "y": 0.88,
+        "width": 0.18,
+        "height": 0.22,
+        "parameters": {
+            "text1": "",
+            "text2": "Rotate"
+        }
+    },
+    {
+        "id": "a3",
+        "channels": [
+            "a3"
+        ],
+        "type": "rotslider",
+        "x": -0.25,
+        "y": 0.6,
+        "width": 0.05,
+        "height": 0.5,
+        "parameters": {
+            "text": [
+                "Wrist"
+            ],
+            "steps": 10,
+            "min": -1,
+            "max": 1,
+            "rest": 0
+        }
+    },
+    {
+        "id": "a7,a8",
+        "type": "joystick",
+        "x": 0.9,
+        "y": 0.86,
+        "width": 0.18,
+        "height": 0.22,
+        "parameters": {
+            "text1": "",
+            "text2": "Translate"
+        }
     }
-  }
 ]

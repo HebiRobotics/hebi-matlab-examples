@@ -1,37 +1,36 @@
 [
-  {
-      "id": "b1",
-      "type": "button",
-      "x": -0.25,
-      "y":  -0.73,
-      "width": 0.15,
-      "height": 0.15,
-      "parameters": {
-          "text": "❌/📈",
-          "mode": "momentary"
-      }
-  },
-  {
-      "id": "b2",
-      "type": "button",
-      "x": 0.25,
-      "y":  -0.73,
-      "width": 0.15,
-      "height": 0.15,
-      "parameters": {
-          "text": "🤳",
-          "mode": "toggle"
-      }
-  },
-  {
-      "id": "led",
-      "type": "led",
-      "x": 0,
-      "y": 0,
-      "width": 0.2,
-      "height": 0.2,
-      "parameters": {
-          "text": "led"
-      }
-  }
+    {
+        "id": "b1",
+        "channels": [
+            "b1"
+        ],
+        "type": "button",
+        "x": -0.25,
+        "y": -0.73,
+        "width": 0.15,
+        "height": 0.15,
+        "parameters": {
+            "text": [
+                "❌/📈"
+            ],
+            "mode": "momentary"
+        }
+    },
+    {
+        "id": "b2",
+        "channels": [
+            "b2"
+        ],
+        "type": "button",
+        "x": 0.25,
+        "y": -0.73,
+        "width": 0.15,
+        "height": 0.15,
+        "parameters": {
+            "text": [
+                "🤳"
+            ],
+            "mode": "toggle"
+        }
+    }
 ]
