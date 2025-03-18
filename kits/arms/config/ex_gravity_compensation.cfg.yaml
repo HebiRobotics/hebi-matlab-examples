@@ -8,7 +8,6 @@ gains:
   default: "gains/A-2085-06.xml"
 
 plugins:
-
   - type: GravityCompensationEffort
     name: gravComp
     enabled: true

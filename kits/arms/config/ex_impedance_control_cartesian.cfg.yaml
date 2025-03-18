@@ -8,7 +8,6 @@ gains:
   default: "gains/A-2085-06.xml"
 
 plugins:
-
   - type: GravityCompensationEffort
     name: gravComp
     enabled: true
@@ -36,7 +35,6 @@ plugins:
     i_clamp: [10, 10, 10, 0, 0, 0] # max value
 
 user_data:
-
   mobile_io_family: "Arm"
   mobile_io_name: "mobileIO"
   mobile_io_layout: "layouts/ex_impedance_control_cartesian.json"

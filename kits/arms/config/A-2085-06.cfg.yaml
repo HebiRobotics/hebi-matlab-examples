@@ -12,7 +12,6 @@ user_data:
   ik_seed_pos: [0.01, 1.0, 2.5, 1.5, -1.5, 0.01]
 
 plugins:
-
   - type: GravityCompensationEffort
     name: gravComp
     enabled: true
@@ -37,7 +36,7 @@ plugins:
     kd: [5, 5, 5, 0, 0, 0] # (N/(m/sec)) or (Nm/(rad/sec))
     ki: [0, 0, 1, 0, 0, 0]
     i_clamp: [10, 10, 10, 10, 10, 10] # max value
-    
+
   # Kits with a gas spring need to add a shoulder compensation torque.
   # It should be around -7 Nm for most kits, but it may need to be tuned
   # for your specific setup.

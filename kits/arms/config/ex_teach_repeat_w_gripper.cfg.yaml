@@ -8,7 +8,6 @@ gains:
   default: "gains/A-2240-06.xml"
 
 plugins:
-
   - type: GravityCompensationEffort
     name: gravComp
     enabled: true
@@ -20,7 +19,6 @@ plugins:
     ramp_time: 5
 
 user_data:
-
   # Travel time is calculated using
   #   base_travel_time + slider * (base_travel_time - min_travel_time)
   # Since slider goes from -1 to 1, travel time goes from min_travel_time to 2 * base_travel_time - min_travel_time

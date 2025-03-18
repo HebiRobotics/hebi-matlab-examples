@@ -8,7 +8,6 @@ gains:
   default: "gains/A-2240-06.xml"
 
 plugins:
-
   - type: GravityCompensationEffort
     name: gravComp
     enabled: true
@@ -20,21 +19,20 @@ plugins:
     ramp_time: 5
 
 user_data:
-
   # Joint angles at home for AR demo: [0, pi/3, pi/2, 2*pi/3, -pi/2, 0]
-  home_position: [ 0.001, 1.047, 2.0943, 2.618, -1.571, 0.001 ] # radians
+  home_position: [0.001, 1.047, 2.0943, 2.618, -1.571, 0.001] # radians
 
   # Time taken for a steady motion to the home position
   homing_duration: 5 # seconds
 
-  # Online trajectory delay to smooth out controller motion.  A shorter 
-  # delay will make a trajectory more response, and longer delay will make 
+  # Online trajectory delay to smooth out controller motion.  A shorter
+  # delay will make a trajectory more response, and longer delay will make
   # the trajectory smooother.
   delay_time: 0.5 # seconds
 
-  # Displacements of the mobile device are scaled by these value to give  
+  # Displacements of the mobile device are scaled by these value to give
   # displacement of the end-effector
-  xyz_scale: [ 1.0, 1.0, 2.0 ]   # [ x, y, z ]
+  xyz_scale: [1.0, 1.0, 2.0] # [ x, y, z ]
 
   gripper_family: "Arm"
   gripper_name: "gripperSpool"
