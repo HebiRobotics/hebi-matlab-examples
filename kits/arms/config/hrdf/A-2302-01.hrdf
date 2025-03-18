@@ -9,7 +9,7 @@
   <actuator type="R8-16"/>
   <link type="R8" extension="0.325" twist="-pi/2"/>
   <actuator type="R8-3"/>
-  <link type="R8" extension="0.325" twist="0"/>
+  <link type="R8" extension="0.325" twist="pi"/>
   <actuator type="R8-3"/>
   
   <!-- For custom end-effector parameters and formatting please visit: -->
