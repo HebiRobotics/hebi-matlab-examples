@@ -7,9 +7,10 @@
   <actuator type="X5-4"/>
   <bracket type="X5HeavyRightOutside"/>
   <actuator type="X5-9"/>
-  <link type="X5" extension="0.325" twist="-pi/2"/>
+  <!-- Mass offset to account for mounted gripper actuator --> 
+  <link type="X5" extension="0.325" twist="-pi/2" mass_offset="0.5"/>
   <actuator type="X5-4"/>
-  <link type="X5" extension="0.325" twist="0"/>
+  <link type="X5" extension="0.325" twist="pi"/>
   <actuator type="X5-1"/>
   <end-effector type="X5Parallel"/>
 </robot>

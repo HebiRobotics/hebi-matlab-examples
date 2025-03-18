@@ -7,7 +7,8 @@
   <actuator type="T8-9"/>
   <bracket type="R8HeavyRightOutside"/>
   <actuator type="T8-16"/>
-  <link type="R8" extension="0.325" twist="pi"/>
+  <!-- Mass offset to account for mounted gripper actuator --> 
+  <link type="R8" extension="0.325" twist="pi" mass_offset="0.8"/>
   <actuator type="T8-9"/>
   <link type="R8" extension="0.325" twist="pi"/>
   <actuator type="T5-1"/>

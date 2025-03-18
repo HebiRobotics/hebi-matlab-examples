@@ -7,9 +7,10 @@
   <actuator type="R8-9"/>
   <bracket type="R8HeavyRightOutside"/>
   <actuator type="R8-16"/>
-  <link type="R8" extension="0.325" twist="-pi/2"/>
+  <!-- Mass offset to account for mounted gripper actuator --> 
+  <link type="R8" extension="0.325" twist="-pi/2" mass_offset="1.0"/>
   <actuator type="R8-3"/>
-  <link type="R8" extension="0.325" twist="0"/>
+  <link type="R8" extension="0.325" twist="pi"/>
   <actuator type="R8-3"/>
   <end-effector type="R8Parallel"/>
 </robot>

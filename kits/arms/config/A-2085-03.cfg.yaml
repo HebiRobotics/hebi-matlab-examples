@@ -1,4 +1,5 @@
 # X-Series 3-DoF Arm
+version: 1.0
 families: ["Arm"]
 names: ["J1_base", "J2_shoulder", "J3_elbow"]
 hrdf: "hrdf/A-2085-03.hrdf"

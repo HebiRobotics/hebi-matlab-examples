@@ -21,7 +21,8 @@
   
   <actuator type="R8-9"/>
    
-  <link type="R8" input="Inline" extension="0.325" twist="0"/>
+  <!-- Mass offset to account for mounted gripper actuator --> 
+  <link type="R8" input="Inline" extension="0.325" twist="0" mass_offset="1.0"/>
 
   <actuator type="R8-16"/>
   

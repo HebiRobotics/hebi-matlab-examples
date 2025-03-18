@@ -1,4 +1,5 @@
 # X-Series 4-DoF SCARA Arm
+version: 1.0
 families: ["Arm"]
 names: ["J1_base", "J2_shoulder", "J3_elbow", "J4_wrist"]
 hrdf: "hrdf/A-2084-01.hrdf"
