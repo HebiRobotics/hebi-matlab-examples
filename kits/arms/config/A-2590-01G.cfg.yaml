@@ -1,15 +1,21 @@
-# R-Series 4-DoF Arm
+# T-Series 4-DoF SCARA Arm with Gripper
 version: 1.0
 families: ["Arm"]
 names: ["J1_base", "J2_shoulder", "J3_elbow", "J4_wrist"]
-hrdf: "hrdf/A-2240-04.hrdf"
+hrdf: "hrdf/A-2590-01G.hrdf"
 
 gains:
-  default: "gains/A-2240-04.xml"
+  default: "gains/A-2590-01.xml"
+  gripper: "gains/A-2080-01.xml"
 
 user_data:
   # Default seed positions for doing inverse kinematics
   ik_seed_pos: [0.01, 1.0, 2.5, 1.5]
+
+  # Gripper specific settings
+  has_gripper: true
+  gripper_open_effort: 1
+  gripper_close_effort: -5
 
 plugins:
   - type: GravityCompensationEffort

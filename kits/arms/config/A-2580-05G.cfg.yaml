@@ -18,7 +18,6 @@ user_data:
   gripper_close_effort: -5
 
 plugins:
-
   - type: GravityCompensationEffort
     name: gravComp
     enabled: true

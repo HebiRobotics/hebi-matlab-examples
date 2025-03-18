@@ -12,7 +12,6 @@ user_data:
   ik_seed_pos: [0.01, 1.0, 2.5, 1.5]
 
 plugins:
-
   - type: GravityCompensationEffort
     name: gravComp
     enabled: true
@@ -28,5 +27,6 @@ plugins:
   # for your specific setup.
   - name: 'gasSpringCompensation'
     type: EffortOffset
-    offset: [0, -7, 0, 0]
     enabled: false
+    ramp_time: 5
+    offset: [0, -7, 0, 0]

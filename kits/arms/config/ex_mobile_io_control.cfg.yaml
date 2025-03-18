@@ -8,7 +8,6 @@ gains:
   default: "gains/A-2085-06.xml"
 
 plugins:
-
   - type: GravityCompensationEffort
     name: gravComp
     enabled: true
@@ -20,11 +19,10 @@ plugins:
     ramp_time: 5
 
 user_data:
-
   # Three waypoints for Buttons - B1, B2, B3
   waypoint_1: [0, 0, 0, 0, 0, 0]
-  waypoint_2: [0.7853981633974483, 1.0471975511965976, 2.0943951023931953, 1.0471975511965976, 0.7853981633974483, 0] # [pi/4, pi/3, 2*pi/3, pi/3, pi/4, 0]
-  waypoint_3: [-0.7853981633974483, 1.0471975511965976, 2.0943951023931953, 1.0471975511965976, 2.356194490192345, 0] # [-pi/4, pi/3, 2*pi/3, pi/3, 3*pi/4, 0]
+  waypoint_2: [0.7854, 1.0472, 2.0944, 1.0472, 0.7854, 0] # [pi/4, pi/3, 2*pi/3, pi/3, pi/4, 0]
+  waypoint_3: [-0.7854, 1.0472, 2.0944, 1.0472, 2.356194490192345, 0] # [-pi/4, pi/3, 2*pi/3, pi/3, 3*pi/4, 0]
 
   # Time taken to travel to a waypoint
   travel_time: 3 # seconds

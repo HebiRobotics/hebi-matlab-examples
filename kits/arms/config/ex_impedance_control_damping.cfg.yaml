@@ -8,7 +8,6 @@ gains:
   default: "gains/A-2085-06.xml"
 
 plugins:
-
   - type: GravityCompensationEffort
     name: gravComp
     enabled: true
@@ -35,7 +34,6 @@ plugins:
 
 # Any extra configuration data is stored here
 user_data:
-
   # Distance above the base for overdamped, critically damped, and underdamped cases respectively
   lower_limits: [0.0, 0.15, 0.3] # (m)
 
