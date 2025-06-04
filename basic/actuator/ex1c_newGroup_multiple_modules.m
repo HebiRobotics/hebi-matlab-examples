@@ -17,9 +17,8 @@ close all;
 % Only needed once per session, but it doesn't hurt to do this every time
 % we run a new script, just in case something changed on the network.
 HebiLookup.initialize();
-familyName = 'Arm';
-moduleNames = {'J4_wrist1','J5_wrist2','J6_wrist3'};
-% familyName = 'Test Family';
-% moduleNames = {'Actuator1','Actuator2','Actuator3'};
+
+familyName = 'Test Family';
+moduleNames = {'Actuator1','Actuator2','Actuator3'};
 
 group = HebiLookup.newGroupFromNames( familyName, moduleNames )
