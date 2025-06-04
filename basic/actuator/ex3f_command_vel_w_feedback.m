@@ -15,8 +15,8 @@ clear *;
 close all;
 HebiLookup.initialize();
 
-familyName = 'Test Family';
-moduleNames = 'Test Actuator'; 
+
+
 group = HebiLookup.newGroupFromNames( familyName, moduleNames );
 
 %% Closed-Loop Controller (Velocity)
