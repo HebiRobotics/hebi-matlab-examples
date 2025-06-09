@@ -3,7 +3,7 @@
 This folder contains examples that help you get started with the HEBI 
 Robotics APIs for MATLAB.  There are separate examples for each of our 
 different products:
- - X-Series Actuator
+ - Actuator
  - I/O Board
  - Mobile I/O
 
