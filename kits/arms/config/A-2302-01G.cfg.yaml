@@ -9,8 +9,11 @@ gains:
   gripper: "gains/A-2255-01.xml"
 
 user_data:
-  # Default seed positions for doing inverse kinematics
+  # IK Seed positions for inverse kinematics
   ik_seed_pos: [0.01, 1.0, 2.5, 1.5]
+
+  # Home Position
+  home_position: [0.0, 0.0, 0.0, 0.0]
 
   # Gripper specific settings
   has_gripper: true

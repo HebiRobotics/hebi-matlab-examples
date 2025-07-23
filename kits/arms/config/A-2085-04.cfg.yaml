@@ -8,8 +8,11 @@ gains:
   default: "gains/A-2085-04.xml"
 
 user_data:
-  # Default seed positions for doing inverse kinematics
+  # IK Seed positions for inverse kinematics
   ik_seed_pos: [0.01, 1.0, 2.5, 1.5]
+
+  # Home Position
+  home_position: [0.0, 1.0, 2.0, 0.0]
 
 plugins:
   - type: GravityCompensationEffort

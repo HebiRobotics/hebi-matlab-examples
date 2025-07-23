@@ -1,7 +1,7 @@
 # X-Series 7-DoF Double Shoulder Arm with Gripper
 version: 1.0
 families: ["Arm"]
-names: ["J1_base", J2A_shoulder1", "J3_shoulder2", "J4_elbow1", "J5_elbow2", "J6_wrist1", "J7_wrist2"]
+names: ["J1_base", "J2A_shoulder1", "J3_shoulder2", "J4_elbow1", "J5_elbow2", "J6_wrist1", "J7_wrist2"]
 hrdf: "hrdf/A-2099-07G.hrdf"
 
 gains:
@@ -9,8 +9,11 @@ gains:
   gripper: "gains/A-2080-01.xml"
 
 user_data:
-  # Default seed positions for doing inverse kinematics
-  ik_seed_pos: [0.01, 1, 0.01, 0.01, -1.5, 0.01, 0.01]
+  # IK Seed positions for inverse kinematics
+  ik_seed_pos: [0.01, -1.0, 0.01, 2.0, 1.0, 1.57, 0.01]
+
+  # Home Position
+  home_position: [0.0, -1.2, 0.0, 2.3, 1.1, 1.57, 0.0]
 
   # Gripper specific settings
   has_gripper: true
