@@ -285,6 +285,11 @@ classdef (Sealed) HebiUtils
             out.names = config.names(1:end-1);
             out.hrdf = config.hrdf{1};
 
+            % Convert optional fields (we still populate them so users
+            % don't have to checkf or field existence)
+            out.feedbackFrequency = config.feedbackFrequency;
+            out.commandLifetime = config.commandLifetime;
+
             % Convert gains to a map struct: field -> value
             out.gains = HebiUtils.mapToStruct(config.gains);
 
