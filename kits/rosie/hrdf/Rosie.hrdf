@@ -5,7 +5,7 @@
         <!-- 6 DOF arm -->
         <output trans="0 0 0.207">
             <rigid-body mass="0" output_trans="0 0 0.005" mesh_path="https://files.hebi.us/meshes/rosie/A-2043-01.obj"/> <!-- T-slot adapter -->
-            <include path="../../arms/hrdf/A-2085-06.hrdf"/>
+            <include path="../../arms/config/hrdf/A-2085-06.hrdf"/>
         </output>
         <!-- Wheel 1 -->
         <output rot="Rz(-pi/3)*Ry(pi/2)" trans="0.0788 -0.1364 0.0750">
