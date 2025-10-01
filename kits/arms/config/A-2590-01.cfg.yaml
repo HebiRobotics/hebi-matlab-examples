@@ -1,11 +1,17 @@
+# HEBI Robot Config file
+# See https://github.com/HebiRobotics/robot-config/blob/main/README.adoc
+
 # T-Series 4-DoF SCARA Arm
-version: 1.0
+version: 1.1
 families: ["Arm"]
 names: ["J1_base", "J2_shoulder", "J3_elbow", "J4_wrist"]
 hrdf: "hrdf/A-2590-01.hrdf"
 
 gains:
   default: "gains/A-2590-01.xml"
+
+feedback_frequency: 100 # [Hz]
+command_lifetime: 0.25 # [s]
 
 user_data:
   # IK Seed positions for inverse kinematics

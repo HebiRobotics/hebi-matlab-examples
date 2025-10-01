@@ -1,5 +1,8 @@
+# HEBI Robot Config file
+# See https://github.com/HebiRobotics/robot-config/blob/main/README.adoc
+
 # R-Series 5-DoF Arm with Gripper
-version: 1.0
+version: 1.1
 families: ["Arm"]
 names: ["J1_base", "J2_shoulder", "J3_elbow", "J4_wrist1", "J5_wrist2"]
 hrdf: "hrdf/A-2240-05G.hrdf"
@@ -7,6 +10,9 @@ hrdf: "hrdf/A-2240-05G.hrdf"
 gains:
   default: "gains/A-2240-05.xml"
   gripper: "gains/A-2255-01.xml"
+
+feedback_frequency: 100 # [Hz]
+command_lifetime: 0.25 # [s]
 
 user_data:
   # IK Seed positions for inverse kinematics
