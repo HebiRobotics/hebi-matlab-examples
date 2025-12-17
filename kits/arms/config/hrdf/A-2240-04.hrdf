@@ -3,7 +3,7 @@
 <!-- https://github.com/HebiRobotics/hebi-hrdf/blob/master/FORMAT.md -->
 
 <!-- R-Series Arm (4-DoF) -->
-<robot version="1.2.0">
+<robot version="1.6.0">
   <actuator type="R8-16"/>
   <bracket type="R8HeavyRightOutside"/>
   <actuator type="R8-16"/>

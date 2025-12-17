@@ -3,7 +3,7 @@
 <!-- https://github.com/HebiRobotics/hebi-hrdf/blob/master/FORMAT.md -->
 
 <!-- X-Series Arm (5-DoF with Gripper) -->
-<robot version="1.2.0">
+<robot version="1.6.0">
   <actuator type="X8-9"/>
   <bracket type="X5HeavyRightOutside"/>
   <actuator type="X8-16"/>
