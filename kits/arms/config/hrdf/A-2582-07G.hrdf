@@ -3,7 +3,7 @@
 <!-- https://github.com/HebiRobotics/hebi-hrdf/blob/master/FORMAT.md -->
 
 <!-- T-Series Double Shoulder Arm Example (This example is 7-DoF)-->
-<robot version="1.4.0">
+<robot version="1.6.0">
     
   <actuator type="T8-9"/>
   
