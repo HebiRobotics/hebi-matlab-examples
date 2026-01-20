@@ -16,8 +16,8 @@ numLegs = length(legKin);
 allLegs = 1:numLegs;
 
 % Stance Parameters
-bodyHeight = .21; % meters
-stanceRadius = .55;  % meters
+bodyHeight = 0.6; % meters
+stanceRadius = 1.2;  % meters
 for leg=1:numLegs
     baseFrame = legKin{leg}.getFirstJointFrame();
     homeStanceXYZ(:,leg) = baseFrame(1:3,1:3) * ...
@@ -27,7 +27,7 @@ end
 levelHomeStanceXYZ = homeStanceXYZ;
 
 % Step Parameters
-stepHeight = .040; % meters (.040 default)
+stepHeight = .150; % meters (.040 default)
 stepOverShoot = 0.35; % factor of step to overshoot 
 stepPeriod = 0.7;  % seconds (.7 default)
 stepPhase = [0 .5 1];
@@ -37,6 +37,6 @@ stepping = false;   % track state of stepping
 legStepState = 0;   % Alternates set A and B in tripod gait
 
 % Thresholds: sets how far COM can be from 'home' position before stepping
-shiftThresh = .02; % meters (.025 default)
-rotThresh = .05; % rad .1
+shiftThresh = 0.075; % meters (.025 default)
+rotThresh = 0.05; % rad .1
 

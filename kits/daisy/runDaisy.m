@@ -123,7 +123,7 @@ cmd.effort = nan(1,3*numLegs);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % SETUP THE MOBILE I/O CONTROLLER %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-controllerName = '_Controller';
+controllerName = 'mobileIO';
 controllerGroup = setupDaisyController( robotName, controllerName );
 
 % Get the initial feedback objects that we'll reuse later for the

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- For documentation on the HEBI Robot Configuration please visit: -->
+<!-- https://github.com/HebiRobotics/hebi-hrdf/blob/master/FORMAT.md -->
+
+<!-- R25/R8 7-DoF Arm (Left-Handed Configuration) -->
+<robot version="1.6.0">
+    
+    <actuator type="R25-40"/>
+  
+    <bracket type="R25HeavyLeftInside"/>
+  
+    <actuator type="R25-40"/>
+
+    <bracket type="R25HeavyRightOutside"/> 
+  
+    <actuator type="R25-20"/>
+   
+    <link type="R25" input="Inline" extension="0.425" twist="-pi/2"/>
+
+    <actuator type="R25-40"/>
+  
+    <!-- Bracket from R25-R8 (Will be added to the HRDF spec and HEBI APIs)-->
+    <rigid-body mass="0.20" 
+                output_trans="0.000 0.045 0.045"
+                output_rot="Rx(-pi/2)"/>
+
+    <actuator type="R8-9"/>
+
+    <link type="R8" input="Inline" extension="0.375" twist="0"/>
+  
+    <actuator type="R8-9"/>
+  
+    <bracket type="R8LightLeft"/>
+  
+    <actuator type="R8-9"/>
+  
+  <!-- For custom end-effector parameters and formatting please visit: -->
+  <!-- https://github.com/HebiRobotics/hebi-hrdf/blob/master/FORMAT.md#end-effector -->
+  <end-effector />      
+              
+</robot>

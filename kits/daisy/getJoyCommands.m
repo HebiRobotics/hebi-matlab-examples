@@ -23,9 +23,9 @@ function [xyzVel, rotVel, auxCmd] = getJoyCommands( fbkIO )
         auxCmd.steppingMode = true;
     end
     
-    joyXYZScale = .3;
-    joyRotScale = .6;
-    joyAxisDeadZone = .05;
+    joyXYZScale = 1.0;  % [m/sec]
+    joyRotScale = 0.5;  % [rad/sec]
+    joyAxisDeadZone = 0.05;
 
     % LINEAR VELOCITIES
     % X-Axis

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <robot version="1.4.0">
-  <actuator type="X8-9"/>
+  <actuator type="X8-9" mass="3.0"/>
   <bracket type="X5HeavyLeftInside"/>
-  <actuator type="X8-16"/>
-  <link type="X5" extension="0.325" twist="pi"/>
-  <actuator type="X8-9"/>
-  <link type="X5" extension="0.325" twist="0"/>
-  <end-effector type="Custom" mass="0.060"/>
+  <actuator type="X8-16" mass="3.0"/>
+  <link type="X5" extension="0.8" twist="pi" mass="2.0"/>
+  <actuator type="X8-9" mass="3.0"/>
+  <link type="X5" extension="0.8" twist="0" mass="2.0"/>
+  <end-effector type="Custom" mass="1.0"/>
 </robot>
